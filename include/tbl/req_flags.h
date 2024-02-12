@@ -42,6 +42,7 @@ REQ_FLAG(late100cont,		0,    0,    "")
 REQ_FLAG(req_reset,		0,    0,    "")
 REQ_FLAG(res_esi,		0,    0,    "")
 REQ_FLAG(res_pipe,		0,    0,    "")
+REQ_FLAG(esi_include_onerror,	resp, resp, "")
 #define REQ_BEREQ_FLAG(lower, vcl_r, vcl_w, doc) \
 	REQ_FLAG(lower, vcl_r, vcl_w, doc)
 #include "tbl/req_bereq_flags.h"
