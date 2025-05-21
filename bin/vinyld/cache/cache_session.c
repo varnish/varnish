@@ -64,7 +64,7 @@ static const struct {
 
 enum sess_close {
 	SCE_NULL = 0,
-#define SESS_CLOSE(nm, stat, err, desc) SCE_##nm,
+#define SESS_CLOSE_C(nm, stat, err, desc) SCE_##nm,
 #include "tbl/sess_close.h"
 	SCE_MAX,
 };
@@ -77,7 +77,7 @@ const struct stream_close SC_NULL[1] = {{
 	.desc = "Not Closing",
 }};
 
-#define SESS_CLOSE(nm, stat, err, text) \
+#define SESS_CLOSE_C(nm, stat, err, text) \
 	const struct stream_close SC_##nm[1] = {{ \
 		.magic = STREAM_CLOSE_MAGIC, \
 		.idx = SCE_##nm, \
@@ -89,7 +89,7 @@ const struct stream_close SC_NULL[1] = {{
 
 static const stream_close_t sc_lookup[SCE_MAX] = {
 	[SCE_NULL] = SC_NULL,
-#define SESS_CLOSE(nm, stat, err, desc) \
+#define SESS_CLOSE_C(nm, stat, err, desc) \
 	[SCE_##nm] = SC_##nm,
 #include "tbl/sess_close.h"
 };
@@ -608,7 +608,7 @@ ses_close_acct(stream_close_t reason)
 
 	CHECK_OBJ_NOTNULL(reason, STREAM_CLOSE_MAGIC);
 	switch (reason->idx) {
-#define SESS_CLOSE(reason, stat, err, desc)		\
+#define SESS_CLOSE_C(reason, stat, err, desc)		\
 	case SCE_ ## reason:				\
 		VSC_C_main->sc_ ## stat++;		\
 		break;
