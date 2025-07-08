@@ -173,7 +173,7 @@ struct obj_methods {
 	/* required */
 	objfree_f	*objfree;
 	objiterator_f	*objiterator;
-	objgetspace_f	*objgetspace;
+	objgetspace_f	*objgetspace;	// XXX add variant for synth
 	objextend_f	*objextend;
 	objgetattr_f	*objgetattr;
 	objsetattr_f	*objsetattr;

@@ -1,0 +1,42 @@
+..
+	Copyright 2026 UPLEX - Nils Goroll Systemoptimierung
+	SPDX-License-Identifier: BSD-2-Clause
+	See LICENSE file for full text of license
+
+..
+	This is *NOT* a RST file but the syntax has been chosen so
+	that it may become an RST file at some later date.
+
+.. vinyl_vsc_begin::	ssy
+	:oneliner:	Synth Stevedore Counters
+	:order:		40
+
+.. vinyl_vsc:: c_allocobj_success
+	:type:	counter
+	:level:	info
+	:oneliner:	allocobj requests succeeded
+
+	Number of times an allocobj request succeeded.
+
+.. vinyl_vsc:: c_allocobj_fail
+	:type:	counter
+	:level:	info
+	:oneliner:	allocobj requests failed
+
+	Number of times an allocobj request failed.
+
+.. vinyl_vsc:: c_getspace_success
+	:type:	counter
+	:level:	info
+	:oneliner:	getspace requests succeeded
+
+	Number of times an getspace request succeeded.
+
+.. vinyl_vsc:: c_getspace_fail
+	:type:	counter
+	:level:	info
+	:oneliner:	getspace requests failed
+
+	Number of times an getspace request failed.
+
+.. vinyl_vsc_end::	ssy

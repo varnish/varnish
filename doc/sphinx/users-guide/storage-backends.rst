@@ -262,8 +262,12 @@ Synth
 -----
 
 By default, the storage backend named "Synth" will be used for synthetic objects
-created in ``vcl_synth {}``. By default, Varnish uses an unlimited default
-backend as the ``Synth`` storage.
+created in ``vcl_synth {}``. By default, Varnish uses the ``synth``
+backend as the ``Synth`` storage, which does not copy any data.
+
+The ``Synth`` storage should only be defined to use a different backend if, for
+whatever reason, the ``synth`` backend has issues, otherwise it is considered
+optimal.
 
 Transient
 ---------
