@@ -312,7 +312,7 @@ static enum req_fsm_nxt v_matchproto_(req_state_f)
 cnt_synth(struct worker *wrk, struct req *req)
 {
 	struct vsb *synth_body;
-	ssize_t sz, szl;
+	ssize_t sz, szl = 0;
 	uint16_t status;
 	uint8_t *ptr;
 	const char *body;
@@ -379,10 +379,13 @@ cnt_synth(struct worker *wrk, struct req *req)
 
 	/* Discard any lingering request body before delivery */
 	(void)VRB_Ignore(req);
-	szl = -1;
 
-	if (req->objcore != NULL ||
-	    Resp_l_storage(req, stv_synth)) {
+	if (req->objcore == NULL)
+		(void) Resp_l_storage(req, stv_synth);
+
+	if (req->objcore == NULL)
+		szl = -1;
+	else if (req->objcore->stobj->stevedore->allocobj != ssy_stevedore.allocobj) {
 		CHECK_OBJ_NOTNULL(req->objcore, OBJCORE_MAGIC);
 		body = VSB_data(synth_body);
 		szl = VSB_len(synth_body);
@@ -400,10 +403,9 @@ cnt_synth(struct worker *wrk, struct req *req)
 			ObjExtend(wrk, req->objcore, sz, szl == 0 ? 1 : 0);
 			body += sz;
 		}
+		if (szl >= 0)
+			AZ(ObjSetU64(wrk, req->objcore, OA_LEN, VSB_len(synth_body)));
 	}
-
-	if (szl >= 0)
-		AZ(ObjSetU64(wrk, req->objcore, OA_LEN, VSB_len(synth_body)));
 	if (req->objcore != NULL)
 		HSH_DerefBoc(wrk, req->objcore);
 	VSB_destroy(&synth_body);

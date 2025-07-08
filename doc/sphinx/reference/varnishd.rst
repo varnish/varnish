@@ -420,12 +420,10 @@ Two special *name*\ s are:
 * ``Synth``, which is the default storage for synthetic responses created in
   ``vcl_synth {}``.
 
-  If no ``Synth`` storage is defined, the ``default`` storage is used as if
+  If no ``Synth`` storage is defined, the ``synth`` storage is used as if
   defined as::
 
-	-s Synth=default
-
-.. XXX change to synth ^^^
+	-s Synth=synth
 
 Storage *kind*\ s (stevedores) can be provided by extensions. The following
 storage *kind*\ s and options are built in:

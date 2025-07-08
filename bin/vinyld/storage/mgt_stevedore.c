@@ -185,6 +185,7 @@ STV_Register_The_Usual_Suspects(void)
 	STV_Register(&smf_stevedore, NULL);
 	STV_Register(&sma_stevedore, NULL);
 	STV_Register(&smd_stevedore, NULL);
+	STV_Register(&ssy_stevedore, NULL);
 #ifdef WITH_PERSISTENT_STORAGE
 	STV_Register(&smp_stevedore, NULL);
 	STV_Register(&smp_fake_stevedore, NULL);
@@ -257,7 +258,7 @@ STV_Config_Final(void)
 	if (! have_transient)
 		STV_Config(TRANSIENT_STORAGE "=default");
 	if (! have_synth)
-		STV_Config(SYNTH_STORAGE "=default");
+		STV_Config(SYNTH_STORAGE "=synth");
 }
 
 /*--------------------------------------------------------------------
