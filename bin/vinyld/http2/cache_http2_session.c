@@ -90,6 +90,30 @@ h2_local_settings(struct h2_settings *h2s)
 	h2s->max_header_list_size = cache_param->http_req_size;
 }
 
+/**********************************************************************/
+
+static void
+h2_del_sess(struct worker *wrk, struct h2_sess *h2, stream_close_t reason)
+{
+	struct sess *sp;
+	struct req *req;
+
+	CHECK_OBJ_NOTNULL(h2, H2_SESS_MAGIC);
+	AZ(h2->refcnt);
+	assert(VTAILQ_EMPTY(&h2->streams));
+	AN(reason);
+
+	VHT_Fini(h2->dectbl);
+	if (h2->efd->poll_fd >= 0)
+		VEFD_Close(h2->efd);
+	TAKE_OBJ_NOTNULL(req, &h2->srq, REQ_MAGIC);
+	assert(!WS_IsReserved(req->ws));
+	TAKE_OBJ_NOTNULL(sp, &h2->sess, SESS_MAGIC);
+	Req_Cleanup(sp, wrk, req);
+	Req_Release(req);
+	SES_Delete(sp, reason, NAN);
+}
+
 /**********************************************************************
  * The h2_sess struct needs many of the same things as a request,
  * WS, VSL, HTC &c,  but rather than implement all that stuff over, we
@@ -98,13 +122,14 @@ h2_local_settings(struct h2_settings *h2s)
  */
 
 static struct h2_sess *
-h2_init_sess(struct sess *sp, struct h2_sess *h2s, struct req **psrq,
-    struct h2h_decode *decode)
+h2_init_sess(struct worker *wrk, struct sess *sp, struct h2_sess *h2s,
+    struct req **psrq, struct h2h_decode *decode)
 {
 	struct req *srq;
 	uintptr_t *up;
 	struct h2_sess *h2;
 
+	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	TAKE_OBJ_NOTNULL(srq, psrq, REQ_MAGIC);
 	AZ(srq->ws_req);
 
@@ -150,7 +175,11 @@ h2_init_sess(struct sess *sp, struct h2_sess *h2s, struct req **psrq,
 	/* Allocate a scratch space to use for staging small outgoing
 	 * frames. */
 	h2->tx_s_start = WS_Alloc(h2->ws, H2_TX_BUFSIZE);
-	AN(h2->tx_s_start);
+	if (h2->tx_s_start == NULL) {
+		VSLb(h2->vsl, SLT_Error, "H2 sess: Out of WS");
+		h2_del_sess(wrk, h2, SC_OVERLOAD);
+		return (NULL);
+	}
 	h2->tx_s_end = h2->tx_s_start + H2_TX_BUFSIZE;
 	h2->tx_s_head = h2->tx_s_start;
 	h2->tx_s_mark = h2->tx_s_start;
@@ -163,28 +192,6 @@ h2_init_sess(struct sess *sp, struct h2_sess *h2s, struct req **psrq,
 	*up = (uintptr_t)h2;
 
 	return (h2);
-}
-
-static void
-h2_del_sess(struct worker *wrk, struct h2_sess *h2, stream_close_t reason)
-{
-	struct sess *sp;
-	struct req *req;
-
-	CHECK_OBJ_NOTNULL(h2, H2_SESS_MAGIC);
-	AZ(h2->refcnt);
-	assert(VTAILQ_EMPTY(&h2->streams));
-	AN(reason);
-
-	VHT_Fini(h2->dectbl);
-	if (h2->efd->poll_fd >= 0)
-		VEFD_Close(h2->efd);
-	TAKE_OBJ_NOTNULL(req, &h2->srq, REQ_MAGIC);
-	assert(!WS_IsReserved(req->ws));
-	sp = h2->sess;
-	Req_Cleanup(sp, wrk, req);
-	Req_Release(req);
-	SES_Delete(sp, reason, NAN);
 }
 
 /**********************************************************************/
@@ -406,7 +413,11 @@ h2_new_session(struct worker *wrk, void *arg)
 	}
 	CHECK_OBJ_NOTNULL(srq, REQ_MAGIC);
 
-	h2 = h2_init_sess(sp, &h2s, &srq, &decode);
+	h2 = h2_init_sess(wrk, sp, &h2s, &srq, &decode);
+	if (h2 == NULL) {
+		wrk->vsl = NULL;
+		return;
+	}
 	AZ(srq);
 
 	CHECK_OBJ_NOTNULL(h2->htc, HTTP_CONN_MAGIC);
