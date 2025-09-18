@@ -1,0 +1,31 @@
+vtest "Verify pseudo-header parsing"
+
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -vcl {
+	backend default none;
+	sub vcl_recv {
+		return (synth(200));
+	}
+} -start
+
+client c1 {
+	stream 1 {
+		txreq -noadd \
+			-hdr ":authority" "foo.com" \
+			-hdr ":path" "/foobar" \
+			-hdr ":scheme" "http" \
+			-hdr ":method" "GET"
+		rxresp
+		expect resp.status == 200
+	} -run
+
+	stream 3 {
+		txreq -noadd \
+			-hdr ":a" "foo.com" \
+			-hdr ":p" "/foobar" \
+			-hdr ":s" "http" \
+			-hdr ":m" "GET"
+		rxrst
+		expect rst.err == PROTOCOL_ERROR
+	} -run
+} -run
