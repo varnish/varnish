@@ -504,6 +504,11 @@ h2_rx_window_update(struct worker *wrk, struct h2_sess *h2, struct h2_req *r2)
 		h2->tx_window += wu;
 		if (h2->tx_window >= (1LL << 31))
 			return (H2CE_FLOW_CONTROL_ERROR);
+		if (h2->tx_window > 0) {
+			/* We have a positive session window. Stop the
+			 * bankruptcy countdown if active. */
+			h2->t_win_low = 0.;
+		}
 	} else {
 		if (wu == 0)
 			return (H2SE_PROTOCOL_ERROR);
@@ -1411,6 +1416,14 @@ h2_run(struct worker *wrk, struct h2_sess *h2)
 		else if (h2->error == NULL && h2->open_streams == 0 &&
 		    h2->sess->t_idle + tmo < now)
 			h2->error = H2CE_NO_ERROR;
+
+		if (h2->error == NULL && h2->t_win_low != 0. &&
+		    now - h2->t_win_low > cache_param->h2_window_timeout) {
+			/* We've been stuck for too long waiting for a
+			 * positive session window. Call the session
+			 * bankrupt. */
+			h2->error = H2CE_BANKRUPT;
+		}
 
 		if (pfd[pfd_ev].revents & POLLIN) {
 			/* Signalled for attention by a request

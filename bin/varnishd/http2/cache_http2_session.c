@@ -133,6 +133,8 @@ h2_init_sess(struct sess *sp, struct h2_sess *h2s, struct req **psrq,
 	h2->tx_window = h2->remote_settings.initial_window_size;
 	h2->rx_window = h2->local_settings.initial_window_size;
 
+	h2->t_win_low = 0.;
+
 	h2->rapid_reset = cache_param->h2_rapid_reset;
 	h2->rapid_reset_limit = cache_param->h2_rapid_reset_limit;
 	h2->rapid_reset_period = cache_param->h2_rapid_reset_period;

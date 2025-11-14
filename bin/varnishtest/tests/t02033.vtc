@@ -1,0 +1,45 @@
+varnishtest "h2: Session window bankruptcy"
+
+server s0 {
+	rxreq
+	txresp -bodylen 100000
+} -start
+
+varnish v1 -vcl+backend {} -start
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set h2_window_timeout 3"
+
+client c1 {
+	timeout 10
+	stream 1 {
+		txreq
+		txwinup -size 100000
+		rxhdrs
+		# Receive 65535 (initial session window) bytes.
+		rxdata
+		expect frame.size == 16384
+		rxdata
+		expect frame.size == 16384
+		rxdata
+		expect frame.size == 16384
+		rxdata
+		expect frame.size == 16383
+	} -run
+	# Expect the connection to be closed on us (will happen after h2_window_timeout)
+	expect_close
+} -run
+
+# Ensure that clearing the state within the timeout doesn't cause bankruptcy
+client c2 {
+	timeout 10
+	stream 0 {
+		# Dealy 1 seond, then refresh the session window
+		delay 1
+		txwinup -size 100000
+	} -start
+	stream 1 {
+		txreq
+		txwinup -size 100000
+		rxresp
+	} -run
+} -run

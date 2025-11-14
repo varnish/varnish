@@ -441,7 +441,19 @@ H2_Send_TxStuff(struct h2_sess *h2)
 			/* Tx is unable to make progress until there has
 			 * been a window update. */
 			h2->tx_l_stuck = 1;
+			if (h2->tx_window <= 0) {
+				/* We failed to make any progress and the
+				 * session window is empty. We would not
+				 * have been called here unless we could
+				 * make progress, meaning failure is
+				 * because the session window is
+				 * empty. Record this timestamp as the
+				 * start of h2_window_timeout duration for
+				 * the session. */
+				h2->t_win_low = VTIM_real();
+			}
 		} else {
+			h2->t_win_low = 0.;
 			h2->tx_l_stuck = 0;
 		}
 

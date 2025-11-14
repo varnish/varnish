@@ -182,6 +182,8 @@ struct h2_sess {
 	int64_t				tx_window;
 	int64_t				rx_window;
 
+	vtim_real			t_win_low;
+
 	struct h2_req_s			streams;
 
 	struct req			*srq;
