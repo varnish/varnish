@@ -77,10 +77,11 @@ shell {
 
 	t /recv_fail c handling fail
 	t /recv_fail c resp.reason "VCL failed"
-	t /recv_fail c errors null
+	# Open-source change: return(fail) produces a VCL_Error record
+	t /recv_fail c errors[0] "Failed from VCL"
 
 	t /fetch_fail b handling fail
-	t /fetch_fail b errors null
+	t /fetch_fail b errors[0] "Failed from VCL"
 	t /fetch_fail c handling synth
 	t /fetch_fail c errors null
 	t /fetch_fail c resp.reason "Service Unavailable"
