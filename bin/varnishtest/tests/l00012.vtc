@@ -43,20 +43,21 @@ shell {
 	varnishlog-json -n ${v1_name} -d -g probe
 	varnishlog-json -n ${v1_name} -d -g probe | jq >${tmpdir}/varnishlog-json-005.out
 
+	# Open-source change: vcl1.s1 -> s1, probes don't print the VCL name
 	# start at 3, we have 2 initial probes
-	t 3 backend vcl1.s1
+	t 3 backend s1
 	t 3 healthy true
 	t 3 happy true
 	t 3 report 4---X-RH
 	t 3 message "HTTP/1.1 200 OK"
 
-	t 4 backend vcl1.s1
+	t 4 backend s1
 	t 4 healthy true
 	t 4 happy false
 	t 4 report 4---X-R-
 	t 4 message "HTTP/1.1 400 OK"
 
-	t 5 backend vcl1.s1
+	t 5 backend s1
 	t 5 healthy false
 	t 5 happy false
 	t 5 report 4---X-R-

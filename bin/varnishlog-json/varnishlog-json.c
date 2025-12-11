@@ -313,7 +313,8 @@ process_probe(struct VSL_data *vsl,
 	cJSON *t= NULL;
 	double duration;
 	enum VSL_tag_e tag;
-	const char *c;
+	const char *c, *e = NULL;
+	char buf[4096];
 	struct VSL_transaction *tp = NULL;
 
 	(void)vsl;
@@ -368,6 +369,23 @@ process_probe(struct VSL_data *vsl,
 	}
 	c++;
 	AN(cJSON_AddStringToObject(t, "message", c));
+	// Open-source change: we need to unwrap the quotes, if any
+	if (*c == '"') {
+		c++;
+		e = strchr(c, '"');
+		if (e != NULL) {
+			if (e - c >= sizeof(buf)) {
+				e = c + sizeof(buf) - 1;
+			}
+			strncpy(buf, c, e - c);
+			buf[e - c] = '\0';
+			AN(cJSON_AddStringToObject(t, "message", buf));
+		} else {
+			AN(cJSON_AddStringToObject(t, "message", c));
+		}
+	} else {
+		AN(cJSON_AddStringToObject(t, "message", c));
+	}
 
 	AZ(VSL_Next(tp->c));
 
