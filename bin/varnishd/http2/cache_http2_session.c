@@ -35,6 +35,7 @@
 #include <stdio.h>
 
 #include "cache/cache_varnishd.h"
+#include "cache/cache_conn_oper.h"
 #include "cache/cache_transport.h"
 #include "http2/cache_http2.h"
 
@@ -286,8 +287,9 @@ h2_ou_session(struct worker *wrk, struct h2_sess *h2,
 		return (NULL);
 	}
 
-	sz = write(h2->sess->fd, h2_resp_101, strlen(h2_resp_101));
-	VTCP_Assert(sz);
+	sz = h2->htc->oper->write(h2->htc->oper_priv, h2->sess->fd,
+	    h2_resp_101, strlen(h2_resp_101));
+	VCO_Assert(h2->htc->oper, sz);
 	if (sz != strlen(h2_resp_101)) {
 		VSLb(h2->vsl, SLT_Debug, "H2: Upgrade: Error writing 101"
 		    " response: %s\n", VAS_errtxt(errno));

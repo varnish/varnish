@@ -36,6 +36,7 @@
 #include <stdlib.h>
 
 #include "cache/cache_varnishd.h"
+#include "cache/cache_conn_oper.h"
 #include "cache/cache_transport.h"
 #include "cache/cache_filter.h"
 #include "http2/cache_http2.h"
@@ -1253,7 +1254,8 @@ h2_rxstuff(struct h2_sess *h2)
 		return (HTC_S_OVERFLOW);
 	}
 
-	l = read(*htc->rfd, htc->rxbuf_e, res);
+	l = htc->oper->nb_read(htc->oper_priv, *htc->rfd, htc->rxbuf_e,
+	    res, h2->deadline);
 	if (l < 0 && errno == EWOULDBLOCK)
 		hs = HTC_S_MORE;
 	else if (l < 0)

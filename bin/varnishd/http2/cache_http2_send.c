@@ -36,6 +36,7 @@
 #include <poll.h>
 
 #include "cache/cache_varnishd.h"
+#include "cache/cache_conn_oper.h"
 #include "cache/cache_transport.h"
 #include "http2/cache_http2.h"
 
@@ -454,7 +455,8 @@ H2_Send_TxStuff(struct h2_sess *h2)
 
 	assert(h2->tx_nvec > 0);
 	while (h2->tx_nvec > 0) {
-		l = writev(h2->sess->fd, h2->tx_vec, h2->tx_nvec);
+		l = h2->htc->oper->nb_writev(h2->htc->oper_priv, h2->sess->fd,
+		    h2->tx_vec, h2->tx_nvec, h2->deadline);
 		if (l < 0) {
 			/* Save the value of errno. This is strictly not
 			 * necessary as none of the calls between here and
