@@ -60,12 +60,12 @@ rdf(struct rdf_vco *src, struct rdf_vco *dst, uint64_t *pcnt)
 	char buf[BUFSIZ], *p;
 
 	i = src->oper->read(src->oper_priv, src->fd, buf, sizeof buf);
-	VTCP_Assert(i);
+	VCO_Assert(src->oper, i);
 	if (i <= 0)
 		return (1);
 	for (p = buf; i > 0; i -= j, p += j) {
 		j = dst->oper->write(dst->oper_priv, dst->fd, p, i);
-		VTCP_Assert(j);
+		VCO_Assert(dst->oper, j);
 		if (j <= 0)
 			return (1);
 		assert(j <= i);
@@ -152,7 +152,7 @@ V1P_Process(const struct req *req, int fd, struct v1p_acct *v1a,
 		j = rdf_b.oper->write(rdf_b.oper_priv, rdf_b.fd,
 		    req->htc->pipeline_b,
 		    req->htc->pipeline_e - req->htc->pipeline_b);
-		VTCP_Assert(j);
+		VCO_Assert(rdf_b.oper, j);
 		if (j < 0)
 			return (SC_OVERLOAD);
 		req->htc->pipeline_b = NULL;

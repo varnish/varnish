@@ -77,7 +77,7 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
 	if (len > 0) {
 		i = htc->oper->read(htc->oper_priv, *htc->rfd, p, len);
 		if (i < 0) {
-			// XXX: VTCP_Assert(i);
+			VCO_Assert(htc->oper, i);
 			VSLbs(vc->wrk->vsl, SLT_FetchError,
 			    TOSTRAND(VAS_errtxt(errno)));
 			return (i);

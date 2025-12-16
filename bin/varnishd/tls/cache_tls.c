@@ -189,10 +189,23 @@ vtls_writev(void *priv, int fd, const struct iovec *iov, int iovcnt)
 	return (i);
 }
 
+/*
+ * TLS error checking is different from TCP - errors are reported via
+ * SSL_get_error() and logged via VTLS_vsl_sslerr(), so we accept all
+ * return values here.
+ */
+static int v_matchproto_(vco_check_f)
+vtls_check(ssize_t a)
+{
+	(void)a;
+	return (1);
+}
+
 static const struct vco vtls_oper_backend = {
 	.read = vtls_read_backend,
 	.write = vtls_write,
 	.writev = vtls_writev,
+	.check = vtls_check,
 };
 
 const struct vco *

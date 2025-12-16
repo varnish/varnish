@@ -40,6 +40,7 @@ typedef ssize_t vco_writev_f(void *, int, const struct iovec *, int);
 typedef ssize_t vco_nb_read_f(void *, int, void *, size_t, vtim_real);
 typedef ssize_t vco_nb_writev_f(void *, int, const struct iovec *, int,
     vtim_real);
+typedef int vco_check_f(ssize_t);
 
 struct vco {
 	vco_read_f		*read;
@@ -48,6 +49,9 @@ struct vco {
 	vco_writev_f		*writev;
 	vco_nb_read_f		*nb_read;
 	vco_nb_writev_f		*nb_writev;
+	vco_check_f		*check;
 };
+
+#define VCO_Assert(vco, a)	assert((vco)->check(a))
 
 extern const struct vco *VCO_default;

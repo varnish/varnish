@@ -240,7 +240,7 @@ vbp_write(struct vbp_target *vt, const struct vco *oper, void *oper_priv,
 	ssize_t i;
 
 	i = oper->write(oper_priv, fd, buf, len);
-	VTCP_Assert(i);
+	VCO_Assert(oper, i);
 	if (i != (ssize_t)len) {
 		if (i < 0) {
 			vt->err_xmit |= 1;
@@ -408,7 +408,7 @@ vbp_poke(struct vbp_target *vt, struct worker *wrk)
 			    vt->resp_buf + rlen, sizeof vt->resp_buf - rlen);
 		else
 			r = oper->read(oper_priv, *fdp, buf, sizeof buf);
-		VTCP_Assert(r);
+		VCO_Assert(oper, r);
 		if (r <= 0) {
 			if (r < 0)
 				bprintf(vt->resp_buf, "Read error %d (%s)",

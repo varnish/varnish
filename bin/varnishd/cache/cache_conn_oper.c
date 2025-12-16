@@ -109,6 +109,13 @@ vco_nb_writev(void *priv, int fd, const struct iovec *iov, int n_iov,
 	return (writev(fd, iov, n_iov));
 }
 
+static int v_matchproto_(vco_check_f)
+vco_check(ssize_t a)
+{
+
+	return (VTCP_Check(a));
+}
+
 static const struct vco vco_default = {
 	.read = vco_read,
 	.write = vco_write,
@@ -116,6 +123,7 @@ static const struct vco vco_default = {
 	.writev = vco_writev,
 	.nb_read = vco_nb_read,
 	.nb_writev = vco_nb_writev,
+	.check = vco_check,
 };
 
 const struct vco *VCO_default = &vco_default;
