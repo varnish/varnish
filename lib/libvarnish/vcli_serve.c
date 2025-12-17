@@ -162,6 +162,8 @@ VCLS_func_help(struct cli *cli, const char * const *av, void *priv)
 			continue;
 		if (clp->desc->flags & CLI_F_INTERNAL)
 			continue;
+		if (clp->desc->flags & CLI_F_HIDDEN)
+			continue;
 		if (av[0] != NULL && !strcmp(clp->desc->request, av[0])) {
 			help_helper(cli, clp, av);
 			return;
@@ -194,6 +196,8 @@ VCLS_func_help_json(struct cli *cli, const char * const *av, void *priv)
 		if ((clp->desc->flags & CLI_F_AUTH) && !cli->auth)
 			continue;
 		if (clp->desc->flags & CLI_F_INTERNAL)
+			continue;
+		if (clp->desc->flags & CLI_F_HIDDEN)
 			continue;
 		VCLI_Out(cli, ",\n  {\n");
 		VSB_indent(cli->sb, 2);

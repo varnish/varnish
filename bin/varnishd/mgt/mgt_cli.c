@@ -738,6 +738,8 @@ mgt_DumpRstCli(void)
 			continue;
 		if (cp->flags & CLI_F_INTERNAL)
 			continue;
+		if (cp->flags & CLI_F_HIDDEN)
+			continue;
 		printf(".. _ref_cli_");
 		for (p = cp->request; *p; p++)
 			fputc(*p == '.' ? '_' : *p, stdout);
