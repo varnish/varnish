@@ -89,6 +89,7 @@ nobase_pkginclude_HEADERS += \
 nobase_noinst_HEADERS = \
 	compat/daemon.h \
 	libvcc.h \
+	tbl/cli_flags.h \
 	vbt.h \
 	vcc_interface.h \
 	vcli_serve.h \
