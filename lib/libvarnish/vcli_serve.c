@@ -149,7 +149,7 @@ VCLS_func_help(struct cli *cli, const char * const *av, void *priv)
 		}
 	}
 	VTAILQ_FOREACH(clp, &cs->funcs, list) {
-		if (clp->auth > cli->auth)
+		if ((clp->desc->flags & CLI_F_AUTH) && !cli->auth)
 			continue;
 		if (clp->desc->flags & CLI_F_INTERNAL)
 			continue;
@@ -182,7 +182,7 @@ VCLS_func_help_json(struct cli *cli, const char * const *av, void *priv)
 	VCLI_JSON_begin(cli, 2, av);
 	VTAILQ_FOREACH(clp, &cs->funcs, list) {
 		sep = "";
-		if (clp->auth > cli->auth)
+		if ((clp->desc->flags & CLI_F_AUTH) && !cli->auth)
 			continue;
 		if (clp->desc->flags & CLI_F_INTERNAL)
 			continue;
@@ -234,13 +234,14 @@ cls_dispatch(struct cli *cli, struct VCLS *cs, char * const * av, int ac)
 	AN(av[1]);
 
 	VTAILQ_FOREACH(cp, &cs->funcs, list) {
-		if (cp->auth > cli->auth)
+		if ((cp->desc->flags & CLI_F_AUTH) && !cli->auth)
 			continue;
 		if (!strcmp(cp->desc->request, av[1]))
 			break;
 	}
 
-	if (cp == NULL && cs->wildcard && cs->wildcard->auth <= cli->auth)
+	if (cp == NULL && cs->wildcard &&
+	    !((cs->wildcard->desc->flags & CLI_F_AUTH) && !cli->auth))
 		cp = cs->wildcard;
 
 	if (cp == NULL) {
@@ -556,7 +557,7 @@ cls_close_fd(struct VCLS *cs, struct VCLS_fd *cfd)
 }
 
 void
-VCLS_AddFunc(struct VCLS *cs, unsigned auth, struct cli_proto *clp)
+VCLS_AddFunc(struct VCLS *cs, struct cli_proto *clp)
 {
 	struct cli_proto *clp2;
 	int i;
@@ -565,7 +566,6 @@ VCLS_AddFunc(struct VCLS *cs, unsigned auth, struct cli_proto *clp)
 	AN(clp);
 
 	for (;clp->desc != NULL; clp++) {
-		clp->auth = auth;
 		if (!strcmp(clp->desc->request, "*")) {
 			cs->wildcard = clp;
 		} else {

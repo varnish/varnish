@@ -47,7 +47,7 @@ CLI_CMD(BAN,
 	"ban <field> <operator> <arg> [&& <field> <oper> <arg> ...]",
 	"Mark obsolete all objects where all the conditions match.",
 	"  See :ref:`std.ban()` for details",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	3, -1
 )
 
@@ -68,7 +68,7 @@ CLI_CMD(BAN_LIST,
 	"  * Ban specification\n\n"
 	"  Durations of ban specifications get normalized, for example \"7d\""
 	" gets changed into \"1w\".",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -77,7 +77,7 @@ CLI_CMD(VCL_LOAD,
 	"vcl.load <configname> <filename> [auto|cold|warm]",
 	"Compile and load the VCL file under the name provided.",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	2, 3
 )
 
@@ -88,7 +88,7 @@ CLI_CMD(VCL_INLINE,
 
 	"  Multi-line VCL can be input using the here document"
 	" :ref:`ref_syntax`.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	2, 3
 )
 
@@ -97,7 +97,7 @@ CLI_CMD(VCL_STATE,
 	"vcl.state <configname> auto|cold|warm",
 	"  Force the state of the named configuration.",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	2, 2
 )
 
@@ -113,7 +113,7 @@ CLI_CMD(VCL_DISCARD,
 	" nothing is discarded."
 	" Each individual name pattern must match at least one named"
 	" configuration or label.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	1, -1
 )
 
@@ -132,7 +132,7 @@ CLI_CMD(VCL_LIST,
 	"  * [ ``<-`` | ``->`` ] and label info last two fields)\n\n"
 	"    * ``->`` <vcl> : label \"points to\" the named <vcl>\n\n"
 	"    * ``<-`` (<n> label[s]): the vcl has <n> label(s)\n\n",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -147,7 +147,7 @@ CLI_CMD(VCL_DEPS,
 	"  * Dependency: another VCL program it depends on\n\n"
 	"  Only direct dependencies are listed, and VCLs with"
 	" multiple dependencies are listed multiple times.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -156,7 +156,7 @@ CLI_CMD(VCL_SHOW,
 	"vcl.show [-v] [<configname>]",
 	"Display the source code for the specified configuration.",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 2
 )
 
@@ -165,7 +165,7 @@ CLI_CMD(VCL_USE,
 	"vcl.use <configname|label>",
 	"Switch to the named configuration immediately.",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	1, 1
 )
 
@@ -176,7 +176,7 @@ CLI_CMD(VCL_LABEL,
 	"  A VCL label is like a UNIX symbolic link, "
 	" a name without substance, which points to another VCL.\n\n"
 	"  Labels are mandatory whenever one VCL references another.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	2, 2
 )
 
@@ -187,7 +187,7 @@ CLI_CMD(PARAM_RESET,
 	"  The JSON output is the same as ``param.show -j <param>`` and"
 	" contains the updated value as it would be represented by a"
 	" subsequent execution of ``param.show``.\n\n",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	1,1
 )
 
@@ -203,7 +203,7 @@ CLI_CMD(PARAM_SHOW,
 	" ``-j`` is permitted. If a parameter is specified with ``<param>``,"
 	" show only that parameter. If ``changed`` is specified, show only"
 	" those parameters whose values differ from their defaults.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 2
 )
 
@@ -217,7 +217,7 @@ CLI_CMD(PARAM_SET,
 	"  This can be useful to later verify that a parameter value didn't"
 	" change and to use the value from the JSON output to reset the"
 	" parameter to the desired value.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	2,2
 )
 
@@ -226,7 +226,7 @@ CLI_CMD(SERVER_STOP,
 	"stop",
 	"Stop the Varnish cache process.",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -235,7 +235,7 @@ CLI_CMD(SERVER_START,
 	"start",
 	"Start the Varnish cache process.",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -271,7 +271,7 @@ CLI_CMD(SERVER_STATUS,
 	"status [-j]",
 	"Check status of Varnish cache process.",
 	"  ``-j`` specifies JSON output.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -299,7 +299,7 @@ CLI_CMD(PANIC_SHOW,
 	"Return the last panic, if any.",
 	"  ``-j`` specifies JSON output -- the panic message is returned as an"
 	" unstructured JSON string.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -309,7 +309,7 @@ CLI_CMD(PANIC_CLEAR,
 	"Clear the last panic, if any,"
 	" -z will clear related varnishstat counter(s)",
 	"",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 1
 )
 
@@ -318,7 +318,7 @@ CLI_CMD(DEBUG_LISTEN_ADDRESS,
 	"debug.listen_address",
 	"Report the actual listen address.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )
 
@@ -358,7 +358,7 @@ CLI_CMD(BACKEND_LIST,
 	"  matching the fields described above. ``probe_message`` has the\n"
 	"  format ``[X, Y, \"state\"]`` as described above for Probe. JSON\n"
 	"  Probe details (``-j -p`` arguments) are director specific.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 2
 )
 
@@ -370,7 +370,7 @@ CLI_CMD(BACKEND_SET_HEALTH,
 	"    or some other dynamic mechanism, if any\n"
 	"  * ``healthy`` sets the backend as usable\n"
 	"  * ``sick`` sets the backend as unusable\n",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	2, 2
 )
 
@@ -379,7 +379,7 @@ CLI_CMD(DEBUG_FRAGFETCH,
 	"debug.fragfetch",
 	"Enable fetch fragmentation.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	1, 1
 )
 
@@ -391,7 +391,7 @@ CLI_CMD(DEBUG_REQPOOLFAIL,
 	"\tparam.set debug.reqpoolfail F__F_F\n\n"
 	"In the example above the first, fourth and sixth attempted\n"
 	"allocations will fail.",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	1, 1
 )
 
@@ -400,7 +400,7 @@ CLI_CMD(DEBUG_SHUTDOWN_DELAY,
 	"debug.shutdown.delay",
 	"Add a delay to the child process shutdown.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	1, 1
 )
 
@@ -409,7 +409,7 @@ CLI_CMD(DEBUG_XID,
 	"debug.xid [<xid> [<cachesize>]]",
 	"Examine or set XID. <cachesize> defaults to 1.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 2
 )
 
@@ -418,7 +418,7 @@ CLI_CMD(DEBUG_SRANDOM,
 	"debug.srandom",
 	"Seed the random(3) function.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 1
 )
 
@@ -427,7 +427,7 @@ CLI_CMD(DEBUG_PANIC_WORKER,
 	"debug.panic.worker",
 	"Panic the worker process.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )
 
@@ -436,7 +436,7 @@ CLI_CMD(DEBUG_PANIC_MASTER,
 	"debug.panic.master",
 	"Panic the master process.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )
 
@@ -445,7 +445,7 @@ CLI_CMD(DEBUG_VCL_SYMTAB,
 	"vcl.symtab",
 	"Dump the VCL symbol-tables.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )
 
@@ -454,7 +454,7 @@ CLI_CMD(DEBUG_VMOD,
 	"debug.vmod",
 	"Show loaded vmods.",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )
 
@@ -467,7 +467,7 @@ CLI_CMD(DEBUG_PERSISTENT,
 	"\tsync\tClose current segment, open a new one\n"
 	"\tdump\tinclude objcores in silo summary",
 	"",
-	CLI_F_DEBUG,
+	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 2
 )
 
@@ -476,7 +476,7 @@ CLI_CMD(STORAGE_LIST,
 	"storage.list [-j]",
 	"List storage devices.",
 	"  ``-j`` specifies JSON output.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
@@ -485,7 +485,7 @@ CLI_CMD(PID,
 	"pid [-j]",
 	"Show the pid of the master process, and the worker if it's running.",
 	"  ``-j`` specifies JSON output.",
-	CLI_F_NONE,
+	CLI_F_AUTH,
 	0, 0
 )
 
