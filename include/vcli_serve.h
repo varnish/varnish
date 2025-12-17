@@ -96,7 +96,7 @@ void VCLI_JSON_end(struct cli *cli);
 void VCLI_SetResult(struct cli *cli, unsigned r);
 
 typedef int cls_cb_f(void *priv);
-typedef void cls_cbc_f(const struct cli*);
+typedef void cls_cbc_f(const struct cli*, struct cli_proto *, const char *cmdn);
 struct VCLS *VCLS_New(struct VCLS *);
 void VCLS_SetHooks(struct VCLS *, cls_cbc_f *, cls_cbc_f *);
 void VCLS_SetLimit(struct VCLS *, volatile unsigned *);

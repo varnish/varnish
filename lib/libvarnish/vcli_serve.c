@@ -354,7 +354,7 @@ cls_exec(struct VCLS_fd *cfd, char * const *av)
 	clp = cls_lookup(av, cli, cs, &cmd_err);
 
 	if (cs->before != NULL)
-		cs->before(cli);
+		cs->before(cli, clp, av[1]);
 
 	if (clp == NULL) {
 		switch (cmd_err) {
@@ -385,7 +385,7 @@ cls_exec(struct VCLS_fd *cfd, char * const *av)
 	AZ(VSB_finish(cli->sb));
 
 	if (cs->after != NULL)
-		cs->after(cli);
+		cs->after(cli, clp, av[1]);
 
 	cli->cls = NULL;
 
@@ -581,13 +581,13 @@ cls_close_fd(struct VCLS *cs, struct VCLS_fd *cfd)
 	if (cfd->match != NULL) {
 		cfd->cli->result = CLIS_TRUNCATED;
 		if (cs->after != NULL)
-			cs->after(cfd->cli);
+			cs->after(cfd->cli, NULL, NULL);
 		VSB_destroy(&cfd->last_arg);
 	} else if (cfd->cli->cmd != NULL) {
 		(void)VSB_finish(cfd->cli->cmd);
 		cfd->cli->result = CLIS_TRUNCATED;
 		if (cs->after != NULL)
-			cs->after(cfd->cli);
+			cs->after(cfd->cli, NULL, NULL);
 		VSB_destroy(&cfd->cli->cmd);
 	}
 	cs->nfd--;

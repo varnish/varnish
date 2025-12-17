@@ -120,6 +120,21 @@ static struct cli_proto cli_debug[] = {
 	{ NULL }
 };
 
+static const struct cli_cmd_desc *
+mgt_cmd_lookup(const char *cmdn)
+{
+	int i;
+
+	if (cmdn == NULL)
+		return (NULL);
+
+	for (i = 0; i < ncmds; i++) {
+		if (!strcmp(cmdn, cmds[i]->request))
+			return (cmds[i]);
+	}
+	return (NULL);
+}
+
 /*--------------------------------------------------------------------*/
 
 static void v_matchproto_(cli_func_t)
@@ -128,6 +143,7 @@ mcf_askchild(struct cli *cli, const char * const *av, void *priv)
 	int i;
 	char *q;
 	unsigned u;
+	const struct cli_cmd_desc *cmd;
 
 	(void)priv;
 	/*
@@ -143,15 +159,11 @@ mcf_askchild(struct cli *cli, const char * const *av, void *priv)
 		return;
 	}
 
-	for (i = 0; i < ncmds; i++) {
-		if (strcmp(av[1], cmds[i]->request))
-			continue;
-		if (cmds[i]->flags & CLI_F_INTERNAL) {
-			VCLI_Out(cli, "Unknown request.\nType 'help' for more info.\n");
-			VCLI_SetResult(cli, CLIS_UNKNOWN);
-			return;
-		}
-		break;
+	cmd = mgt_cmd_lookup(av[1]);
+	if (cmd != NULL && cmd->flags & CLI_F_INTERNAL) {
+		VCLI_Out(cli, "Unknown request.\nType 'help' for more info.\n");
+		VCLI_SetResult(cli, CLIS_UNKNOWN);
+		return;
 	}
 
 	VSB_clear(cli_buf);
@@ -345,20 +357,28 @@ static struct cli_proto cli_auth[] = {
 /*--------------------------------------------------------------------*/
 
 static void
-mgt_cli_cb_before(const struct cli *cli)
+mgt_cli_cb_before(const struct cli *cli, struct cli_proto *clp, const char *cmdn)
 {
+	const struct cli_cmd_desc *cmd;
+
+	cmd = (clp == NULL ? mgt_cmd_lookup(cmdn) : clp->desc);
 
 	if (cli->priv == stderr)
 		fprintf(stderr, "> %s\n", VSB_data(cli->cmd));
-	MGT_Complain(C_CLI, "CLI %s Rd %s", cli->ident, VSB_data(cli->cmd));
+	if (cmd == NULL || !(cmd->flags & CLI_F_SENSITIVE))
+		MGT_Complain(C_CLI, "CLI %s Rd %s", cli->ident, VSB_data(cli->cmd));
 }
 
 static void
-mgt_cli_cb_after(const struct cli *cli)
+mgt_cli_cb_after(const struct cli *cli, struct cli_proto *clp, const char *cmdn)
 {
+	const struct cli_cmd_desc *cmd;
 
-	MGT_Complain(C_CLI, "CLI %s Wr %03u %s",
-	    cli->ident, cli->result, VSB_data(cli->sb));
+	cmd = (clp == NULL ? mgt_cmd_lookup(cmdn) : clp->desc);
+
+	if (cmd == NULL || !(cmd->flags & CLI_F_SENSITIVE))
+		MGT_Complain(C_CLI, "CLI %s Wr %03u %s",
+		    cli->ident, cli->result, VSB_data(cli->sb));
 	if (cli->priv != stderr)
 		return;
 	if (cli->result == CLIS_TRUNCATED)

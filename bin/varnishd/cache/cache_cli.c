@@ -71,24 +71,31 @@ CLI_AddFuncs(struct cli_proto *p)
 }
 
 static void
-cli_cb_before(const struct cli *cli)
+cli_cb_before(const struct cli *cli, struct cli_proto *clp, const char *cmdn)
 {
 
 	ASSERT_CLI();
-	VSL(SLT_CLI, NO_VXID, "Rd %s", VSB_data(cli->cmd));
+	(void)cmdn;
+
+	if (clp == NULL || !(clp->desc->flags & CLI_F_SENSITIVE))
+		VSL(SLT_CLI, NO_VXID, "Rd %s", VSB_data(cli->cmd));
 	Lck_Lock(&cli_mtx);
 	VCL_Poll();
 	VCP_RelPoll();
 }
 
 static void
-cli_cb_after(const struct cli *cli)
+cli_cb_after(const struct cli *cli, struct cli_proto *clp, const char *cmdn)
 {
 
 	ASSERT_CLI();
+	(void)cmdn;
+
 	Lck_Unlock(&cli_mtx);
-	VSL(SLT_CLI, NO_VXID, "Wr %03u %zd %s",
-	    cli->result, VSB_len(cli->sb), VSB_data(cli->sb));
+	if (clp == NULL || !(clp->desc->flags & CLI_F_SENSITIVE)) {
+		VSL(SLT_CLI, NO_VXID, "Wr %03u %zd %s",
+		    cli->result, VSB_len(cli->sb), VSB_data(cli->sb));
+	}
 }
 
 void
