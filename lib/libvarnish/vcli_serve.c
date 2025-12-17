@@ -79,6 +79,15 @@ struct VCLS {
 	struct cli_proto		*wildcard;
 };
 
+enum cmd_error_e {
+	CMD_ERR_NONE,
+	CMD_ERR_SYNTAX,
+	CMD_ERR_EMPTY,
+	CMD_ERR_ISUPPER,
+	CMD_ERR_NOTLOWER,
+	CMD_ERR_UNKNOWN
+};
+
 /*--------------------------------------------------------------------*/
 
 void v_matchproto_(cli_func_t)
@@ -219,39 +228,21 @@ VCLS_func_help_json(struct cli *cli, const char * const *av, void *priv)
 }
 
 /*--------------------------------------------------------------------
- * Look for a CLI command to execute
+ * Execute a CLI command
  */
 
 static void
-cls_dispatch(struct cli *cli, struct VCLS *cs, char * const * av, int ac)
+cls_dispatch(struct cli *cli, const struct cli_proto *cp,
+    char * const *av, unsigned na)
 {
 	int json = 0;
-	struct cli_proto *cp;
 
 	AN(av);
-	assert(ac >= 0);
-	AZ(av[0]);
-	AN(av[1]);
-
-	VTAILQ_FOREACH(cp, &cs->funcs, list) {
-		if ((cp->desc->flags & CLI_F_AUTH) && !cli->auth)
-			continue;
-		if (!strcmp(cp->desc->request, av[1]))
-			break;
-	}
-
-	if (cp == NULL && cs->wildcard &&
-	    !((cs->wildcard->desc->flags & CLI_F_AUTH) && !cli->auth))
-		cp = cs->wildcard;
-
-	if (cp == NULL) {
-		VCLI_Out(cli, "Unknown request.\nType 'help' for more info.\n");
-		return;
-	}
+	AN(cp);
 
 	VSB_clear(cli->sb);
 
-	if (ac > 1 && !strcmp(av[2], "-j"))
+	if (na > 1 && !strcmp(av[2], "-j"))
 		json = 1;
 
 	if (cp->func == NULL && !json) {
@@ -265,25 +256,65 @@ cls_dispatch(struct cli *cli, struct VCLS *cs, char * const * av, int ac)
 		return;
 	}
 
-	if (ac - 1 < cp->desc->minarg + json) {
+	if ((int)na - 1 < cp->desc->minarg + json) {
 		VCLI_Out(cli, "Too few parameters\n");
 		VCLI_SetResult(cli, CLIS_TOOFEW);
 		return;
 	}
 
-	if (cp->desc->maxarg >= 0 && ac - 1 > cp->desc->maxarg + json) {
+	if (cp->desc->maxarg >= 0 && (int)na - 1 > cp->desc->maxarg + json) {
 		VCLI_Out(cli, "Too many parameters\n");
 		VCLI_SetResult(cli, CLIS_TOOMANY);
 		return;
 	}
 
 	cli->result = CLIS_OK;
-	cli->cls = cs;
 	if (json)
 		cp->jsonfunc(cli, (const char * const *)av, cp->priv);
 	else
 		cp->func(cli, (const char * const *)av, cp->priv);
-	cli->cls = NULL;
+}
+
+/*--------------------------------------------------------------------
+ * Look for a CLI command
+ */
+
+static struct cli_proto *
+cls_lookup(char * const *av, struct cli *cli, struct VCLS *cs,
+    enum cmd_error_e *err)
+{
+	struct cli_proto *clp = NULL;
+
+	*err = CMD_ERR_NONE;
+
+	if (av[0] != NULL) {
+		*err = CMD_ERR_SYNTAX;
+		return (NULL);
+	}
+
+	if (av[1] == NULL) {
+		*err = CMD_ERR_EMPTY;
+		return (NULL);
+	}
+
+	if (isupper(av[1][0])) {
+		*err = CMD_ERR_NOTLOWER;
+		return (NULL);
+	}
+
+	if (!islower(av[1][0])) {
+		*err = CMD_ERR_UNKNOWN;
+		return (NULL);
+	}
+
+	VTAILQ_FOREACH(clp, &cs->funcs, list) {
+		if ((clp->desc->flags & CLI_F_AUTH) && !cli->auth)
+			continue;
+		if (!strcmp(clp->desc->request, av[1]))
+			break;
+	}
+
+	return (clp);
 }
 
 /*--------------------------------------------------------------------
@@ -291,14 +322,17 @@ cls_dispatch(struct cli *cli, struct VCLS *cs, char * const * av, int ac)
  */
 
 static int
-cls_exec(struct VCLS_fd *cfd, char * const *av, int ac)
+cls_exec(struct VCLS_fd *cfd, char * const *av)
 {
 	struct VCLS *cs;
+	struct cli_proto *clp = NULL;
 	struct cli *cli;
+	unsigned na;
 	ssize_t len;
 	char *s;
 	unsigned lim;
 	int retval = 0;
+	enum cmd_error_e cmd_err = CMD_ERR_NONE;
 
 	CHECK_OBJ_NOTNULL(cfd, VCLS_FD_MAGIC);
 	cs = cfd->cls;
@@ -308,39 +342,52 @@ cls_exec(struct VCLS_fd *cfd, char * const *av, int ac)
 	CHECK_OBJ_NOTNULL(cli, CLI_MAGIC);
 	AN(cli->cmd);
 
+	cli->cls = cs;
 	cli->result = CLIS_UNKNOWN;
+
 	VSB_clear(cli->sb);
+	VCLI_Out(cli, "Unknown request.\nType 'help' for more info.\n");
+
+	for (na = 0; av[na + 1] != NULL; na++)
+		continue;
+
+	clp = cls_lookup(av, cli, cs, &cmd_err);
 
 	if (cs->before != NULL)
 		cs->before(cli);
 
-	do {
-		if (av[0] != NULL) {
+	if (clp == NULL) {
+		switch (cmd_err) {
+		case CMD_ERR_SYNTAX:
 			VCLI_Out(cli, "Syntax Error: %s\n", av[0]);
 			VCLI_SetResult(cli, CLIS_SYNTAX);
 			break;
-		}
-
-		if (av[1] == NULL) {
+		case CMD_ERR_EMPTY:
 			VCLI_Out(cli, "Empty CLI command.\n");
 			VCLI_SetResult(cli, CLIS_SYNTAX);
 			break;
-		}
-
-		if (!islower(av[1][0])) {
-			VCLI_Out(cli, "All commands are in lower-case.\n");
+		case CMD_ERR_NOTLOWER:
+			VCLI_Out(cli, "all commands are in lower-case.\n");
 			VCLI_SetResult(cli, CLIS_UNKNOWN);
 			break;
+		case CMD_ERR_UNKNOWN:
+			break;
+		default:
+			if (cs->wildcard &&
+			    (!(cs->wildcard->desc->flags & CLI_F_AUTH) ||
+			    cli->auth))
+				cls_dispatch(cli, cs->wildcard, av, na);
+			break;
 		}
-
-		cls_dispatch(cli, cs, av, ac);
-
-	} while (0);
+	} else
+		cls_dispatch(cli, clp, av, na);
 
 	AZ(VSB_finish(cli->sb));
 
 	if (cs->after != NULL)
 		cs->after(cli);
+
+	cli->cls = NULL;
 
 	s = VSB_data(cli->sb);
 	len = VSB_len(cli->sb);
@@ -421,7 +468,7 @@ cls_feed(struct VCLS_fd *cfd, const char *p, const char *e)
 				AN(cfd->last_arg);
 			} else {
 				/* Plain command */
-				i = cls_exec(cfd, av, ac - 1);
+				i = cls_exec(cfd, av);
 				VAV_Free(av);
 				VSB_destroy(&cli->cmd);
 				if (i)
@@ -441,7 +488,7 @@ cls_feed(struct VCLS_fd *cfd, const char *p, const char *e)
 				REPLACE(cfd->argv[cfd->argc - 2], NULL);
 				cfd->argv[cfd->argc - 2] =
 				    VSB_data(cfd->last_arg);
-				i = cls_exec(cfd, cfd->argv, cfd->argc - 2);
+				i = cls_exec(cfd, cfd->argv);
 				cfd->argv[cfd->argc - 2] = NULL;
 				VAV_Free(cfd->argv);
 				cfd->argv = NULL;
