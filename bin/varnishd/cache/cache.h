@@ -156,6 +156,12 @@ struct ws {
  *
  */
 
+enum well_known_method {
+#define WKM(wk, bit) WKM_##wk = 1U << bit,
+#include "tbl/well_known_methods.h"
+#undef WKM
+};
+
 struct http {
 	unsigned		magic;
 #define HTTP_MAGIC		0x6428b5c9
@@ -174,6 +180,7 @@ struct http {
 	struct ws		*ws;
 	uint16_t		status;
 	uint8_t			protover;
+	enum well_known_method	wkm;
 };
 
 /*--------------------------------------------------------------------*/
