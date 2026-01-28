@@ -515,17 +515,6 @@ vcp_open(struct conn_pool *cp, vtim_dur tmo, VCL_IP *ap, int *err,
 }
 
 /*--------------------------------------------------------------------
- * Open a new connection from pool (public API for probes).
- * This wrapper maintains the old API without TLS support.
- */
-
-int
-VCP_Open(struct conn_pool *cp, vtim_dur tmo, VCL_IP *ap, int *err)
-{
-	return (vcp_open(cp, tmo, ap, err, NULL, NULL));
-}
-
-/*--------------------------------------------------------------------
  * Close a connection.
  */
 
