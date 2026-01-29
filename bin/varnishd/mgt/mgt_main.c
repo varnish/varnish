@@ -66,6 +66,9 @@
 #include "vsa.h"
 #include "vus.h"
 
+/* Forward declaration - defined in mgt_tls_conf.c */
+int TLS_Config(const char *fn);
+
 struct heritage		heritage;
 unsigned		d_flag = 0;
 struct vev_root		*mgt_evb;
@@ -77,7 +80,7 @@ static char		*workdir;
 
 static struct vfil_path *vcl_path = NULL;
 
-static const char opt_spec[] = "?a:b:CdE:f:Fh:i:I:j:l:M:n:P:p:r:S:s:T:t:VW:x:";
+static const char opt_spec[] = "?a:A:b:CdE:f:Fh:i:I:j:l:M:n:P:p:r:S:s:T:t:VW:x:";
 
 /*--------------------------------------------------------------------*/
 
@@ -622,6 +625,7 @@ main(int argc, char * const *argv)
 	int o, eric_fd = -1;
 	unsigned C_flag = 0;
 	unsigned F_flag = 0;
+	const char *A_arg = NULL;
 	const char *b_arg = NULL;
 	const char *i_arg = NULL;
 	const char *j_arg = NULL;
@@ -673,6 +677,9 @@ main(int argc, char * const *argv)
 				ARGV_ERR("Too many arguments for -x\n");
 			mgt_x_arg(optarg);
 			exit(0);
+		case 'A':
+			A_arg = optarg;
+			break;
 		case 'b':
 			b_arg = optarg;
 			break;
@@ -788,8 +795,11 @@ main(int argc, char * const *argv)
 
 	VJ_Init(j_arg);
 
-	/* Initialize the bogo-IP VSA */
+	/* Initialize the bogo-IP VSA (must be before TLS_Config for UDS) */
 	VSA_Init();
+
+	if (A_arg != NULL)
+		TLS_Config(A_arg);
 
 	if (b_arg != NULL)
 		mgt_b_conv(b_arg);

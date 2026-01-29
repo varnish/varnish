@@ -56,6 +56,8 @@
 
 #include "mgt/mgt.h"
 #include "common/heritage.h"
+#include "acceptor/mgt_acceptor.h"
+#include "acceptor/cache_acceptor.h"
 
 #include "vcli_serve.h"
 #include "vfil.h"
@@ -304,7 +306,10 @@ vtls_mgt_insert_cert(const struct vtls_cert_cfg *c_cfg,
 		else
 			VSB_printf(fe_vsb, ":%s", fcfg->port);
 		VSB_finish(fe_vsb);
-		c->fe = strdup(fcfg->name);
+		if (fcfg->name != NULL)
+			c->fe = strdup(fcfg->name);
+		else
+			c->fe = strdup(VSB_data(fe_vsb));
 		VSB_destroy(&fe_vsb);
 	}
 
@@ -398,10 +403,6 @@ vtls_init_global(const struct vtls_cfg *c)
 	AN(v);
 
 	v->protos = c->opts->protos;
-	REPLACE(v->cfg->ciphers, c->opts->ciphers);
-	REPLACE(v->cfg->ciphersuites, c->opts->ciphersuites);
-	REPLACE(v->cfg->ecdh_curve, c->opts->ecdh_curve);
-	v->cfg->prefer_server_ciphers = c->opts->prefer_server_ciphers;
 	v->cfg->sni_nomatch_abort = c->opts->sni_nomatch_abort;
 
 	VTAILQ_FOREACH(certcfg, &c->certs, list) {
@@ -490,32 +491,34 @@ mgt_cert_load_cld(unsigned *status, struct vsb *e_msg,
 {
 	char *p;
 	struct vsb *cmd;
-	struct vsb *crt_key = NULL, *privkey = NULL, *dh = NULL;
+	struct vsb *crt = NULL, *privkey = NULL, *dh = NULL;
 
 	AN(status);
 	AN(e_msg);
 	CHECK_OBJ(cert, VTLS_MGT_CERT_MAGIC);
 
-	privkey = NULL;
-	crt_key = mgt_cert_load_file_b64(cert->fn_cert);
-
-	if (crt_key == NULL) {
-		VSB_printf(e_msg, "Unable to read file '%s' (%s)\n",
+	/* Load certificate file */
+	crt = mgt_cert_load_file_b64(cert->fn_cert);
+	if (crt == NULL) {
+		VSB_printf(e_msg, "Unable to read certificate file '%s' (%s)\n",
 		    cert->fn_cert, strerror(errno));
 		*status = CLIS_CANT;
 		goto err;
 	}
 
+	/* Load private key file if separate */
 	if (cert->fn_key != NULL) {
 		privkey = mgt_cert_load_file_b64(cert->fn_key);
 		if (privkey == NULL) {
-			VSB_printf(e_msg, "Unable to read private key file "
-			    "'%s' (%s)\n", cert->fn_key, strerror(errno));
+			VSB_printf(e_msg,
+			    "Unable to read private key file '%s' (%s)\n",
+			    cert->fn_key, strerror(errno));
 			*status = CLIS_CANT;
 			goto err;
 		}
 	}
 
+	/* Load DH parameters file if specified */
 	if (cert->fn_dh != NULL) {
 		dh = mgt_cert_load_file_b64(cert->fn_dh);
 		if (dh == NULL) {
@@ -526,7 +529,7 @@ mgt_cert_load_cld(unsigned *status, struct vsb *e_msg,
 		}
 	}
 
-	if (VSB_len(crt_key) == 0) {
+	if (VSB_len(crt) == 0) {
 		VSB_printf(e_msg, "File '%s' is empty.\n", cert->fn_cert);
 		*status = CLIS_PARAM;
 		goto err;
@@ -535,11 +538,14 @@ mgt_cert_load_cld(unsigned *status, struct vsb *e_msg,
 		AN(cmd);
 
 		AN(cert->id);
+		/*
+		 * CLI: vtls.cld_cert_load <id> <frontend> <protos>
+		 *      <prefer_server_ciphers> <ciphers> <ciphersuites>
+		 *      <is_default> <cert_b64> <privkey_b64>
+		 */
 		VSB_printf(cmd, "\"%s\" ", cert->id);
 		VSB_printf(cmd, "\"%s\" ",
 		    cert->fe != NULL ? cert->fe : "");
-		VSB_printf(cmd, "\"%s\" ",
-		    (dh != NULL && VSB_len(dh) > 0) ? VSB_data(dh) : "");
 		VSB_printf(cmd, "\"%i\" ", cert->protos);
 		VSB_printf(cmd, "\"%i\" ", cert->prefer_server_ciphers);
 		VSB_printf(cmd, "\"%s\" ",
@@ -547,10 +553,9 @@ mgt_cert_load_cld(unsigned *status, struct vsb *e_msg,
 		VSB_printf(cmd, "\"%s\" ",
 		    cert->ciphersuites != NULL ? cert->ciphersuites : "");
 		VSB_printf(cmd, "\"%i\" ", cert->is_default);
-		VSB_printf(cmd, "\"%s\" ", VSB_data(crt_key));
+		VSB_printf(cmd, "\"%s\" ", VSB_data(crt));
 		VSB_printf(cmd, "\"%s\" ",
-		    (privkey != NULL && VSB_len(privkey) > 0) ?
-		    VSB_data(privkey) : "");
+		    privkey != NULL ? VSB_data(privkey) : "");
 		AZ(VSB_finish(cmd));
 
 		if (mgt_cli_askchild(status, &p, "vtls.cld_cert_load %s\n",
@@ -567,8 +572,8 @@ mgt_cert_load_cld(unsigned *status, struct vsb *e_msg,
 	}
 
 err:
-	if (crt_key != NULL)
-		VSB_destroy(&crt_key);
+	if (crt != NULL)
+		VSB_destroy(&crt);
 
 	if (privkey != NULL)
 		VSB_destroy(&privkey);
@@ -582,16 +587,23 @@ err:
 
 /*
  * Push certificates to the child process at startup
+ * Returns 0 on success, 1 on failure
  */
-void
-MGT_TLS_push_server_certs(void)
+int
+MGT_TLS_push_server_certs(unsigned *statusp, char **pp)
 {
 	struct vtls_mgt_cert *c;
 	struct vsb *e_msg;
-	unsigned status;
+	unsigned status = CLIS_OK;
+	int e = 0;
+
+	if (pp != NULL)
+		*pp = NULL;
+	if (statusp != NULL)
+		*statusp = CLIS_OK;
 
 	if (!vtls_check_enabled())
-		return;
+		return (0);
 
 	e_msg = VSB_new_auto();
 	AN(e_msg);
@@ -603,14 +615,19 @@ MGT_TLS_push_server_certs(void)
 
 		VSB_clear(e_msg);
 		if (mgt_cert_load_cld(&status, e_msg, c)) {
-			MGT_Complain(C_ERR, "TLS certificate load failed: %s",
-			    VSB_data(e_msg));
-		} else {
-			c->state = VTLS_CERT_STATE_COMMITTED;
+			/* e_msg is already finished by mgt_cert_load_cld */
+			if (statusp != NULL)
+				*statusp = status;
+			if (pp != NULL)
+				*pp = strdup(VSB_data(e_msg));
+			e = 1;
+			break;
 		}
+		c->state = VTLS_CERT_STATE_COMMITTED;
 	}
 
 	VSB_destroy(&e_msg);
+	return (e);
 }
 
 /*
@@ -623,6 +640,7 @@ TLS_Config(const char *fn)
 	struct vtls_frontend_cfg *fcfg;
 	struct vsb *vsb;
 	struct listen_sock *ls;
+	int n;
 
 	AN(fn);
 
@@ -647,38 +665,75 @@ TLS_Config(const char *fn)
 
 	AZ(fclose(yyin));
 
+	/* Check that at least one frontend is defined */
+	if (VTAILQ_EMPTY(&cfg->frontends))
+		ARGV_ERR("-A: No frontend listen endpoint definitions "
+		    "found in configuration file %s\n", fn);
+
 	/* Initialize global TLS config */
 	heritage.tls = vtls_init_global(cfg);
 
 	/* Process frontends and create listen sockets */
 	VTAILQ_FOREACH(fcfg, &cfg->frontends, list) {
+		void *tls_local;
+		const char *sockname;
+
 		CHECK_OBJ_NOTNULL(fcfg, VTLS_FRONTEND_CFG_MAGIC);
+
+		/* Auto-generate name for unnamed frontends */
+		if (fcfg->name == NULL) {
+			static unsigned tls_name_seq = 0;
+			char name_buf[16];
+
+			bprintf(name_buf, "tls%u", tls_name_seq++);
+			fcfg->name = strdup(name_buf);
+			AN(fcfg->name);
+		}
+
+		/* Initialize TLS configuration for this frontend */
+		tls_local = vtls_init_local(cfg, fcfg);
 
 		vsb = VSB_new_auto();
 		AN(vsb);
 
+		/* Build the -a argument string: name=host:port,TLS */
+		if (fcfg->name != NULL) {
+			sockname = fcfg->name;
+			VSB_printf(vsb, "%s=", fcfg->name);
+		} else {
+			sockname = NULL;
+		}
+
 		if (fcfg->argspec != NULL) {
-			VSB_printf(vsb, "%s", fcfg->argspec);
+			VSB_printf(vsb, "%s,TLS", fcfg->argspec);
 		} else {
 			frontend_fmt(vsb, fcfg->host, fcfg->port);
+			VSB_cat(vsb, ",TLS");
 		}
 		AZ(VSB_finish(vsb));
 
-		/* Create a new listen socket for this TLS frontend */
-		ALLOC_OBJ(ls, LISTEN_SOCK_MAGIC);
-		AN(ls);
-		ls->endpoint = strdup(VSB_data(vsb));
-		AN(ls->endpoint);
-		if (fcfg->name != NULL)
-			ls->name = strdup(fcfg->name);
-		else
-			ls->name = strdup(ls->endpoint);
-		ls->tls = vtls_init_local(cfg, fcfg);
-		ls->transport = XPORT_Find("TLS");
-		if (ls->transport == NULL)
-			ARGV_ERR("-A: TLS transport not available\n");
+		/* Use VCA_Arg to create and bind the socket */
+		VCA_Arg(VSB_data(vsb));
 
-		VTAILQ_INSERT_TAIL(&heritage.socks, ls, list);
+		/* Find the created listen_sock(s) and attach TLS config.
+		 * An endpoint may resolve to multiple addresses (e.g.
+		 * both IPv4 and IPv6), so attach to all matching sockets.
+		 */
+		n = 0;
+		VTAILQ_FOREACH(ls, &heritage.socks, list) {
+			CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+			if (ls->tls == NULL &&
+			    ls->transport == XPORT_Find("TLS") &&
+			    (sockname == NULL ||
+			     strcmp(ls->name, sockname) == 0)) {
+				ls->tls = tls_local;
+				n++;
+			}
+		}
+		if (n == 0)
+			ARGV_ERR("-A: Failed to create TLS"
+			    " socket for %s\n", VSB_data(vsb));
+
 		VSB_destroy(&vsb);
 	}
 

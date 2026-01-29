@@ -80,7 +80,8 @@ struct transport {
 #define TRANSPORTS \
 	TRANSPORT_MACRO(PROXY) \
 	TRANSPORT_MACRO(HTTP1) \
-	TRANSPORT_MACRO(HTTP2)
+	TRANSPORT_MACRO(HTTP2) \
+	TRANSPORT_MACRO(TLS)
 
 #define TRANSPORT_MACRO(name) extern struct transport name##_transport;
 TRANSPORTS

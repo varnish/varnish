@@ -624,6 +624,7 @@ vtls_new_session(struct worker *wrk, void *arg)
 
 struct transport TLS_transport = {
 	.name =			"TLS",
+	.proto_ident =		"TLS",
 	.magic =		TRANSPORT_MAGIC,
 	.new_session =		vtls_new_session
 };
@@ -745,11 +746,486 @@ VTLS_buf_free(struct vtls_buf **pbuf)
 	MPL_Free(buf->pool, buf);
 }
 
+/*
+ * Base64 decode PEM data received from manager
+ */
+static char *
+vtls_cli_base64_decode(const char *b64, int *out_len)
+{
+	BIO *bio, *b64bio;
+	int b64_len;
+	char *buf;
+
+	AN(b64);
+	AN(out_len);
+
+	b64_len = strlen(b64);
+	buf = malloc(b64_len);  /* Decoded is always smaller */
+	AN(buf);
+
+	b64bio = BIO_new(BIO_f_base64());
+	AN(b64bio);
+	BIO_set_flags(b64bio, BIO_FLAGS_BASE64_NO_NL);
+
+	bio = BIO_new_mem_buf(TRUST_ME(b64), b64_len);
+	AN(bio);
+	BIO_push(b64bio, bio);
+
+	*out_len = BIO_read(b64bio, buf, b64_len);
+	assert(*out_len >= 0);
+
+	BIO_free_all(b64bio);
+	return (buf);
+}
+
+/*
+ * Password callback for PEM reading.
+ * Returns 0 to indicate no password is available, which causes encrypted
+ * PEM files to fail loading rather than prompting on stdin.
+ */
+static int
+pass_cb(char *buf, int size, int rwflag, void *priv)
+{
+	(void)buf;
+	(void)size;
+	(void)rwflag;
+	(void)priv;
+	return (0);
+}
+
+/*
+ * Create SSL_CTX from PEM data in memory.
+ * If key/key_len is provided, use that for the private key.
+ * Otherwise try to find the private key in the cert PEM.
+ * If px509 is not NULL, the X509 certificate is returned (caller must free).
+ */
+static struct vtls_ctx *
+vtls_ctx_new_from_pem(struct cli *cli, const char *name_id,
+    const char *pem, int pem_len, const char *key, int key_len,
+    int protos, int prefer_server_ciphers,
+    const char *ciphers, const char *ciphersuites, X509 **px509)
+{
+	struct vtls_ctx *vc;
+	BIO *src;
+	X509 *x509, *t_ca;
+	EVP_PKEY *pkey;
+	unsigned long e;
+	char errbuf[256];
+
+	AN(pem);
+	AN(pem_len);
+
+	if (px509 != NULL)
+		*px509 = NULL;
+
+	ALLOC_OBJ(vc, VTLS_CTX_MAGIC);
+	AN(vc);
+	REPLACE(vc->name_id, name_id);
+	vc->protos = protos;
+
+	vc->ctx = SSL_CTX_new(TLS_server_method());
+	if (vc->ctx == NULL) {
+		VCLI_Out(cli, "Failed to create SSL_CTX\n");
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	/* Set session id context */
+	AN(SSL_CTX_set_session_id_context(vc->ctx,
+	    (const unsigned char *)"varnishd", strlen("varnishd")));
+
+	/* Set options */
+	if (prefer_server_ciphers)
+		(void)SSL_CTX_set_options(vc->ctx,
+		    SSL_OP_CIPHER_SERVER_PREFERENCE);
+	(void)SSL_CTX_set_options(vc->ctx, SSL_OP_NO_RENEGOTIATION);
+
+	/* Enable ECDH */
+	AN(SSL_CTX_set_ecdh_auto(vc->ctx, 1));
+
+	/* Set ciphers if specified */
+	if (ciphers != NULL && *ciphers != '\0') {
+		if (SSL_CTX_set_cipher_list(vc->ctx, ciphers) != 1) {
+			VCLI_Out(cli, "Invalid cipher list: %s\n", ciphers);
+			vtls_ctx_free(vc);
+			return (NULL);
+		}
+	}
+
+	/* Set ciphersuites (TLSv1.3) if specified */
+	if (ciphersuites != NULL && *ciphersuites != '\0') {
+		if (SSL_CTX_set_ciphersuites(vc->ctx, ciphersuites) != 1) {
+			VCLI_Out(cli, "Invalid ciphersuites: %s\n",
+			    ciphersuites);
+			vtls_ctx_free(vc);
+			return (NULL);
+		}
+	}
+
+	/* Load certificate from PEM data */
+	src = BIO_new_mem_buf(TRUST_ME(pem), pem_len);
+	if (src == NULL) {
+		VCLI_Out(cli, "Failed to create BIO\n");
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	x509 = PEM_read_bio_X509_AUX(src, NULL, pass_cb, NULL);
+	if (x509 == NULL) {
+		while ((e = ERR_get_error())) {
+			ERR_error_string_n(e, errbuf, sizeof errbuf);
+			VCLI_Out(cli, "Error loading certificate: %s\n",
+			    errbuf);
+		}
+		BIO_free(src);
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	if (SSL_CTX_use_certificate(vc->ctx, x509) != 1) {
+		while ((e = ERR_get_error())) {
+			ERR_error_string_n(e, errbuf, sizeof errbuf);
+			VCLI_Out(cli, "SSL_CTX_use_certificate: %s\n", errbuf);
+		}
+		X509_free(x509);
+		BIO_free(src);
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	/* Load certificate chain */
+	SSL_CTX_clear_chain_certs(vc->ctx);
+	while (1) {
+		t_ca = PEM_read_bio_X509_AUX(src, NULL, pass_cb, NULL);
+		if (t_ca == NULL) {
+			e = ERR_peek_last_error();
+			if (ERR_GET_LIB(e) == ERR_LIB_PEM &&
+			    ERR_GET_REASON(e) == PEM_R_NO_START_LINE) {
+				ERR_clear_error();
+				break;
+			}
+			ERR_error_string_n(e, errbuf, sizeof errbuf);
+			VCLI_Out(cli, "Error loading chain cert: %s\n", errbuf);
+			X509_free(x509);
+			BIO_free(src);
+			vtls_ctx_free(vc);
+			return (NULL);
+		}
+
+		if (SSL_CTX_add_extra_chain_cert(vc->ctx, t_ca) == 0) {
+			ERR_error_string_n(ERR_get_error(), errbuf,
+			    sizeof errbuf);
+			VCLI_Out(cli, "Error adding chain cert: %s\n", errbuf);
+			X509_free(t_ca);
+			X509_free(x509);
+			BIO_free(src);
+			vtls_ctx_free(vc);
+			return (NULL);
+		}
+	}
+
+	/* Load private key - from separate data if provided, else from cert PEM */
+	if (key != NULL && key_len > 0) {
+		BIO *key_bio = BIO_new_mem_buf(TRUST_ME(key), key_len);
+		if (key_bio == NULL) {
+			VCLI_Out(cli, "Error creating key BIO\n");
+			X509_free(x509);
+			BIO_free(src);
+			vtls_ctx_free(vc);
+			return (NULL);
+		}
+		pkey = PEM_read_bio_PrivateKey(key_bio, NULL, pass_cb, NULL);
+		BIO_free(key_bio);
+	} else {
+		BIO_reset(src);
+		pkey = PEM_read_bio_PrivateKey(src, NULL, pass_cb, NULL);
+	}
+	if (pkey == NULL) {
+		while ((e = ERR_get_error())) {
+			ERR_error_string_n(e, errbuf, sizeof errbuf);
+			VCLI_Out(cli, "Error loading private key: %s\n",
+			    errbuf);
+		}
+		X509_free(x509);
+		BIO_free(src);
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	if (SSL_CTX_use_PrivateKey(vc->ctx, pkey) != 1) {
+		while ((e = ERR_get_error())) {
+			ERR_error_string_n(e, errbuf, sizeof errbuf);
+			VCLI_Out(cli, "SSL_CTX_use_PrivateKey: %s\n", errbuf);
+		}
+		EVP_PKEY_free(pkey);
+		X509_free(x509);
+		BIO_free(src);
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	EVP_PKEY_free(pkey);
+	BIO_free(src);
+
+	/* Verify key matches certificate */
+	if (SSL_CTX_check_private_key(vc->ctx) != 1) {
+		while ((e = ERR_get_error())) {
+			ERR_error_string_n(e, errbuf, sizeof errbuf);
+			VCLI_Out(cli, "Private key mismatch: %s\n", errbuf);
+		}
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+
+	/* Set up callbacks */
+	if (!SSL_CTX_set_tlsext_servername_callback(vc->ctx, vtls_sni_cb)) {
+		VCLI_Out(cli, "Failed to set SNI callback\n");
+		vtls_ctx_free(vc);
+		return (NULL);
+	}
+	SSL_CTX_set_client_hello_cb(vc->ctx, vtls_clienthello_cb, NULL);
+	SSL_CTX_set_alpn_select_cb(vc->ctx, vtls_alpn_select, NULL);
+
+	if (px509 != NULL)
+		*px509 = x509;
+	else
+		X509_free(x509);
+
+	return (vc);
+}
+
+/*
+ * CLI: vtls.cld_cert_load
+ * Load certificate from manager (base64-encoded PEM data)
+ */
+static void v_matchproto_(cli_func_t)
+vtls_cli_cert_load(struct cli *cli, const char *const *av, void *priv)
+{
+	struct vtls *vtls = NULL;
+	struct listen_sock *ls;
+	struct vtls_ctx *vc;
+	const char *id, *fe, *ciphers, *ciphersuites;
+	const char *cert_b64, *privkey_b64;
+	int protos, prefer_server_ciphers, is_default;
+	char *cert, *privkey;
+	int cert_len, privkey_len;
+	X509 *x509 = NULL;
+
+	(void)priv;
+
+	/* Parse arguments:
+	 * av[2] = id
+	 * av[3] = frontend (empty string for global)
+	 * av[4] = protos
+	 * av[5] = prefer_server_ciphers
+	 * av[6] = ciphers
+	 * av[7] = ciphersuites
+	 * av[8] = is_default
+	 * av[9] = cert_b64 (base64-encoded certificate)
+	 * av[10] = privkey_b64 (base64-encoded private key, or empty)
+	 */
+	AN(av[2]); AN(av[3]); AN(av[4]); AN(av[5]); AN(av[6]);
+	AN(av[7]); AN(av[8]); AN(av[9]); AN(av[10]);
+
+	id = av[2];
+	fe = av[3];
+	protos = atoi(av[4]);
+	prefer_server_ciphers = atoi(av[5]);
+	ciphers = av[6];
+	ciphersuites = av[7];
+	is_default = atoi(av[8]);
+	cert_b64 = av[9];
+	privkey_b64 = av[10];
+
+	/* Find target vtls struct */
+	if (*fe != '\0') {
+		VTAILQ_FOREACH(ls, &heritage.socks, list) {
+			CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+			if (ls->tls == NULL)
+				continue;
+			if (strcmp(ls->name, fe) == 0) {
+				vtls = ls->tls;
+				break;
+			}
+		}
+		if (vtls == NULL) {
+			VCLI_Out(cli, "Frontend '%s' not found\n", fe);
+			VCLI_SetResult(cli, CLIS_CANT);
+			return;
+		}
+	} else {
+		vtls = heritage.tls;
+	}
+
+	if (vtls == NULL) {
+		VCLI_Out(cli, "No TLS configuration available\n");
+		VCLI_SetResult(cli, CLIS_CANT);
+		return;
+	}
+
+	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+
+	/* Initialize scratch SNI map if not already done */
+	if (vtls->sni_scratch == NULL)
+		vtls->sni_scratch = vtls_sni_map_new();
+
+	/* Decode certificate data */
+	cert = vtls_cli_base64_decode(cert_b64, &cert_len);
+	if (cert == NULL || cert_len == 0) {
+		VCLI_Out(cli, "Failed to decode certificate data\n");
+		VCLI_SetResult(cli, CLIS_CANT);
+		free(cert);
+		return;
+	}
+
+	/* Decode private key data if provided */
+	privkey = NULL;
+	privkey_len = 0;
+	if (*privkey_b64 != '\0') {
+		privkey = vtls_cli_base64_decode(privkey_b64, &privkey_len);
+		if (privkey == NULL) {
+			VCLI_Out(cli, "Failed to decode private key data\n");
+			VCLI_SetResult(cli, CLIS_CANT);
+			free(cert);
+			return;
+		}
+	}
+
+	/* Create SSL_CTX and get X509 for hostname extraction */
+	vc = vtls_ctx_new_from_pem(cli, id, cert, cert_len, privkey, privkey_len,
+	    protos, prefer_server_ciphers, ciphers, ciphersuites, &x509);
+
+	/* Clear sensitive data from memory */
+	ZERO_OBJ(cert, cert_len);
+	free(cert);
+	if (privkey != NULL) {
+		ZERO_OBJ(privkey, privkey_len);
+		free(privkey);
+	}
+
+	if (vc == NULL) {
+		X509_free(x509);
+		VCLI_SetResult(cli, CLIS_CANT);
+		return;
+	}
+
+	X509_free(x509);
+
+	/* Store in scratch for commit */
+	if (is_default) {
+		if (vtls->d_ctx_scratch != NULL)
+			vtls_ctx_free(vtls->d_ctx_scratch);
+		vtls->d_ctx_scratch = vc;
+	} else {
+		/* For non-default certs, add to SNI map (not implemented yet) */
+		if (vtls->d_ctx_scratch != NULL)
+			vtls_ctx_free(vtls->d_ctx_scratch);
+		vtls->d_ctx_scratch = vc;
+	}
+
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * CLI: vtls.cld_cert_commit
+ * Commit staged certificates
+ */
+static void v_matchproto_(cli_func_t)
+vtls_cli_cert_commit(struct cli *cli, const char *const *av, void *priv)
+{
+	struct listen_sock *ls;
+	struct vtls *vtls;
+
+	(void)av;
+	(void)priv;
+
+	/* Commit global certificates */
+	if (heritage.tls != NULL) {
+		vtls = heritage.tls;
+		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+		if (vtls->d_ctx_scratch != NULL) {
+			if (vtls->d_ctx != NULL)
+				vtls_ctx_free(vtls->d_ctx);
+			vtls->d_ctx = vtls->d_ctx_scratch;
+			vtls->d_ctx_scratch = NULL;
+		}
+	}
+
+	/* Commit per-frontend certificates */
+	VTAILQ_FOREACH(ls, &heritage.socks, list) {
+		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+		if (ls->tls == NULL)
+			continue;
+		vtls = ls->tls;
+		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+		if (vtls->d_ctx_scratch != NULL) {
+			if (vtls->d_ctx != NULL)
+				vtls_ctx_free(vtls->d_ctx);
+			vtls->d_ctx = vtls->d_ctx_scratch;
+			vtls->d_ctx_scratch = NULL;
+		}
+	}
+
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * CLI: vtls.cld_cert_discard
+ * Discard staged certificates
+ */
+static void v_matchproto_(cli_func_t)
+vtls_cli_cert_discard(struct cli *cli, const char *const *av, void *priv)
+{
+	struct listen_sock *ls;
+	struct vtls *vtls;
+
+	(void)av;
+	(void)priv;
+
+	/* Discard global scratch */
+	if (heritage.tls != NULL) {
+		vtls = heritage.tls;
+		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+		if (vtls->d_ctx_scratch != NULL) {
+			vtls_ctx_free(vtls->d_ctx_scratch);
+			vtls->d_ctx_scratch = NULL;
+		}
+	}
+
+	/* Discard per-frontend scratch */
+	VTAILQ_FOREACH(ls, &heritage.socks, list) {
+		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+		if (ls->tls == NULL)
+			continue;
+		vtls = ls->tls;
+		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+		if (vtls->d_ctx_scratch != NULL) {
+			vtls_ctx_free(vtls->d_ctx_scratch);
+			vtls->d_ctx_scratch = NULL;
+		}
+	}
+
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * CLI command table
+ */
+static struct cli_proto vtls_cli_cmds[] = {
+	{ CLICMD_VTLS_CLD_CERT_LOAD, vtls_cli_cert_load, vtls_cli_cert_load },
+	{ CLICMD_VTLS_CLD_CERT_COMMIT, vtls_cli_cert_commit,
+	    vtls_cli_cert_commit },
+	{ CLICMD_VTLS_CLD_CERT_DISCARD, vtls_cli_cert_discard,
+	    vtls_cli_cert_discard },
+	{ NULL }
+};
+
 /* Initialize certificate subsystem */
 void
 VTLS_tls_cert_init(void)
 {
-	/* Placeholder for certificate initialization */
+	/* Register CLI commands */
+	CLI_AddFuncs(vtls_cli_cmds);
 }
 
 /* VMOD accessor: get SSL context */
@@ -803,8 +1279,8 @@ VTLS_ja3(const struct vrt_ctx *ctx)
 }
 
 /*
- * Suppress unused function warnings for callback functions that will be
- * registered when certificate loading is fully implemented.
+ * Suppress unused function warnings for SNI map functions that will be
+ * used when multi-certificate SNI support is fully implemented.
  */
 static void __attribute__((unused))
 vtls_suppress_unused_warnings(void)
@@ -812,8 +1288,4 @@ vtls_suppress_unused_warnings(void)
 	(void)vtls_sni_map_new;
 	(void)vtls_sni_key_free;
 	(void)vtls_sni_map_add;
-	(void)vtls_ctx_free;
-	(void)vtls_alpn_select;
-	(void)vtls_clienthello_cb;
-	(void)vtls_sni_cb;
 }

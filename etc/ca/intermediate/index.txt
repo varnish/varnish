@@ -1,0 +1,12 @@
+V	420328092507Z		1000	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=example.com
+V	420328093640Z		1001	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=cdn01.example.com
+V	420328093927Z		1002	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=wildcard.example.com
+V	20760626071638Z		1003	unknown	/C=NO/ST=Norway/O=Varnish Software/OU=Varnish Software Test CA/CN=no-san.example.com
+V	420421113754Z		1004	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=client01
+V	430822145328Z		1005	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=example.com
+V	431220112403Z		1006	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=protected.example.com
+V	440728140648Z		1007	unknown	/C=NO/ST=Norway/O=Varnish Software/OU=Varnish Software Test CA/CN=ocsp.example.com
+R	440728144425Z	240115144609Z	1008	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=revoked.example.com
+V	441224112550Z		1009	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=ecc.example.com
+V	450603124509Z		100A	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=example.com
+V	21280427113635Z		100B	unknown	/C=NO/ST=Norway/O=Varnish Software/CN=foo.example.com

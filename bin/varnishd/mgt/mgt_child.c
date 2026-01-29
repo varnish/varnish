@@ -58,6 +58,9 @@
 #include "vlu.h"
 #include "vtim.h"
 
+/* Forward declaration from mgt_tls_conf.c */
+int MGT_TLS_push_server_certs(unsigned *status, char **p);
+
 #include "common/heritage.h"
 
 static pid_t		child_pid = -1;
@@ -480,6 +483,17 @@ mgt_launch_child(struct cli *cli)
 		MCH_Stop_Child();
 		return;
 	}
+
+	/* Push TLS certificates to the child */
+	if (MGT_TLS_push_server_certs(&u, &p)) {
+		mgt_launch_err(cli, u,
+		    "Child (%jd) Pushing certificates failed:\n%s",
+		    (intmax_t)child_pid, p);
+		free(p);
+		MCH_Stop_Child();
+		return;
+	}
+	free(p);
 
 	if (mgt_cli_askchild(&u, &p, "start\n")) {
 		mgt_launch_err(cli, u, "Child (%jd) Acceptor start failed:\n%s",

@@ -1,0 +1,68 @@
+varnishtest "Test ALPN (and tls+http/2)"
+
+# Ported from Varnish Enterprise
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+
+EOF
+}
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -arg "-p feature=+http2" -vcl+backend {
+} -start
+
+client c1 {
+	tls_config {
+		alpn = "h2"
+	}
+	tls_handshake
+	expect tls.alpn == h2
+	stream 1 {
+		txreq
+		rxresp
+		expect resp.status == 200
+	} -run
+} -run
+
+client c1 {
+	tls_config {
+		alpn = "http/1.1"
+	}
+	tls_handshake
+	expect tls.alpn == http/1.1
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
+
+client c2 {
+	tls_config {
+		alpn = "foobar"
+	}
+	tls_handshake
+	expect tls.alpn == <undef>
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
+
+varnish v1 -cliok "param.set feature -http2"
+
+client c1 {
+	tls_config {
+		alpn = "h2"
+	}
+	tls_handshake
+	expect tls.alpn == <undef>
+
+} -run

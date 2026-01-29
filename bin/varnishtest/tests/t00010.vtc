@@ -1,0 +1,205 @@
+varnishtest "Test various tls config bits"
+
+# Ported from Varnish Enterprise
+# Note: Some tests removed that require features not yet ported
+
+server s1 {} -start
+
+# cipher-list invalid
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  ciphers = "()#/"
+EOF
+}
+
+shell -err -expect "Invalid cipher list" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo0
+}
+
+# cipher-list invalid in frontend context
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+      ciphers = "###\$#\$"
+      pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  }
+EOF
+}
+
+shell -err -expect "Invalid cipher list" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo1
+}
+
+# ciphersuites invalid
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  ciphersuites = "\$#\$&^^&"
+EOF
+}
+
+shell -err -expect "Invalid ciphersuites" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo2
+}
+
+# ciphersuites invalid in frontend context
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+      ciphersuites = "\$#\$&^^&"
+      pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  }
+EOF
+}
+
+shell -err -expect "Invalid ciphersuites" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo3
+}
+
+# No cert configured - should fail handshake
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+EOF
+}
+
+varnish v2 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect ${v2_sock} {
+	tls_handshake
+	expect tls.failed == true
+} -run
+
+varnish v2 -stop -cleanup
+
+# Cert/priv key given as separate arguments
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = {
+	  cert = "${topsrc}/etc/ca/intermediate/certs/example.com.cert.pem"
+	  private-key = "${topsrc}/etc/ca/intermediate/private/example.com.key.pem"
+  }
+EOF
+}
+
+varnish v3 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect ${v3_sock} {
+	tls_handshake
+	expect tls.cert.subject == "example.com"
+} -run
+
+varnish v3 -stop -cleanup
+
+# Cert/priv key mismatch
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = {
+	  cert = "${topsrc}/etc/ca/intermediate/certs/example.com.cert.pem"
+	  private-key = "${topsrc}/etc/ca/intermediate/private/intermediate.key.pem"
+  }
+EOF
+}
+
+shell -err -expect "mismatch" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo4
+}
+
+# prefer-server-cipher in frontend{} block
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "*"
+      port = "0"
+      prefer-server-ciphers = true
+      pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  }
+EOF
+}
+
+varnish v6 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect "${v6_sock}" {
+	tls_handshake
+	expect tls.failed == false
+} -run
+
+varnish v6 -stop -cleanup
+
+# garbage pem-file
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "*"
+      port = "0"
+      pem-file = "${tmpdir}/vtls.cfg"
+  }
+EOF
+}
+
+shell -err {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo8
+}
+
+# shorthand frontend{} definition
+shell {
+cat >vtls.cfg <<EOF
+  frontend = "*:0"
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+EOF
+}
+
+varnish v7 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect "${v7_sock}" {
+	tls_handshake
+	expect tls.failed == false
+} -run
+
+varnish v7 -stop -cleanup
+
+# missing frontend spec
+shell {
+cat >vtls.cfg <<EOF
+	pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+EOF
+}
+
+shell -err -expect "No frontend listen endpoint definitions found" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}/foo9
+}
+
+# empty config
+shell {touch empty.cfg}
+
+shell -err -expect "Parsing error" {
+	varnishd -b "${s1_sock}" -A ${tmpdir}/empty.cfg -n ${tmpdir}/foo10
+}

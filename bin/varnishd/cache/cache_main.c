@@ -34,6 +34,7 @@
 #include "cache_varnishd.h"
 #include "cache_conn_pool_ssl.h"
 #include "acceptor/cache_acceptor.h"
+#include "tls/cache_tls.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -533,6 +534,8 @@ child_main(int sigmagic, size_t altstksz)
 	BAN_Init();
 
 	VCA_Init();
+
+	VTLS_tls_cert_init();
 
 	STV_open();
 

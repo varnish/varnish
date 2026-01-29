@@ -1,0 +1,35 @@
+varnishtest "TLS over UDS with pipelining"
+
+# Ported from Varnish Enterprise t00036.vtc
+
+feature tls
+
+setenv SSL_CERT_FILE ${topsrc}/etc/ca/certs/ca.cert.pem
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${tmpdir}/v1.sock"
+  }
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect "${tmpdir}/v1.sock" {
+	tls_handshake
+	expect tls.cert.subject == "example.com"
+	expect tls.cert1.subject == "Varnish Software Test Intermediate CA"
+	txreq
+	txreq
+	rxresp
+	expect resp.status == 200
+	rxresp
+	expect resp.status == 200
+} -run

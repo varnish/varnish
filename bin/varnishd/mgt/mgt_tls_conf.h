@@ -80,4 +80,4 @@ struct vtls_cfg {
 /* Manager TLS configuration functions */
 struct vtls_frontend_cfg *VTLS_frontend_cfg_alloc(void);
 int TLS_Config(const char *fn);
-void MGT_TLS_push_server_certs(void);
+int MGT_TLS_push_server_certs(unsigned *status, char **p);

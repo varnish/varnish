@@ -1,0 +1,63 @@
+varnishtest "Test tls-protos"
+
+# Ported from Varnish Enterprise
+
+feature tls_1_3
+
+server s1 {} -start
+
+# global vs local override without a local SSL_CTX
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "*"
+      port = "0"
+      tls-protos = TLSv1.2
+      name = "tls0"
+  }
+  frontend = {
+      host = "*"
+      port = "0"
+      name = "tls1"
+  }
+
+  tls-protos = TLSv1.3
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+EOF
+}
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect ${v1_tls0_sock} {
+	tls_handshake
+	expect tls.failed == false
+	expect tls.version == TLSv1.2
+} -run
+
+client c1 -connect "${v1_tls1_sock}" {
+       tls_handshake
+       expect tls.failed == false
+       expect tls.version == TLSv1.3
+} -run
+
+varnish v1 -stop -cleanup
+
+# No local override: global setting takes effect
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "*"
+      port = "0"
+      pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  }
+
+  tls-protos = TLSv1.2
+EOF
+}
+
+varnish v3 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect "${v3_sock}"  {
+	tls_handshake
+	expect tls.version == TLSv1.2
+} -run

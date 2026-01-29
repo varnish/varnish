@@ -489,6 +489,39 @@ CLI_CMD(PID,
 	0, 0
 )
 
+/*--------------------------------------------------------------------
+ * TLS certificate management (child-side internal commands)
+ */
+
+CLI_CMD(VTLS_CLD_CERT_LOAD,
+	"vtls.cld_cert_load",
+	"vtls.cld_cert_load <id> <frontend> <protos>"
+	" <prefer_server_ciphers> <ciphers> <ciphersuites>"
+	" <is_default> <cert> <privkey>",
+	"Private interface. Load certificate data (base64 encoded).",
+	"",
+	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	9, 9
+)
+
+CLI_CMD(VTLS_CLD_CERT_COMMIT,
+	"vtls.cld_cert_commit",
+	"vtls.cld_cert_commit",
+	"Commit TLS configuration changes.",
+	"",
+	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	0, 0
+)
+
+CLI_CMD(VTLS_CLD_CERT_DISCARD,
+	"vtls.cld_cert_discard",
+	"vtls.cld_cert_discard",
+	"Discard staged TLS certificates.",
+	"",
+	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	0, 0
+)
+
 #undef CLI_CMD
 
 /*lint -restore */
