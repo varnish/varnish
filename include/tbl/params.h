@@ -1113,6 +1113,19 @@ PARAM_SIMPLE(
 )
 
 PARAM_SIMPLE(
+	/* name */	tls_cleanup_batch,
+	/* type */	uint,
+	/* min */	"1",
+	/* max */	NULL,
+	/* def */	"100",
+	/* units */	"SSL_CTX",
+	/* descr */
+	"Maximum number of SSL_CTX objects to free per CLI poll cycle. "
+	"This paces the TLS cleanup task to avoid blocking the CLI thread "
+	"during certificate reloads with many certificates."
+)
+
+PARAM_SIMPLE(
 	/* name */	transit_buffer,
 	/* type */	bytes,
 	/* min */	"0k",

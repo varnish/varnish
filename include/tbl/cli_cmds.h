@@ -515,10 +515,121 @@ CLI_CMD(VTLS_CLD_CERT_COMMIT,
 
 CLI_CMD(VTLS_CLD_CERT_DISCARD,
 	"vtls.cld_cert_discard",
-	"vtls.cld_cert_discard",
-	"Discard staged TLS certificates.",
+	"vtls.cld_cert_discard <certname>",
+	"Private interface. Use 'tls.cert.discard'",
 	"",
 	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	1, 1
+)
+
+CLI_CMD(VTLS_CLD_CERT_ROLLBACK,
+	"vtls.cld_cert_rollback",
+	"vtls.cld_cert_rollback",
+	"Rollback non committed TLS configuration changes.",
+	"",
+	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	0, 0
+)
+
+CLI_CMD(VTLS_CLD_CERT_DISCARD_ALL,
+	"vtls.cld_cert_discard_all",
+	"vtls.cld_cert_discard_all",
+	"Mark all certificates as discarded for reload.",
+	"",
+	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	0, 0
+)
+
+CLI_CMD(VTLS_CLD_CERT_LIST,
+	"vtls.cld_cert_list",
+	"vtls.cld_cert_list <json> <list_staged>",
+	"Private interface. Use 'tls.cert.list'",
+	"",
+	CLI_F_INTERNAL|CLI_F_SENSITIVE,
+	2, 2
+)
+
+/*--------------------------------------------------------------------
+ * TLS certificate management (public CLI commands)
+ */
+
+CLI_CMD(VTLS_CERT_LOAD,
+	"tls.cert.load",
+	"tls.cert.load"
+	" [cert-id]"
+	" <filename>"
+	" [-f frontend-name]"
+	" [-k private-key-filename]"
+	" [-p protos]"
+	" [-c ciphers]"
+	" [-s cipher-suites]"
+	" [-o]"
+	" [-d]",
+	"Load TLS certificate from the given file. If a frontend is specified "
+	"the certificate will only be valid for that frontend.\n\n"
+	"'-f' specifies the frontend to load the certificate for.\n\n"
+	"'-k' specifies a separate private key file.\n\n"
+	"'-p' specifies the SSL/TLS protocols to be used.\n\n"
+	"  Example: -p TLSv1.2,TLSv1.3\n\n"
+	"'-c' specifies the TLS1.2 (and earlier) cipher list.\n\n"
+	"'-s' specifies the TLS1.3 ciphersuites.\n\n"
+	"'-d' will flag the certificate as default fallback certificate.\n\n"
+	"'-o' Prefer the server's cipher order over the client's.",
+	"",
+	CLI_F_AUTH,
+	1, -1
+)
+
+CLI_CMD(VTLS_CERT_COMMIT,
+	"tls.cert.commit",
+	"tls.cert.commit",
+	"Commit TLS configuration changes (loaded and/or discarded certs).",
+	"",
+	CLI_F_AUTH,
+	0, 0
+)
+
+CLI_CMD(VTLS_CERT_DISCARD,
+	"tls.cert.discard",
+	"tls.cert.discard <cert-id>",
+	"Discard TLS certificate. Ongoing sessions will be allowed to complete.",
+	"",
+	CLI_F_AUTH,
+	1, 1
+)
+
+CLI_CMD(VTLS_CERT_ROLLBACK,
+	"tls.cert.rollback",
+	"tls.cert.rollback",
+	"Clear TLS commands staged for commit. This is the inverse of commit.",
+	"",
+	CLI_F_AUTH,
+	0, 0
+)
+
+CLI_CMD(VTLS_CERT_LIST,
+	"tls.cert.list",
+	"tls.cert.list [-s]",
+	"List active TLS configurations. Takes an optional '-s' that will "
+	"only list staged or discarded certificates.",
+	"",
+	CLI_F_AUTH,
+	0, 1
+)
+
+CLI_CMD(VTLS_CERT_RELOAD,
+	"tls.cert.reload",
+	"tls.cert.reload",
+	"Atomically reload all certificates. A successful reload is "
+	"immediately committed. Each active certificate will be reread from "
+	"disk and loaded using the same parameters as the current "
+	"configuration. If an error is encountered during a reload, all "
+	"changes will be rolled back and the previous state will be "
+	"preserved.\n\n"
+	"NOTE: A reload cannot take place while there are uncommitted changes "
+	"to the TLS configuration.",
+	"",
+	CLI_F_AUTH,
 	0, 0
 )
 

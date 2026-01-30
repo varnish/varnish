@@ -66,8 +66,9 @@
 #include "vsa.h"
 #include "vus.h"
 
-/* Forward declaration - defined in mgt_tls_conf.c */
+/* Forward declarations - defined in mgt_tls_conf.c */
 int TLS_Config(const char *fn);
+void MGT_TLS_Init(void);
 
 struct heritage		heritage;
 unsigned		d_flag = 0;
@@ -367,6 +368,7 @@ mgt_initialize(struct cli *cli)
 	cli[0].limit = &clilim;
 
 	mgt_cli_init_cls();		// CLI commands can be registered
+	MGT_TLS_Init();
 
 	MCF_InitParams(cli);
 

@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2019 Varnish Software AS
+ * Copyright (c) 2019-2026 Varnish Software AS
  * All rights reserved.
  *
  * Author: Dag Haavi Finstad <daghf@varnish-software.com>
@@ -59,6 +59,7 @@
 #include "acceptor/mgt_acceptor.h"
 #include "acceptor/cache_acceptor.h"
 
+#include "vav.h"
 #include "vcli_serve.h"
 #include "vfil.h"
 #include "mgt/mgt_tls_conf.h"
@@ -98,6 +99,9 @@ struct vtls_mgt_cert {
 
 static VTAILQ_HEAD(, vtls_mgt_cert) certs =
     VTAILQ_HEAD_INITIALIZER(certs);
+
+/* Forward declaration */
+static int mgt_tls_cert_execute_commit(unsigned int *status, char **p);
 
 static int
 mgt_tls_cert_id_unique(const char *id)
@@ -143,6 +147,15 @@ vtls_check_enabled(void)
 
 	return (0);
 }
+
+#define VTLS_CLI_CHECK()						\
+	do {								\
+		if (vtls_check_enabled() == 0) {			\
+			VCLI_Out(cli, "TLS has not been configured");	\
+			VCLI_SetResult(cli, CLIS_CANT);			\
+			return;						\
+		}							\
+	} while (0)
 
 /* Test if the supplied address is a numeric IPv6 address */
 static int
@@ -360,6 +373,7 @@ vtls_init_local(const struct vtls_cfg *gcfg,
 
 	ALLOC_OBJ(v, VTLS_MAGIC);
 	AN(v);
+	VTAILQ_INIT(&v->ctxs);
 
 	v->protos = fcfg->opts->protos;
 
@@ -401,6 +415,7 @@ vtls_init_global(const struct vtls_cfg *c)
 	CHECK_OBJ_NOTNULL(c, VTLS_CFG_MAGIC);
 	ALLOC_OBJ(v, VTLS_MAGIC);
 	AN(v);
+	VTAILQ_INIT(&v->ctxs);
 
 	v->protos = c->opts->protos;
 	v->cfg->sni_nomatch_abort = c->opts->sni_nomatch_abort;
@@ -610,7 +625,9 @@ MGT_TLS_push_server_certs(unsigned *statusp, char **pp)
 
 	VTAILQ_FOREACH(c, &certs, list) {
 		CHECK_OBJ_NOTNULL(c, VTLS_MGT_CERT_MAGIC);
-		if (c->state != VTLS_CERT_STATE_MGMT)
+		/* Push certs in MGMT or COMMITTED state (for reload) */
+		if (c->state != VTLS_CERT_STATE_MGMT &&
+		    c->state != VTLS_CERT_STATE_COMMITTED)
 			continue;
 
 		VSB_clear(e_msg);
@@ -623,10 +640,17 @@ MGT_TLS_push_server_certs(unsigned *statusp, char **pp)
 			e = 1;
 			break;
 		}
-		c->state = VTLS_CERT_STATE_COMMITTED;
 	}
 
 	VSB_destroy(&e_msg);
+
+	/* On success, commit all pushed certs */
+	if (e == 0) {
+		e = mgt_tls_cert_execute_commit(&status, pp);
+		if (statusp != NULL)
+			*statusp = status;
+	}
+
 	return (e);
 }
 
@@ -739,4 +763,379 @@ TLS_Config(const char *fn)
 
 	vtls_cfg_free(&cfg);
 	return (0);
+}
+
+/*--------------------------------------------------------------------
+ * Public CLI commands for TLS certificate management
+ */
+
+static void
+mgt_tls_cert_free(struct vtls_mgt_cert *c)
+{
+	CHECK_OBJ_NOTNULL(c, VTLS_MGT_CERT_MAGIC);
+
+	free(c->id);
+	free(c->fe);
+	free(c->fn_cert);
+	free(c->fn_key);
+	free(c->fn_dh);
+	free(c->ciphers);
+	free(c->ciphersuites);
+	FREE_OBJ(c);
+}
+
+/*
+ * CLI: tls.cert.load
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_load(struct cli *cli, const char * const *av, void *priv)
+{
+	(void)priv;
+	struct vtls_mgt_cert *cert;
+	struct vsb *e_msg;
+	unsigned status;
+
+	int i = 2;
+
+	ALLOC_OBJ(cert, VTLS_MGT_CERT_MAGIC);
+	AN(cert);
+
+	/* First positional arg may be cert-id or filename */
+	if (av[i + 1] != NULL && *av[i + 1] != '-') {
+		REPLACE(cert->id, av[i]);
+		REPLACE(cert->fn_cert, av[i + 1]);
+		i++;
+	} else {
+		REPLACE(cert->fn_cert, av[i]);
+	}
+
+	i++;
+
+	if (cert->id == NULL)
+		cert->id = mgt_cert_generate_id();
+	if (!mgt_tls_cert_id_unique(cert->id)) {
+		VCLI_Out(cli, "Id: \"%s\" already exists", cert->id);
+		VCLI_SetResult(cli, CLIS_CANT);
+		mgt_tls_cert_free(cert);
+		return;
+	}
+
+#define MGT_TLS_PARSE_ARG(flag, val)					\
+	if (strcmp(av[i], flag) == 0) {					\
+		if (av[i + 1] != NULL && *av[i + 1] != '-') {		\
+			i++;						\
+			REPLACE(val, av[i]);				\
+		} else {						\
+			VCLI_Out(cli, "No value specified for: %s", av[i]); \
+			VCLI_SetResult(cli, CLIS_CANT);			\
+			mgt_tls_cert_free(cert);			\
+			return;						\
+		}							\
+	} else
+
+	for (; av[i] != NULL; i++) {
+		MGT_TLS_PARSE_ARG("-f", cert->fe)
+		MGT_TLS_PARSE_ARG("-c", cert->ciphers)
+		MGT_TLS_PARSE_ARG("-k", cert->fn_key)
+		MGT_TLS_PARSE_ARG("-s", cert->ciphersuites)
+
+		/* The macro above turns this into an else if */
+		if (strcmp(av[i], "-p") == 0) {
+			char **proto_av;
+			int j;
+
+			if (av[i+1] == NULL) {
+				VCLI_Out(cli, "No value specified for: %s",
+				    av[i]);
+				VCLI_SetResult(cli, CLIS_CANT);
+				mgt_tls_cert_free(cert);
+				return;
+			}
+			i++;
+			proto_av = VAV_Parse(av[i], NULL, ARGV_COMMA);
+
+			for (j = 1; proto_av[j] != NULL; j++) {
+#define VTLS_PROTO(vtls_proto, n, ssl_proto, s)				\
+				if (strcasecmp(proto_av[j], s) == 0) {	\
+					cert->protos |= vtls_proto;	\
+					continue;			\
+				}					\
+				else
+#include "common/common_tls_protos.h"
+#undef VTLS_PROTO
+				{
+					VCLI_Out(cli,
+					    "Unknown protocol specifier: %s",
+					    proto_av[j]);
+					VCLI_SetResult(cli, CLIS_CANT);
+					mgt_tls_cert_free(cert);
+					VAV_Free(proto_av);
+					return;
+				}
+			}
+			VAV_Free(proto_av);
+		} else if (strcmp(av[i], "-d") == 0) {
+			cert->is_default = 1;
+		} else if (strcmp(av[i], "-o") == 0) {
+			cert->prefer_server_ciphers = 1;
+		} else {
+			VCLI_Out(cli, "Unknown TLS option: %s", av[i]);
+			VCLI_SetResult(cli, CLIS_CANT);
+			mgt_tls_cert_free(cert);
+			return;
+		}
+	}
+#undef MGT_TLS_PARSE_ARG
+
+	e_msg = VSB_new_auto();
+	AN(e_msg);
+
+	if (mgt_cert_load_cld(&status, e_msg, cert) == 0) {
+		cert->state = VTLS_CERT_STATE_STAGED;
+		VTAILQ_INSERT_TAIL(&certs, cert, list);
+	} else {
+		VCLI_Out(cli, "%s", VSB_data(e_msg));
+		mgt_tls_cert_free(cert);
+	}
+
+	VSB_destroy(&e_msg);
+	VCLI_SetResult(cli, status);
+}
+
+static int
+mgt_tls_cert_execute_commit(unsigned int *status, char **p)
+{
+	struct vtls_mgt_cert *c;
+	struct vtls_mgt_cert *tc;
+	int res;
+
+	res = mgt_cli_askchild(status, p, "vtls.cld_cert_commit\n");
+
+	/* Now free discarded certs and update states */
+	VTAILQ_FOREACH_SAFE(c, &certs, list, tc) {
+		CHECK_OBJ_NOTNULL(c, VTLS_MGT_CERT_MAGIC);
+		if (c->state != VTLS_CERT_STATE_DISCARDED) {
+			if (c->state != VTLS_CERT_STATE_MGMT)
+				c->state = VTLS_CERT_STATE_COMMITTED;
+			continue;
+		}
+
+		VTAILQ_REMOVE(&certs, c, list);
+		mgt_tls_cert_free(c);
+	}
+
+	return (res);
+}
+
+/*
+ * CLI: tls.cert.commit
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_commit(struct cli *cli, const char * const *av, void *priv)
+{
+	char *p;
+	unsigned status;
+
+	(void)priv;
+	(void)av;
+
+	if (MCH_Running()) {
+		mgt_tls_cert_execute_commit(&status, &p);
+		VCLI_Out(cli, "%s", p);
+		VCLI_SetResult(cli, status);
+		free(p);
+	}
+}
+
+/*
+ * CLI: tls.cert.discard
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_discard(struct cli *cli, const char * const *av, void *priv)
+{
+	char *p;
+	unsigned status, found = 0;
+	struct vtls_mgt_cert *c;
+	struct vtls_mgt_cert *tc;
+	(void)priv;
+
+	if (MCH_Running()) {
+		VTAILQ_FOREACH_SAFE(c, &certs, list, tc) {
+			CHECK_OBJ_NOTNULL(c, VTLS_MGT_CERT_MAGIC);
+			if (strcmp(c->id, av[2]) != 0)
+				continue;
+
+			found = 1;
+			mgt_cli_askchild(&status, &p,
+			    "vtls.cld_cert_discard %s\n", c->id);
+			VCLI_Out(cli, "%s", p);
+			VCLI_SetResult(cli, status);
+			free(p);
+
+			if (status == CLIS_OK)
+				c->state = VTLS_CERT_STATE_DISCARDED;
+		}
+	}
+
+	if (!found) {
+		VCLI_Out(cli, "ID not found");
+		VCLI_SetResult(cli, CLIS_CANT);
+	}
+}
+
+/*
+ * CLI: tls.cert.rollback
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_rollback(struct cli *cli, const char * const *av, void *priv)
+{
+	char *p;
+	unsigned status;
+	struct vtls_mgt_cert *c;
+	struct vtls_mgt_cert *tc;
+
+	(void)priv;
+	(void)av;
+
+	if (MCH_Running()) {
+		VTAILQ_FOREACH_SAFE(c, &certs, list, tc) {
+			CHECK_OBJ_NOTNULL(c, VTLS_MGT_CERT_MAGIC);
+
+			if (c->state == VTLS_CERT_STATE_DISCARDED)
+				c->state = VTLS_CERT_STATE_COMMITTED;
+
+			if (c->state != VTLS_CERT_STATE_STAGED)
+				continue;
+
+			VTAILQ_REMOVE(&certs, c, list);
+
+			mgt_tls_cert_free(c);
+		}
+		mgt_cli_askchild(&status, &p, "vtls.cld_cert_rollback\n");
+		VCLI_Out(cli, "%s", p);
+		VCLI_SetResult(cli, status);
+		free(p);
+	}
+}
+
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_list(struct cli *cli, const char *const *av, void *priv,
+    int json, int only_staged)
+{
+	char *p;
+	unsigned status;
+
+	(void)av;
+	(void)priv;
+
+	if (MCH_Running()) {
+		mgt_cli_askchild(&status, &p, "vtls.cld_cert_list %i %i\n",
+		    json, only_staged);
+		VCLI_Out(cli, "%s", p);
+		VCLI_SetResult(cli, status);
+		free(p);
+	}
+}
+
+/*
+ * CLI: tls.cert.list (text output)
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_list_txt(struct cli *cli, const char * const *av, void *priv)
+{
+	int only_staged = 0;
+
+	VTLS_CLI_CHECK();
+
+	if (NULL != av[2] && strcmp(av[2], "-s") == 0)
+		only_staged = 1;
+
+	mgt_tls_cert_list(cli, av, priv, 0, only_staged);
+}
+
+/*
+ * CLI: tls.cert.list (JSON output)
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_list_json(struct cli *cli, const char * const *av, void *priv)
+{
+	int only_staged = 0;
+
+	VTLS_CLI_CHECK();
+
+	if (NULL != av[3] && strcmp(av[3], "-s") == 0)
+		only_staged = 1;
+
+	mgt_tls_cert_list(cli, av, priv, 1, only_staged);
+}
+
+/*
+ * CLI: tls.cert.reload
+ */
+static void v_matchproto_(cli_func_t)
+mgt_tls_cert_reload(struct cli *cli, const char * const *av, void *priv)
+{
+	unsigned status;
+	char *p;
+	(void)av;
+	(void)priv;
+
+	struct vtls_mgt_cert *c;
+
+	VTAILQ_FOREACH(c, &certs, list) {
+		CHECK_OBJ_NOTNULL(c, VTLS_MGT_CERT_MAGIC);
+
+		if (c->state == VTLS_CERT_STATE_DISCARDED ||
+		    c->state == VTLS_CERT_STATE_STAGED) {
+			VCLI_Out(cli,
+			    "There are staged changes, "
+			    "please commit or rollback staged changes first.\n");
+			VCLI_SetResult(cli, CLIS_CANT);
+			return;
+		}
+	}
+
+	/* Ask child to mark all current certs as discarded */
+	if (mgt_cli_askchild(&status, &p, "vtls.cld_cert_discard_all\n")) {
+		VCLI_Out(cli, "%s", p);
+		VCLI_SetResult(cli, status);
+		free(p);
+		return;
+	}
+	free(p);
+
+	/* Re-push all certificates */
+	if (MGT_TLS_push_server_certs(&status, &p)) {
+		VCLI_Out(cli, "%s", p);
+		VCLI_SetResult(cli, status);
+		free(p);
+
+		mgt_cli_askchild(&status, &p, "vtls.cld_cert_rollback\n");
+		free(p);
+		return;
+	}
+
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * CLI command table
+ */
+static struct cli_proto cli_tls_cert[] = {
+	{ CLICMD_VTLS_CERT_LOAD, mgt_tls_cert_load },
+	{ CLICMD_VTLS_CERT_COMMIT, mgt_tls_cert_commit },
+	{ CLICMD_VTLS_CERT_DISCARD, mgt_tls_cert_discard },
+	{ CLICMD_VTLS_CERT_ROLLBACK, mgt_tls_cert_rollback },
+	{ CLICMD_VTLS_CERT_LIST, mgt_tls_cert_list_txt, mgt_tls_cert_list_json },
+	{ CLICMD_VTLS_CERT_RELOAD, mgt_tls_cert_reload },
+	{ NULL }
+};
+
+/*
+ * Initialize TLS CLI commands (called from mgt_main.c)
+ */
+void
+MGT_TLS_Init(void)
+{
+	VCLS_AddFunc(mgt_cls, cli_tls_cert);
 }

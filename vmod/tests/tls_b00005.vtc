@@ -1,0 +1,58 @@
+varnishtest "Test SNI certificate selection"
+
+# Test that SNI hostname -> certificate mapping works
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+# Load a wildcard certificate
+varnish v1 -cliok "tls.cert.load wildcard ${topsrc}/etc/ca/bundle/wildcard.example.com.pem"
+varnish v1 -cliok "tls.cert.commit"
+
+# List should show both certificates
+varnish v1 -cliok "tls.cert.list"
+
+# Connect with SNI hostname matching wildcard cert
+client c1 {
+	tls_config {
+		servername = "foo.wildcard.example.com"
+	}
+	tls_handshake
+	expect tls.failed == false
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
+
+# Connect with SNI hostname matching default cert
+client c2 {
+	tls_config {
+		servername = "www.example.com"
+	}
+	tls_handshake
+	expect tls.failed == false
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
+
+# Connect without SNI - should use default cert
+client c3 {
+	tls_handshake
+	expect tls.failed == false
+} -run

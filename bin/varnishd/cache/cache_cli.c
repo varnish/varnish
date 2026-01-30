@@ -84,6 +84,7 @@ cli_cb_before(const struct cli *cli, struct cli_proto *clp, const char *cmdn)
 	Lck_Lock(&cli_mtx);
 	VCL_Poll();
 	VCP_RelPoll();
+	VTLS_Poll();
 }
 
 static void

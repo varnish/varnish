@@ -1,0 +1,66 @@
+varnishtest "Test tls.cert.rollback"
+
+# Ported from Varnish Enterprise t00027.vtc
+# Tests certificate rollback functionality
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+# Load cert, rollback and then commit
+varnish v1 -cliok "tls.cert.load testcert ${topsrc}/etc/ca/bundle/no-san.example.com.pem"
+varnish v1 -cliok "tls.cert.rollback"
+varnish v1 -cliok "tls.cert.commit"
+
+# Connection should fail - no certs loaded
+client c1 {
+	tls_config {
+		servername = no-san.example.com
+	}
+	tls_handshake
+	expect tls.failed == true
+} -run
+
+# Load cert, verify staged status, commit, verify active status
+varnish v1 -cliok "tls.cert.load DISCARDME ${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+varnish v1 -cliexpect "staged.*cdn01.example.com" "tls.cert.list"
+varnish v1 -cliok "tls.cert.commit"
+varnish v1 -cliexpect "active.*cdn01.example.com" "tls.cert.list"
+
+# Connect with the loaded cert
+client c2 {
+	tls_config {
+		servername = cdn01.example.com
+	}
+	tls_handshake
+	expect tls.cert.subject == "cdn01.example.com"
+	expect tls.failed == false
+} -run
+
+# Test discard followed by rollback restores the cert
+varnish v1 -cliok "tls.cert.discard DISCARDME"
+varnish v1 -cliexpect "discard.*cdn01.example.com" "tls.cert.list"
+varnish v1 -cliok "tls.cert.rollback"
+varnish v1 -cliexpect "active.*cdn01.example.com" "tls.cert.list"
+
+# Verify cert still works after rollback
+client c3 {
+	tls_config {
+		servername = cdn01.example.com
+	}
+	tls_handshake
+	expect tls.cert.subject == "cdn01.example.com"
+	expect tls.failed == false
+} -run

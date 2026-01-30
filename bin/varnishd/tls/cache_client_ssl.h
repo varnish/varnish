@@ -43,6 +43,7 @@ struct vtls_ctx {
 #define VTLS_CTX_MAGIC  		0xee1f014c
 	SSL_CTX 			*ctx;
 	char 				*name_id;
+	char				*subject;  /* CN from certificate */
 	int				protos;
 	int				discarded;
 	VTAILQ_ENTRY(vtls_ctx) 		list;

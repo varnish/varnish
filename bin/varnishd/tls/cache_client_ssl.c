@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2019, 2023 Varnish Software AS
+ * Copyright (c) 2019-2026 Varnish Software AS
  * All rights reserved.
  *
  * Author: Dag Haavi Finstad <daghf@varnish-software.com>
@@ -77,6 +77,23 @@ struct vtls_sni_map {
 };
 
 VRBT_GENERATE(vtls_sni_rbtree, vtls_sni_key, tree, vtls_sni_key_cmp);
+
+/*
+ * Cleanup task for deferred freeing of SSL_CTX objects.
+ * This provides a "cooling period" to avoid use-after-free races
+ * when a certificate is discarded while handshakes are in progress.
+ */
+struct vtls_cleanup_task {
+	unsigned			magic;
+#define VTLS_CLEANUP_MAGIC		0xe01f014c
+	vtim_mono			cooled;
+	struct v_ctx_list		*ctxs;
+	VTAILQ_HEAD(, vtls_sni_map)	sni_maps;
+	VTAILQ_ENTRY(vtls_cleanup_task)	list;
+};
+
+static VTAILQ_HEAD(, vtls_cleanup_task)	cleanup_tasks =
+    VTAILQ_HEAD_INITIALIZER(cleanup_tasks);
 
 struct vtls_options {
 	int protos;
@@ -225,6 +242,219 @@ _vtls_sni_lookup(const struct vtls_sni_map *m, const char *id, int wc)
 	return (NULL);
 }
 
+/*
+ * Check if a hostname already exists in the SNI map
+ */
+static int
+vtls_sni_exists(const struct vtls_sni_map *m, const char *id)
+{
+	struct vtls_sni_key k, *r;
+
+	if (m == NULL)
+		return (0);
+	CHECK_OBJ_NOTNULL(m, VTLS_SNI_MAP_MAGIC);
+
+	INIT_OBJ(&k, VTLS_SNI_KEY_MAGIC);
+
+	/* Strip wildcard prefix for lookup */
+	if (strstr(id, "*.") == id)
+		id++;
+	k.id = TRUST_ME(id);
+
+	r = VRBT_FIND(vtls_sni_rbtree, &m->root, &k);
+	if (r != NULL) {
+		CHECK_OBJ_NOTNULL(r, VTLS_SNI_KEY_MAGIC);
+		if (!r->ctx->discarded)
+			return (1);
+	}
+	return (0);
+}
+
+/*
+ * Free all entries in an SNI map
+ */
+static void
+vtls_sni_map_free(struct vtls_sni_map **pm)
+{
+	struct vtls_sni_map *m;
+	struct vtls_sni_key *k, *k_tmp;
+	struct vtls_sni_key *dup, *dup_tmp;
+
+	AN(pm);
+	if (*pm == NULL)
+		return;
+
+	TAKE_OBJ_NOTNULL(m, pm, VTLS_SNI_MAP_MAGIC);
+
+	VRBT_FOREACH_SAFE(k, vtls_sni_rbtree, &m->root, k_tmp) {
+		VRBT_REMOVE(vtls_sni_rbtree, &m->root, k);
+		VTAILQ_FOREACH_SAFE(dup, &k->dups, dups_list, dup_tmp) {
+			VTAILQ_REMOVE(&k->dups, dup, dups_list);
+			vtls_sni_key_free(dup);
+		}
+		vtls_sni_key_free(k);
+	}
+	FREE_OBJ(m);
+}
+
+/*
+ * Copy an SNI key entry to another map (used during commit)
+ */
+static void
+vtls_sni_map_add_copy(struct vtls_sni_map *m, struct vtls_sni_key *src)
+{
+	struct vtls_sni_key *k, *r;
+
+	CHECK_OBJ_NOTNULL(m, VTLS_SNI_MAP_MAGIC);
+	CHECK_OBJ_NOTNULL(src, VTLS_SNI_KEY_MAGIC);
+
+	k = vtls_sni_key_alloc(src->id, src->is_wildcard, src->ctx);
+
+	r = VRBT_INSERT(vtls_sni_rbtree, &m->root, k);
+	if (r) {
+		/* Duplicate: add to existing entry's dups list */
+		CHECK_OBJ_NOTNULL(r, VTLS_SNI_KEY_MAGIC);
+		VTAILQ_INSERT_TAIL(&r->dups, k, dups_list);
+	}
+}
+
+/*
+ * Remove all SNI entries for a given vtls_ctx from the map
+ */
+static void
+vtls_sni_map_remove_ctx(struct vtls_sni_map *m, struct vtls_ctx *ctx)
+{
+	struct vtls_sni_key *k, *k_tmp;
+	struct vtls_sni_key *dup, *dup_tmp;
+
+	if (m == NULL)
+		return;
+	CHECK_OBJ_NOTNULL(m, VTLS_SNI_MAP_MAGIC);
+	CHECK_OBJ_NOTNULL(ctx, VTLS_CTX_MAGIC);
+
+	VRBT_FOREACH_SAFE(k, vtls_sni_rbtree, &m->root, k_tmp) {
+		if (k->ctx == ctx) {
+			VRBT_REMOVE(vtls_sni_rbtree, &m->root, k);
+			VTAILQ_FOREACH_SAFE(dup, &k->dups, dups_list, dup_tmp) {
+				VTAILQ_REMOVE(&k->dups, dup, dups_list);
+				vtls_sni_key_free(dup);
+			}
+			vtls_sni_key_free(k);
+		} else {
+			/* Check duplicates list */
+			VTAILQ_FOREACH_SAFE(dup, &k->dups, dups_list, dup_tmp) {
+				if (dup->ctx == ctx) {
+					VTAILQ_REMOVE(&k->dups, dup, dups_list);
+					vtls_sni_key_free(dup);
+				}
+			}
+		}
+	}
+}
+
+/*
+ * Extract hostnames from X509 certificate and add to SNI map
+ * Extracts Subject Alternative Names (DNS type) or falls back to Common Name
+ */
+static int
+vtls_load_x509_names(struct cli *cli, struct vtls *vtls,
+    struct vtls_ctx *vc, X509 *x509)
+{
+	STACK_OF(GENERAL_NAME) *names;
+	char *p;
+	int i, nb = 0;
+
+	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+	CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+	CHECK_OBJ_NOTNULL(vtls->sni_scratch, VTLS_SNI_MAP_MAGIC);
+
+	/* Extract CN for display purposes */
+	{
+		X509_NAME *x509_name;
+		X509_NAME_ENTRY *x509_entry;
+
+		x509_name = X509_get_subject_name(x509);
+		if (x509_name != NULL) {
+			i = X509_NAME_get_index_by_NID(x509_name,
+			    NID_commonName, -1);
+			if (i >= 0) {
+				x509_entry = X509_NAME_get_entry(x509_name, i);
+				if (x509_entry != NULL) {
+					ASN1_STRING_to_UTF8((unsigned char **)&p,
+					    X509_NAME_ENTRY_get_data(x509_entry));
+					if (p != NULL) {
+						vc->subject = strdup(p);
+						AN(vc->subject);
+						OPENSSL_free(p);
+					}
+				}
+			}
+		}
+	}
+
+#define ADD_TO_SNI(name)						\
+do {									\
+	if (vtls_sni_exists(vtls->sni, name)) {				\
+		/* Already in active map - that's OK */			\
+	}								\
+	if (vtls_sni_exists(vtls->sni_scratch, name)) {			\
+		/* Already in scratch - skip duplicate */		\
+	} else {							\
+		AZ(vtls_sni_map_add(vtls->sni_scratch, name, vc));	\
+		nb++;							\
+	}								\
+} while (0)
+
+	/* First try Subject Alternative Names */
+	names = X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL);
+	if (names != NULL) {
+		for (i = 0; i < sk_GENERAL_NAME_num(names); i++) {
+			GENERAL_NAME *n;
+			n = sk_GENERAL_NAME_value(names, i);
+			if (n->type == GEN_DNS) {
+				ASN1_STRING_to_UTF8((unsigned char **)&p,
+				    n->d.dNSName);
+				if (p != NULL) {
+					ADD_TO_SNI(p);
+					OPENSSL_free(p);
+				}
+			}
+		}
+		sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
+	}
+
+	/* Fall back to Common Name if no SANs */
+	if (nb == 0) {
+		X509_NAME *x509_name;
+		X509_NAME_ENTRY *x509_entry;
+
+		x509_name = X509_get_subject_name(x509);
+		if (x509_name != NULL) {
+			i = X509_NAME_get_index_by_NID(x509_name,
+			    NID_commonName, -1);
+			if (i >= 0) {
+				x509_entry = X509_NAME_get_entry(x509_name, i);
+				if (x509_entry != NULL) {
+					ASN1_STRING_to_UTF8((unsigned char **)&p,
+					    X509_NAME_ENTRY_get_data(x509_entry));
+					if (p != NULL) {
+						ADD_TO_SNI(p);
+						OPENSSL_free(p);
+					}
+				}
+			}
+		}
+	}
+#undef ADD_TO_SNI
+
+	if (nb == 0) {
+		VCLI_Out(cli, "Could not find valid SAN or CN in certificate\n");
+		return (-1);
+	}
+
+	return (0);
+}
+
 static struct vtls_ctx *
 vtls_sni_lookup(const struct vtls_sni_map *m, const char *id)
 {
@@ -240,6 +470,7 @@ vtls_ctx_free(struct vtls_ctx *c)
 
 	SSL_CTX_free(c->ctx);
 	free(c->name_id);
+	free(c->subject);
 	FREE_OBJ(c);
 }
 
@@ -857,6 +1088,7 @@ vtls_ctx_new_from_pem(struct cli *cli, const char *name_id,
 			ERR_error_string_n(e, errbuf, sizeof errbuf);
 			VCLI_Out(cli, "Private key mismatch: %s\n", errbuf);
 		}
+		X509_free(x509);
 		vtls_ctx_free(vc);
 		return (NULL);
 	}
@@ -864,12 +1096,14 @@ vtls_ctx_new_from_pem(struct cli *cli, const char *name_id,
 	/* Set up callbacks */
 	if (!SSL_CTX_set_tlsext_servername_callback(vc->ctx, vtls_sni_cb)) {
 		VCLI_Out(cli, "Failed to set SNI callback\n");
+		X509_free(x509);
 		vtls_ctx_free(vc);
 		return (NULL);
 	}
 	SSL_CTX_set_client_hello_cb(vc->ctx, vtls_clienthello_cb, NULL);
 	SSL_CTX_set_alpn_select_cb(vc->ctx, vtls_alpn_select, NULL);
 
+	/* Return X509 to caller if requested, otherwise free it */
 	if (px509 != NULL)
 		*px509 = x509;
 	else
@@ -941,12 +1175,6 @@ vtls_cli_cert_load(struct cli *cli, const char *const *av, void *priv)
 		vtls = heritage.tls;
 	}
 
-	if (vtls == NULL) {
-		VCLI_Out(cli, "No TLS configuration available\n");
-		VCLI_SetResult(cli, CLIS_CANT);
-		return;
-	}
-
 	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
 
 	/* Initialize scratch SNI map if not already done */
@@ -993,21 +1221,182 @@ vtls_cli_cert_load(struct cli *cli, const char *const *av, void *priv)
 		return;
 	}
 
+	/* Extract hostnames from certificate and add to SNI map */
+	if (vtls_load_x509_names(cli, vtls, vc, x509) != 0) {
+		X509_free(x509);
+		vtls_sni_map_remove_ctx(vtls->sni_scratch, vc);
+		vtls_ctx_free(vc);
+		VCLI_SetResult(cli, CLIS_CANT);
+		return;
+	}
 	X509_free(x509);
 
-	/* Store in scratch for commit */
+	/* Add to ctxs list for tracking */
+	VTAILQ_INSERT_TAIL(&vtls->ctxs, vc, list);
+
+	/* If this is the default certificate, mark it for use */
 	if (is_default) {
 		if (vtls->d_ctx_scratch != NULL)
-			vtls_ctx_free(vtls->d_ctx_scratch);
-		vtls->d_ctx_scratch = vc;
-	} else {
-		/* For non-default certs, add to SNI map (not implemented yet) */
-		if (vtls->d_ctx_scratch != NULL)
-			vtls_ctx_free(vtls->d_ctx_scratch);
+			vtls->d_ctx_scratch->discarded = 1;
 		vtls->d_ctx_scratch = vc;
 	}
 
 	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * Commit staged changes for a single vtls struct.
+ * Discarded contexts are moved to the cleanup task for deferred freeing.
+ */
+static void
+vtls_commit_one(struct vtls *vtls, struct vtls_cleanup_task *c_task)
+{
+	struct vtls_sni_key *k, *k_tmp;
+	struct vtls_sni_key *dup, *dup_tmp;
+	struct vtls_ctx *vc, *vc_tmp;
+
+	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+	CHECK_OBJ_NOTNULL(c_task, VTLS_CLEANUP_MAGIC);
+
+	/*
+	 * Create sni_scratch if we have discarded contexts.
+	 * This ensures we rebuild the SNI map without discarded entries.
+	 */
+	if (vtls->sni_scratch == NULL) {
+		VTAILQ_FOREACH(vc, &vtls->ctxs, list) {
+			if (vc->discarded) {
+				vtls->sni_scratch = vtls_sni_map_new();
+				break;
+			}
+		}
+	}
+
+	/* If we have staged SNI entries, build the new combined map */
+	if (vtls->sni_scratch != NULL) {
+		CHECK_OBJ_NOTNULL(vtls->sni_scratch, VTLS_SNI_MAP_MAGIC);
+
+		/* Copy non-discarded entries from current SNI map to scratch */
+		if (vtls->sni != NULL) {
+			VRBT_FOREACH_SAFE(k, vtls_sni_rbtree, &vtls->sni->root,
+			    k_tmp) {
+				CHECK_OBJ_NOTNULL(k, VTLS_SNI_KEY_MAGIC);
+				if (k->ctx != NULL && !k->ctx->discarded)
+					vtls_sni_map_add_copy(vtls->sni_scratch,
+					    k);
+				VTAILQ_FOREACH_SAFE(dup, &k->dups, dups_list,
+				    dup_tmp) {
+					if (dup->ctx != NULL &&
+					    !dup->ctx->discarded)
+						vtls_sni_map_add_copy(
+						    vtls->sni_scratch, dup);
+				}
+			}
+		}
+
+		/*
+		 * Update default context. This must happen inside the
+		 * sni_scratch block so we can pick from sni_scratch if needed.
+		 */
+		if (vtls->d_ctx_scratch != NULL)
+			vtls->d_ctx = vtls->d_ctx_scratch;
+		vtls->d_ctx_scratch = NULL;
+
+		/*
+		 * If default is null or discarded, pick from sni_scratch.
+		 * sni_scratch only contains non-discarded entries.
+		 */
+		if (vtls->d_ctx == NULL || vtls->d_ctx->discarded) {
+			if (!VRBT_EMPTY(&vtls->sni_scratch->root))
+				vtls->d_ctx =
+				    VRBT_ROOT(&vtls->sni_scratch->root)->ctx;
+			else
+				vtls->d_ctx = NULL;
+		}
+
+		/* Queue old SNI map for deferred cleanup */
+		if (vtls->sni != NULL)
+			VTAILQ_INSERT_TAIL(&c_task->sni_maps, vtls->sni, list);
+
+		vtls->sni = vtls->sni_scratch;
+		vtls->sni_scratch = NULL;
+	}
+
+	/* Move discarded contexts to cleanup task for deferred freeing */
+	VTAILQ_FOREACH_SAFE(vc, &vtls->ctxs, list, vc_tmp) {
+		if (vc->discarded) {
+			VTAILQ_REMOVE(&vtls->ctxs, vc, list);
+			VTAILQ_INSERT_TAIL(c_task->ctxs, vc, list);
+		}
+	}
+}
+
+/*
+ * Cooling period in seconds before discarded SSL_CTX objects are freed.
+ * This gives in-flight TLS handshakes time to complete.
+ */
+#define VTLS_COOLING_PERIOD	6.0
+
+/*
+ * Process pending cleanup tasks.
+ * Called periodically from the CLI thread.
+ */
+void
+VTLS_Poll(void)
+{
+	struct vtls_cleanup_task *t, *t_tmp;
+	struct vtls_sni_map *m, *m_tmp;
+	struct vtls_ctx *c, *c_tmp;
+	unsigned n_ctx = 0, n_maps = 0;
+	unsigned limit;
+	vtim_mono now;
+
+	ASSERT_CLI();
+	now = VTIM_mono();
+	limit = cache_param->tls_cleanup_batch;
+
+	VTAILQ_FOREACH_SAFE(t, &cleanup_tasks, list, t_tmp) {
+		CHECK_OBJ_NOTNULL(t, VTLS_CLEANUP_MAGIC);
+
+		/* Skip tasks still in cooling period */
+		if (t->cooled > now)
+			break;
+
+		/* Free SNI maps */
+		VTAILQ_FOREACH_SAFE(m, &t->sni_maps, list, m_tmp) {
+			CHECK_OBJ_NOTNULL(m, VTLS_SNI_MAP_MAGIC);
+			VTAILQ_REMOVE(&t->sni_maps, m, list);
+			vtls_sni_map_free(&m);
+			n_maps++;
+		}
+
+		/* Free SSL_CTX objects, respecting batch limit */
+		if (t->ctxs != NULL) {
+			VTAILQ_FOREACH_SAFE(c, t->ctxs, list, c_tmp) {
+				CHECK_OBJ_NOTNULL(c, VTLS_CTX_MAGIC);
+				VTAILQ_REMOVE(t->ctxs, c, list);
+				vtls_ctx_free(c);
+				n_ctx++;
+				if (n_ctx >= limit)
+					goto done;
+			}
+			if (VTAILQ_EMPTY(t->ctxs)) {
+				free(t->ctxs);
+				t->ctxs = NULL;
+			}
+		}
+
+		/* Remove completed task */
+		if (t->ctxs == NULL && VTAILQ_EMPTY(&t->sni_maps)) {
+			VTAILQ_REMOVE(&cleanup_tasks, t, list);
+			FREE_OBJ(t);
+		}
+	}
+
+done:
+	if (n_maps || n_ctx)
+		VSL(SLT_CLI, NO_VXID, "VTLS cleanup: %u maps, %u certs%s",
+		    n_maps, n_ctx,
+		    n_ctx >= limit ? " (batch limit)" : "");
 }
 
 /*
@@ -1018,35 +1407,200 @@ static void v_matchproto_(cli_func_t)
 vtls_cli_cert_commit(struct cli *cli, const char *const *av, void *priv)
 {
 	struct listen_sock *ls;
-	struct vtls *vtls;
+	struct vtls_cleanup_task *c_task;
 
 	(void)av;
 	(void)priv;
 
+	/* Create cleanup task for deferred freeing */
+	ALLOC_OBJ(c_task, VTLS_CLEANUP_MAGIC);
+	AN(c_task);
+	c_task->cooled = VTIM_mono() + VTLS_COOLING_PERIOD;
+	VTAILQ_INIT(&c_task->sni_maps);
+	c_task->ctxs = malloc(sizeof(*c_task->ctxs));
+	AN(c_task->ctxs);
+	VTAILQ_INIT(c_task->ctxs);
+
 	/* Commit global certificates */
-	if (heritage.tls != NULL) {
-		vtls = heritage.tls;
-		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
-		if (vtls->d_ctx_scratch != NULL) {
-			if (vtls->d_ctx != NULL)
-				vtls_ctx_free(vtls->d_ctx);
-			vtls->d_ctx = vtls->d_ctx_scratch;
-			vtls->d_ctx_scratch = NULL;
-		}
-	}
+	CHECK_OBJ_NOTNULL(heritage.tls, VTLS_MAGIC);
+	vtls_commit_one(heritage.tls, c_task);
 
 	/* Commit per-frontend certificates */
 	VTAILQ_FOREACH(ls, &heritage.socks, list) {
 		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+		if (ls->tls != NULL)
+			vtls_commit_one(ls->tls, c_task);
+	}
+
+	/* Queue cleanup task */
+	VTAILQ_INSERT_TAIL(&cleanup_tasks, c_task, list);
+
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * Find a certificate context by ID in a vtls struct
+ */
+static struct vtls_ctx *
+vtls_find_ctx_by_id(struct vtls *vtls, const char *id)
+{
+	struct vtls_ctx *vc;
+
+	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+	AN(id);
+
+	VTAILQ_FOREACH(vc, &vtls->ctxs, list) {
+		CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+		if (vc->name_id != NULL && strcmp(vc->name_id, id) == 0)
+			return (vc);
+	}
+	return (NULL);
+}
+
+/*
+ * CLI: vtls.cld_cert_discard
+ * Mark a certificate for discard (by ID)
+ */
+static void v_matchproto_(cli_func_t)
+vtls_cli_cert_discard(struct cli *cli, const char *const *av, void *priv)
+{
+	struct vtls_ctx *vc = NULL;
+	struct listen_sock *ls;
+	const char *id;
+
+	(void)priv;
+
+	AN(av[2]);
+	id = av[2];
+
+	/* Search in global vtls */
+	CHECK_OBJ_NOTNULL(heritage.tls, VTLS_MAGIC);
+	vc = vtls_find_ctx_by_id(heritage.tls, id);
+
+	/* Search in per-frontend vtls */
+	if (vc == NULL) {
+		VTAILQ_FOREACH(ls, &heritage.socks, list) {
+			CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+			if (ls->tls == NULL)
+				continue;
+			vc = vtls_find_ctx_by_id(ls->tls, id);
+			if (vc != NULL)
+				break;
+		}
+	}
+
+	if (vc == NULL) {
+		VCLI_Out(cli, "Certificate '%s' not found\n", id);
+		VCLI_SetResult(cli, CLIS_CANT);
+		return;
+	}
+
+	/* Mark for discard - actual removal happens at commit */
+	vc->discarded = 1;
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * Rollback staged changes for a single vtls struct
+ */
+static void
+vtls_rollback_one(struct vtls *vtls)
+{
+	struct vtls_ctx *vc, *vc_tmp;
+	struct vtls_sni_key *k, *k_tmp;
+
+	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+
+	/* Clear the scratch SNI map */
+	if (vtls->sni_scratch != NULL) {
+		/* Remove ctxs that are only in scratch (not in active sni) */
+		VRBT_FOREACH_SAFE(k, vtls_sni_rbtree, &vtls->sni_scratch->root,
+		    k_tmp) {
+			CHECK_OBJ_NOTNULL(k, VTLS_SNI_KEY_MAGIC);
+			if (k->ctx != NULL &&
+			    !vtls_sni_exists(vtls->sni, k->id)) {
+				/* This ctx was only in scratch, remove it */
+				VTAILQ_FOREACH_SAFE(vc, &vtls->ctxs, list,
+				    vc_tmp) {
+					if (vc == k->ctx) {
+						VTAILQ_REMOVE(&vtls->ctxs, vc,
+						    list);
+						vtls_ctx_free(vc);
+						break;
+					}
+				}
+			}
+		}
+		vtls_sni_map_free(&vtls->sni_scratch);
+	}
+
+	/* Clear d_ctx_scratch */
+	vtls->d_ctx_scratch = NULL;
+
+	/* Unmark any discarded certificates */
+	VTAILQ_FOREACH(vc, &vtls->ctxs, list) {
+		CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+		vc->discarded = 0;
+	}
+}
+
+/*
+ * CLI: vtls.cld_cert_rollback
+ * Rollback uncommitted certificate changes
+ */
+static void v_matchproto_(cli_func_t)
+vtls_cli_cert_rollback(struct cli *cli, const char *const *av, void *priv)
+{
+	struct listen_sock *ls;
+
+	(void)av;
+	(void)priv;
+
+	/* Rollback global */
+	CHECK_OBJ_NOTNULL(heritage.tls, VTLS_MAGIC);
+	vtls_rollback_one(heritage.tls);
+
+	/* Rollback per-frontend */
+	VTAILQ_FOREACH(ls, &heritage.socks, list) {
+		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+		if (ls->tls != NULL)
+			vtls_rollback_one(ls->tls);
+	}
+
+	VCLI_SetResult(cli, CLIS_OK);
+}
+
+/*
+ * CLI: vtls.cld_cert_discard_all
+ * Mark all certificates as discarded (used by reload)
+ */
+static void v_matchproto_(cli_func_t)
+vtls_cli_cert_discard_all(struct cli *cli, const char *const *av, void *priv)
+{
+	struct vtls_ctx *vc;
+	struct listen_sock *ls;
+
+	ASSERT_CLI();
+	(void)av;
+	(void)priv;
+
+	/* Mark all ctxs in heritage.tls as discarded */
+	CHECK_OBJ_NOTNULL(heritage.tls, VTLS_MAGIC);
+	VTAILQ_FOREACH(vc, &heritage.tls->ctxs, list) {
+		CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+		if (!vc->discarded)
+			vc->discarded = 1;
+	}
+
+	/* Mark all ctxs in per-frontend tls as discarded */
+	VTAILQ_FOREACH(ls, &heritage.socks, list) {
+		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
 		if (ls->tls == NULL)
 			continue;
-		vtls = ls->tls;
-		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
-		if (vtls->d_ctx_scratch != NULL) {
-			if (vtls->d_ctx != NULL)
-				vtls_ctx_free(vtls->d_ctx);
-			vtls->d_ctx = vtls->d_ctx_scratch;
-			vtls->d_ctx_scratch = NULL;
+		VTAILQ_FOREACH(vc, &ls->tls->ctxs, list) {
+			CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+			if (!vc->discarded)
+				vc->discarded = 1;
 		}
 	}
 
@@ -1054,40 +1608,134 @@ vtls_cli_cert_commit(struct cli *cli, const char *const *av, void *priv)
 }
 
 /*
- * CLI: vtls.cld_cert_discard
- * Discard staged certificates
+ * Check if a context is referenced in a SNI map
+ */
+static int
+vtls_ctx_in_sni_map(struct vtls_ctx *vc, struct vtls_sni_map *m)
+{
+	struct vtls_sni_key *k;
+	struct vtls_sni_key *dup;
+
+	if (m == NULL)
+		return (0);
+
+	CHECK_OBJ_NOTNULL(m, VTLS_SNI_MAP_MAGIC);
+	CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+
+	VRBT_FOREACH(k, vtls_sni_rbtree, &m->root) {
+		CHECK_OBJ_NOTNULL(k, VTLS_SNI_KEY_MAGIC);
+		if (k->ctx == vc)
+			return (1);
+		VTAILQ_FOREACH(dup, &k->dups, dups_list) {
+			CHECK_OBJ_NOTNULL(dup, VTLS_SNI_KEY_MAGIC);
+			if (dup->ctx == vc)
+				return (1);
+		}
+	}
+	return (0);
+}
+
+/*
+ * List certificates from a single vtls struct
+ */
+static int
+vtls_list_certs(struct cli *cli, struct vtls *vtls, const char *fe_name,
+    int json, int only_staged, int *first)
+{
+	struct vtls_ctx *vc;
+	const char *status;
+	int count = 0;
+	int in_sni, in_scratch;
+
+	CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
+
+	VTAILQ_FOREACH(vc, &vtls->ctxs, list) {
+		CHECK_OBJ_NOTNULL(vc, VTLS_CTX_MAGIC);
+
+		/* Determine cert location */
+		in_sni = vtls_ctx_in_sni_map(vc, vtls->sni);
+		in_scratch = vtls_ctx_in_sni_map(vc, vtls->sni_scratch);
+
+		/* Determine status */
+		if (vc->discarded)
+			status = "discard";
+		else if (in_scratch && !in_sni)
+			status = "staged";
+		else if (vtls->d_ctx == vc)
+			status = "active";
+		else
+			status = "active";
+
+		/* Filter by staged if requested */
+		if (only_staged) {
+			/* Show staged and discarded only */
+			if (!vc->discarded && !in_scratch)
+				continue;
+			/* Don't show active certs in staged-only mode */
+			if (in_sni && !vc->discarded)
+				continue;
+		}
+
+		if (json) {
+			if (!*first)
+				VCLI_Out(cli, ",\n");
+			VCLI_Out(cli, "  {\"frontend\": \"%s\", "
+			    "\"id\": \"%s\", \"status\": \"%s\", "
+			    "\"subject\": \"%s\"}",
+			    fe_name,
+			    vc->name_id ? vc->name_id : "",
+			    status,
+			    vc->subject ? vc->subject : "");
+			*first = 0;
+		} else {
+			VCLI_Out(cli, "%s\t%s\t%s\t%s\n",
+			    fe_name,
+			    vc->name_id ? vc->name_id : "",
+			    status,
+			    vc->subject ? vc->subject : "");
+		}
+		count++;
+	}
+
+	return (count);
+}
+
+/*
+ * CLI: vtls.cld_cert_list
+ * List loaded certificates
  */
 static void v_matchproto_(cli_func_t)
-vtls_cli_cert_discard(struct cli *cli, const char *const *av, void *priv)
+vtls_cli_cert_list(struct cli *cli, const char *const *av, void *priv)
 {
 	struct listen_sock *ls;
-	struct vtls *vtls;
+	int json, only_staged;
+	int first = 1;
 
-	(void)av;
 	(void)priv;
 
-	/* Discard global scratch */
-	if (heritage.tls != NULL) {
-		vtls = heritage.tls;
-		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
-		if (vtls->d_ctx_scratch != NULL) {
-			vtls_ctx_free(vtls->d_ctx_scratch);
-			vtls->d_ctx_scratch = NULL;
-		}
-	}
+	AN(av[2]);
+	AN(av[3]);
+	json = atoi(av[2]);
+	only_staged = atoi(av[3]);
 
-	/* Discard per-frontend scratch */
+	if (json)
+		VCLI_Out(cli, "[\n");
+
+	/* List global certificates */
+	CHECK_OBJ_NOTNULL(heritage.tls, VTLS_MAGIC);
+	(void)vtls_list_certs(cli, heritage.tls, "default",
+	    json, only_staged, &first);
+
+	/* List per-frontend certificates */
 	VTAILQ_FOREACH(ls, &heritage.socks, list) {
 		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
-		if (ls->tls == NULL)
-			continue;
-		vtls = ls->tls;
-		CHECK_OBJ_NOTNULL(vtls, VTLS_MAGIC);
-		if (vtls->d_ctx_scratch != NULL) {
-			vtls_ctx_free(vtls->d_ctx_scratch);
-			vtls->d_ctx_scratch = NULL;
-		}
+		if (ls->tls != NULL)
+			(void)vtls_list_certs(cli, ls->tls, ls->name,
+			    json, only_staged, &first);
 	}
+
+	if (json)
+		VCLI_Out(cli, "\n]\n");
 
 	VCLI_SetResult(cli, CLIS_OK);
 }
@@ -1101,6 +1749,11 @@ static struct cli_proto vtls_cli_cmds[] = {
 	    vtls_cli_cert_commit },
 	{ CLICMD_VTLS_CLD_CERT_DISCARD, vtls_cli_cert_discard,
 	    vtls_cli_cert_discard },
+	{ CLICMD_VTLS_CLD_CERT_ROLLBACK, vtls_cli_cert_rollback,
+	    vtls_cli_cert_rollback },
+	{ CLICMD_VTLS_CLD_CERT_DISCARD_ALL, vtls_cli_cert_discard_all,
+	    vtls_cli_cert_discard_all },
+	{ CLICMD_VTLS_CLD_CERT_LIST, vtls_cli_cert_list, vtls_cli_cert_list },
 	{ NULL }
 };
 
@@ -1162,14 +1815,3 @@ VTLS_ja3(const struct vrt_ctx *ctx)
 	return (tsp->ja3);
 }
 
-/*
- * Suppress unused function warnings for SNI map functions that will be
- * used when multi-certificate SNI support is fully implemented.
- */
-static void __attribute__((unused))
-vtls_suppress_unused_warnings(void)
-{
-	(void)vtls_sni_map_new;
-	(void)vtls_sni_key_free;
-	(void)vtls_sni_map_add;
-}

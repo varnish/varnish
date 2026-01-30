@@ -615,6 +615,9 @@ void *STV_GetBufPtr(struct stv_buffer *stvbuf, size_t *psize);
 void SMP_Ready(void);
 #endif
 
+/* tls/cache_client_ssl.c */
+void VTLS_Poll(void);
+
 #define FEATURE(x)	COM_FEATURE(cache_param->feature_bits, x)
 #define EXPERIMENT(x)	COM_EXPERIMENT(cache_param->experimental_bits, x)
 #define DO_DEBUG(x)	COM_DO_DEBUG(cache_param->debug_bits, x)

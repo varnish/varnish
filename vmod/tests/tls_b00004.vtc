@@ -1,0 +1,56 @@
+varnishtest "Test tls.cert.* CLI commands"
+
+# Test the public CLI commands for TLS certificate management
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+# Test tls.cert.list - should show cert0 (default cert from config)
+varnish v1 -cliok "tls.cert.list"
+
+# Test tls.cert.load - load a new certificate
+varnish v1 -cliok "tls.cert.load newcert ${topsrc}/etc/ca/bundle/wildcard.example.com.pem"
+
+# Test tls.cert.list -s - should show staged cert
+varnish v1 -cliok "tls.cert.list -s"
+
+# Test tls.cert.rollback - discard staged changes
+varnish v1 -cliok "tls.cert.rollback"
+
+# Test tls.cert.load again
+varnish v1 -cliok "tls.cert.load anothercert ${topsrc}/etc/ca/bundle/wildcard.example.com.pem"
+
+# Test tls.cert.commit - commit the loaded cert
+varnish v1 -cliok "tls.cert.commit"
+
+# Verify cert is active
+varnish v1 -cliok "tls.cert.list"
+
+# Test tls.cert.discard
+varnish v1 -cliok "tls.cert.discard anothercert"
+
+# Commit the discard
+varnish v1 -cliok "tls.cert.commit"
+
+# Verify client can still connect (default cert should remain)
+client c1 {
+	tls_handshake
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run

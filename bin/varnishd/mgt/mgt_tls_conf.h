@@ -81,3 +81,4 @@ struct vtls_cfg {
 struct vtls_frontend_cfg *VTLS_frontend_cfg_alloc(void);
 int TLS_Config(const char *fn);
 int MGT_TLS_push_server_certs(unsigned *status, char **p);
+void MGT_TLS_Init(void);
