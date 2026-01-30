@@ -41,6 +41,7 @@ struct listen_arg {
 	VTAILQ_HEAD(,listen_sock)	socks;
 	const struct transport		*transport;
 	const struct uds_perms		*perms;
+	void				*tls;
 };
 
 struct acceptor;

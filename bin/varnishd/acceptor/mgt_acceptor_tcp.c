@@ -44,6 +44,8 @@
 #include "mgt/mgt.h"
 #include "common/heritage.h"
 
+void *TLS_Listener_Config(void);
+
 #include "acceptor/cache_acceptor.h"
 #include "acceptor/acceptor_tcp.h"
 #include "acceptor/mgt_acceptor.h"
@@ -117,6 +119,7 @@ vca_tcp_open_cb(void *priv, const struct suckaddr *sa)
 	ls->name = la->name;
 	ls->transport = la->transport;
 	ls->perms = la->perms;
+	ls->tls = la->tls;
 
 	VJ_master(JAIL_MASTER_PRIVPORT);
 	fail = vca_tcp_opensocket(ls);
@@ -175,6 +178,11 @@ vca_tcp_open(char **av, struct listen_arg *la, const char **err)
 
 	for (int i = 0; av[i] != NULL; i++) {
 		if (strchr(av[i], '=') == NULL) {
+			if (strcmp(av[i], "https") == 0 && la->tls == NULL) {
+				la->tls = TLS_Listener_Config();
+				AN(la->tls);
+				continue;
+			}
 			if (xp != NULL)
 				ARGV_ERR("Too many protocol sub-args"
 				    " in -a (%s)\n", av[i]);

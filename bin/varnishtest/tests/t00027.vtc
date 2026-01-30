@@ -1,0 +1,20 @@
+varnishtest "Test TLS with empty config"
+
+# Ported from Varnish Enterprise t00031.vtc
+
+feature tls
+
+varnish v1 -arg "-a :0,https" -vcl+backend {
+    backend be none;
+} -start
+
+varnish v1 -cliok "tls.cert.load ${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+varnish v1 -cliok "tls.cert.commit"
+
+client c1 {
+	tls_config {
+		servername = cdn03.example.com
+	}
+	tls_handshake
+	expect tls.cert.subject_alt_names ~ "cdn03.example.com"
+} -run

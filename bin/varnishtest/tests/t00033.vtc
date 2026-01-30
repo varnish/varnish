@@ -1,0 +1,41 @@
+varnishtest "tls: use-after-free on tls.cert.rollback"
+
+# Ported from Varnish Enterprise t00053.vtc
+# Regression test for stale pointer in d_ctx_scratch
+
+feature tls
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-a :0,https" -vcl+backend {} -start
+
+# First load and rollback a default cert
+varnish v1 -cliok "tls.cert.load defaultcert ${topsrc}/etc/ca/bundle/example.com.pem -d"
+varnish v1 -cliok "tls.cert.rollback"
+
+# this should leave a stale pointer in d_ctx_scratch
+
+# load a different non-default cert
+varnish v1 -cliok "tls.cert.load newdefault ${topsrc}/etc/ca/bundle/no-san.example.com.pem"
+
+# at this point we should have the same stale pointer in
+# d_ctx_scratch, and also an intialized vtls->sni_scratch, triggering
+# the path where the stale default pointer gets used.
+
+varnish v1 -cliok "tls.cert.commit"
+# with this, the stale pointer is assigned as the new default cert
+
+# with ASAN, this gets us:
+# ERROR: AddressSanitizer: heap-use-after-free
+
+client c1 {
+	tls_handshake
+	expect tls.failed == false
+	expect tls.cert.subject == "no-san.example.com"
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run

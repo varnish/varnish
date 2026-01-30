@@ -38,6 +38,7 @@
 
 #include "cache/cache_varnishd.h"
 
+#include "tls/cache_tls.h"
 #include "acceptor/cache_acceptor.h"
 #include "acceptor/acceptor_priv.h"
 #include "acceptor/acceptor_uds.h"
@@ -360,7 +361,10 @@ vca_uds_make_session(struct worker *wrk, void *arg)
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 	req->htc->rfd = &sp->fd;
 
-	SES_SetTransport(wrk, sp, req, wa->acceptlsock->transport);
+	if (wa->acceptlsock->tls != NULL)
+		SES_SetTransport(wrk, sp, req, &TLS_transport);
+	else
+		SES_SetTransport(wrk, sp, req, wa->acceptlsock->transport);
 	WS_Release(wrk->aws, 0);
 }
 

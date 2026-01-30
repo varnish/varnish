@@ -1,0 +1,30 @@
+varnishtest "Frontend-TLS timeouts"
+
+# Ported from Varnish Enterprise t00051.vtc
+
+feature tls
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-a :0,https -p timeout_idle=2" -vcl+backend {} -start
+
+varnish v1 -cliok "tls.cert.load ${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+varnish v1 -cliok "tls.cert.commit"
+
+logexpect l1 -v v1 {
+	expect * 1004 Timestamp	"Bereq: .* [234].* [234].*"
+} -start
+
+client c1 {
+	tls_handshake
+	txreq
+	rxresp
+	txreq -req POST -nolen -hdr "Transfer-encoding: chunked"
+	rxresp
+	expect resp.status == 400
+} -run
+
+logexpect l1 -wait

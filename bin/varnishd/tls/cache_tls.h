@@ -117,6 +117,9 @@ void VTLS_vsl_set(struct vtls_sess *tsp, struct vsl_log *vsl);
 /* Certificate initialization (child process) */
 void VTLS_tls_cert_init(void);
 
+/* TLS transport */
+extern struct transport TLS_transport;
+
 /* VMOD accessor functions */
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);

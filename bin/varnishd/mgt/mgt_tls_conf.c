@@ -1132,6 +1132,30 @@ static struct cli_proto cli_tls_cert[] = {
 };
 
 /*
+ * Allocate a minimal TLS listener configuration for -a :port,https
+ * Also sets up heritage.tls if not already configured, so CLI commands work.
+ */
+void *
+TLS_Listener_Config(void)
+{
+	struct vtls *v;
+
+	ALLOC_OBJ(v, VTLS_MAGIC);
+	AN(v);
+	VTAILQ_INIT(&v->ctxs);
+
+	v->cfg->sni_nomatch_abort = 1;
+	v->sni_match_global = 1;
+	v->d_ctx = NULL;
+
+	/* Set up heritage.tls if not already configured */
+	if (heritage.tls == NULL)
+		heritage.tls = v;
+
+	return (v);
+}
+
+/*
  * Initialize TLS CLI commands (called from mgt_main.c)
  */
 void

@@ -1,0 +1,23 @@
+varnishtest "HTTP/1 TLS DoS"
+
+# Ported from Varnish Enterprise t00037.vtc
+
+feature tls
+
+server s1 {
+	rxreqhdrs
+	expect req.http.content-length == 20
+	expect_close
+} -start
+
+varnish v1 -arg "-a :0,https" -vcl+backend {} -start
+varnish v1 -cliok "param.set timeout_idle 1"
+varnish v1 -cliok "tls.cert.load ${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+varnish v1 -cliok "tls.cert.commit"
+
+client c1 {
+	tls_handshake
+	txreq -req POST -hdr "Content-Length: 20"
+	rxresp
+	expect resp.status == 400
+} -run
