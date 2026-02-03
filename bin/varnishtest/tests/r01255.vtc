@@ -1,6 +1,6 @@
 varnishtest "Test RFC9112 3.2 compliance"
 
-server s1 -repeat 3 {
+server s1 -repeat 6 {
 	rxreq
 	txresp -hdr "Foo: 1"
 } -start
@@ -24,8 +24,28 @@ client c1 {
 	expect resp.http.rxhost == www.example.com
 	expect resp.http.url == /
 
+	txreq -url http://www.example.com -hdr "host: another"
+	rxresp
+	expect resp.http.rxhost == www.example.com
+	expect resp.http.url == /
+
+	txreq -req OPTIONS -url http://www.example.com -hdr "host: another"
+	rxresp
+	expect resp.http.rxhost == www.example.com
+	expect resp.http.url == *
+
 	txreq -url http:///bar -hdr "host: another"
 	rxresp
 	expect resp.http.rxhost == ""
 	expect resp.http.url == /bar
+
+	txreq -url http:// -hdr "host: another"
+	rxresp
+	expect resp.http.rxhost == ""
+	expect resp.http.url == /
+
+	txreq -req OPTIONS -url http:// -hdr "host: another"
+	rxresp
+	expect resp.http.rxhost == ""
+	expect resp.http.url == *
 } -run

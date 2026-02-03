@@ -27,6 +27,26 @@ individual releases. These documents are updated as part of the
 release process.
 
 =================================
+Varnish-Cache 6.0.17 (2026-03-16)
+=================================
+
+.. _VSV18: https://vinyl-cache.org/security/VSV00018.html
+
+* The handling of HTTP/1.1 requests to an "absolute form" URI has been fixed to
+  also cover the case where the absolute form has an empty path component:
+
+  Previously, a request with an empty path like ``GET http://example.com
+  HTTP/1.1`` would cause ``req.url`` to contain ``http://example.com`` and the
+  ``Host:`` header to remain unchanged. This has now been fixed:
+
+  - ``req.url`` gets set to ``*`` if the request method is ``OPTIONS`` and to
+    ``/`` otherwise
+
+  - The ``Host:`` header gets set to ``example.com``.
+
+  (`VSV18`_)
+
+=================================
 Varnish-Cache 6.0.16 (2025-08-20)
 =================================
 
