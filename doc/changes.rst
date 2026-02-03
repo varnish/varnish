@@ -41,6 +41,22 @@ Varnish-Cache NEXT (2026-03-15)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+.. _VSV18: https://vinyl-cache.org/security/VSV00018.html
+
+* The handling of HTTP/1.1 requests to an "absolute form" URI has been fixed to
+  also cover the case where the absolute form has an empty path component:
+
+  Previously, a request with an empty path like ``GET http://example.com
+  HTTP/1.1`` would cause ``req.url`` to contain ``http://example.com`` and the
+  ``Host:`` header to remain unchanged. This has now been fixed:
+
+  - ``req.url`` gets set to ``*`` if the request method is ``OPTIONS`` and to
+    ``/`` otherwise
+
+  - The ``Host:`` header gets set to ``example.com``.
+
+  (`VSV18`_)
+
 * The VCL variable ``beresp.storage_hint`` no longer exists.
 
 * The VAI interface gained

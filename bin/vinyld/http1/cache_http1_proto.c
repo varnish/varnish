@@ -376,10 +376,16 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 		b = hp->hd[HTTP_HDR_URL].b + 8;
 	if (b) {
 		e = strchr(b, '/');
-		if (e) {
-			http_Unset(hp, H_Host);
-			http_PrintfHeader(hp, "Host: %.*s", (int)(e - b), b);
-			hp->hd[HTTP_HDR_URL].b = e;
+		if (e == NULL)
+			e = hp->hd[HTTP_HDR_URL].e;
+		http_Unset(hp, H_Host);
+		http_PrintfHeader(hp, "Host: %.*s", (int)(e - b), b);
+		hp->hd[HTTP_HDR_URL].b = e;
+		if (Tlen(hp->hd[HTTP_HDR_URL]) == 0) {
+			if (http_method_eq(hp->wkm, WKM_OPTIONS))
+				hp->hd[HTTP_HDR_URL] = Tstr("*");
+			else
+				hp->hd[HTTP_HDR_URL] = Tstr("/");
 		}
 	}
 
