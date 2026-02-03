@@ -26,8 +26,7 @@ client c1 {
 
 	txreq -url https://www.example.com/bar
 	rxresp
-	expect resp.http.rxhost == "${localhost}"
-	expect resp.http.rxurl == https://www.example.com/bar
+	expect resp.status == 400
 } -run
 
 varnish v1 -cliok "param.set feature +https_scheme"

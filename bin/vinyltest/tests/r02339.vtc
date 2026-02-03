@@ -11,10 +11,10 @@ varnish v1 -vcl+backend {
 	import purge;
 
 	sub vcl_miss {
-		if (req.url == "miss") { purge.hard(); }
+		if (req.url == "/miss") { purge.hard(); }
 	}
 	sub vcl_hit {
-		if (req.url == "hit") { purge.hard(); }
+		if (req.url == "/hit") { purge.hard(); }
 	}
 } -start
 
@@ -39,15 +39,15 @@ logexpect l1 -v v1 {
 } -start
 
 client c1 {
-	txreq -url hit
+	txreq -url /hit
 	rxresp
 	expect resp.status == 200
 
-	txreq -url hit
+	txreq -url /hit
 	rxresp
 	expect resp.status == 200
 
-	txreq -url miss
+	txreq -url /miss
 	rxresp
 	expect resp.status == 200
 } -run
@@ -56,7 +56,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_purge'" {
 	import purge;
 
 	sub vcl_purge {
-		if (req.url == "purge") { purge.hard(); }
+		if (req.url == "/purge") { purge.hard(); }
 	}
 }
 
@@ -64,7 +64,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_pass'" {
 	import purge;
 
 	sub vcl_pass {
-		if (req.url == "pass") { purge.hard(); }
+		if (req.url == "/pass") { purge.hard(); }
 	}
 }
 
@@ -72,7 +72,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_deliver'" {
 	import purge;
 
 	sub vcl_deliver {
-		if (req.url == "deliver") { purge.hard(); }
+		if (req.url == "/deliver") { purge.hard(); }
 	}
 }
 
@@ -80,7 +80,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_synth'" {
 	import purge;
 
 	sub vcl_synth {
-		if (req.url == "synth") { purge.hard(); }
+		if (req.url == "/synth") { purge.hard(); }
 	}
 }
 
@@ -88,7 +88,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
 	import purge;
 
 	sub vcl_backend_fetch {
-		if (bereq.url == "fetch") { purge.hard(); }
+		if (bereq.url == "/fetch") { purge.hard(); }
 	}
 }
 
@@ -96,7 +96,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_backend_error'" {
 	import purge;
 
 	sub vcl_backend_error {
-		if (bereq.url == "error") { purge.hard(); }
+		if (bereq.url == "/error") { purge.hard(); }
 	}
 }
 
@@ -104,7 +104,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_backend_response'" {
 	import purge;
 
 	sub vcl_backend_response {
-		if (bereq.url == "response") { purge.hard(); }
+		if (bereq.url == "/response") { purge.hard(); }
 	}
 }
 
