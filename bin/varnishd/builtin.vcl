@@ -41,6 +41,7 @@ sub vcl_recv {
 }
 
 sub vcl_builtin_recv {
+	call vcl_req_url;
 	call vcl_req_host;
 	call vcl_req_method;
 	call vcl_req_authorization;
@@ -55,6 +56,16 @@ sub vcl_req_host {
 	    req.esi_level == 0 &&
 	    req.proto == "HTTP/1.1") {
 		# In HTTP/1.1, Host is required.
+		return (synth(400));
+	}
+}
+
+sub vcl_req_url {
+	if (req.url == "*" && req.method == "OPTIONS") {
+		return;
+	}
+	# NB: we do not allow connect by default (see vcl_req_method)
+	if (req.url !~ "^/" && req.method != "CONNECT") {
 		return (synth(400));
 	}
 }
