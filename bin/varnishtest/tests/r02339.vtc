@@ -10,43 +10,43 @@ varnish v1 -arg "-p thread_pools=1" -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {
-		if (req.url == "recv") { purge.hard(); }
-		if (req.url == "pass") { return (pass); }
-		if (req.url == "purge") { return (purge); }
-		if (req.url == "synth") { return (synth(200)); }
+		if (req.url == "/recv") { purge.hard(); }
+		if (req.url == "/pass") { return (pass); }
+		if (req.url == "/purge") { return (purge); }
+		if (req.url == "/synth") { return (synth(200)); }
 	}
 	sub vcl_hash {
-		if (req.url == "hash") { purge.hard(); }
+		if (req.url == "/hash") { purge.hard(); }
 	}
 	sub vcl_miss {
-		if (req.url == "miss") { purge.hard(); }
+		if (req.url == "/miss") { purge.hard(); }
 	}
 	sub vcl_hit {
-		if (req.url == "hit") { purge.hard(); }
+		if (req.url == "/hit") { purge.hard(); }
 	}
 	sub vcl_purge {
-		if (req.url == "purge") { purge.hard(); }
+		if (req.url == "/purge") { purge.hard(); }
 	}
 	sub vcl_pass {
-		if (req.url == "pass") { purge.hard(); }
+		if (req.url == "/pass") { purge.hard(); }
 	}
 	sub vcl_deliver {
-		if (req.url == "deliver") { purge.hard(); }
+		if (req.url == "/deliver") { purge.hard(); }
 	}
 	sub vcl_synth {
-		if (req.url == "synth") { purge.hard(); }
+		if (req.url == "/synth") { purge.hard(); }
 	}
 	sub vcl_backend_fetch {
-		if (bereq.url == "fetch") { purge.hard(); }
-		if (bereq.url == "error") {
+		if (bereq.url == "/fetch") { purge.hard(); }
+		if (bereq.url == "/error") {
 			set bereq.backend = vtc.no_backend();
 		}
 	}
 	sub vcl_backend_error {
-		if (bereq.url == "error") { purge.hard(); }
+		if (bereq.url == "/error") { purge.hard(); }
 	}
 	sub vcl_backend_response {
-		if (bereq.url == "response") { purge.hard(); }
+		if (bereq.url == "/response") { purge.hard(); }
 	}
 } -start
 
@@ -99,15 +99,15 @@ logexpect l1 -v v1 {
 } -start
 
 client c1 {
-	txreq -url hit
+	txreq -url /hit
 	rxresp
 	expect resp.status == 200
 
-	txreq -url hit
+	txreq -url /hit
 	rxresp
 	expect resp.status == 200
 
-	txreq -url miss
+	txreq -url /miss
 	rxresp
 	expect resp.status == 200
 } -run
@@ -116,61 +116,61 @@ logexpect l0 -wait
 logexpect l2 -wait
 
 client c1 {
-	txreq -url recv
+	txreq -url /recv
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url hash
+	txreq -url /hash
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url purge
+	txreq -url /purge
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url pass
+	txreq -url /pass
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url deliver
+	txreq -url /deliver
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url synth
+	txreq -url /synth
 	expect_close
 } -run
 
 client c1 {
-	txreq -url fetch
+	txreq -url /fetch
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url error
+	txreq -url /error
 	rxresp
 	expect resp.status == 503
 	expect_close
 } -run
 
 client c1 {
-	txreq -url response
+	txreq -url /response
 	rxresp
 	expect resp.status == 503
 	expect_close

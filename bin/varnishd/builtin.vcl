@@ -35,6 +35,11 @@ vcl 4.0;
 # Client side
 
 sub vcl_recv {
+    # NB: we do not allow connect by default (see below)
+    if ((req.url != "*" || req.method != "OPTIONS") &&
+        req.url !~ "^/" && req.method != "CONNECT") {
+        return (synth(400));
+    }
     if (req.method == "PRI") {
         /* This will never happen in properly formed traffic (see: RFC7540) */
         return (synth(405));

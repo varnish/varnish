@@ -34,19 +34,19 @@ server s1 {
 # Varnish 4
 server s2 {
 	rxreq
-	expect req.url == "bar/foo"
+	expect req.url == "/foo"
 	txresp -body {<INCL>}
 } -start
 
 varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
-		if (bereq.url != "bar") {
+		if (bereq.url != "/bar") {
 			set bereq.backend = s2;
 		}
 	}
 
 	sub vcl_backend_response {
-		if (bereq.url == "bar") {
+		if (bereq.url == "/bar") {
 			set beresp.do_esi = true;
 		}
 	}
@@ -67,7 +67,7 @@ logexpect l1 -v v1 -g vxid {
 } -start
 
 client c1 {
-	txreq  -url bar
+	txreq  -url /bar
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 65856

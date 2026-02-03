@@ -49,6 +49,11 @@ Varnish-Cache 6.0.17 (2026-03-16)
 * For requests to an absolute form URI, the host field is now required. Requests
   without a host field are rejected with a Status 400 error.
 
+* The built-in VCL has been changed to require ``req.url`` to start with ``/``,
+  unless the request method is ``CONNECT`` or ``OPTIONS``. For ``CONNECT``, no
+  additional check is applied, but ``CONNECT`` is not allowed by default. For
+  ``OPTIONS``, ``*`` is also allowed.
+
 =================================
 Varnish-Cache 6.0.16 (2025-08-20)
 =================================

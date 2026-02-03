@@ -39,7 +39,7 @@ logexpect l1 -wait
 varnish v1  -cli "param.set feature +esi_disable_xml_check"
 
 client c1 {
-	txreq -url bar
+	txreq -url /bar
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 22
