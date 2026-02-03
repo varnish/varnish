@@ -1,11 +1,16 @@
 vtest "Test RFC2616 5.2 compliance"
 
-server s1 -repeat 6 {
+server s1 -repeat 8 {
 	rxreq
 	txresp -hdr "Foo: 1"
 } -start
 
 varnish v1 -vcl+backend {
+	sub vcl_req_method {
+		if (req.method == "CONNECT") {
+			return (pass);
+		}
+	}
 
 	sub vcl_deliver {
 		set resp.http.rxhost = req.http.host;
@@ -16,23 +21,46 @@ varnish v1 -vcl+backend {
 client c1 {
 	txreq -url http://www.example.com/bar -hdr "host: another"
 	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
 	expect resp.http.rxhost == www.example.com
 	expect resp.http.url == /bar
 
 	txreq -url http://www.example.com/ -hdr "host: another"
 	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
 	expect resp.http.rxhost == www.example.com
 	expect resp.http.url == /
 
 	txreq -url http://www.example.com -hdr "host: another"
 	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
 	expect resp.http.rxhost == www.example.com
 	expect resp.http.url == /
 
 	txreq -method OPTIONS -url http://www.example.com -hdr "host: another"
 	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
 	expect resp.http.rxhost == www.example.com
 	expect resp.http.url == *
+
+	# we do not actually handle CONNECT here
+	txreq -req CONNECT -url example.com:80 -hdr "host: another"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
+	expect resp.http.rxhost == "another"
+	expect resp.http.url == "example.com:80"
+
+	txreq -req OPTIONS -url "*" -hdr "host: another"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
+	expect resp.http.rxhost == "another"
+	expect resp.http.url == "*"
 
 	txreq -url http:///bar -hdr "host: another"
 	rxresp
