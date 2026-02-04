@@ -65,6 +65,11 @@ Varnish-Cache 8.0.1 (2026-03-16)
   additional check is applied, but ``CONNECT`` is not allowed by default. For
   ``OPTIONS``, ``*`` is also allowed.
 
+* The ``ReqTarget`` Varnish Shared Log (VSL) Tag has been added to log the
+  original request target before any handling of absolute form URIs. To preserve
+  the existing log format and ordering, the tag is marked by default. It can be
+  unmasked by adding ``+ReqTarget`` to the ``vsl_mask`` parameter.
+
 ================================
 Varnish-Cache 8.0.0 (2025-09-15)
 ================================
