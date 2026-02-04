@@ -70,6 +70,10 @@ Varnish-Cache 8.0.1 (2026-03-16)
   the existing log format and ordering, the tag is marked by default. It can be
   unmasked by adding ``+ReqTarget`` to the ``vsl_mask`` parameter.
 
+* The ``MAIN.http1_absolute_form`` counter has been added to track the number of
+  times an HTTP/1.1 request with an absolute form request target has been
+  handled.
+
 ================================
 Varnish-Cache 8.0.0 (2025-09-15)
 ================================
