@@ -908,4 +908,15 @@
 	from a backend. They are done to verify the gzip stream while it's
 	inserted in storage.
 
+
+.. varnish_vsc:: http1_absolute_form
+	:oneliner:	Requests with absolute form request target
+
+	Number of requests for which an absolute form request target (e.g.
+	http://example.com/ or https://example.com/) was handled. The https://
+	scheme is only handled if the feature ``https_scheme`` is enabled (see
+	RUN TIME PARAMETERS in `varnishd(1)`).
+
+	See also ReqTarget in `vsl(7)`. This counter is approximately correct.
+
 .. varnish_vsc_end::	main

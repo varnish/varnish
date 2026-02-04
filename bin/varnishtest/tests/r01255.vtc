@@ -123,6 +123,8 @@ client c3 {
 	expect resp.status == 400
 } -run
 
+varnish v1 -expect MAIN.http1_absolute_form == 7
+
 logexpect l1001 -wait
 logexpect l1003 -wait
 logexpect l1005 -wait

@@ -387,6 +387,7 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 	    !strncasecmp(hp->hd[HTTP_HDR_URL].b, "https://", 8))
 		b = hp->hd[HTTP_HDR_URL].b + 8;
 	if (b) {
+		VSC_C_main->http1_absolute_form++;
 		e = strchr(b, '/');
 		if (e == NULL)
 			e = hp->hd[HTTP_HDR_URL].e;
