@@ -378,6 +378,8 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 	if (http_CountHdr(hp, H_Content_Length) > 1)
 		return (400);
 
+	VSLbt(hp->vsl, SLT_ReqTarget, hp->hd[HTTP_HDR_URL]);
+
 	/* RFC2616, section 5.2, point 1 */
 	if (!strncasecmp(hp->hd[HTTP_HDR_URL].b, "http://", 7))
 		b = hp->hd[HTTP_HDR_URL].b + 7;
