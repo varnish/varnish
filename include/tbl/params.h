@@ -2106,6 +2106,7 @@ PARAM_BITS(
 	"-ObjProtocol,"
 	"-ObjReason,"
 	"-ObjStatus,"
+	"-ReqTarget,"
 	"-VdpAcct,"
 	"-VfpAcct,"
 	"-WorkThread",

@@ -368,6 +368,8 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 
 	http_SetWellKnownMethod(hp);
 
+	VSLbt(hp->vsl, SLT_ReqTarget, hp->hd[HTTP_HDR_URL]);
+
 	/* RFC2616, section 5.2, point 1 */
 	if (http_scheme_at(hp->hd[HTTP_HDR_URL].b, http))
 		b = hp->hd[HTTP_HDR_URL].b + 7;

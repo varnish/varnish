@@ -716,6 +716,12 @@ SLTM(VdpAcct, 0, "Deliver filter accounting",
 	NODEF_NOTICE
 )
 
+SLTM(ReqTarget, 0, "Request target as received",
+	"For HTTP1 connections, this is the *request-target* field from the request\n"
+	"line, which has the format *method* SP *request-target* SP *HTTP-Version*\n"
+	"(SP for space, 0x20)\n\n"
+	NODEF_NOTICE
+)
 
 #undef NOSUP_NOTICE
 #undef NODEF_NOTICE

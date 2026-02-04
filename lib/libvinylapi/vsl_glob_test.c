@@ -72,7 +72,7 @@ main(int argc, char * const *argv)
 
 	if (argc == 1) {
 		i = tst_one_glob("Req*");
-		assert(i == 10);
+		assert(i == 11);
 		j = tst_one_glob("reQ*");
 		assert(i == j);
 		assert(tst_one_glob("*Header") > 0);
