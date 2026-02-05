@@ -50,6 +50,7 @@ vtim_dur PFD_Age(const struct pfd *);
 uint64_t PFD_Reused(const struct pfd *);
 void PFD_LocalName(const struct pfd *, char *, unsigned, char *, unsigned);
 void PFD_RemoteName(const struct pfd *, char *, unsigned, char *, unsigned);
+struct vtls_sess *PFD_TLSPriv(const struct pfd *);
 
 /*---------------------------------------------------------------------
  * Prototypes

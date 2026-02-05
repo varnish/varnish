@@ -1,0 +1,52 @@
+varnishtest "Backend TLS VMOD introspection"
+
+# Test that tls.* VMOD functions work in vcl_backend_response
+
+server s1 {
+	tls_config {
+		# Use the builtin self-signed cert (CN=example.com)
+	}
+	tls_handshake
+	rxreq
+	txresp -hdr "X-Backend: ssl"
+} -start
+
+varnish v1 -vcl {
+	import tls;
+
+	backend ssl_backend {
+		.host = "${s1_addr}";
+		.port = "${s1_port}";
+		.ssl = 1;
+		.ssl_noverify = 1;
+	}
+
+	sub vcl_recv {
+		set req.backend_hint = ssl_backend;
+	}
+
+	sub vcl_backend_response {
+		# Test tls.is_tls() - should return true for TLS backend
+		if (tls.is_tls()) {
+			set beresp.http.X-Backend-TLS = "true";
+		} else {
+			set beresp.http.X-Backend-TLS = "false";
+		}
+
+		# Test tls.version() - should return TLS version string
+		set beresp.http.X-Backend-TLS-Version = tls.version();
+
+		# Test tls.cipher() - should return cipher name
+		set beresp.http.X-Backend-TLS-Cipher = tls.cipher();
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-Backend == "ssl"
+	expect resp.http.X-Backend-TLS == "true"
+	expect resp.http.X-Backend-TLS-Version ~ "TLSv1"
+	expect resp.http.X-Backend-TLS-Cipher ~ "."
+} -run

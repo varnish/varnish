@@ -43,6 +43,7 @@
 
 #include "cache/cache_varnishd.h"
 #include "cache/cache_conn_oper.h"
+#include "cache/cache_conn_pool.h"
 #include "cache/cache_pool.h"
 #include "cache_tls.h"
 
@@ -449,6 +450,67 @@ VTLS_conn_oper_##l(struct vtls_sess *tsp, void **ppriv)		\
 
 VTLS_OPER(backend)
 VTLS_OPER(client)
+
+/*
+ * Get TLS session from VRT context.
+ * Works for both client (req->sp->tls) and backend (bo->htc->priv->tls) paths.
+ */
+static struct vtls_sess *
+vtls_get_sess(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+	void *p;
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+
+	if (ctx->req != NULL) {
+		/* Client-side path */
+		CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);
+		CHECK_OBJ_NOTNULL(ctx->req->sp, SESS_MAGIC);
+		CHECK_OBJ_ORNULL(ctx->req->sp->tls, VTLS_SESS_MAGIC);
+		return (ctx->req->sp->tls);
+	}
+
+	if (ctx->bo != NULL) {
+		/* Backend path - get TLS session from connection pool */
+		CHECK_OBJ_NOTNULL(ctx->bo, BUSYOBJ_MAGIC);
+		if (ctx->bo->htc != NULL && ctx->bo->htc->priv != NULL) {
+			p = PFD_TLSPriv(ctx->bo->htc->priv);
+			if (p != NULL) {
+				CAST_OBJ_NOTNULL(tsp, p, VTLS_SESS_MAGIC);
+				return (tsp);
+			}
+		}
+	}
+
+	return (NULL);
+}
+
+/* VMOD accessor: get SSL context */
+const SSL *
+VTLS_tls_ctx(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+
+	tsp = vtls_get_sess(ctx);
+	if (tsp == NULL)
+		return (NULL);
+
+	return (tsp->ssl);
+}
+
+/* VMOD accessor: get JA3 fingerprint */
+const char *
+VTLS_ja3(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+
+	tsp = vtls_get_sess(ctx);
+	if (tsp == NULL)
+		return (NULL);
+
+	return (tsp->ja3);
+}
 
 /*
  * This is the SSL_do_handshake/poll loop.

@@ -191,6 +191,13 @@ PFD_RemoteName(const struct pfd *p, char *abuf, unsigned alen, char *pbuf,
 	p->conn_pool->methods->remote_name(p, abuf, alen, pbuf, plen);
 }
 
+struct vtls_sess *
+PFD_TLSPriv(const struct pfd *p)
+{
+	CHECK_OBJ_NOTNULL(p, PFD_MAGIC);
+	return (p->tls);
+}
+
 /*--------------------------------------------------------------------
  */
 
