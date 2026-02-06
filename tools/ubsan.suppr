@@ -1,0 +1,3 @@
+# Flexible array member access in VSL shared memory log
+# UBSAN flags this as "insufficient space" but it's valid C99
+object-size:cache_shmlog.c
