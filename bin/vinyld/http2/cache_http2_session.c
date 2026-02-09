@@ -109,6 +109,7 @@ h2_del_sess(struct worker *wrk, struct h2_sess *h2, stream_close_t reason)
 	TAKE_OBJ_NOTNULL(req, &h2->srq, REQ_MAGIC);
 	assert(!WS_IsReserved(req->ws));
 	TAKE_OBJ_NOTNULL(sp, &h2->sess, SESS_MAGIC);
+	THR_SetRequest(NULL);
 	Req_Cleanup(sp, wrk, req);
 	Req_Release(req);
 	SES_Delete(sp, reason, NAN);
@@ -412,6 +413,7 @@ h2_new_session(struct worker *wrk, void *arg)
 		srq = Req_New(sp, NULL);
 	}
 	CHECK_OBJ_NOTNULL(srq, REQ_MAGIC);
+	THR_SetRequest(srq);
 
 	h2 = h2_init_sess(wrk, sp, &h2s, &srq, &decode);
 	if (h2 == NULL) {
@@ -472,8 +474,6 @@ h2_new_session(struct worker *wrk, void *arg)
 	HTC_RxPipeline(h2->htc, h2->htc->rxbuf_b + sizeof(H2_prism));
 	HTC_RxInit(h2->htc, h2->ws);
 	WS_ReleaseP(h2->htc->ws, h2->htc->rxbuf_e);
-
-	THR_SetRequest(h2->srq);
 
 	/* Send our settings */
 	l = h2_enc_settings(&h2->local_settings, settings, sizeof (settings));
