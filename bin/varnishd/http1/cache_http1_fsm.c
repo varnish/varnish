@@ -35,10 +35,12 @@
 
 #include "config.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "cache/cache_varnishd.h"
+#include "cache/cache_conn_oper.h"
 #include "cache/cache_objhead.h"
 #include "cache/cache_transport.h"
 #include "cache_http1.h"
@@ -204,14 +206,14 @@ http1_minimal_response(struct req *req, uint16_t status)
 
 	if (status >= 400)
 		req->err_code = status;
-	wl = write(req->sp->fd, buf, l);
+	wl = req->htc->oper->write(req->htc->oper_priv, req->sp->fd, buf, l);
 
 	if (wl > 0)
 		req->acct.resp_hdrbytes += wl;
 	if (wl != l) {
-		if (wl < 0)
-			VTCP_Assert(1);
-		if (req->doclose == SC_NULL)
+		if (wl < 0 && errno == EAGAIN)
+			req->doclose = SC_OVERLOAD;
+		else if (req->doclose == SC_NULL)
 			req->doclose = SC_REM_CLOSE;
 		return (-1);
 	}
