@@ -1,0 +1,188 @@
+varnishtest "Test TLS and BackendSSL log tags"
+
+# Test 1: SLT_TLS on plain HTTP to TLS port (client-side handshake error)
+# Test 2: BackendSSL tag on backend verification failure
+# Test 3: Client-side pipelined TLS requests (proves vtls_writev
+#          vsl assertion holds across request boundaries)
+# Test 4: BackendSSL tag for pipelined requests over frontend TLS
+# Test 5: Client-side write error on second pipelined request
+
+feature tls
+
+server s1 {
+	tls_config {}
+	tls_handshake
+	expect tls.failed == true
+} -start
+
+server s2 {
+	rxreq
+	expect req.url == "/first"
+	txresp -body "one"
+	rxreq
+	expect req.url == "/second"
+	txresp -body "two"
+} -start
+
+server s3 {
+	tls_config {}
+	tls_handshake
+	expect tls.failed == true
+} -start
+
+server s4 {
+	tls_config {}
+	tls_handshake
+	expect tls.failed == true
+} -start
+
+varnish v1 -arg "-a :0,https" -vcl {
+	backend b_verify {
+		.host = "${s1_addr}";
+		.port = "${s1_port}";
+		.ssl = 1;
+		.ssl_verify_peer = 1;
+	}
+
+	sub vcl_recv {
+		set req.backend_hint = b_verify;
+	}
+} -start
+
+varnish v1 -cliok "tls.cert.load ${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+varnish v1 -cliok "tls.cert.commit"
+
+# --- Test 1: SLT_TLS on plain HTTP to TLS port ---
+# A non-TLS client connecting to the TLS port triggers an OpenSSL
+# handshake error, logged with SLT_TLS.
+
+logexpect l0 -v v1 {
+	expect * *	TLS	"error:.*SSL routines"
+} -start
+
+client c0 -connect "${v1_addr}:${v1_port}" {
+	txreq
+	expect_close
+} -run
+
+logexpect l0 -wait
+
+# --- Test 2: BackendSSL on verification failure ---
+
+logexpect l1 -v v1 {
+	expect * *	BackendSSL	"Server verification failed"
+} -start
+
+client c1 {
+	tls_handshake
+	txreq
+	rxresp
+	expect resp.status == 503
+} -run
+
+logexpect l1 -wait
+
+# --- Test 2: Client TLS pipelining ---
+# If vsl plumbing is broken, the AN(tsp->log->vsl) assertion
+# in vtls_writev fires on the second request's response delivery.
+
+varnish v1 -vcl {
+	backend default {
+		.host = "${s2_addr}";
+		.port = "${s2_port}";
+	}
+}
+
+client c2 {
+	tls_handshake
+	txreq -url "/first"
+	rxresp
+	expect resp.status == 200
+	expect resp.body == "one"
+	txreq -url "/second"
+	rxresp
+	expect resp.status == 200
+	expect resp.body == "two"
+} -run
+
+# --- Test 3: BackendSSL on pipelined requests over frontend TLS ---
+
+varnish v1 -vcl {
+	backend b3 {
+		.host = "${s3_addr}";
+		.port = "${s3_port}";
+		.ssl = 1;
+		.ssl_verify_peer = 1;
+	}
+	backend b4 {
+		.host = "${s4_addr}";
+		.port = "${s4_port}";
+		.ssl = 1;
+		.ssl_verify_peer = 1;
+	}
+	sub vcl_recv {
+		if (req.url == "/one") {
+			set req.backend_hint = b3;
+		} else {
+			set req.backend_hint = b4;
+		}
+	}
+}
+
+logexpect l2 -v v1 {
+	expect * *	BackendSSL	"Server verification failed"
+	expect * *	BackendSSL	"Server verification failed"
+} -start
+
+client c3 {
+	tls_handshake
+	txreq -url "/one"
+	rxresp
+	expect resp.status == 503
+	txreq -url "/two"
+	rxresp
+	expect resp.status == 503
+} -run
+
+logexpect l2 -wait
+
+# --- Test 5: Client-side write error on second pipelined request ---
+# Client sends two requests, reads first response, then closes without
+# reading the second (large) response.  Varnish's SSL_write fails during
+# delivery of the second response, logging an error on that request's
+# VXID — proving the vsl plumbing works for the write error path.
+
+server s5 {
+	rxreq
+	expect req.url == "/small"
+	txresp -body "ok"
+	rxreq
+	expect req.url == "/large"
+	txresp -bodylen 1000000
+} -start
+
+varnish v1 -vcl {
+	backend default {
+		.host = "${s5_addr}";
+		.port = "${s5_port}";
+	}
+}
+
+logexpect l3 -v v1 {
+	expect * *	Error	"ssl:.*SSL_ERROR"
+} -start
+
+client c4 {
+	tls_handshake
+	txreq -url "/small"
+	rxresp
+	expect resp.status == 200
+	expect resp.body == "ok"
+	txreq -url "/large"
+	# Close without reading the large response
+} -run
+
+# Give varnish time to attempt delivery and hit the write error
+delay 1
+
+logexpect l3 -wait
