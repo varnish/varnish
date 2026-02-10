@@ -1263,6 +1263,7 @@ h2_rxstuff(struct h2_sess *h2)
 	/* Set up the workspace buffer */
 	assert(htc->rxbuf_b <= htc->rxbuf_e);
 	HTC_RxPipeline(htc, htc->rxbuf_b);
+	WS_Rollback(h2->ws, 0);
 	HTC_RxInit(htc, h2->ws);
 	res = WS_ReservationSize(h2->ws);
 

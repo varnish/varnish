@@ -188,8 +188,6 @@ h2_init_sess(struct worker *wrk, struct sess *sp, struct h2_sess *h2s,
 	/* Init send queue */
 	VTAILQ_INIT(&h2->tx_l_queue);
 
-	h2->htc->pipeline_snap = WS_Snapshot(h2->ws);
-
 	*up = (uintptr_t)h2;
 
 	return (h2);
@@ -472,6 +470,7 @@ h2_new_session(struct worker *wrk, void *arg)
 	 * basically just resets the WS, memmove()s the pipeline data
 	 * first, and sets htc->rxbuf_[be] to the pipeline data. */
 	HTC_RxPipeline(h2->htc, h2->htc->rxbuf_b + sizeof(H2_prism));
+	WS_Rollback(h2->ws, 0);
 	HTC_RxInit(h2->htc, h2->ws);
 	WS_ReleaseP(h2->htc->ws, h2->htc->rxbuf_e);
 
