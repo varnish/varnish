@@ -175,9 +175,9 @@ h2_init_sess(struct worker *wrk, struct sess *sp, struct h2_sess *h2s,
 
 	/* Allocate a scratch space to use for staging small outgoing
 	 * frames. */
-	h2->tx_s_start = WS_Alloc(h2->ws, H2_TX_BUFSIZE);
+	h2->tx_s_start = WS_Alloc(wrk->aws, H2_TX_BUFSIZE);
 	if (h2->tx_s_start == NULL) {
-		VSLb(h2->vsl, SLT_Error, "H2 sess: Out of WS");
+		VSLb(h2->vsl, SLT_Error, "H2 sess: Out of workspace_thread");
 		h2_del_sess(wrk, h2, SC_OVERLOAD);
 		return (NULL);
 	}
