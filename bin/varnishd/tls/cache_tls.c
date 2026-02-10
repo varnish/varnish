@@ -78,35 +78,12 @@ VTLS_vsl_sslerr(struct vtls_log *log, SSL *ssl, int i)
 	e = SSL_get_error(ssl, i);
 
 	switch (e) {
-	case SSL_ERROR_NONE:
-		l = "SSL_ERROR_NONE";
-		break;
-	case SSL_ERROR_ZERO_RETURN:
-		l = "SSL_ERROR_ZERO_RETURN";
-		break;
-	case SSL_ERROR_WANT_READ:
-		l = "SSL_ERROR_WANT_READ";
-		break;
-	case SSL_ERROR_WANT_WRITE:
-		l = "SSL_ERROR_WANT_WRITE";
-		break;
-	case SSL_ERROR_WANT_CONNECT:
-		l = "SSL_ERROR_WANT_CONNECT";
-		break;
-	case SSL_ERROR_WANT_ACCEPT:
-		l = "SSL_ERROR_WANT_ACCEPT";
-		break;
-	case SSL_ERROR_WANT_X509_LOOKUP:
-		l = "SSL_ERROR_WANT_X509_LOOKUP";
-		break;
-	case SSL_ERROR_SYSCALL:
-		l = "SSL_ERROR_SYSCALL";
-		break;
-	case SSL_ERROR_SSL:
-		l = "SSL_ERROR_SSL";
-		break;
-	default:
-		l = "<undefined>";
+#define SSL_ERR(a) \
+		case a: l = #a; break;
+#include "tbl/ssl_err.h"
+#undef SSL_ERR
+		default:
+			l = "<undefined>";
 	}
 
 	if (e == SSL_ERROR_SYSCALL && i < 0)

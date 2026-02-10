@@ -32,6 +32,7 @@ nobase_pkginclude_HEADERS = \
 	tbl/req_flags.h \
 	tbl/sess_attr.h \
 	tbl/sess_close.h \
+	tbl/ssl_err.h \
 	tbl/symbol_kind.h \
 	tbl/vcc_feature_bits.h \
 	tbl/vcl_returns.h \
