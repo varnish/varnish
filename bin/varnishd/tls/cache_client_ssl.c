@@ -1004,9 +1004,9 @@ vtls_set_dh(struct cli *cli, struct vtls_ctx *vc, BIO *src,
 static struct vtls_ctx *
 vtls_ctx_new_from_pem(struct cli *cli, const char *name_id,
     const char *pem, int pem_len, const char *key, int key_len,
-    const char *dh, int dh_len,
-    int protos, int prefer_server_ciphers,
-    const char *ciphers, const char *ciphersuites, X509 **px509)
+    const char *dh, int dh_len, int protos, int prefer_server_ciphers,
+    const char *ciphers, const char *ciphersuites,
+    const char *ecdh_curve, X509 **px509)
 {
 	struct vtls_ctx *vc;
 	BIO *src;
@@ -1051,8 +1051,26 @@ vtls_ctx_new_from_pem(struct cli *cli, const char *name_id,
 		    SSL_OP_CIPHER_SERVER_PREFERENCE);
 	(void)SSL_CTX_set_options(vc->ctx, SSL_OP_NO_RENEGOTIATION);
 
-	/* Enable ECDH */
-	AN(SSL_CTX_set_ecdh_auto(vc->ctx, 1));
+	/* Set key exchange groups (ECDH curves + PQ hybrids) */
+	if (ecdh_curve != NULL && strcmp(ecdh_curve, "auto") != 0) {
+		if (SSL_CTX_set1_groups_list(vc->ctx,
+		    TRUST_ME(ecdh_curve)) == 0) {
+			VCLI_Out(cli,
+			    "Failed to set groups:'%s'\n",
+			    ecdh_curve);
+			while ((e = ERR_get_error())) {
+				ERR_error_string_n(e, errbuf,
+				    sizeof errbuf);
+				VCLI_Out(cli, "%s\n", errbuf);
+			}
+			vtls_ctx_free(vc);
+			return (NULL);
+		}
+	} else {
+		/* For openssl > 1.1 'auto' is default on and this is
+		 * just a NOOP macro. */
+		AN(SSL_CTX_set_ecdh_auto(vc->ctx, 1));
+	}
 
 	/* Set ciphers if specified */
 	if (ciphers != NULL && *ciphers != '\0') {
@@ -1328,7 +1346,7 @@ vtls_cli_cert_load(struct cli *cli, const char *const *av, void *priv)
 	/* Create SSL_CTX and get X509 for hostname extraction */
 	vc = vtls_ctx_new_from_pem(cli, id, cert, cert_len, privkey, privkey_len,
 	    dh, dh_len, protos, prefer_server_ciphers, ciphers, ciphersuites,
-	    &x509);
+	    vtls->cfg->ecdh_curve, &x509);
 
 	/* Clear sensitive data from memory */
 	ZERO_OBJ(cert, cert_len);
