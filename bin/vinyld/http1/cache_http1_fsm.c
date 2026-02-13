@@ -73,7 +73,8 @@ http1_getstate(const struct sess *sp)
 }
 
 /*--------------------------------------------------------------------
- * Call protocol for this request
+ * Call protocol for this request that may be new or reembarked from a
+ * waiting list.
  */
 
 static void v_matchproto_(task_func_t)
@@ -92,13 +93,7 @@ http1_req(struct worker *wrk, void *arg)
 }
 
 /*--------------------------------------------------------------------
- * Call protocol for this session (new or from waiter)
- *
- * When sessions are rescheduled from the waiter, a struct pool_task
- * is put on the reserved session workspace (for reasons of memory
- * conservation).  This reservation is released as the first thing.
- * The acceptor and any other code which schedules this function
- * must obey this calling convention with a dummy reservation.
+ * Call protocol for this new session.
  */
 
 static void v_matchproto_(task_func_t)
@@ -114,6 +109,7 @@ http1_new_session(struct worker *wrk, void *arg)
 	sp = req->sp;
 	CHECK_OBJ_NOTNULL(sp, SESS_MAGIC);
 
+	AZ(req->ws_req);
 	req->htc->pipeline_snap = ws_pipeline_rollback;
 	HTC_RxInit(req->htc, req->ws);
 
@@ -136,6 +132,18 @@ http1_new_session(struct worker *wrk, void *arg)
 	wrk->task->priv = req;
 }
 
+/*--------------------------------------------------------------------
+ * Call protocol for this session returning from a waiter.
+ *
+ * When sessions are rescheduled from the waiter, a struct pool_task
+ * is put on the reserved session workspace (in the absence of a
+ * worker thread to store it, for memory conservation).
+ *
+ * This reservation is released as the first thing. Any code which
+ * schedules this function must obey this calling convention with a
+ * temp reservation.
+ */
+
 static void v_matchproto_(task_func_t)
 http1_unwait(struct worker *wrk, void *arg)
 {
@@ -147,6 +155,7 @@ http1_unwait(struct worker *wrk, void *arg)
 	WS_Release(sp->ws, 0);
 	req = Req_New(sp, NULL);
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
+	AZ(req->ws_req);
 	req->htc->rfd = &sp->fd;
 	HTC_RxInit(req->htc, req->ws);
 	http1_setstate(sp, H1NEWREQ);
