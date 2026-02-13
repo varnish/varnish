@@ -1,15 +1,21 @@
-name: Make Check
+name: Compile and Check
 
 on:
   push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
-  check:
+  make_dist:
+    name: Create distribution tarball
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
           sudo apt-get update
           sudo apt-get install -y \
             autoconf \
@@ -17,18 +23,232 @@ jobs:
             build-essential \
             ca-certificates \
             cpio \
+            git \
             libedit-dev \
             libjemalloc-dev \
             libncurses-dev \
             libpcre2-dev \
+            libssl-dev \
             libtool \
             libunwind-dev \
             pkg-config \
             python3-sphinx
-      - uses: actions/checkout@v4
+
+      - name: Build distribution tarball
+        run: |
+          ./autogen.sh
+          ./configure
+          make dist
+
+      - name: Upload tarball
+        uses: actions/upload-artifact@v4
         with:
-          submodules: true
-      - run: ./autogen.sh
-      - run: ./configure
-      - run: make -j 8
-      - run: make check -j 8 || tools/ci_make_recheck.sh
+          name: dist-tarball
+          path: varnish-*.tar.gz
+          retention-days: 1
+
+  build:
+    name: Build${{ matrix.os.check && ' and Check' || '' }} on ${{ matrix.os.dist }}:${{ matrix.os.version }} (${{ matrix.arch.name }})
+    needs: make_dist
+    runs-on: ubuntu-24.04${{ matrix.arch.suffix }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - name: "x86"
+            suffix: ""
+          - name: "arm"
+            suffix: "-arm"
+        os:
+          - { dist: almalinux,   version: "10",      check: true  }
+          - { dist: almalinux,   version: "9",       check: false }
+          - { dist: alpine,      version: latest,    check: true  }
+          - { dist: amazonlinux, version: "2023",    check: false }
+          - { dist: archlinux,   version: latest,    check: true  }
+          - { dist: debian,      version: bookworm,  check: false }
+          - { dist: debian,      version: trixie,    check: true  }
+          - { dist: ubuntu,      version: jammy,     check: false }
+          - { dist: ubuntu,      version: noble,     check: false }
+          - { dist: ubuntu,      version: questing,  check: false }
+          - { dist: ubuntu,      version: resolute,  check: false }
+        exclude:
+          - os: { dist: archlinux, version: latest, check: true }
+            arch: { name: "arm", suffix: "-arm" }
+    steps:
+      - &download_tarball
+        name: Download tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-tarball
+
+      - &extract_tarball
+        name: Extract tarball
+        run: |
+          tar xzf varnish-*.tar.gz --strip 1
+
+      - name: Build container image
+        run: |
+          cat > Dockerfile.build << 'EOF'
+          FROM ${{ matrix.os.dist }}:${{ matrix.os.version }}
+
+          RUN if command -v apt-get &> /dev/null; then \
+                export DEBIAN_FRONTEND=noninteractive && \
+                export DEBCONF_NONINTERACTIVE_SEEN=true && \
+                apt-get update && \
+                apt-get install -y \
+                  build-essential \
+                  ca-certificates \
+                  cpio \
+                  git \
+                  libedit-dev \
+                  libjemalloc-dev \
+                  libncurses-dev \
+                  libpcre2-dev \
+                  libssl-dev \
+                  libunwind-dev \
+                  python3-sphinx \
+                  pkg-config; \
+              elif command -v dnf &> /dev/null; then \
+                dnf install -y epel-release || true && \
+                dnf config-manager --set-enabled crb || true && \
+                dnf install -y \
+                  diffutils \
+                  gcc \
+                  git \
+                  jemalloc-devel \
+                  libedit-devel \
+                  libunwind-devel \
+                  make \
+                  ncurses-devel \
+                  openssl-devel \
+                  pcre2-devel \
+                  python3-sphinx \
+                  pkgconfig; \
+              elif command -v apk &> /dev/null; then \
+                apk add --no-cache \
+                  bash \
+                  build-base \
+                  ca-certificates \
+                  cpio \
+                  git \
+                  libedit-dev \
+                  jemalloc-dev \
+                  linux-headers \
+                  ncurses-dev \
+                  openssl-dev \
+                  pcre2-dev \
+                  libunwind-dev \
+                  py3-docutils \
+                  py3-sphinx \
+                  pkgconf; \
+              elif command -v pacman &> /dev/null; then \
+                pacman -Syu --noconfirm && \
+                pacman -S --noconfirm \
+                  base-devel \
+                  ca-certificates \
+                  cpio \
+                  git \
+                  jemalloc \
+                  libedit \
+                  libunwind \
+                  ncurses \
+                  openssl \
+                  pcre2 \
+                  python-docutils \
+                  python-sphinx \
+                  pkgconf; \
+              fi
+          EOF
+
+          docker build -f Dockerfile.build -t varnish-build:${{ matrix.os.dist }}-${{ matrix.os.version }} .
+
+      - name: Build
+        id: build
+        run: |
+          docker run \
+            --rm \
+            --workdir /workspace \
+            -v ${{ github.workspace }}:/workspace \
+            varnish-build:${{ matrix.os.dist }}-${{ matrix.os.version }} \
+            bash -c '
+              set -e
+              ./configure
+              make -k -j V=1
+            '
+      - name: Check
+        id: check
+        if: matrix.os.check
+        run: |
+          docker run \
+            --rm \
+            --workdir /workspace \
+            -v ${{ github.workspace }}:/workspace \
+            varnish-build:${{ matrix.os.dist }}-${{ matrix.os.version }} \
+            bash -c '
+              set -e
+              make check -k V=1 -j 8
+            '
+      - &collect_logs
+        name: Collect failed test logs
+        if: always()
+        run: |
+          mkdir -p failed-logs
+          find . -name "*.log" -type f | while read logfile; do
+            if tail -n 1 "$logfile" 2>/dev/null | grep -q "^FAIL"; then
+              cp --parents "$logfile" failed-logs/
+            fi
+          done
+
+      - name: Upload failed logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-logs-${{ matrix.os.dist }}-${{ matrix.os.version }}-${{ matrix.arch.name }}
+          path: failed-logs/
+          if-no-files-found: ignore
+
+  check_macos:
+    name: Build and Check on MacOS (${{ matrix.macos.arch }})
+    needs: make_dist
+    runs-on: ${{ matrix.macos.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        macos:
+          - runner: macos-26
+            arch: arm
+          - runner: macos-26-large
+            arch: x86
+    steps:
+      - *download_tarball
+
+      - *extract_tarball
+
+      - name: Install dependencies
+        run: |
+          yes | brew install \
+                  automake \
+                  docutils \
+                  jemalloc \
+                  libedit \
+                  libxml2 \
+                  ncurses \
+                  sphinx-doc
+          sudo pip3 install lxml --break-system-packages
+
+      - name: Build and Check
+        id: check
+        run: |
+          ./configure --with-persistent-storage
+          make -k -j V=1
+          make check -k V=1 -j 8
+
+      - *collect_logs
+
+      - name: Upload failed logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-logs-macos-${{ matrix.macos.arch }}
+          path: failed-logs/
+          if-no-files-found: ignore
