@@ -326,6 +326,7 @@ Req_Cleanup(struct sess *sp, struct worker *wrk, struct req *req)
 	req->htc->doclose = SC_NULL;
 	req->htc->body_status = NULL;
 
+	req->ws_req = 0;
 	if (WS_Overflowed(req->ws))
 		wrk->stats->ws_client_overflow++;
 

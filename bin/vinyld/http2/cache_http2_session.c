@@ -106,6 +106,7 @@ h2_init_sess(struct sess *sp, struct h2_sess *h2s, struct req **psrq,
 	struct h2_sess *h2;
 
 	TAKE_OBJ_NOTNULL(srq, psrq, REQ_MAGIC);
+	AZ(srq->ws_req);
 
 	/* proto_priv session attribute will always have been set up by H1
 	 * before reaching here. */
