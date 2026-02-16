@@ -108,19 +108,19 @@ def main():
 
     use_flags = []
     for i in DESIRABLE_OPTIONS + DESIRABLE_WFLAGS + UNDESIRABLE_WFLAGS:
+        sys.stderr.write("checking whether C compiler accepts " + i + "... ")
         j = cc(compiler, i, obj_file.name, src_file.name)
         if not j:
             use_flags.append(i)
+            sys.stderr.write("yes\n")
         else:
-            sys.stderr.write(compiler + " cannot " + i + '\n')
+            sys.stderr.write(" no\n")
             if b'error: unrecognized command line option' in j:
                 # LLVM
                 pass
             elif b'warning: unknown warning option' in j:
                 # GCC
                 pass
-            else:
-                sys.stderr.write("\n\t" + j.decode('utf8') + '\n')
     print(" ".join(use_flags))
 
 if __name__ == "__main__":
