@@ -3,9 +3,15 @@
 	SPDX-License-Identifier: BSD-2-Clause
 	See LICENSE file for full text of license
 
-=========================
-IMPORTANT - WE ARE MOVING
-=========================
+=====================================
+IMPORTANT - THIS REPOSITORY HAS MOVED
+=====================================
+
+New location: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache
+
+The main branch changes from ``master`` to ``main``.
+
+The last usable version on github has the ``last`` tag.
 
 Read this: https://vinyl-cache.org/organization/moving.html
 

@@ -5,6 +5,13 @@ Copyright 2010-2025 UPLEX - Nils Goroll Systemoptimierung])
 AC_REVISION([$Id$])
 AC_INIT([Varnish], [trunk], [varnish-dev@varnish-cache.org])
 AC_CONFIG_SRCDIR(include/miniobj.h)
+AC_MSG_ERROR([
+
+
+	      THIS REPOSITORY HAS MOVED. See README.rst
+
+
+	      ])
 if ! test -f "${srcdir}/bin/varnishtest/vtest2/src/vtc_main.c" ; then
   AC_MSG_ERROR([vtest2 seems to be missing, use "git clone --recursive" or "git submodule update --init"])
 fi

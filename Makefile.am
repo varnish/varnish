@@ -1,3 +1,11 @@
+all:
+	@echo
+	@echo
+	@echo THIS REPOSITORY HAS MOVED. See README.rst
+	@echo
+	@echo
+	exit 1
+
 ACLOCAL_AMFLAGS = -I m4 -I .
 
 SUBDIRS = include lib bin vmod etc doc man contrib
