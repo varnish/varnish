@@ -81,7 +81,7 @@ h2_sess_panic(struct vsb *vsb, const struct sess *sp)
 	VSB_printf(vsb, "open_streams = %d, highest_stream = %u,\n",
 	    h2->open_streams, h2->highest_stream);
 	VSB_printf(vsb, "tx_window = %jd, rx_window = %jd,\n",
-	    h2->tx_window, h2->rx_window);
+	    (intmax_t)h2->tx_window, (intmax_t)h2->rx_window);
 	VSB_cat(vsb, "local_settings = {");
 	h2_panic_settings(vsb, &h2->local_settings);
 	VSB_cat(vsb, "},\n");
