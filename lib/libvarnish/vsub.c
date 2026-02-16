@@ -40,6 +40,8 @@
 #include <unistd.h>		// BSD/Linux close_range(2)
 #ifndef HAVE_CLOSEFROM
 #  include <dirent.h>
+#  include <limits.h>
+#  include <sys/resource.h>
 #endif
 
 #include "vdef.h"
@@ -74,13 +76,17 @@ VSUB_closefrom(int fd)
 		return;
 #  endif
 	char buf[128];
-	int i, maxfd = 0;
+	int i, maxfd = -1;
+	long lfd;
 	DIR *d;
 	struct dirent *de;
 	char *p;
+	struct rlimit rlim;
 
 	bprintf(buf, "/proc/%d/fd/", getpid());
 	d = opendir(buf);
+	if (d == NULL)
+		d = opendir("/dev/fd/");
 	if (d != NULL) {
 		while (1) {
 			de = readdir(d);
@@ -95,9 +101,16 @@ VSUB_closefrom(int fd)
 		AZ(closedir(d));
 	}
 
-	if (maxfd == 0)
-		maxfd = sysconf(_SC_OPEN_MAX);
-	assert(maxfd > 0);
+	if (maxfd <= 0) {
+		lfd = sysconf(_SC_OPEN_MAX);
+		if (lfd > 0 && lfd <= INT_MAX)
+			maxfd = (int)lfd;
+	}
+	if (maxfd <= 0 && getrlimit(RLIMIT_NOFILE, &rlim) == 0 &&
+	    rlim.rlim_cur > 0)
+		maxfd = rlim.rlim_cur > INT_MAX ? INT_MAX : (int)rlim.rlim_cur;
+	if (maxfd <= fd)
+		return;
 	for (; maxfd > fd; maxfd--)
 		(void)close(maxfd);
 #endif
