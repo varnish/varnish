@@ -56,3 +56,6 @@ vmod_debug_symbols_regex = 'Vmod_.*_Data'
 
 # not --strict, not installed
 vmodtoolargs_debug = --boilerplate --noinst -o vcc_debug_if
+
+libvmod_tls_la_CFLAGS += $(OPENSSL_CFLAGS)
+libvmod_tls_la_LDFLAGS += $(OPENSSL_LIBS)
