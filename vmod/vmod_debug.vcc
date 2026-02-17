@@ -69,6 +69,10 @@ $Function STRING test_priv_top(PRIV_TOP, STRING)
 
 Test function for TOP private pointers
 
+$Function VOID test_default_bool(BOOL test=true)
+
+Test function for default bool parameters
+
 $Object obj(STRING string="default", ENUM { one, two, three } number=one)
 
 Test object
