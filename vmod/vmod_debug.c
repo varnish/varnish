@@ -187,6 +187,14 @@ xyzzy_test_priv_top(VRT_CTX, struct vmod_priv *priv, VCL_STRING s)
 	return (priv->priv);
 }
 
+VCL_VOID v_matchproto_(td_debug_test_default_bool)
+xyzzy_test_default_bool(VRT_CTX, VCL_BOOL test)
+{
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	assert(test == 0 || test == 1);
+}
+
 VCL_VOID v_matchproto_(td_debug_test_priv_vcl)
 xyzzy_test_priv_vcl(VRT_CTX, struct vmod_priv *priv)
 {

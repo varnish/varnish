@@ -1,0 +1,19 @@
+varnishtest "Test boolean parameters work without stdbool.h in vgc.c"
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -vcl+backend {
+	import debug;
+
+	sub vcl_init {
+		debug.test_default_bool(false);
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+} -run
