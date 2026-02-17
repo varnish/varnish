@@ -19,7 +19,7 @@ CLEANFILES = \
 
 EXTRA_DIST = \
 	$(TESTS) \
-	README.rst \
+	README.md \
 	README.Packaging \
 	LICENSE \
 	autogen.sh \
