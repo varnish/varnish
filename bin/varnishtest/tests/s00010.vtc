@@ -1,6 +1,6 @@
 varnishtest "client h1 send timeouts - tcp"
 
-# XXX See https://github.com/varnishcache/varnish-cache/pull/2980#issuecomment-486214661
+# XXX See https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/2980#issuecomment-52170
 feature cmd {test $(uname) != "SunOS" && test $(uname) != "Darwin"}
 
 barrier b1 cond 2 -cyclic
