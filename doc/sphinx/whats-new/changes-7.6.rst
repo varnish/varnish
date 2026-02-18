@@ -11,7 +11,7 @@ A more detailed and technical account of changes in Varnish, with
 links to issues that have been fixed and pull requests that have been
 merged, may be found in the `change log`_.
 
-.. _change log: https://github.com/varnishcache/varnish-cache/blob/master/doc/changes.rst
+.. _change log: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst
 
 Changes applying to most varnish-cache programs
 ===============================================

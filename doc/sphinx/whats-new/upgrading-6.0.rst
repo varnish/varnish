@@ -485,7 +485,7 @@ sharding of requests to backends will change once and only once.
 
 If you have been using other values of ``alg`` for ``.key()`` and need
 to preserve the previous behavior, see the
-`change log <https://github.com/varnishcache/varnish-cache/blob/master/doc/changes.rst>`_
+`change log <https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst>`_
 for advice on how to do so.
 
 With the ``resolve=LAZY`` argument of the ``.backend()`` method, the
@@ -834,7 +834,7 @@ Other changes
 
   * The VRT API version has been bumped to 7.0, and comprises a variety
     of new additions and changes. See ``vrt.h`` and the
-    `change log <https://github.com/varnishcache/varnish-cache/blob/master/doc/changes.rst>`_
+    `change log <https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst>`_
     for details.
 
   * There are new rules about including API headers -- some may only
@@ -852,7 +852,7 @@ Other changes
     strictly 64 bit (rather than leave it to whatever your platform
     defines as ``long``). But you may not get that full precision,
     for reasons discussed in the
-    `change log <https://github.com/varnishcache/varnish-cache/blob/master/doc/changes.rst>`_.
+    `change log <https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst>`_.
 
   * As part of VRT version 7.0, the ``path`` field has been added to
     to ``struct vrt_backend``, which a VMOD can use with

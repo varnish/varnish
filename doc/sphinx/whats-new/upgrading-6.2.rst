@@ -184,7 +184,7 @@ See ``vrt.h``, the `change log`_ and
 :ref:`whatsnew_changes_director_api_2019_03` in
 :ref:`whatsnew_changes_2019_03` for details.
 
-.. _change log: https://github.com/varnishcache/varnish-cache/blob/master/doc/changes.rst
+.. _change log: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst
 
 The vmodtool has been changed significantly to avoid name clashes in
 the C identifiers declared in ``vcc_if.h``. This may necessitate

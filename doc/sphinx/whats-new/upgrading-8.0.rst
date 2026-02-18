@@ -9,7 +9,7 @@ This document only lists breaking changes that you should be aware of when
 upgrading from Varnish-Cache 7.x to 8.0. For a complete list of changes,
 please refer to the `change log`_ or :ref:`whatsnew_changes_8.0`.
 
-.. _change log: https://github.com/varnishcache/varnish-cache/blob/master/doc/changes.rst
+.. _change log: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst
 
 varnishd
 ========
