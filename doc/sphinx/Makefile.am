@@ -112,6 +112,15 @@ include/varnishlog_synopsis.rst: $(top_builddir)/bin/varnishlog/varnishlog
 BUILT_SOURCES += include/varnishlog_options.rst \
 	include/varnishlog_synopsis.rst
 
+include/varnishlog-json_options.rst: $(top_builddir)/bin/varnishlog-json/varnishlog-json
+	$(top_builddir)/bin/varnishlog-json/varnishlog-json --options > ${@}_
+	mv -f ${@}_ ${@}
+include/varnishlog-json_synopsis.rst: $(top_builddir)/bin/varnishlog-json/varnishlog-json
+	$(top_builddir)/bin/varnishlog-json/varnishlog-json --synopsis > ${@}_
+	mv -f ${@}_ ${@}
+BUILT_SOURCES += include/varnishlog-json_options.rst \
+	include/varnishlog-json_synopsis.rst
+
 include/varnishtop_options.rst: $(top_builddir)/bin/varnishtop/varnishtop
 	$(top_builddir)/bin/varnishtop/varnishtop --options > ${@}_
 	mv -f ${@}_ ${@}
