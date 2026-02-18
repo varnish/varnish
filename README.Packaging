@@ -17,7 +17,7 @@ and made available on https://packagecloud.io/varnishcache/ .
 
 Packaging files and scripts for Debian and Redhat:
 
-    https://github.com/varnishcache/pkg-varnish-cache
+    https://code.vinyl-cache.org/vinyl-cache/pkg-vinyl-cache
 
 
 Third-party packages

@@ -8,7 +8,7 @@ body:
       
       If your panic happens in the child_sigsegv_handler function, look at the backtrace to determine whether it is similar to another issue. When in doubt, open a new one and it will be closed as a duplicate if needed.
       
-      If it's a packaging bug (including sysv or systemd services bugs) please open an issue on [varnishcache/pkg-varnish-cache](https://github.com/varnishcache/pkg-varnish-cache) instead.
+      If it's a packaging bug (including sysv or systemd services bugs) please open an issue on [varnishcache/pkg-varnish-cache](https://code.vinyl-cache.org/vinyl-cache/pkg-vinyl-cache) instead.
       
       If it's a feature request, please start a thread on the [varnish-misc](https://varnish-cache.org/support/index.html#mailing-lists) list instead.
       
