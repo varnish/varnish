@@ -411,7 +411,7 @@ vdire_start_iter(struct vdire *vdire)
 
 	CHECK_OBJ_NOTNULL(vdire, VDIRE_MAGIC);
 
-	// https://github.com/varnishcache/varnish-cache/pull/4142#issuecomment-2593091097
+	// https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4142#issuecomment-57363
 	ASSERT_CLI();
 
 	Lck_Lock(vdire->mtx);
@@ -461,7 +461,7 @@ vdire_start_event(struct vdire *vdire, const struct vcltemp *temp)
 
 	Lck_AssertHeld(vdire->mtx);
 
-	// https://github.com/varnishcache/varnish-cache/pull/4142#issuecomment-2593091097
+	// https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4142#issuecomment-57363
 	ASSERT_CLI();
 
 	AZ(vdire->checkpoint);
