@@ -77,7 +77,7 @@ chown varnish "${TMPDIR}" > /dev/null 2>&1 || true
 
 if ! (cd varnish-cache 2>/dev/null) ; then
 	git clone --recursive \
-		https://github.com/varnishcache/varnish-cache.git \
+		https://code.vinyl-cache.org/vinyl-cache/vinyl-cache.git \
 		varnish-cache
 else
 	(cd varnish-cache && git submodule update --init || true)

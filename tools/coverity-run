@@ -4,7 +4,7 @@
 #
 # Requires the Coverity scanner in $PATH and the upload token set in $COVTOKEN.
 #
-# See https://github.com/varnishcache/varnish-cache/wiki/Coverity-scans for overview.
+# See https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/wiki/Coverity-scans for overview.
 #
 
 
