@@ -27,7 +27,7 @@ This will recursively check out the vtest2 sources from the default repository
 URL. If you prefer to use vtest2 from a non-default (local) repository, you can
 tell git to replace the url:
 
-        ``git config url.$YOUR_VTEST2_URL.insteadOf https://github.com/vtest/VTest2.git``
+        ``git config url.$YOUR_VTEST2_URL.insteadOf https://code.vinyl-cache.org/vtest/VTest2.git``
 
 Build dependencies on FreeBSD
 -----------------------------

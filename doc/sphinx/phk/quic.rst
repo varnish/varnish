@@ -160,7 +160,7 @@ and once sites get even bigger, or more GDPR exposed, the
 ability to use diverse TLS offloaders is seen as a big benefit.
 
 Finally, there is the little detail of testing:  Varnishtest,
-which has its own `VTest project <https://github.com/vtest/VTest>`_
+which has its own `VTest project <https://code.vinyl-cache.org/vtest/VTest>`_
 now, will need to learn about HTTP3, QUIC and possibly TLS also.
 
 And of course, when we ask the Varnish users, they say *"Ohhh...

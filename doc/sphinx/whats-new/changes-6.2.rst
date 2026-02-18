@@ -230,7 +230,7 @@ available as a stand-alone program useful for testing various HTTP
 clients, servers and proxies (not just Varnish). But for the time
 being, we still use :ref:`varnishtest(1)` for our own testing.
 
-.. _VTest: https://github.com/vtest/VTest
+.. _VTest: https://code.vinyl-cache.org/vtest/VTest
 
 Changes for developers and VMOD authors
 =======================================
