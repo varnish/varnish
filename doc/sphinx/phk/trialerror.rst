@@ -84,7 +84,7 @@ So, taking my friends advice, I sat down and wrote VTEST, which
 consists of two small pieces of code: Tester and Reporter.
 
 The tester is a small, 173 lines, `portable and simple shell script
-<https://github.com/varnishcache/varnish-cache/blob/master/tools/vtest.sh>`_
+<https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/tools/vtest.sh>`_
 which runs on the computer, physical or virtual, where we want
 to test Varnish.
 
