@@ -111,7 +111,7 @@ The Homepage
 
 The homepage is built with `Sphinx <http://www.sphinx-doc.org/>`_
 and lives in its own
-`github project <https://github.com/varnishcache/homepage>`_ (Pull requests
+`github project <https://code.vinyl-cache.org/vinyl-cache/homepage>`_ (Pull requests
 are very welcome!)
 
 We have taken snapshots of some of the old webproperties, Trac, the
