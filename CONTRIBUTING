@@ -3,7 +3,7 @@ Contributing to Varnish Cache
 
 Official development tree is here:
 
-    https://github.com/varnishcache/varnish-cache
+    https://code.vinyl-cache.org/vinyl-cache/vinyl-cache
 
 These days we prefer patches as pull requests directly to that tree.
 

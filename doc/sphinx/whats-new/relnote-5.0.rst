@@ -151,9 +151,9 @@ things take time to write.
 The best way to get involved is to just jump in and do stuff that
 needs done.
 
-Here is the `Varnish Cache github page <https://github.com/varnishcache/varnish-cache>`_.
+Here is the `Varnish Cache github page <https://code.vinyl-cache.org/vinyl-cache/vinyl-cache>`_.
 
-And here is the `Varnish Projects homepage on github <https://github.com/varnishcache/varnish-cache>`_.
+And here is the `Varnish Projects homepage on github <https://code.vinyl-cache.org/vinyl-cache/vinyl-cache>`_.
 
 Welcome on board!
 

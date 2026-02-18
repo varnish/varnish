@@ -670,7 +670,7 @@ Future plans include the ability to automate this for out-of-tree VMODs
 and remove manual steps. To learn more about the history behind this
 change, it was formalized via the Varnish Improvement Process:
 
-https://github.com/varnishcache/varnish-cache/wiki/VIP20%3A-Varnish-ABI-and-packaging
+https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/wiki/VIP20%3A-Varnish-ABI-and-packaging
 
 Another thing available only to RPM packages as of 6.0.0 is virtual
 provides for VMODs.
