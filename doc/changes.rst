@@ -742,11 +742,10 @@ Varnish Cache 7.5.0 (2024-03-18)
   Cache evictions of superseded objects are logged as ``ExpKill``
   messages starting with ``VBF_Superseded``.
 
-  .. _Varnish-Modules #222: https://github.com/varnish/varnish-modules/issues/222
-
 * The implementation of ``PRIV_TASK`` and ``PRIV_TOP`` VMOD
   function/method arguments has been fixed to also work with
-  ``std.rollback()`` (`Varnish-Modules #222`_)
+  ``std.rollback()`` (`Varnish-Modules #222
+  <https://github.com/varnish/varnish-modules/issues/222>`_)
 
 * Transports are now responsible for calling ``VDP_Close()`` in all
   cases.
@@ -2049,7 +2048,7 @@ Varnish Cache 6.6.0 (2021-03-15)
   to be literal, whereas before they could be taken from some other
   variable or function returning ``VCL_STRING``.
 
-  Note that these functions never actually handled _dynamic_ regexen,
+  Note that these functions never actually handled *dynamic* regexen,
   the string passed with the first call was compiled to a regex, which
   was then used for the lifetime of the respective VCL.
 
@@ -2855,14 +2854,14 @@ Fixed bugs
 
 * Fix warmup/rampup of the shard director (2823_)
 
-* Fix VRT_priv_task for calls from vcl_pipe {} (2820_)
+* Fix ``VRT_priv_task`` for calls from vcl_pipe {} (2820_)
 
 * Fix assigning <bool> == <bool> (2809_)
 
 * Fix vmod object constructor documentation in the ``vmodtool.py`` -
   generated RST files
 
-* Fix some stats metrics (vsc) which were wrongly marked as _gauge_
+* Fix some stats metrics (vsc) which were wrongly marked as *gauge*
 
 * Fix ``varnishd -I`` (2782_)
 
@@ -2933,7 +2932,7 @@ C APIs (for vmod and utility authors)
 * libvarnishapi so version bumped to 2.0.0 (2718_)
 
 * For VMOD methods/functions with PRIV_TASK or PRIV_TOP arguments, the
-  struct vrt_priv is allocated on the appropriate workspace. In the
+  ``struct vrt_priv`` is allocated on the appropriate workspace. In the
   out-of-workspace condition, VCL failure is invoked, and the VMOD
   method/function is not called. (2708_)
 
@@ -3286,7 +3285,7 @@ C APIs (for vmod and utility authors)
 * Rules for including API headers have been changed:
   * many headers can now only be included once
   * some headers require specific include ordering
-  * only ``cache.h`` _or_ ``vrt.h`` can be included
+  * only ``cache.h`` *or* ``vrt.h`` can be included
 
 * Signatures of functions in the VLU API for bytestream into text
   serialization have been changed
