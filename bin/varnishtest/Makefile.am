@@ -95,6 +95,9 @@ EXTRA_DIST = $(srcdir)/vtest2/src/../tests/*.vtc \
 	vtest2/src/sequences \
 	vtest2/src/teken.3 \
 	vtest2/src/huffman_gen.py \
+	vtest2/src/tbl/tls_alert_tbl.h \
+	vtest2/src/tbl/tls_cmds_tbl.h \
+	vtest2/src/tbl/tls_proto_tbl.h \
 	vtest2/src/tbl/vhp_huffman.h
 
 teken.c: teken_state.h
