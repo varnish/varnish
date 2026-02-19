@@ -229,7 +229,7 @@ _vtls_sni_lookup(const struct vtls_sni_map *m, const char *id, int wc)
 		return (NULL);
 
 	/* Do another lookup for wildcard matches */
-	k.id = strchr(id, '.');
+	k.id = TRUST_ME(strchr(id, '.'));
 	if (k.id == NULL)
 		return (NULL);
 	r = VRBT_FIND(vtls_sni_rbtree, &m->root, &k);
