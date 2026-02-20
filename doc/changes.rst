@@ -1,6 +1,6 @@
 ..
-	Copyright (c) 2011-2024 Varnish Software AS
-	Copyright 2016-2024 UPLEX - Nils Goroll Systemoptimierung
+	Copyright (c) 2011-2026 Varnish Software AS
+	Copyright 2016-2026 UPLEX - Nils Goroll Systemoptimierung
 	SPDX-License-Identifier: BSD-2-Clause
 	See LICENSE file for full text of license
 
