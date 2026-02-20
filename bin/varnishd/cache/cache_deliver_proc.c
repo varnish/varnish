@@ -421,6 +421,16 @@ VDPIO_Return(const struct vdp_ctx *vdc)
 	ObjVAIreturn(vdc->wrk, vdc->vai_hdl, vdc->scaret);
 }
 
+// Notify after a VDP's io_lease has return -EAGAIN
+// usually not called from the io thread, so it has a separate wrk
+void
+VDPIO_Notify(struct worker *wrk, const struct vdp_ctx *vdc)
+{
+	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
+
+	ObjVAInotify(wrk, vdc->vai_hdl);
+}
+
 void
 VDPIO_Fini(struct vdp_ctx *vdc)
 {

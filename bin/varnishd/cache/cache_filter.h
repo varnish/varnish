@@ -320,6 +320,7 @@ vdpio_consolidate_vscarab(const struct vdp_ctx *vdc, struct vscarab *scarab)
 int VDPIO_Init(struct vdp_ctx *vdc, struct objcore *oc, struct ws *ws,
     vai_notify_cb *notify_cb, void *notify_priv, struct vscaret *scaret);
 void VDPIO_Return(const struct vdp_ctx *vdc);
+void VDPIO_Notify(struct worker *, const struct vdp_ctx *vdc);
 void VDPIO_Fini(struct vdp_ctx *vdc);
 
 /* Registry functions -------------------------------------------------*/

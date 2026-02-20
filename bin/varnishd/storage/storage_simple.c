@@ -615,6 +615,18 @@ sml_ai_return(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 	}
 }
 
+// call the notify_cb to allow VDPs to use -EAGAIN also
+static void v_matchproto_(vai_return_f)
+sml_ai_notify(struct worker *wrk, vai_hdl vhdl)
+{
+	struct sml_hdl *hdl;
+
+	(void) wrk;
+	CAST_VAI_HDL_NOTNULL(hdl, vhdl, SML_HDL_MAGIC);
+	CHECK_OBJ(&hdl->qe, VAI_Q_MAGIC);
+	hdl->qe.cb(vhdl, hdl->qe.priv);
+}
+
 static void v_matchproto_(vai_fini_f)
 sml_ai_fini(struct worker *wrk, vai_hdl *vai_hdlp)
 {
@@ -655,6 +667,7 @@ sml_ai_init(struct worker *wrk, struct objcore *oc, struct ws *ws,
 	hdl->preamble.vai_lease = sml_ai_lease_simple;
 	hdl->preamble.vai_buffer = sml_ai_buffer;
 	hdl->preamble.vai_return = sml_ai_return_buffers;
+	hdl->preamble.vai_notify = sml_ai_notify;
 	hdl->preamble.vai_fini = sml_ai_fini;
 	hdl->ws = ws;
 
