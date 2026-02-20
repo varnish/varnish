@@ -27,7 +27,10 @@ varnish v1 \
 	}
 } -start
 
+# No response must take less than 200ms, because we push the reluctant vdpio
+# twice, and each delays for 50ms, plus we need to wait for 2 cleanups
 logexpect l1 -v v1 -g raw {
+	fail add *	Timestamp {^Resp: [0-9\.]+ 0\.[01]}
 	fail add *	Debug "scheduling dbg_vai_deliverobj"
 	expect * *	Debug "scheduling dbg_vai_lease"
 	expect * *	ReqHeader "Last: Request"
