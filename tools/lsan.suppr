@@ -6,7 +6,6 @@ leak:STV_Config
 leak:HSH_config
 #
 leak:vcc_
-leak:VSL_Setup
 leak:WRK_BgThread
 leak:vext_argument
 #

@@ -428,7 +428,7 @@ exp_thread(struct worker *wrk, void *priv)
 
 	CAST_OBJ_NOTNULL(ep, priv, EXP_PRIV_MAGIC);
 	ep->wrk = wrk;
-	VSL_Setup(&ep->vsl, NULL, 0);
+	VSL_Alloc(&ep->vsl);
 	AZ(wrk->vsl);
 	wrk->vsl = &ep->vsl;
 	ep->heap = VBH_new(NULL, object_cmp, object_update);
@@ -464,6 +464,7 @@ exp_thread(struct worker *wrk, void *priv)
 			tnext = exp_expire(ep, t);
 	}
 	wrk->vsl = NULL;
+	VSL_Free(&ep->vsl);
 	return (NULL);
 }
 

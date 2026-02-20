@@ -1285,7 +1285,7 @@ VCL_Init(void)
 	ws_snapshot_cli = WS_Snapshot(&ws_cli);
 	CLI_AddFuncs(vcl_cmds);
 	Lck_New(&vcl_mtx, lck_vcl);
-	VSL_Setup(&vsl_cli, NULL, 0);
+	VSL_Alloc(&vsl_cli);
 }
 
 void
@@ -1309,4 +1309,5 @@ VCL_Shutdown(void)
 		}
 		usleep(100 * 1000);
 	}
+	VSL_Free(&vsl_cli);
 }

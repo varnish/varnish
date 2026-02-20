@@ -167,7 +167,7 @@ Req_New(struct sess *sp, const struct req *preq)
 	assert(p < e);
 
 	sz = cache_param->vsl_buffer;
-	VSL_Setup(req->vsl, p, sz);
+	VSL_Init(req->vsl, p, sz);
 	p += sz;
 	p = (void*)PRNDUP(p);
 

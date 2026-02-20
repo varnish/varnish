@@ -481,7 +481,9 @@ int SES_Set_String_Attr(struct sess *sp, enum sess_attr a, const char *src);
 /* cache_shmlog.c */
 extern struct VSC_main *VSC_C_main;
 void VSM_Init(void);
-void VSL_Setup(struct vsl_log *vsl, void *ptr, size_t len);
+void VSL_Init(struct vsl_log *vsl, void *ptr, size_t len);
+void VSL_Alloc(struct vsl_log *vsl);
+void VSL_Free(struct vsl_log *vsl);
 void VSL_ChgId(struct vsl_log *vsl, const char *typ, const char *why,
     vxid_t vxid);
 void VSL_End(struct vsl_log *vsl);

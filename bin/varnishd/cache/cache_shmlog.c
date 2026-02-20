@@ -570,18 +570,17 @@ VSLb_bin(struct vsl_log *vsl, enum VSL_tag_e tag, ssize_t len, const void *ptr)
 }
 
 /*--------------------------------------------------------------------
- * Setup a VSL buffer, allocate space if none provided.
+ * Setup a VSL buffer
  */
 
 void
-VSL_Setup(struct vsl_log *vsl, void *ptr, size_t len)
+VSL_Init(struct vsl_log *vsl, void *ptr, size_t len)
 {
 
-	if (ptr == NULL) {
-		len = cache_param->vsl_buffer;
-		ptr = malloc(len);
-		AN(ptr);
-	}
+	AN(vsl);
+	AN(ptr);
+	AN(len);
+
 	vsl->wlp = ptr;
 	vsl->wlb = ptr;
 	vsl->wle = ptr;
@@ -589,6 +588,22 @@ VSL_Setup(struct vsl_log *vsl, void *ptr, size_t len)
 	vsl->wlr = 0;
 	vsl->wid = NO_VXID;
 	vsl_sanity(vsl);
+}
+
+void
+VSL_Alloc(struct vsl_log *vsl)
+{
+	size_t len = cache_param->vsl_buffer;
+	void *ptr = malloc(len);
+	AN(ptr);
+	VSL_Init(vsl, ptr, len);
+}
+
+void
+VSL_Free(struct vsl_log *vsl)
+{
+	free(vsl->wlb);
+	memset(vsl, 0, sizeof *vsl);
 }
 
 /*--------------------------------------------------------------------*/

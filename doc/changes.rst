@@ -41,6 +41,15 @@ Vinyl-Cache NEXT (2026-03-15)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+* ``VSL_Setup()`` has been replaced with ``VSL_Init()`` to initialize caller-provided
+  space as a vsl buffer and ``VSL_Alloc()`` to allocate the default
+  ``vsl_buffer`` on the heap.
+
+  ``VSL_Free()`` has been added to free the memory allocated by ``VSL_Alloc()``
+
+  ``tools/coccinelle/vsl_setup_retire.cocci`` can be used to partially automate
+  the transition (it does not add ``VSL_Free()``).
+
 * Added vmod ``math``.
 
 .. _4389: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4389

@@ -420,7 +420,7 @@ ban_lurker(struct worker *wrk, void *priv)
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	AZ(priv);
 
-	VSL_Setup(&vsl, NULL, 0);
+	VSL_Alloc(&vsl);
 	AZ(wrk->vsl);
 	wrk->vsl = &vsl;
 
@@ -439,6 +439,7 @@ ban_lurker(struct worker *wrk, void *priv)
 		Lck_Unlock(&ban_mtx);
 	}
 	wrk->vsl = NULL;
+	VSL_Free(&vsl);
 	pthread_exit(0);
 	NEEDLESS(return (NULL));
 }
