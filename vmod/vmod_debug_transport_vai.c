@@ -39,7 +39,12 @@
 #include "cache/cache_transport.h"
 #include "http1/cache_http1.h"
 
+#include "vtim.h"
+
 #include "vmod_debug.h"
+
+/* VDP hello: prepend a string to the start of the response
+ */
 
 #define HELLO "hello "
 
@@ -92,6 +97,109 @@ static const struct vdp vdp_hello = {
 	.io_init = vdpio_hello_init,
 	.io_lease = vdpio_hello_lease
 };
+
+/* VDP reluctant state */
+
+struct vdp_reluctant_state {
+	unsigned		magic;
+#define VDPRS_MAGIC		0xeaf5bc82
+	unsigned		been_reluctant;
+	struct pool_task	task;
+};
+
+/* helper for VDP reluctant, similar to sml_ai_later*, but acting from the other
+ * end of the API
+ *
+ * Using a task which sleeps is extraordinarily inefficient, but this
+ * is vmod_debug after all
+ */
+
+static const vtim_dur reluctant_delay = 0.05;
+
+static void
+vdpio_reluctant_later_task(struct worker *wrk, void *priv)
+{
+
+	VTIM_sleep(reluctant_delay);
+	VDPIO_Notify(wrk, priv);
+}
+
+static void
+vdpio_reluctant_later(struct vdp_ctx *vdc, struct vdp_reluctant_state *vdprs)
+{
+	struct worker *wrk;
+
+	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
+	wrk = vdc->wrk;
+	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
+	CHECK_OBJ_NOTNULL(vdprs, VDPRS_MAGIC);
+	vdprs->task.func = vdpio_reluctant_later_task;
+	vdprs->task.priv = vdc;
+	AZ(Pool_Task(wrk->pool, &vdprs->task, TASK_QUEUE_BO));
+}
+
+/* VDP relunctant: always needs to be asked twice and takes 50ms inbetween
+ */
+
+static int v_matchproto_(vdpio_init_f)
+vdpio_reluctant_init(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
+{
+	struct vdp_reluctant_state *vdprs;
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
+	AN(priv);
+
+	WS_TASK_ALLOC_OBJ(ctx, vdprs, VDPRS_MAGIC);
+	if (vdprs == NULL)
+		return (-1);
+
+	*priv = vdprs;
+	return (capacity);
+}
+
+static int v_matchproto_(vdpio_lease_f)
+vdpio_reluctant_lease(struct vdp_ctx *vdc, struct vdp_entry *this,
+    struct vscarab *scarab)
+{
+	struct vdp_reluctant_state *vdprs;
+
+	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
+	CHECK_OBJ_NOTNULL(this, VDP_ENTRY_MAGIC);
+	CAST_OBJ_NOTNULL(vdprs, this->priv, VDPRS_MAGIC);
+
+	if (vdprs->been_reluctant) {
+		vdprs->been_reluctant = 0;
+		return (vdpio_pull(vdc, this, scarab));
+	}
+
+	vdprs->been_reluctant = 1;
+	vdpio_reluctant_later(vdc, vdprs);
+	return (-EAGAIN);
+}
+
+static void v_matchproto_(vdpio_fini_f)
+vdpio_reluctant_fini(struct vdp_ctx *vdc, void **priv)
+{
+	struct vdp_reluctant_state *vdprs;
+
+	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
+	TAKE_OBJ_NOTNULL(vdprs, priv, VDPRS_MAGIC);
+	// we need to make sure that no notifications come in after we return,
+	// because the vai handle will get destroyed.
+	//
+	// This a is cheap and wrong (for real code) way to wait for any pending
+	// notification task to complete - but after all this is vmod_debug
+	VTIM_sleep(reluctant_delay);
+}
+
+static const struct vdp vdp_reluctant = {
+	.name = "reluctant",
+	.io_init = vdpio_reluctant_init,
+	.io_lease = vdpio_reluctant_lease,
+	.io_fini = vdpio_reluctant_fini
+};
+
 
 static void
 dbg_vai_error(struct req *req, struct v1l **v1lp, const char *msg)
@@ -166,9 +274,19 @@ dbg_vai_deliver(struct req *req, int sendbody)
 			}
 			break;
 		}
+		cap = VDPIO_Push(ctx, req->vdc, req->ws, &vdp_reluctant, NULL);
+		if (cap < 1) {
+			dbg_vai_error(req, &v1l, "Failure to push reluctant");
+			return (VTR_D_DONE);
+		}
 		cap = VDPIO_Push(ctx, req->vdc, req->ws, &vdp_hello, NULL);
 		if (cap < 1) {
 			dbg_vai_error(req, &v1l, "Failure to push hello");
+			return (VTR_D_DONE);
+		}
+		cap = VDPIO_Push(ctx, req->vdc, req->ws, &vdp_reluctant, NULL);
+		if (cap < 1) {
+			dbg_vai_error(req, &v1l, "Failure to push reluctant");
 			return (VTR_D_DONE);
 		}
 		cap = VDPIO_Push(ctx, req->vdc, req->ws, VDP_v1l, v1l);

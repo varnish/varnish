@@ -121,6 +121,11 @@ typedef int vai_buffer_f(struct worker *, vai_hdl, struct vscarab *);
 typedef void vai_return_f(struct worker *, vai_hdl, struct vscaret *);
 
 /*
+ * call the notify function (from a VDP)
+ */
+typedef void vai_notify_f(struct worker *, vai_hdl);
+
+/*
  * finish iteration, vai_return_f must have been called on all leases
  */
 typedef void vai_fini_f(struct worker *, vai_hdl *);
@@ -142,7 +147,8 @@ struct vai_hdl_preamble {
 	vai_lease_f	*vai_lease;
 	vai_buffer_f	*vai_buffer;
 	vai_return_f	*vai_return;
-	uintptr_t	reserve[4];	// abi fwd compat
+	vai_notify_f	*vai_notify;
+	uintptr_t	reserve[3];	// abi fwd compat
 	vai_fini_f	*vai_fini;
 };
 

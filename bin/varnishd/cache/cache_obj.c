@@ -242,6 +242,13 @@ ObjIterate(struct worker *wrk, struct objcore *oc,
  *	ObjVAIreturn() may retain leases in the vscaret if the implementation
  *	still requires them, iow, the vscaret might not be empty upon return.
  *
+ * ObjVAInotify() notify to resume delivery from a vmod
+ *
+ *	Not only a storage engine can encounter a "no data ready at the moment"
+ *	condition, but also a filter: A filter's .io_lease() function might
+ *	return -EAGAIN, but then it needs a way to notify when more data is
+ *	available. This is ObjVAInotify().
+ *
  * ObjVAIfini() finalized iteration
  *
  *	it must be called when iteration is done, irrespective of error status
@@ -291,6 +298,17 @@ ObjVAIreturn(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 	assert(vaip->magic2 == VAI_HDL_PREAMBLE_MAGIC2);
 	AN(vaip->vai_return);
 	vaip->vai_return(wrk, vhdl, scaret);
+}
+
+void
+ObjVAInotify(struct worker *wrk, vai_hdl vhdl)
+{
+	struct vai_hdl_preamble *vaip = vhdl;
+
+	AN(vaip);
+	assert(vaip->magic2 == VAI_HDL_PREAMBLE_MAGIC2);
+	AN(vaip->vai_notify);
+	vaip->vai_notify(wrk, vhdl);
 }
 
 void

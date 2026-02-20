@@ -937,6 +937,7 @@ vai_hdl ObjVAIinit(struct worker *, struct objcore *, struct ws *,
 int ObjVAIlease(struct worker *, vai_hdl, struct vscarab *);
 int ObjVAIbuffer(struct worker *, vai_hdl, struct vscarab *);
 void ObjVAIreturn(struct worker *, vai_hdl, struct vscaret *);
+void ObjVAInotify(struct worker *, vai_hdl);
 void ObjVAIfini(struct worker *, vai_hdl *);
 
 /* cache_req_body.c */
