@@ -245,14 +245,15 @@ VTC_WS_OP(VOID, , overflow, WS_MarkOverflow(ws))
 VTC_WS_OP(BOOL, (0), overflowed, return (WS_Overflowed(ws)))
 #undef VTC_WS_OP
 
+#define WS_DUMP_MAXLEN	1023
+
 VCL_BLOB v_matchproto_(td_vtc_workspace_dump)
 vmod_workspace_dump(VRT_CTX, VCL_ENUM which, VCL_ENUM where,
     VCL_BYTES off, VCL_BYTES len)
 {
 	struct ws *ws;
 	unsigned l;
-	const unsigned maxlen = 1024;
-	unsigned char buf[maxlen];
+	unsigned char buf[WS_DUMP_MAXLEN];
 	const char *p, *err;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
@@ -263,14 +264,14 @@ vmod_workspace_dump(VRT_CTX, VCL_ENUM which, VCL_ENUM where,
 		return (NULL);
 	WS_Assert(ws);
 
-	if (len > maxlen) {
+	if (len > WS_DUMP_MAXLEN) {
 		VRT_fail(ctx, "workspace_dump: max length is %jd",
-		    (intmax_t)maxlen);
+		    (intmax_t)WS_DUMP_MAXLEN);
 		return (NULL);
 	}
 
 	l = WS_Dump(ws, *where, off, buf, len);
-	assert(l <= maxlen);
+	assert(l <= WS_DUMP_MAXLEN);
 
 	if (l == 0) {
 		switch (errno) {
@@ -290,6 +291,8 @@ vmod_workspace_dump(VRT_CTX, VCL_ENUM which, VCL_ENUM where,
 	}
 	return (VRT_blob(ctx, "workspace_dump", p, l, 0xd000d000));
 }
+
+#undef WS_DUMP_MAXLEN
 
 /*--------------------------------------------------------------------*/
 
