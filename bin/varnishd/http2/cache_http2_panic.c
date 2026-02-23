@@ -31,6 +31,7 @@
 
 #include "config.h"
 
+#include <inttypes.h>
 #include <stdint.h>
 
 #include "cache/cache_varnishd.h"
@@ -80,7 +81,7 @@ h2_sess_panic(struct vsb *vsb, const struct sess *sp)
 	    h2->refcnt, h2->bogosity, h2_panic_error(h2->error));
 	VSB_printf(vsb, "open_streams = %d, highest_stream = %u,\n",
 	    h2->open_streams, h2->highest_stream);
-	VSB_printf(vsb, "tx_window = %jd, rx_window = %jd,\n",
+	VSB_printf(vsb, "tx_window = %" PRId64 ", rx_window = %" PRIu64 ",\n",
 	    h2->tx_window, h2->rx_window);
 	VSB_cat(vsb, "local_settings = {");
 	h2_panic_settings(vsb, &h2->local_settings);
