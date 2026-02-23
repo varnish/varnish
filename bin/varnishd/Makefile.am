@@ -203,12 +203,13 @@ noinst_PROGRAMS = vhp_gen_hufdec
 vhp_gen_hufdec_SOURCES = hpack/vhp_gen_hufdec.c
 vhp_gen_hufdec_LDADD = $(top_builddir)/lib/libvarnish/libvarnish.la
 
+TESTS = vhp_table_test
 noinst_PROGRAMS += vhp_table_test
 vhp_table_test_SOURCES = hpack/vhp_table.c
 vhp_table_test_CFLAGS = -DTABLE_TEST_DRIVER
 vhp_table_test_LDADD = $(top_builddir)/lib/libvarnish/libvarnish.la
 
-noinst_PROGRAMS += vhp_decode_test
+TESTS += vhp_decode_test
 vhp_decode_test_SOURCES = hpack/vhp_decode.c hpack/vhp_table.c
 vhp_decode_test_CFLAGS = -DDECODE_TEST_DRIVER
 vhp_decode_test_LDADD = $(top_builddir)/lib/libvarnish/libvarnish.la
@@ -231,7 +232,7 @@ else
 esi_parse_fuzzer_CFLAGS += -DTEST_DRIVER
 endif
 
-TESTS = vhp_table_test vhp_decode_test
+noinst_PROGRAMS += $(TESTS)
 
 #
 # Turn the builtin.vcl file into a C-string we can include in the program.
