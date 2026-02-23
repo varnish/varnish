@@ -200,9 +200,13 @@ struct acct_bereq {
 /*--------------------------------------------------------------------*/
 
 struct vsl_log {
+	uint16_t		magic;
+#define VSL_LOG_MAGIC		0x9f34
+	uint16_t		flags;
+#define VSL_LOG_F_MALLOCED	1
+	unsigned		wlr;
 	uint32_t		*wlb, *wlp, *wle;
 	vxid_t			wid;
-	unsigned		wlr;
 };
 
 /*--------------------------------------------------------------------*/

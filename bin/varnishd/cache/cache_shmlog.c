@@ -108,6 +108,8 @@ struct VSC_main *VSC_C_main;
 static void
 vsl_sanity(const struct vsl_log *vsl)
 {
+
+	CHECK_OBJ_NOTNULL(vsl, VSL_LOG_MAGIC);
 	AN(vsl);
 	AN(vsl->wlp);
 	AN(vsl->wlb);
@@ -581,6 +583,7 @@ VSL_Init(struct vsl_log *vsl, void *ptr, size_t len)
 	AN(ptr);
 	AN(len);
 
+	INIT_OBJ(vsl, VSL_LOG_MAGIC);
 	vsl->wlp = ptr;
 	vsl->wlb = ptr;
 	vsl->wle = ptr;
@@ -597,11 +600,15 @@ VSL_Alloc(struct vsl_log *vsl)
 	void *ptr = malloc(len);
 	AN(ptr);
 	VSL_Init(vsl, ptr, len);
+	vsl->flags |= VSL_LOG_F_MALLOCED;
 }
 
 void
 VSL_Free(struct vsl_log *vsl)
 {
+
+	CHECK_OBJ_NOTNULL(vsl, VSL_LOG_MAGIC);
+	assert(vsl->flags & VSL_LOG_F_MALLOCED);
 	free(vsl->wlb);
 	memset(vsl, 0, sizeof *vsl);
 }
