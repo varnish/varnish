@@ -656,6 +656,20 @@ MGT_TLS_push_server_certs(unsigned *statusp, char **pp)
 	return (e);
 }
 
+static void
+frontend_autoname(struct vtls_frontend_cfg *fcfg)
+{
+	static unsigned seq = 0;
+	char buf[16];
+
+	CHECK_OBJ_NOTNULL(fcfg, VTLS_FRONTEND_CFG_MAGIC);
+	if (fcfg->name != NULL)
+		return;
+	bprintf(buf, "tls%u", seq++);
+	fcfg->name = strdup(buf);
+	AN(fcfg->name);
+}
+
 /*
  * Parse a TLS configuration file specified by -A
  */
@@ -703,19 +717,8 @@ TLS_Config(const char *fn)
 	/* Process frontends and create listen sockets */
 	VTAILQ_FOREACH(fcfg, &cfg->frontends, list) {
 		void *tls_local;
-		const char *sockname;
 
-		CHECK_OBJ_NOTNULL(fcfg, VTLS_FRONTEND_CFG_MAGIC);
-
-		/* Auto-generate name for unnamed frontends */
-		if (fcfg->name == NULL) {
-			static unsigned tls_name_seq = 0;
-			char name_buf[16];
-
-			bprintf(name_buf, "tls%u", tls_name_seq++);
-			fcfg->name = strdup(name_buf);
-			AN(fcfg->name);
-		}
+		frontend_autoname(fcfg);
 
 		/* Initialize TLS configuration for this frontend */
 		tls_local = vtls_init_local(cfg, fcfg);
@@ -724,12 +727,7 @@ TLS_Config(const char *fn)
 		AN(vsb);
 
 		/* Build the -a argument string: name=host:port,TLS */
-		if (fcfg->name != NULL) {
-			sockname = fcfg->name;
-			VSB_printf(vsb, "%s=", fcfg->name);
-		} else {
-			sockname = NULL;
-		}
+		VSB_printf(vsb, "%s=", fcfg->name);
 
 		if (fcfg->argspec != NULL) {
 			p = fcfg->argspec;
@@ -755,8 +753,7 @@ TLS_Config(const char *fn)
 			CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
 			if (ls->tls == NULL &&
 			    ls->transport == XPORT_Find("TLS") &&
-			    (sockname == NULL ||
-			     strcmp(ls->name, sockname) == 0)) {
+			    strcmp(ls->name, fcfg->name) == 0) {
 				ls->tls = tls_local;
 				n++;
 			}
