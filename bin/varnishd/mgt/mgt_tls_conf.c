@@ -680,6 +680,7 @@ TLS_Config(const char *fn)
 	struct vtls_frontend_cfg *fcfg;
 	struct vsb *vsb;
 	struct listen_sock *ls;
+	void *tls_local;
 	const char *p;
 	int n;
 
@@ -716,8 +717,6 @@ TLS_Config(const char *fn)
 
 	/* Process frontends and create listen sockets */
 	VTAILQ_FOREACH(fcfg, &cfg->frontends, list) {
-		void *tls_local;
-
 		frontend_autoname(fcfg);
 
 		/* Initialize TLS configuration for this frontend */
