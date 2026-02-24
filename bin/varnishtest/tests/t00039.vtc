@@ -60,7 +60,7 @@ logexpect l0 -v v1 {
 	expect * *	TLS	"error:.*SSL routines"
 } -start
 
-client c0 -connect "${v1_addr}:${v1_port}" {
+client c0 -connect "${v1_sock}" {
 	txreq
 	expect_close
 } -run
