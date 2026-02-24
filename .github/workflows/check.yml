@@ -192,10 +192,11 @@ jobs:
         name: Collect failed test logs
         if: always()
         run: |
-          mkdir -p failed-logs
           find . -name "*.log" -type f | while read logfile; do
             if tail -n 1 "$logfile" 2>/dev/null | grep -q "^FAIL"; then
-              cp --parents "$logfile" failed-logs/
+              echo $logfile
+              mkdir -p failed-logs/$(dirname $logfile)
+              cp "$logfile" failed-logs/"$logfile"
             fi
           done
 
