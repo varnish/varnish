@@ -318,24 +318,22 @@ void vdpio_return_vscarab(const struct vdp_ctx *vdc, struct vscarab *scarab)
 static inline void
 vdpio_consolidate_vscarab(const struct vdp_ctx *vdc, struct vscarab *scarab)
 {
-	struct viov *v, *f = NULL;
+	struct viov *v, *w;
 
 	VSCARAB_CHECK_NOTNULL(scarab);
+	w = &scarab->s[0];
 	VSCARAB_FOREACH(v, scarab) {
 		if (v->iov.iov_len == 0) {
 			AN(v->iov.iov_base);
 			vdpio_return_lease(vdc, v->lease);
-			if (f == NULL)
-				f = v;
 			continue;
 		}
-		else if (f == NULL)
-			continue;
-		memmove(f, v, scarab->used - (v - scarab->s) * sizeof (*v));
-		break;
+
+		if (v != w)
+			*w = *v;
+		w++;
 	}
-	if (f != NULL)
-		scarab->used = f - scarab->s;
+	scarab->used = w - &scarab->s[0];
 }
 
 // Lifecycle management in cache_deliver_proc.c
