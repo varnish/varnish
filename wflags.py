@@ -72,6 +72,7 @@ UNDESIRABLE_WFLAGS = [
     "-Wno-system-headers", # Outside of our control
     "-Wno-thread-safety", # Does not understand our mutexes are wrapped
     "-Wno-sign-compare", # Fixable
+    "-Wno-gnu-folding-constant", # does not help code clarity
 ]
 
 
