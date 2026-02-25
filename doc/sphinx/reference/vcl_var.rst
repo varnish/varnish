@@ -561,7 +561,7 @@ req.ttl
 
 
 	Deprecated alias of ``req.max-age``, which will be removed in a future
-	version of Vinyl-Cache.
+	version of Varnish-Cache.
 
 .. _req.url:
 

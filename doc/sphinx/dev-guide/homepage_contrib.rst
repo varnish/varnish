@@ -17,7 +17,7 @@ Git Repository
 
 The web site contents live in github at:
 
-https://code.vinyl-cache.org/vinyl-cache/homepage
+https://github.com/varnish-cache/homepage
 
 To offer your own contribution, fork the project and send us a pull
 request.

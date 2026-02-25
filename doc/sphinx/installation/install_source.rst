@@ -21,13 +21,13 @@ https://varnish-cache.org/releases/ .
 Alternatively, if you want to hack on Varnish, you should clone our
 git repository by doing.
 
-      ``git clone --recursive https://code.vinyl-cache.org/vinyl-cache/vinyl-cache``
+      ``git clone --recursive https://github.com/varnish/varnish``
 
 This will recursively check out the vtest2 sources from the default repository
 URL. If you prefer to use vtest2 from a non-default (local) repository, you can
 tell git to replace the url:
 
-        ``git config url.$YOUR_VTEST2_URL.insteadOf https://code.vinyl-cache.org/vtest/VTest2.git``
+        ``git config url.$YOUR_VTEST2_URL.insteadOf https://github.com/varnish/VTest2.git``
 
 Build dependencies on FreeBSD
 -----------------------------

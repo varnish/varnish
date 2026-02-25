@@ -163,7 +163,7 @@ not have a 200 status::
 	}
 
 The background here is that the HTTP standards only allow refreshes of status
-200 objects, but Vinyl Cache core code allows to deliberately violate this. In
+200 objects, but Varnish Cache core code allows to deliberately violate this. In
 such cases, the status check needs to be neutered by not running the built-in
 code using::
 

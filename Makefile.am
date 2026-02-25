@@ -20,7 +20,6 @@ CLEANFILES = \
 EXTRA_DIST = \
 	$(TESTS) \
 	README.md \
-	README.Packaging \
 	LICENSE \
 	autogen.sh \
 	varnishapi.pc.in \

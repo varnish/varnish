@@ -16,7 +16,7 @@ A more detailed and technical account of changes in Varnish, with
 links to issues that have been fixed and pull requests that have been
 merged, may be found in the `change log`_.
 
-.. _change log: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst
+.. _change log: https://github.com/varnishcache/varnish-cache/src/branch/main/doc/changes.rst
 
 varnishd
 ========
@@ -230,7 +230,7 @@ available as a stand-alone program useful for testing various HTTP
 clients, servers and proxies (not just Varnish). But for the time
 being, we still use :ref:`varnishtest(1)` for our own testing.
 
-.. _VTest: https://code.vinyl-cache.org/vtest/VTest
+.. _VTest: https://github.com/vtest/VTest
 
 Changes for developers and VMOD authors
 =======================================
