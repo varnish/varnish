@@ -52,9 +52,6 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-logexpect l0 -wait
-logexpect l2 -wait
-
 varnish v1 -errvcl "Not available in subroutine 'vcl_purge'" {
 	import purge;
 
@@ -110,3 +107,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_backend_response'" {
 		if (bereq.url == "response") { purge.hard(); }
 	}
 }
+
+logexpect l0 -wait
+logexpect l1 -wait
+logexpect l2 -wait
