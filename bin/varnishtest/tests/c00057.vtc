@@ -27,12 +27,12 @@ static void (*accessor)(volatile char *p) = _accessor;
 
 }C
 	sub vcl_recv { C{
-	    const int stkkb = 128;
+	    #define STKKB 128
 	    int i;
-	    volatile char overflow[stkkb * 1024];
+	    volatile char overflow[STKKB * 1024];
 
 	    /* for downwards stack, take care to hit a single guard page */
-	    for (i = (stkkb - 1) * 1024; i >= 0; i -= 1024)
+	    for (i = (STKKB - 1) * 1024; i >= 0; i -= 1024)
 		accessor(overflow + i);
 	    /* NOTREACHED */
 	    sleep(2);
