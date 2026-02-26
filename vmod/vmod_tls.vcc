@@ -52,6 +52,11 @@ $Function STRING ja3()
 Returns the ja3 fingerprint for this connection if the ``tls_ja3`` parameter
 has been enabled.
 
+$Function STRING ja4()
+
+Returns the JA4 fingerprint for this connection if the ``tls_ja4`` parameter
+has been enabled.
+
 $Function STRING cipher()
 $Restrict client vcl_backend_response vcl_pipe
 

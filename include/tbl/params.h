@@ -1113,6 +1113,20 @@ PARAM_SIMPLE(
 )
 
 PARAM_SIMPLE(
+	/* name */	tls_ja4,
+	/* type */	boolean,
+	/* min */	NULL,
+	/* max */	NULL,
+	/* def */	"off",
+	/* units */	"bool",
+	/* descr */
+	"Enable JA4 TLS client fingerprinting for incoming TLS connections. "
+	"When enabled, the JA4 fingerprint string can be accessed via the "
+	"tls VMOD using tls.ja4(). The fingerprint can be used for client "
+	"identification and classification."
+)
+
+PARAM_SIMPLE(
 	/* name */	tls_cleanup_batch,
 	/* type */	uint,
 	/* min */	"1",

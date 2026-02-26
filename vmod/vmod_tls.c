@@ -47,6 +47,7 @@
  */
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);
+const char *VTLS_ja4(const struct vrt_ctx *ctx);
 
 /*
  * For the backend-side, this VMOD is only callable when we have an
@@ -99,6 +100,23 @@ vmod_ja3(VRT_CTX)
 		return (NULL);
 
 	return (WS_Copy(ctx->ws, ja3, -1));
+}
+
+VCL_STRING
+vmod_ja4(VRT_CTX)
+{
+	const char *ja4;
+
+	if (!(ctx->method & VCL_MET_TASK_C)) {
+		VRT_fail(ctx, "tls.ja4() can only be used in client context");
+		return (NULL);
+	}
+
+	ja4 = VTLS_ja4(ctx);
+	if (ja4 == NULL)
+		return (NULL);
+
+	return (WS_Copy(ctx->ws, ja4, -1));
 }
 
 VCL_STRING

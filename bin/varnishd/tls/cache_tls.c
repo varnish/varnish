@@ -512,6 +512,19 @@ VTLS_ja3(const struct vrt_ctx *ctx)
 	return (tsp->ja3);
 }
 
+/* VMOD accessor: get JA4 fingerprint */
+const char *
+VTLS_ja4(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+
+	tsp = vtls_get_sess(ctx);
+	if (tsp == NULL)
+		return (NULL);
+
+	return (tsp->ja4);
+}
+
 /*
  * This is the SSL_do_handshake/poll loop.
  *

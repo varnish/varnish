@@ -84,6 +84,7 @@ struct vtls_sess {
 	/* Client-side TLS fields */
 	int			sni_result;	/* SNI callback result */
 	char			*ja3;		/* JA3 fingerprint string */
+	char			*ja4;		/* JA4 fingerprint string */
 	struct vtls_buf		*buf;		/* TLS record buffer */
 	void			*priv_local;	/* Pointer to listen_sock->tls */
 };
@@ -123,6 +124,7 @@ extern struct transport TLS_transport;
 /* VMOD accessor functions */
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);
+const char *VTLS_ja4(const struct vrt_ctx *ctx);
 
 /* Log message macro - if vsl is NULL it is logged as non-transactional */
 #define VTLS_LOG(log, tag, ...)					\

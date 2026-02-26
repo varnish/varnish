@@ -1,0 +1,43 @@
+varnishtest "Test vmod-tls ja4 fingerprint"
+
+feature tls_1_3
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "*"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  tls-protos = TLSv1.3
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {
+	import tls;
+
+	sub vcl_deliver {
+		set resp.http.ja4 = tls.ja4();
+	}
+}
+
+varnish v1 -cli "param.set tls_ja4 on"
+varnish v1 -start
+
+client c1 {
+	tls_config {
+		version = TLSv1.3
+		ciphersuites = "TLS_AES_128_GCM_SHA256"
+	}
+	tls_handshake
+	txreq
+	rxresp
+	expect resp.http.ja4 != ""
+	expect resp.http.ja4 ~ "^t13"
+} -run

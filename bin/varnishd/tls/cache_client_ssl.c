@@ -40,7 +40,9 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
+#include <openssl/sha.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "common/common_vtls_types.h"
 #include "cache/cache_varnishd.h"
@@ -119,6 +121,7 @@ VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp)
 	TAKE_OBJ_NOTNULL(tsp, ptsp, VTLS_SESS_MAGIC);
 
 	free(tsp->ja3);
+	free(tsp->ja4);
 
 	if (tsp->buf != NULL)
 		VTLS_buf_free(&tsp->buf);
@@ -716,6 +719,227 @@ vtls_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 	return (0);
 }
 
+#define TLSEXT_TYPE_signature_algorithms	13	/* JA4: RFC 5246 */
+
+/* JA4: first 12 hex chars of SHA256; empty input -> "000000000000". */
+static void
+vtls_ja4_hash12(const char *in, size_t len, char out[13])
+{
+	unsigned char digest[SHA256_DIGEST_LENGTH];
+	unsigned u;
+
+	if (len == 0) {
+		memcpy(out, "000000000000", 13);
+		return;
+	}
+	SHA256((const unsigned char *)in, len, digest);
+	for (u = 0; u < 6; u++)
+		sprintf(out + u * 2, "%02x", digest[u]);
+	out[12] = '\0';
+}
+
+static int
+cmp_uint16(const void *a, const void *b)
+{
+	uint16_t x = *(const uint16_t *)a, y = *(const uint16_t *)b;
+	return (x < y ? -1 : (x > y ? 1 : 0));
+}
+
+static int
+cmp_int(const void *a, const void *b)
+{
+	int x = *(const int *)a, y = *(const int *)b;
+	return (x < y ? -1 : (x > y ? 1 : 0));
+}
+
+/* JA4 Part A: map TLS/DTLS version code to 2-char string. */
+static const char *
+ja4_version_str(uint16_t v)
+{
+	switch (v) {
+	case 0x0304: return "13";
+	case 0x0303: return "12";
+	case 0x0302: return "11";
+	case 0x0301: return "10";
+	case 0x0300: return "s3";
+	case 0x0002: return "s2";
+	case 0xfeff: return "d1";
+	case 0xfefd: return "d2";
+	case 0xfefc: return "d3";
+	default: return "00";
+	}
+}
+
+static int
+vtls_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
+{
+	struct vsb ja4[1];
+	size_t len, i, j, nc, ncext;
+	const unsigned char *p;
+	int *out = NULL, *exts = NULL;
+	uint16_t *ciphers;
+	uintptr_t sn;
+	const char *ver_str;
+	unsigned next;
+	char part_a[16], part_b[13], part_c[13];
+	char *ja4p;
+	const unsigned char *alpn_p, *proto;
+	size_t alpn_len, list_len, proto_len;
+	char alpn_0, alpn_1;
+	const unsigned char *sig_alg_p;
+	size_t sig_alg_len;
+
+	sn = WS_Snapshot(sp->ws);
+
+	/* Part A: TLS version (supported_versions ext 43, else legacy) */
+	ver_str = "00";
+	if (SSL_client_hello_get0_ext(ssl, 43, &p, &len) == 1 && len >= 2) {
+		uint16_t v, vmax = 0;
+		size_t off = 0;
+		/* RFC 8446 wire format: 1-byte length then list. Some APIs return list only. */
+		if (len >= 3 && (size_t)p[0] == len - 1)
+			off = 1;
+		for (i = off; i + 2 <= len; i += 2) {
+			v = (uint16_t)p[i] << 8 | p[i + 1];
+			if (!IS_GREASE_TLS(v) && v > vmax)
+				vmax = v;
+		}
+		if (vmax != 0)
+			ver_str = ja4_version_str(vmax);
+	}
+	if (ver_str[0] == '0' && ver_str[1] == '0')
+		ver_str = ja4_version_str(SSL_client_hello_get0_legacy_version(ssl));
+
+	/* Part A: SNI present */
+	int sni_present = SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_server_name,
+	    &p, &len) == 1;
+
+	/* Part B: sorted ciphers (non-GREASE), hash truncated 12 */
+	len = SSL_client_hello_get0_ciphers(ssl, &p);
+	nc = 0;
+	for (i = 0; i + 2 <= len; i += 2) {
+		if (!IS_GREASE_TLS((uint16_t)(p[i] << 8 | p[i + 1])))
+			nc++;
+	}
+	ciphers = WS_Alloc(sp->ws, nc * sizeof(uint16_t));
+	if (ciphers == NULL)
+		goto fail;
+	for (i = 0, j = 0; i + 2 <= len; i += 2) {
+		uint16_t c = (uint16_t)p[i] << 8 | p[i + 1];
+		if (!IS_GREASE_TLS(c))
+			ciphers[j++] = c;
+	}
+	qsort(ciphers, nc, sizeof(uint16_t), cmp_uint16);
+	WS_VSB_new(ja4, sp->ws);
+	for (i = 0; i < nc; i++) {
+		if (i > 0)
+			VSB_putc(ja4, ',');
+		VSB_printf(ja4, "%04x", ciphers[i]);
+	}
+	AZ(VSB_finish(ja4));
+	vtls_ja4_hash12(VSB_data(ja4), VSB_len(ja4), part_b);
+	VSB_clear(ja4);
+
+	/* Part C: extensions (get once; some OpenSSL allow only one call per ClientHello) */
+	if (SSL_client_hello_get1_extensions_present(ssl, &out, &len) != 1)
+		goto fail;
+	next = 0;
+	ncext = 0;
+	for (i = 0; i < len; i++) {
+		if (!IS_GREASE_TLS(out[i])) {
+			next++;
+			if (out[i] != 0 && out[i] != 16)
+				ncext++;
+		}
+	}
+	exts = NULL;
+	if (ncext > 0) {
+		exts = malloc(ncext * sizeof(int));
+		if (exts == NULL)
+			goto fail;
+		for (i = 0, j = 0; i < len; i++) {
+			if (!IS_GREASE_TLS(out[i]) && out[i] != 0 && out[i] != 16)
+				exts[j++] = out[i];
+		}
+		qsort(exts, ncext, sizeof(int), cmp_int);
+	}
+	for (i = 0; i < ncext; i++) {
+		if (i > 0)
+			VSB_putc(ja4, ',');
+		VSB_printf(ja4, "%04x", exts[i]);
+	}
+	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_signature_algorithms,
+	    &sig_alg_p, &sig_alg_len) == 1 && sig_alg_len >= 2) {
+		uint16_t salen = (sig_alg_p[0] << 8) | sig_alg_p[1];
+
+		VSB_putc(ja4, '_');
+		for (j = 2; j + 2 <= 2 + (size_t)salen && j + 2 <= sig_alg_len; j += 2) {
+			if (j > 2)
+				VSB_putc(ja4, ',');
+			VSB_printf(ja4, "%02x%02x", sig_alg_p[j], sig_alg_p[j + 1]);
+		}
+	}
+	AZ(VSB_finish(ja4));
+	vtls_ja4_hash12(VSB_data(ja4), VSB_len(ja4), part_c);
+	VSB_clear(ja4);
+
+	if (next > 99)
+		next = 99;
+	if (nc > 99)
+		nc = 99;
+
+	/* Part A: ALPN first/last char (or hex); no ALPN -> "00" */
+	alpn_0 = alpn_1 = '0';
+	if (SSL_client_hello_get0_ext(ssl, 16, &alpn_p, &alpn_len) == 1 &&
+	    alpn_len >= 3) {
+		list_len = (size_t)alpn_p[0] << 8 | alpn_p[1];
+		if (list_len > 0 && list_len <= alpn_len - 2) {
+			proto_len = alpn_p[2];
+			if (proto_len > 0 && proto_len <= list_len - 1) {
+				proto = alpn_p + 3;
+				if (proto_len * 2 <= 512) {
+					if (isalnum((unsigned char)proto[0]) &&
+					    isalnum((unsigned char)proto[proto_len - 1])) {
+						alpn_0 = (char)proto[0];
+						alpn_1 = (char)proto[proto_len - 1];
+					} else {
+						char hex_buf[512];
+						for (j = 0; j < proto_len; j++) {
+							hex_buf[2 * j] =
+							    "0123456789abcdef"[proto[j] >> 4];
+							hex_buf[2 * j + 1] =
+							    "0123456789abcdef"[proto[j] & 0xf];
+						}
+						j = proto_len * 2;
+						hex_buf[j] = '\0';
+						alpn_0 = hex_buf[0];
+						alpn_1 = (j > 1 ? hex_buf[j - 1] : hex_buf[0]);
+					}
+				}
+			}
+		}
+	}
+
+	sprintf(part_a, "t%s%c%02u%02u%c%c", ver_str, sni_present ? 'd' : 'i',
+	    (unsigned)nc, (unsigned)next, alpn_0, alpn_1);
+	VSB_printf(ja4, "%s_%s_%s", part_a, part_b, part_c);
+	ja4p = WS_VSB_finish(ja4, sp->ws, NULL);
+	if (ja4p == NULL)
+		goto fail;
+	REPLACE(tsp->ja4, ja4p);
+	WS_Reset(sp->ws, sn);
+	free(exts);
+	OPENSSL_free(out);
+	return (0);
+fail:
+	VTLS_LOG(tsp->log, SLT_Error,
+	    "Out of workspace_session during JA4 handling");
+	free(exts);
+	OPENSSL_free(out);
+	WS_Reset(sp->ws, sn);
+	return (1);
+}
+
 static int
 vtls_clienthello_cb(SSL *ssl, int *al, void *priv)
 {
@@ -736,12 +960,31 @@ vtls_clienthello_cb(SSL *ssl, int *al, void *priv)
 	(void)al;
 	(void)priv;
 
+	VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: entry ja3=%s ja4=%s",
+	    cache_param->tls_ja3 ? "on" : "off",
+	    cache_param->tls_ja4 ? "on" : "off");
+
 	protos = tls->protos;
 	if (protos == 0)
 		protos = heritage.tls->protos;
 
-	if (cache_param->tls_ja3 && vtls_get_ja3(ssl, sp, tsp) != 0)
-		return (SSL_CLIENT_HELLO_ERROR);
+	if (cache_param->tls_ja3) {
+		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: get_ja3");
+		if (vtls_get_ja3(ssl, sp, tsp) != 0) {
+			VTLS_LOG(tsp->log, SLT_Error, "ClientHello: ja3 failed");
+			return (SSL_CLIENT_HELLO_ERROR);
+		}
+		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: ja3 ok");
+	}
+
+	if (cache_param->tls_ja4) {
+		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: get_ja4");
+		if (vtls_get_ja4(ssl, sp, tsp) != 0) {
+			VTLS_LOG(tsp->log, SLT_Error, "ClientHello: ja4 failed");
+			return (SSL_CLIENT_HELLO_ERROR);
+		}
+		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: ja4 ok");
+	}
 
 	if (!SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_server_name,
 	    &ext, &l)) {
