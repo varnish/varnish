@@ -1309,5 +1309,5 @@ VCL_Shutdown(void)
 		}
 		usleep(100 * 1000);
 	}
-	VSL_Free(&vsl_cli);
+	NEEDLESS(VSL_Free(&vsl_cli));
 }
