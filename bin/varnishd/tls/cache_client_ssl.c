@@ -960,31 +960,15 @@ vtls_clienthello_cb(SSL *ssl, int *al, void *priv)
 	(void)al;
 	(void)priv;
 
-	VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: entry ja3=%s ja4=%s",
-	    cache_param->tls_ja3 ? "on" : "off",
-	    cache_param->tls_ja4 ? "on" : "off");
-
 	protos = tls->protos;
 	if (protos == 0)
 		protos = heritage.tls->protos;
 
-	if (cache_param->tls_ja3) {
-		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: get_ja3");
-		if (vtls_get_ja3(ssl, sp, tsp) != 0) {
-			VTLS_LOG(tsp->log, SLT_Error, "ClientHello: ja3 failed");
-			return (SSL_CLIENT_HELLO_ERROR);
-		}
-		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: ja3 ok");
-	}
+	if (cache_param->tls_ja3 && vtls_get_ja3(ssl, sp, tsp) != 0)
+		return (SSL_CLIENT_HELLO_ERROR);
 
-	if (cache_param->tls_ja4) {
-		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: get_ja4");
-		if (vtls_get_ja4(ssl, sp, tsp) != 0) {
-			VTLS_LOG(tsp->log, SLT_Error, "ClientHello: ja4 failed");
-			return (SSL_CLIENT_HELLO_ERROR);
-		}
-		VTLS_LOG(tsp->log, SLT_TLS, "ClientHello: ja4 ok");
-	}
+	if (cache_param->tls_ja4 && vtls_get_ja4(ssl, sp, tsp) != 0)
+		return (SSL_CLIENT_HELLO_ERROR);
 
 	if (!SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_server_name,
 	    &ext, &l)) {
