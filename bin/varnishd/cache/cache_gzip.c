@@ -585,8 +585,7 @@ vdpio_gunzip_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 	}
 
 	if (r <= 0) {
-		o->iov.iov_base = NULL;
-		o->iov.iov_len = 0;
+		o->iov = IOV_NIL;
 		vdpio_return_lease(vdc, b->lease);
 		return (r);
 	}
