@@ -721,6 +721,29 @@ vtls_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 
 #define TLSEXT_TYPE_signature_algorithms	13	/* JA4: RFC 5246 */
 
+/*
+ * JA4 client fingerprint. Spec: https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/JA4.md
+ *
+ * Format: (protocol)(tls_ver)(sni)(nr_ciphers:02)(nr_exts:02)(alpn_first)(alpn_last)_(cipher_hash)_(ext_sig_hash)
+ *
+ * First chunk:
+ *   protocol: "t" TLS over TCP, "q" QUIC, "d" DTLS
+ *   tls_ver:  2 chars; if supported_versions (0x002b) exists, max non-GREASE; else Protocol Version
+ *   sni:      "d" if SNI (0x0000) present, "i" otherwise
+ *   nr_ciphers/nr_exts: count non-GREASE; cap at 99. Extensions count includes SNI and ALPN.
+ *   alpn:     first and last ASCII alphanumeric of first ALPN value; else hex; "00" if none
+ *
+ * Cipher hash: first 12 hex chars (lowercase) of SHA256 of sorted 4-char hex ciphers, comma-sep, non-GREASE. Empty -> "000000000000".
+ *
+ * Extension hash: first 12 hex chars of SHA256 of (sorted extension hex, excluding SNI and ALPN)_(sig algs in order). No sig algs -> no underscore. Empty -> "000000000000".
+ */
+#ifndef TLSEXT_TYPE_supported_versions
+#define TLSEXT_TYPE_supported_versions	43
+#endif
+#ifndef TLSEXT_TYPE_alpn
+#define TLSEXT_TYPE_alpn		16
+#endif
+
 /* JA4: first 12 hex chars of SHA256; empty input -> "000000000000". */
 static void
 vtls_ja4_hash12(const char *in, size_t len, char out[13])
@@ -770,172 +793,277 @@ ja4_version_str(uint16_t v)
 	}
 }
 
+/* JA4: TLS version string from Client Hello (supported_versions ext or legacy). */
+static const char *
+ja4_tls_version_str(SSL *ssl)
+{
+	const unsigned char *sv_data;
+	size_t sv_len;
+	size_t off;
+	size_t vi;
+	uint16_t v, vmax;
+
+	vmax = 0;
+	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_supported_versions,
+	    &sv_data, &sv_len) != 1 || sv_len < 2)
+		return (ja4_version_str(SSL_client_hello_get0_legacy_version(ssl)));
+
+	/* RFC 8446 wire format: 1-byte length then list. Some APIs return list only. */
+	off = (sv_len >= 3 && (size_t)sv_data[0] == sv_len - 1) ? 1 : 0;
+	for (vi = off; vi + 2 <= sv_len; vi += 2) {
+		v = (uint16_t)sv_data[vi] << 8 | sv_data[vi + 1];
+		if (!IS_GREASE_TLS(v) && v > vmax)
+			vmax = v;
+	}
+	if (vmax != 0)
+		return (ja4_version_str(vmax));
+	return (ja4_version_str(SSL_client_hello_get0_legacy_version(ssl)));
+}
+
+/* JA4: 'd' if SNI present, 'i' otherwise. */
+static char
+ja4_sni_marker(SSL *ssl)
+{
+	const unsigned char *p;
+	size_t len;
+
+	return (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_server_name,
+	    &p, &len) == 1 ? 'd' : 'i');
+}
+
+/* JA4: ALPN first and last character (or '0'); non-alnum use hex digit. */
+static void
+ja4_alpn_first_last(SSL *ssl, char *alpn_first, char *alpn_last)
+{
+	const unsigned char *alpn_data;
+	size_t alpn_len;
+	size_t list_len;
+	size_t proto_len;
+	const unsigned char *proto;
+	size_t hi;
+	char hex_buf[512];
+
+	*alpn_first = '0';
+	*alpn_last = '0';
+	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_alpn, &alpn_data, &alpn_len) != 1
+	    || alpn_len < 3)
+		return;
+	list_len = (size_t)alpn_data[0] << 8 | alpn_data[1];
+	if (list_len == 0 || list_len > alpn_len - 2)
+		return;
+	proto_len = alpn_data[2];
+	if (proto_len == 0 || proto_len > list_len - 1)
+		return;
+	proto = alpn_data + 3;
+	if (proto_len * 2 > sizeof(hex_buf))
+		return;
+	if (isalnum((unsigned char)proto[0]) && isalnum((unsigned char)proto[proto_len - 1])) {
+		*alpn_first = (char)proto[0];
+		*alpn_last = (char)proto[proto_len - 1];
+		return;
+	}
+	for (hi = 0; hi < proto_len; hi++) {
+		hex_buf[2 * hi] = "0123456789abcdef"[proto[hi] >> 4];
+		hex_buf[2 * hi + 1] = "0123456789abcdef"[proto[hi] & 0xf];
+	}
+	hex_buf[proto_len * 2] = '\0';
+	*alpn_first = hex_buf[0];
+	*alpn_last = (proto_len * 2 > 1 ? hex_buf[proto_len * 2 - 1] : hex_buf[0]);
+}
+
+/* JA4: collect non-GREASE ciphers, sort, format comma-sep hex, hash12. Returns 0 or -1. */
+static int
+ja4_build_ciphers_hash(SSL *ssl, struct sess *sp, char ciphers_hash[13])
+{
+	const unsigned char *cipher_list;
+	size_t cipher_list_len;
+	size_t cipher_count;
+	size_t ci, cj;
+	size_t buf_len, off;
+	uint16_t *sorted_ciphers;
+	char *buf;
+
+	(void)sp;
+	cipher_list_len = SSL_client_hello_get0_ciphers(ssl, &cipher_list);
+	if (cipher_list == NULL && cipher_list_len > 0)
+		return (-1);
+	cipher_count = 0;
+	for (ci = 0; ci + 2 <= cipher_list_len; ci += 2) {
+		if (!IS_GREASE_TLS((uint16_t)(cipher_list[ci] << 8 | cipher_list[ci + 1])))
+			cipher_count++;
+	}
+	if (cipher_count == 0) {
+		vtls_ja4_hash12("", 0, ciphers_hash);
+		return (0);
+	}
+	sorted_ciphers = malloc(cipher_count * sizeof(uint16_t));
+	if (sorted_ciphers == NULL)
+		return (-1);
+	for (ci = 0, cj = 0; ci + 2 <= cipher_list_len; ci += 2) {
+		uint16_t c = (uint16_t)cipher_list[ci] << 8 | cipher_list[ci + 1];
+		if (!IS_GREASE_TLS(c))
+			sorted_ciphers[cj++] = c;
+	}
+	qsort(sorted_ciphers, cipher_count, sizeof(uint16_t), cmp_uint16);
+	/* "XXXX," per cipher; last is "XXXX" only -> (n*5 - 1) + 1 for NUL */
+	buf_len = cipher_count * 5;
+	buf = malloc(buf_len);
+	if (buf == NULL) {
+		free(sorted_ciphers);
+		return (-1);
+	}
+	off = 0;
+	for (ci = 0; ci < cipher_count; ci++) {
+		off += (size_t)snprintf(buf + off, buf_len - off, "%s%04x",
+		    ci > 0 ? "," : "", sorted_ciphers[ci]);
+	}
+	free(sorted_ciphers);
+	vtls_ja4_hash12(buf, off, ciphers_hash);
+	free(buf);
+	return (0);
+}
+
+/* JA4: exts (excl. SNI/ALPN) sorted + "_" + sig algs, hash12. Returns 0 or -1. */
+static int
+ja4_build_exts_sigs_hash(SSL *ssl, struct sess *sp,
+    const int *ext_types, size_t ext_count_total, char exts_sigs_hash[13])
+{
+	size_t ext_count_for_hash;
+	size_t ei, ej;
+	int *exts_for_hash;
+	const unsigned char *sig_alg_data;
+	size_t sig_alg_len;
+	uint16_t sig_alg_list_len;
+	size_t si;
+	struct vsb vsb[1];
+
+	ext_count_for_hash = 0;
+	for (ei = 0; ei < ext_count_total; ei++) {
+		if (!IS_GREASE_TLS(ext_types[ei]) &&
+		    ext_types[ei] != TLSEXT_TYPE_server_name &&
+		    ext_types[ei] != TLSEXT_TYPE_alpn)
+			ext_count_for_hash++;
+	}
+	exts_for_hash = NULL;
+	if (ext_count_for_hash > 0) {
+		exts_for_hash = malloc(ext_count_for_hash * sizeof(int));
+		if (exts_for_hash == NULL)
+			return (-1);
+		for (ei = 0, ej = 0; ei < ext_count_total; ei++) {
+			if (!IS_GREASE_TLS(ext_types[ei]) &&
+			    ext_types[ei] != TLSEXT_TYPE_server_name &&
+			    ext_types[ei] != TLSEXT_TYPE_alpn)
+				exts_for_hash[ej++] = ext_types[ei];
+		}
+		qsort(exts_for_hash, ext_count_for_hash, sizeof(int), cmp_int);
+	}
+	WS_VSB_new(vsb, sp->ws);
+	for (ei = 0; ei < ext_count_for_hash; ei++) {
+		if (ei > 0)
+			VSB_putc(vsb, ',');
+		VSB_printf(vsb, "%04x", exts_for_hash[ei]);
+	}
+	free(exts_for_hash);
+	exts_for_hash = NULL;
+	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_signature_algorithms,
+	    &sig_alg_data, &sig_alg_len) == 1 && sig_alg_len >= 2) {
+		sig_alg_list_len = (sig_alg_data[0] << 8) | sig_alg_data[1];
+		VSB_putc(vsb, '_');
+		for (si = 2; si + 2 <= 2 + (size_t)sig_alg_list_len && si + 2 <= sig_alg_len;
+		    si += 2) {
+			if (si > 2)
+				VSB_putc(vsb, ',');
+			VSB_printf(vsb, "%02x%02x", sig_alg_data[si], sig_alg_data[si + 1]);
+		}
+	}
+	AZ(VSB_finish(vsb));
+	{
+		ssize_t vsb_len = VSB_len(vsb);
+		vtls_ja4_hash12(VSB_data(vsb), vsb_len, exts_sigs_hash);
+		WS_Release(sp->ws, (unsigned)(vsb_len + 1));
+		VSB_fini(vsb);
+	}
+	return (0);
+}
+
 static int
 vtls_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 {
-	struct vsb ja4[1];
-	size_t len, i, j, nc, ncext;
-	const unsigned char *p;
-	int *out = NULL, *exts = NULL;
-	uint16_t *ciphers;
+	int *ext_types = NULL;
+	size_t ext_count_total;
+	unsigned nr_exts_raw;
+	size_t cipher_count;
+	size_t ei;
+	unsigned nr_ciphers;
+	unsigned nr_exts;
+	const char *tls_version_str;
+	char sni_marker;
+	char alpn_first;
+	char alpn_last;
+	char first_chunk[16];
+	char ciphers_hash[13];
+	char exts_sigs_hash[13];
+	char *ja4_result;
 	uintptr_t sn;
-	const char *ver_str;
-	unsigned next;
-	char part_a[16], part_b[13], part_c[13];
-	char *ja4p;
-	const unsigned char *alpn_p, *proto;
-	size_t alpn_len, list_len, proto_len;
-	char alpn_0, alpn_1;
-	const unsigned char *sig_alg_p;
-	size_t sig_alg_len;
 
 	sn = WS_Snapshot(sp->ws);
 
-	/* Part A: TLS version (supported_versions ext 43, else legacy) */
-	ver_str = "00";
-	if (SSL_client_hello_get0_ext(ssl, 43, &p, &len) == 1 && len >= 2) {
-		uint16_t v, vmax = 0;
-		size_t off = 0;
-		/* RFC 8446 wire format: 1-byte length then list. Some APIs return list only. */
-		if (len >= 3 && (size_t)p[0] == len - 1)
-			off = 1;
-		for (i = off; i + 2 <= len; i += 2) {
-			v = (uint16_t)p[i] << 8 | p[i + 1];
-			if (!IS_GREASE_TLS(v) && v > vmax)
-				vmax = v;
-		}
-		if (vmax != 0)
-			ver_str = ja4_version_str(vmax);
-	}
-	if (ver_str[0] == '0' && ver_str[1] == '0')
-		ver_str = ja4_version_str(SSL_client_hello_get0_legacy_version(ssl));
-
-	/* Part A: SNI present */
-	int sni_present = SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_server_name,
-	    &p, &len) == 1;
-
-	/* Part B: sorted ciphers (non-GREASE), hash truncated 12 */
-	len = SSL_client_hello_get0_ciphers(ssl, &p);
-	nc = 0;
-	for (i = 0; i + 2 <= len; i += 2) {
-		if (!IS_GREASE_TLS((uint16_t)(p[i] << 8 | p[i + 1])))
-			nc++;
-	}
-	ciphers = WS_Alloc(sp->ws, nc * sizeof(uint16_t));
-	if (ciphers == NULL)
+	if (SSL_client_hello_get1_extensions_present(ssl, &ext_types, &ext_count_total) != 1)
 		goto fail;
-	for (i = 0, j = 0; i + 2 <= len; i += 2) {
-		uint16_t c = (uint16_t)p[i] << 8 | p[i + 1];
-		if (!IS_GREASE_TLS(c))
-			ciphers[j++] = c;
-	}
-	qsort(ciphers, nc, sizeof(uint16_t), cmp_uint16);
-	WS_VSB_new(ja4, sp->ws);
-	for (i = 0; i < nc; i++) {
-		if (i > 0)
-			VSB_putc(ja4, ',');
-		VSB_printf(ja4, "%04x", ciphers[i]);
-	}
-	AZ(VSB_finish(ja4));
-	vtls_ja4_hash12(VSB_data(ja4), VSB_len(ja4), part_b);
-	VSB_clear(ja4);
 
-	/* Part C: extensions (get once; some OpenSSL allow only one call per ClientHello) */
-	if (SSL_client_hello_get1_extensions_present(ssl, &out, &len) != 1)
-		goto fail;
-	next = 0;
-	ncext = 0;
-	for (i = 0; i < len; i++) {
-		if (!IS_GREASE_TLS(out[i])) {
-			next++;
-			if (out[i] != 0 && out[i] != 16)
-				ncext++;
+	nr_exts_raw = 0;
+	for (ei = 0; ei < ext_count_total; ei++) {
+		if (!IS_GREASE_TLS(ext_types[ei]))
+			nr_exts_raw++;
+	}
+
+	cipher_count = 0;
+	{
+		const unsigned char *cipher_list;
+		size_t cipher_list_len;
+
+		cipher_list_len = SSL_client_hello_get0_ciphers(ssl, &cipher_list);
+		for (ei = 0; ei + 2 <= cipher_list_len; ei += 2) {
+			if (!IS_GREASE_TLS((uint16_t)(cipher_list[ei] << 8 | cipher_list[ei + 1])))
+				cipher_count++;
 		}
 	}
-	exts = NULL;
-	if (ncext > 0) {
-		exts = malloc(ncext * sizeof(int));
-		if (exts == NULL)
+
+	nr_ciphers = (cipher_count > 99) ? 99 : (unsigned)cipher_count;
+	nr_exts = (nr_exts_raw > 99) ? 99 : nr_exts_raw;
+
+	tls_version_str = ja4_tls_version_str(ssl);
+	sni_marker = ja4_sni_marker(ssl);
+	ja4_alpn_first_last(ssl, &alpn_first, &alpn_last);
+
+	sprintf(first_chunk, "t%s%c%02u%02u%c%c", tls_version_str, sni_marker,
+	    nr_ciphers, nr_exts, alpn_first, alpn_last);
+
+	if (ja4_build_ciphers_hash(ssl, sp, ciphers_hash) != 0)
+		goto fail;
+	if (ja4_build_exts_sigs_hash(ssl, sp, ext_types, ext_count_total, exts_sigs_hash) != 0)
+		goto fail;
+
+	{
+		char ja4_buf[64];	/* first_chunk + _ + 12 + _ + 12 + NUL */
+		size_t l;
+
+		snprintf(ja4_buf, sizeof(ja4_buf), "%s_%s_%s",
+		    first_chunk, ciphers_hash, exts_sigs_hash);
+		l = strlen(ja4_buf) + 1;
+		ja4_result = malloc(l);
+		if (ja4_result == NULL)
 			goto fail;
-		for (i = 0, j = 0; i < len; i++) {
-			if (!IS_GREASE_TLS(out[i]) && out[i] != 0 && out[i] != 16)
-				exts[j++] = out[i];
-		}
-		qsort(exts, ncext, sizeof(int), cmp_int);
+		memcpy(ja4_result, ja4_buf, l);
 	}
-	for (i = 0; i < ncext; i++) {
-		if (i > 0)
-			VSB_putc(ja4, ',');
-		VSB_printf(ja4, "%04x", exts[i]);
-	}
-	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_signature_algorithms,
-	    &sig_alg_p, &sig_alg_len) == 1 && sig_alg_len >= 2) {
-		uint16_t salen = (sig_alg_p[0] << 8) | sig_alg_p[1];
-
-		VSB_putc(ja4, '_');
-		for (j = 2; j + 2 <= 2 + (size_t)salen && j + 2 <= sig_alg_len; j += 2) {
-			if (j > 2)
-				VSB_putc(ja4, ',');
-			VSB_printf(ja4, "%02x%02x", sig_alg_p[j], sig_alg_p[j + 1]);
-		}
-	}
-	AZ(VSB_finish(ja4));
-	vtls_ja4_hash12(VSB_data(ja4), VSB_len(ja4), part_c);
-	VSB_clear(ja4);
-
-	if (next > 99)
-		next = 99;
-	if (nc > 99)
-		nc = 99;
-
-	/* Part A: ALPN first/last char (or hex); no ALPN -> "00" */
-	alpn_0 = alpn_1 = '0';
-	if (SSL_client_hello_get0_ext(ssl, 16, &alpn_p, &alpn_len) == 1 &&
-	    alpn_len >= 3) {
-		list_len = (size_t)alpn_p[0] << 8 | alpn_p[1];
-		if (list_len > 0 && list_len <= alpn_len - 2) {
-			proto_len = alpn_p[2];
-			if (proto_len > 0 && proto_len <= list_len - 1) {
-				proto = alpn_p + 3;
-				if (proto_len * 2 <= 512) {
-					if (isalnum((unsigned char)proto[0]) &&
-					    isalnum((unsigned char)proto[proto_len - 1])) {
-						alpn_0 = (char)proto[0];
-						alpn_1 = (char)proto[proto_len - 1];
-					} else {
-						char hex_buf[512];
-						for (j = 0; j < proto_len; j++) {
-							hex_buf[2 * j] =
-							    "0123456789abcdef"[proto[j] >> 4];
-							hex_buf[2 * j + 1] =
-							    "0123456789abcdef"[proto[j] & 0xf];
-						}
-						j = proto_len * 2;
-						hex_buf[j] = '\0';
-						alpn_0 = hex_buf[0];
-						alpn_1 = (j > 1 ? hex_buf[j - 1] : hex_buf[0]);
-					}
-				}
-			}
-		}
-	}
-
-	sprintf(part_a, "t%s%c%02u%02u%c%c", ver_str, sni_present ? 'd' : 'i',
-	    (unsigned)nc, (unsigned)next, alpn_0, alpn_1);
-	VSB_printf(ja4, "%s_%s_%s", part_a, part_b, part_c);
-	ja4p = WS_VSB_finish(ja4, sp->ws, NULL);
-	if (ja4p == NULL)
-		goto fail;
-	REPLACE(tsp->ja4, ja4p);
+	REPLACE(tsp->ja4, ja4_result);
 	WS_Reset(sp->ws, sn);
-	free(exts);
-	OPENSSL_free(out);
+	if (ext_types != NULL)
+		OPENSSL_free(ext_types);
 	return (0);
 fail:
-	VTLS_LOG(tsp->log, SLT_Error,
-	    "Out of workspace_session during JA4 handling");
-	free(exts);
-	OPENSSL_free(out);
+	if (ext_types != NULL)
+		OPENSSL_free(ext_types);
 	WS_Reset(sp->ws, sn);
 	return (1);
 }
