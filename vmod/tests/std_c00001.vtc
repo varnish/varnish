@@ -79,6 +79,7 @@ client c1 {
 
 server s1 -wait
 
+varnish v1 -cliok "param.set vsl_buffer 4k"
 varnish v1 -cliok "param.set workspace_client 12000"
 varnish v1 -cliok "param.set workspace_backend 12000"
 
