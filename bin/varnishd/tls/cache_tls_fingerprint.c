@@ -701,65 +701,60 @@ ja4_build_hashed_result(struct ws *ws, const char *part_a,
 	return (WS_Copy(ws, ja4_buf, -1));
 }
 
+/*
+ * Run one JA4 phase: build the intermediates for that variant and store
+ * the result in the matching tsp field. Returns 0 on success, 1 on workspace
+ * failure.
+ */
 static int
-vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
-    struct vtls_sess *tsp)
+vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
+    struct vtls_sess *tsp, enum vtls_ja4_variant variant)
 {
 	struct ws *ws;
 	char part_a[JA4_PART_A_MAX];
-	char *sorted_ciphers = NULL;
-	char *original_ciphers = NULL;
-	char *sorted_exts = NULL;
-	char *original_exts = NULL;
+	char *ciphers = NULL;
+	char *exts = NULL;
 	char *sig_algs = NULL;
-	char *ja4_result = NULL;
-	char *ja4_r_result = NULL;
-	char *ja4_o_result = NULL;
-	char *ja4_ro_result = NULL;
+	char *result = NULL;
 	uintptr_t sn;
+	int sorted;
 
 	ws = sp->ws;
 	sn = WS_Snapshot(ws);
 	ja4_build_part_a(raw, part_a);
 
-	if (ja4_build_cipher_list_raw(ws, raw->ciphers, raw->cipher_len, 1,
-	    &sorted_ciphers) != 0)
+	/* MAIN,R = sorted; O,RO = original. MAIN,O = hashed; R,RO = raw. */
+	sorted = (variant <= VTLS_JA4_R);
+	if (ja4_build_cipher_list_raw(ws, raw->ciphers, raw->cipher_len,
+	    sorted, &ciphers) != 0)
 		goto fail;
-	if (ja4_build_cipher_list_raw(ws, raw->ciphers, raw->cipher_len, 0,
-	    &original_ciphers) != 0)
-		goto fail;
-	if (ja4_build_exts_list(ws, raw->ext_types, raw->ext_count, 1, 1,
-	    &sorted_exts) != 0)
-		goto fail;
-	if (ja4_build_exts_list(ws, raw->ext_types, raw->ext_count, 0, 0,
-	    &original_exts) != 0)
+	if (ja4_build_exts_list(ws, raw->ext_types, raw->ext_count,
+	    sorted, sorted, &exts) != 0)
 		goto fail;
 	if (ja4_build_sig_algs_str_raw(ws, raw->sig_algs, raw->sig_algs_len,
 	    &sig_algs) != 0)
 		goto fail;
 
-	ja4_result = ja4_build_hashed_result(ws, part_a, sorted_ciphers,
-	    sorted_exts, sig_algs);
-	if (ja4_result == NULL)
-		goto fail;
-	ja4_r_result = ja4_build_raw(ws, part_a, sorted_ciphers, sorted_exts,
-	    sig_algs);
-	if (ja4_r_result == NULL)
-		goto fail;
-	ja4_o_result = ja4_build_hashed_result(ws, part_a, original_ciphers,
-	    original_exts, sig_algs);
-	if (ja4_o_result == NULL)
-		goto fail;
-	ja4_ro_result = ja4_build_raw(ws, part_a, original_ciphers,
-	    original_exts, sig_algs);
-	if (ja4_ro_result == NULL)
+	result = (variant & 1) == 0
+	    ? ja4_build_hashed_result(ws, part_a, ciphers, exts, sig_algs)
+	    : ja4_build_raw(ws, part_a, ciphers, exts, sig_algs);
+	if (result == NULL)
 		goto fail;
 
-	REPLACE(tsp->ja4, ja4_result);
-	REPLACE(tsp->ja4_r, ja4_r_result);
-	REPLACE(tsp->ja4_o, ja4_o_result);
-	REPLACE(tsp->ja4_ro, ja4_ro_result);
-
+	switch (variant) {
+	case VTLS_JA4_MAIN:
+		REPLACE(tsp->ja4, result);
+		break;
+	case VTLS_JA4_R:
+		REPLACE(tsp->ja4_r, result);
+		break;
+	case VTLS_JA4_O:
+		REPLACE(tsp->ja4_o, result);
+		break;
+	case VTLS_JA4_RO:
+		REPLACE(tsp->ja4_ro, result);
+		break;
+	}
 	WS_Reset(ws, sn);
 	return (0);
 fail:
@@ -767,6 +762,39 @@ fail:
 	    "Out of workspace_session during JA4 handling");
 	WS_Reset(ws, sn);
 	return (1);
+}
+
+int
+VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
+    enum vtls_ja4_variant variant)
+{
+	char **field;
+
+	if (tsp->ja3_ja4_raw == NULL)
+		return (-1);
+	switch (variant) {
+	case VTLS_JA4_MAIN: field = &tsp->ja4; break;
+	case VTLS_JA4_R:   field = &tsp->ja4_r; break;
+	case VTLS_JA4_O:   field = &tsp->ja4_o; break;
+	case VTLS_JA4_RO:  field = &tsp->ja4_ro; break;
+	default: return (-1);
+	}
+	if (*field != NULL)
+		return (0);
+	return (vtls_get_ja4_one_variant(tsp->ja3_ja4_raw, sp, tsp, variant));
+}
+
+static int
+vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
+    struct vtls_sess *tsp)
+{
+	enum vtls_ja4_variant v;
+
+	for (v = VTLS_JA4_MAIN; v <= VTLS_JA4_RO; v++) {
+		if (vtls_get_ja4_one_variant(raw, sp, tsp, v) != 0)
+			return (1);
+	}
+	return (0);
 }
 
 static int

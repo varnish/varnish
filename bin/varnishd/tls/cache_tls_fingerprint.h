@@ -23,3 +23,15 @@ int VTLS_fingerprint_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp);
 
 /* Compute JA4 from tsp->ja3_ja4_raw into tsp->ja4, ja4_r, ja4_o, ja4_ro. Returns 0 on success. */
 int VTLS_fingerprint_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp);
+
+/* JA4 variant: compute only the requested one on first use. */
+enum vtls_ja4_variant {
+	VTLS_JA4_MAIN = 0,	/* ja4 (sorted, hashed) */
+	VTLS_JA4_R,		/* ja4_r (sorted, raw) */
+	VTLS_JA4_O,		/* ja4_o (original, hashed) */
+	VTLS_JA4_RO		/* ja4_ro (original, raw) */
+};
+
+/* Compute one JA4 variant from tsp->ja3_ja4_raw into the matching tsp field. Returns 0 on success, -1 if nothing to compute. */
+int VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
+    enum vtls_ja4_variant variant);
