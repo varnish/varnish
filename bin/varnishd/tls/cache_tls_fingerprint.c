@@ -141,11 +141,13 @@ vtls_ja3_ja4_raw_parse_clienthello(const unsigned char *buf, size_t len,
 	unsigned char *copy;
 
 	memset(out, 0, sizeof(*out));
-	if (len < CH_RECORD_HEADER_LEN || buf[0] != SSL3_MT_CLIENT_HELLO)
+	if (len < CH_RECORD_HEADER_LEN || len > VTLS_CLIENT_HELLO_MAX_LEN ||
+	    buf[0] != SSL3_MT_CLIENT_HELLO)
 		return (-1);
 	/* TLS record payload length (3 bytes big-endian) */
 	body_len = (size_t)buf[1] << 16 | (size_t)buf[2] << 8 | buf[3];
-	if (len < CH_RECORD_HEADER_LEN + body_len || body_len < CH_MIN_BODY_LEN)
+	if (body_len > VTLS_CLIENT_HELLO_MAX_LEN - CH_RECORD_HEADER_LEN ||
+	    len < CH_RECORD_HEADER_LEN + body_len || body_len < CH_MIN_BODY_LEN)
 		return (-1);
 	off = CH_RECORD_HEADER_LEN;
 	out->legacy_version = vbe16dec(buf + off);

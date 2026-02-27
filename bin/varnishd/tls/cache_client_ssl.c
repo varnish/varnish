@@ -670,6 +670,9 @@ vtls_msg_cb(int write_p, int version, int content_type, const void *buf,
 		tsp->client_hello_len = 0;
 		tsp->client_hello_ws_snapshot = 0;
 	}
+	/* Reject oversized Client Hello to avoid malloc DoS from malicious client */
+	if (len > VTLS_CLIENT_HELLO_MAX_LEN)
+		return;
 	copy = malloc(len);
 	if (copy == NULL)
 		return;
