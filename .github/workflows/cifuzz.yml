@@ -2,8 +2,8 @@ name: CIFuzz
 on: [pull_request]
 jobs:
   Fuzzing:
-    if: github.repository_owner == 'varnishcache'
-    runs-on: ubuntu-latest
+    if: github.repository_owner == 'vinyl-cache'
+    runs-on: debian
     steps:
     - name: Build Fuzzers
       id: build
