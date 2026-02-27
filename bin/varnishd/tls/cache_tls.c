@@ -502,7 +502,7 @@ name(const struct vrt_ctx *ctx)						\
  * corresponding param is on (same flow as JA3). Accessors just return
  * the precomputed value.
  */
-#define VTLS_JA4_ACCESSOR(name, member, variant, param_on)		\
+#define VTLS_JA4_ACCESSOR(name, member, param_on)				\
 const char *								\
 name(const struct vrt_ctx *ctx)						\
 {									\
@@ -515,10 +515,10 @@ name(const struct vrt_ctx *ctx)						\
 
 VTLS_VMOD_ACCESSOR(const SSL *, VTLS_tls_ctx, ssl)
 VTLS_VMOD_ACCESSOR(const char *, VTLS_ja3, ja3)
-VTLS_JA4_ACCESSOR(VTLS_ja4, ja4, VTLS_JA4_MAIN, cache_param->tls_ja4)
-VTLS_JA4_ACCESSOR(VTLS_ja4_r, ja4_r, VTLS_JA4_R, cache_param->tls_ja4_r)
-VTLS_JA4_ACCESSOR(VTLS_ja4_o, ja4_o, VTLS_JA4_O, cache_param->tls_ja4_o)
-VTLS_JA4_ACCESSOR(VTLS_ja4_ro, ja4_ro, VTLS_JA4_RO, cache_param->tls_ja4_ro)
+VTLS_JA4_ACCESSOR(VTLS_ja4, ja4, cache_param->tls_ja4)
+VTLS_JA4_ACCESSOR(VTLS_ja4_r, ja4_r, cache_param->tls_ja4_r)
+VTLS_JA4_ACCESSOR(VTLS_ja4_o, ja4_o, cache_param->tls_ja4_o)
+VTLS_JA4_ACCESSOR(VTLS_ja4_ro, ja4_ro, cache_param->tls_ja4_ro)
 
 /*
  * This is the SSL_do_handshake/poll loop.

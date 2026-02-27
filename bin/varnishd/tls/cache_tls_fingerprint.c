@@ -484,13 +484,12 @@ ja4_alpn_first_last(const struct ja3_ja4_raw_ch *raw, char *first, char *last)
 
 /*
  * Build one JA4 variant from the parsed Client Hello and store it in tsp.
- * JA4 = part A (version, SNI, counts, ALPN) + part B (ciphers) + part C (exts+sigs).
- * Sorted variants (ja4, ja4_r) use sorted order; hashed variants (ja4, ja4_o) use
- * 12-char hash; raw variants (ja4_r, ja4_ro) use comma-sep hex. One variant per call.
+ * variant is a bitfield: VTLS_JA4_SORTED and/or VTLS_JA4_HASHED (use
+ * VTLS_JA4_MAIN/R/O/RO for the four slots). Returns 0 on success.
  */
 int
 VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
-    enum vtls_ja4_variant variant)
+    unsigned variant)
 {
 	const struct ja3_ja4_raw_ch *raw;
 	struct ws *ws;
@@ -515,6 +514,11 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 		return (-1);
 	if (tsp->ja3_ja4_raw == NULL)
 		return (-1);
+	/* Only the four valid combinations. */
+	if (variant != VTLS_JA4_MAIN && variant != VTLS_JA4_R &&
+	    variant != VTLS_JA4_O && variant != VTLS_JA4_RO)
+		return (-1);
+
 	switch (variant) {
 	case VTLS_JA4_MAIN: if (tsp->ja4 != NULL) return (0); break;
 	case VTLS_JA4_R:   if (tsp->ja4_r != NULL) return (0); break;
@@ -526,8 +530,8 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 	raw = tsp->ja3_ja4_raw;
 	ws = sp->ws;
 	sn = WS_Snapshot(ws);
-	do_sort = (variant <= VTLS_JA4_R);
-	do_hash = ((variant & 1) == 0);
+	do_sort = (variant & VTLS_JA4_SORTED) != 0;
+	do_hash = (variant & VTLS_JA4_HASHED) != 0;
 
 	/* Step 1: version (from supported_versions or legacy). */
 	if (raw->supported_versions != NULL && raw->supported_versions_len >= 2) {
@@ -616,9 +620,9 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 
 	/* Step 5: signature algorithms as hex string. */
 	sig_algs_str = NULL;
+	n_sig = 0;
 	if (raw->sig_algs != NULL && raw->sig_algs_len >= 2) {
 		uint16_t list_len = vbe16dec(raw->sig_algs);
-		n_sig = 0;
 		for (si = 2; si + 2 <= 2 + (size_t)list_len && si + 2 <= raw->sig_algs_len; si += 2) {
 			if (!IS_GREASE_TLS(vbe16dec(raw->sig_algs + si)))
 				n_sig++;
@@ -684,6 +688,7 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 	case VTLS_JA4_R:   REPLACE(tsp->ja4_r, result); break;
 	case VTLS_JA4_O:   REPLACE(tsp->ja4_o, result); break;
 	case VTLS_JA4_RO:  REPLACE(tsp->ja4_ro, result); break;
+	default: break;
 	}
 	WS_Reset(ws, sn);
 	return (0);

@@ -27,13 +27,17 @@ int VTLS_fingerprint_parse_clienthello(const unsigned char *buf, size_t len,
 /* Compute JA3 from tsp->ja3_ja4_raw into tsp->ja3. Returns 0 on success. */
 int VTLS_fingerprint_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp);
 
-/* JA4 variant: compute the requested variant from tsp->ja3_ja4_raw into the matching tsp field. Returns 0 on success, -1 if nothing to compute. */
-enum vtls_ja4_variant {
-	VTLS_JA4_MAIN = 0,	/* ja4 (sorted, hashed) */
-	VTLS_JA4_R,		/* ja4_r (sorted, raw) */
-	VTLS_JA4_O,		/* ja4_o (original, hashed) */
-	VTLS_JA4_RO		/* ja4_ro (original, raw) */
-};
+/* JA4 dimensions (bitfield): sorted vs original order, hashed vs raw. */
+#define VTLS_JA4_SORTED	0x01u
+#define VTLS_JA4_HASHED	0x02u
 
+/* Convenience: which JA4 variant to compute (combination of the two bits above). */
+#define VTLS_JA4_MAIN	(VTLS_JA4_SORTED | VTLS_JA4_HASHED)	/* ja4 */
+#define VTLS_JA4_R	(VTLS_JA4_SORTED)				/* ja4_r */
+#define VTLS_JA4_O	(VTLS_JA4_HASHED)				/* ja4_o */
+#define VTLS_JA4_RO	0u						/* ja4_ro */
+
+/* Compute one JA4 variant from tsp->ja3_ja4_raw into the matching tsp field.
+ * variant uses VTLS_JA4_SORTED and/or VTLS_JA4_HASHED. Returns 0 on success. */
 int VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
-    enum vtls_ja4_variant variant);
+    unsigned variant);
