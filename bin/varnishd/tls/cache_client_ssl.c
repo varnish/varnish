@@ -41,10 +41,8 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
-#include <openssl/sha.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "common/common_vtls_types.h"
 #include "cache/cache_varnishd.h"
