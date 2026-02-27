@@ -47,6 +47,10 @@
  */
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);
+const char *VTLS_ja4(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_r(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_o(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_ro(const struct vrt_ctx *ctx);
 
 /*
  * For the backend-side, this VMOD is only callable when we have an
@@ -65,6 +69,23 @@ const char *VTLS_ja3(const struct vrt_ctx *ctx);
 #define BERESP_CHECK_RET_0 BERESP_CHECK(0)
 #define BERESP_CHECK_RET_NULL BERESP_CHECK(NULL)
 
+#define VMOD_TLS_CLIENT_STRING(name)					\
+	VCL_STRING								\
+	vmod_ ## name(VRT_CTX)							\
+	{									\
+		AN(ctx->method & VCL_MET_TASK_C);				\
+		const char *_p = VTLS_ ## name(ctx);				\
+		if (_p == NULL)							\
+			return (NULL);						\
+		return (WS_Copy(ctx->ws, _p, -1));				\
+	}
+
+VMOD_TLS_CLIENT_STRING(ja3)
+VMOD_TLS_CLIENT_STRING(ja4)
+VMOD_TLS_CLIENT_STRING(ja4_r)
+VMOD_TLS_CLIENT_STRING(ja4_o)
+VMOD_TLS_CLIENT_STRING(ja4_ro)
+
 VCL_BOOL
 vmod_is_tls(VRT_CTX)
 {
@@ -82,23 +103,6 @@ vmod_version(VRT_CTX)
 	if (ssl)
 		return (SSL_get_version(ssl));
 	return (NULL);
-}
-
-VCL_STRING
-vmod_ja3(VRT_CTX)
-{
-	const char *ja3;
-
-	if (!(ctx->method & VCL_MET_TASK_C)) {
-		VRT_fail(ctx, "tls.ja3() can only be used in client context");
-		return (NULL);
-	}
-
-	ja3 = VTLS_ja3(ctx);
-	if (ja3 == NULL)
-		return (NULL);
-
-	return (WS_Copy(ctx->ws, ja3, -1));
 }
 
 VCL_STRING

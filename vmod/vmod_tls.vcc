@@ -48,9 +48,34 @@ $Restrict client vcl_backend_response vcl_pipe
 Returns the TLS version in use for this connection. E.g. "TLSv1.2".
 
 $Function STRING ja3()
+$Restrict client
 
 Returns the ja3 fingerprint for this connection if the ``tls_ja3`` parameter
 has been enabled.
+
+$Function STRING ja4()
+$Restrict client
+
+Returns the JA4 fingerprint (hashed, sorted) for this connection if the
+``tls_ja4`` parameter has been enabled.
+
+$Function STRING ja4_r()
+$Restrict client
+
+Returns the JA4 raw fingerprint (sorted) for this connection if the
+``tls_ja4_r`` parameter has been enabled.
+
+$Function STRING ja4_o()
+$Restrict client
+
+Returns the JA4 fingerprint (hashed, original order) for this connection
+if the ``tls_ja4_o`` parameter has been enabled.
+
+$Function STRING ja4_ro()
+$Restrict client
+
+Returns the JA4 raw fingerprint (original order) for this connection if
+the ``tls_ja4_ro`` parameter has been enabled.
 
 $Function STRING cipher()
 $Restrict client vcl_backend_response vcl_pipe

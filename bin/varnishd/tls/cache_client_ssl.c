@@ -35,12 +35,15 @@
 
 #include <openssl/dh.h>
 #include <openssl/ssl.h>
+#include <openssl/ssl3.h>
 #include <openssl/tls1.h>
 #include <openssl/x509.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
+#include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common/common_vtls_types.h"
 #include "cache/cache_varnishd.h"
@@ -60,6 +63,7 @@
 #include "vtree.h"
 
 #include "cache_client_ssl.h"
+#include "cache_tls_fingerprint.h"
 
 VTAILQ_HEAD(v_ctx_list, vtls_ctx);
 
@@ -115,10 +119,25 @@ VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp)
 {
 	struct vtls_sess *tsp;
 
+	if (ptsp == NULL)
+		return;
 	CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 	TAKE_OBJ_NOTNULL(tsp, ptsp, VTLS_SESS_MAGIC);
 
 	free(tsp->ja3);
+	free(tsp->ja4);
+	free(tsp->ja4_r);
+	free(tsp->ja4_o);
+	free(tsp->ja4_ro);
+	VTLS_fingerprint_raw_free(&tsp->ja3_ja4_raw);
+
+	/* Release lazy Client Hello buffer (malloc'd) */
+	if (tsp->client_hello_buf != NULL) {
+		free(tsp->client_hello_buf);
+		tsp->client_hello_buf = NULL;
+		tsp->client_hello_len = 0;
+		tsp->client_hello_ws_snapshot = 0;
+	}
 
 	if (tsp->buf != NULL)
 		VTLS_buf_free(&tsp->buf);
@@ -626,94 +645,44 @@ vtls_server_name_parse(const unsigned char *p, ssize_t l, struct vsb *vsb)
 	return (0);
 }
 
-#define IS_GREASE_TLS(x) \
-	((((x) & 0x0f0f) == 0x0a0a) && (((x) & 0xff) == (((x) >> 8) & 0xff)))
-
 static void
-vtls_ja3_parsefields(int s, const unsigned char *data, int len,
-    struct vsb *ja3)
+vtls_msg_cb(int write_p, int version, int content_type, const void *buf,
+    size_t len, SSL *ssl, void *arg)
 {
-	int cnt;
-	uint16_t tmp;
-	int first = 1;
+	struct sess *sp;
+	struct vtls_sess *tsp;
+	unsigned char *copy;
 
-	for (cnt = 0; cnt < len; cnt += s) {
-		if (s == 1)
-			tmp = *data;
-		else
-			tmp = vbe16dec(data);
-
-		data += s;
-
-		if (s != 2 || !IS_GREASE_TLS(tmp)) {
-			if (!first)
-				VSB_putc(ja3, '-');
-
-			first = 0;
-			VSB_printf(ja3, "%i", tmp);
-		}
+	(void)version;
+	(void)arg;
+	if (write_p != 0 || content_type != SSL3_RT_HANDSHAKE)
+		return;
+	if (!cache_param->tls_ja3 && !cache_param->tls_ja4 &&
+	    !cache_param->tls_ja4_r && !cache_param->tls_ja4_o &&
+	    !cache_param->tls_ja4_ro)
+		return;
+	sp = SSL_get_app_data(ssl);
+	if (sp == NULL)
+		return;
+	tsp = sp->tls;
+	if (tsp == NULL || tsp->magic != VTLS_SESS_MAGIC)
+		return;
+	/* Release any previous lazy Client Hello buffer (malloc'd, not session ws) */
+	if (tsp->client_hello_buf != NULL) {
+		free(tsp->client_hello_buf);
+		tsp->client_hello_buf = NULL;
+		tsp->client_hello_len = 0;
+		tsp->client_hello_ws_snapshot = 0;
 	}
-}
-
-static int
-vtls_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
-{
-	struct vsb ja3[1];
-	size_t len, i;
-	const unsigned char *p;
-	int first, type, *out;
-	char *ja3p;
-	uintptr_t sn;
-
-	sn = WS_Snapshot(sp->ws);
-	WS_VSB_new(ja3, sp->ws);
-	VSB_printf(ja3, "%i,", SSL_version(ssl));
-
-	len = SSL_client_hello_get0_ciphers(ssl, &p);
-	vtls_ja3_parsefields(2, p, len, ja3);
-	VSB_putc(ja3, ',');
-
-	if (SSL_client_hello_get1_extensions_present(ssl, &out, &len) == 1) {
-		first = 1;
-		for (i = 0; i < len; i++) {
-			type = out[i];
-			if (!IS_GREASE_TLS(type)) {
-				if (!first)
-					VSB_putc(ja3, '-');
-
-				first = 0;
-				VSB_printf(ja3, "%i", type);
-			}
-		}
-		OPENSSL_free(out);
-	}
-	VSB_putc(ja3, ',');
-
-	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_elliptic_curves, &p,
-	    &len) == 1) {
-		p += 2;
-		len -= 2;
-		vtls_ja3_parsefields(2, p, len, ja3);
-	}
-	VSB_putc(ja3, ',');
-
-	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_ec_point_formats, &p,
-	    &len) == 1) {
-		++p;
-		--len;
-		vtls_ja3_parsefields(1, p, len, ja3);
-	}
-
-	ja3p = WS_VSB_finish(ja3, sp->ws, NULL);
-	if (ja3p == NULL) {
-		VTLS_LOG(tsp->log, SLT_Error,
-		    "Out of workspace_session during JA3 handling");
-		return (1);
-	}
-
-	REPLACE(tsp->ja3, ja3p);
-	WS_Reset(sp->ws, sn);
-	return (0);
+	/* Reject oversized Client Hello to avoid malloc DoS from malicious client */
+	if (len > VTLS_CLIENT_HELLO_MAX_LEN)
+		return;
+	copy = malloc(len);
+	if (copy == NULL)
+		return;
+	memcpy(copy, buf, len);
+	tsp->client_hello_buf = copy;
+	tsp->client_hello_len = len;
 }
 
 static int
@@ -740,8 +709,30 @@ vtls_clienthello_cb(SSL *ssl, int *al, void *priv)
 	if (protos == 0)
 		protos = heritage.tls->protos;
 
-	if (cache_param->tls_ja3 && vtls_get_ja3(ssl, sp, tsp) != 0)
+	/* Lazy: parse raw Client Hello on first use */
+	if (tsp->client_hello_buf != NULL) {
+		(void)VTLS_fingerprint_parse_clienthello(tsp->client_hello_buf,
+		    tsp->client_hello_len, &tsp->ja3_ja4_raw);
+		free(tsp->client_hello_buf);
+		tsp->client_hello_buf = NULL;
+		tsp->client_hello_len = 0;
+		tsp->client_hello_ws_snapshot = 0;
+	}
+
+	if (cache_param->tls_ja3 && VTLS_fingerprint_get_ja3(ssl, sp, tsp) != 0)
 		return (SSL_CLIENT_HELLO_ERROR);
+
+	if (cache_param->tls_ja4 && VTLS_fingerprint_get_ja4_variant(sp, tsp, VTLS_JA4_MAIN) != 0)
+		return (SSL_CLIENT_HELLO_ERROR);
+	if (cache_param->tls_ja4_r && VTLS_fingerprint_get_ja4_variant(sp, tsp, VTLS_JA4_R) != 0)
+		return (SSL_CLIENT_HELLO_ERROR);
+	if (cache_param->tls_ja4_o && VTLS_fingerprint_get_ja4_variant(sp, tsp, VTLS_JA4_O) != 0)
+		return (SSL_CLIENT_HELLO_ERROR);
+	if (cache_param->tls_ja4_ro && VTLS_fingerprint_get_ja4_variant(sp, tsp, VTLS_JA4_RO) != 0)
+		return (SSL_CLIENT_HELLO_ERROR);
+
+	/* Raw Client Hello no longer needed; free it now. */
+	VTLS_fingerprint_raw_free(&tsp->ja3_ja4_raw);
 
 	if (!SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_server_name,
 	    &ext, &l)) {
@@ -1225,6 +1216,7 @@ vtls_ctx_new_from_pem(struct cli *cli, const char *name_id,
 		return (NULL);
 	}
 	SSL_CTX_set_client_hello_cb(vc->ctx, vtls_clienthello_cb, NULL);
+	SSL_CTX_set_msg_callback(vc->ctx, vtls_msg_cb);
 	SSL_CTX_set_alpn_select_cb(vc->ctx, vtls_alpn_select, NULL);
 
 	/* Return X509 to caller if requested, otherwise free it */

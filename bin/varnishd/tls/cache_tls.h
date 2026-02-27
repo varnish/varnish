@@ -31,11 +31,15 @@
  * TLS support (backend and client-side)
  */
 
+#include <stddef.h>
+#include <stdint.h>
+
 /* Forward declaration - OpenSSL types */
 typedef struct ssl_st SSL;
 
 struct mempool;
 struct pool;
+struct sess;
 struct vco;
 struct vrt_ctx;
 struct vsl_log;
@@ -84,6 +88,15 @@ struct vtls_sess {
 	/* Client-side TLS fields */
 	int			sni_result;	/* SNI callback result */
 	char			*ja3;		/* JA3 fingerprint string */
+	char			*ja4;		/* JA4 fingerprint string */
+	char			*ja4_r;		/* JA4 raw (sorted) fingerprint */
+	char			*ja4_o;		/* JA4 hashed original-order fingerprint */
+	char			*ja4_ro;		/* JA4 raw original-order fingerprint */
+	void			*ja3_ja4_raw;	/* Parsed raw Client Hello for JA3/JA4 (freed after use) */
+	/* Lazy Client Hello: raw bytes in session ws; parse on first JA3/JA4 use */
+	unsigned char		*client_hello_buf;
+	size_t			client_hello_len;
+	uintptr_t		client_hello_ws_snapshot;
 	struct vtls_buf		*buf;		/* TLS record buffer */
 	void			*priv_local;	/* Pointer to listen_sock->tls */
 };
@@ -123,6 +136,10 @@ extern struct transport TLS_transport;
 /* VMOD accessor functions */
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);
+const char *VTLS_ja4(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_r(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_o(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_ro(const struct vrt_ctx *ctx);
 
 /* Log message macro - if vsl is NULL it is logged as non-transactional */
 #define VTLS_LOG(log, tag, ...)					\
