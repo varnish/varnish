@@ -465,7 +465,7 @@ ja4_alpn_first_last_raw(const unsigned char *alpn_data, size_t alpn_len,
 }
 
 static int
-ja4_build_cipher_list_raw(const unsigned char *cipher_list,
+ja4_build_cipher_list_raw(struct ws *ws, const unsigned char *cipher_list,
     size_t cipher_list_len, int sorted, char **out)
 {
 	size_t cipher_count, ci, cj, buf_len, off;
@@ -477,18 +477,15 @@ ja4_build_cipher_list_raw(const unsigned char *cipher_list,
 		if (!IS_GREASE_TLS(vbe16dec(cipher_list + ci)))
 			cipher_count++;
 	}
-	*out = malloc(1);
+	*out = WS_Alloc(ws, 1);
 	if (*out == NULL)
 		return (-1);
 	**out = '\0';
 	if (cipher_count == 0)
 		return (0);
-	ciphers = malloc(cipher_count * sizeof(uint16_t));
-	if (ciphers == NULL) {
-		free(*out);
-		*out = NULL;
+	ciphers = WS_Alloc(ws, cipher_count * sizeof(uint16_t));
+	if (ciphers == NULL)
 		return (-1);
-	}
 	for (ci = 0, cj = 0; ci + 2 <= cipher_list_len; ci += 2) {
 		uint16_t c = vbe16dec(cipher_list + ci);
 		if (!IS_GREASE_TLS(c))
@@ -497,26 +494,20 @@ ja4_build_cipher_list_raw(const unsigned char *cipher_list,
 	if (sorted)
 		qsort(ciphers, cipher_count, sizeof(uint16_t), cmp_uint16);
 	buf_len = cipher_count * JA4_HEX_ITEM_MAX;
-	buf = malloc(buf_len);
-	if (buf == NULL) {
-		free(ciphers);
-		free(*out);
-		*out = NULL;
+	buf = WS_Alloc(ws, buf_len);
+	if (buf == NULL)
 		return (-1);
-	}
 	off = 0;
 	for (ci = 0; ci < cipher_count; ci++) {
 		off += (size_t)snprintf(buf + off, buf_len - off, "%s%04x",
 		    ci > 0 ? "," : "", ciphers[ci]);
 	}
-	free(ciphers);
-	free(*out);
 	*out = buf;
 	return (0);
 }
 
 static int
-ja4_build_sig_algs_str_raw(const unsigned char *sig_alg_data,
+ja4_build_sig_algs_str_raw(struct ws *ws, const unsigned char *sig_alg_data,
     size_t sig_alg_len, char **out)
 {
 	uint16_t sig_alg_list_len;
@@ -524,7 +515,7 @@ ja4_build_sig_algs_str_raw(const unsigned char *sig_alg_data,
 	uint16_t sa;
 	char *buf;
 
-	*out = malloc(1);
+	*out = WS_Alloc(ws, 1);
 	if (*out == NULL)
 		return (-1);
 	**out = '\0';
@@ -541,12 +532,9 @@ ja4_build_sig_algs_str_raw(const unsigned char *sig_alg_data,
 	if (n == 0)
 		return (0);
 	buf_len = n * JA4_HEX_ITEM_MAX;
-	buf = malloc(buf_len);
-	if (buf == NULL) {
-		free(*out);
-		*out = NULL;
+	buf = WS_Alloc(ws, buf_len);
+	if (buf == NULL)
 		return (-1);
-	}
 	off = 0;
 	for (si = 2; si + 2 <= 2 + (size_t)sig_alg_list_len && si + 2 <= sig_alg_len;
 	    si += 2) {
@@ -555,13 +543,12 @@ ja4_build_sig_algs_str_raw(const unsigned char *sig_alg_data,
 			off += (size_t)snprintf(buf + off, buf_len - off, "%s%02x%02x",
 			    off > 0 ? "," : "", sig_alg_data[si], sig_alg_data[si + 1]);
 	}
-	free(*out);
 	*out = buf;
 	return (0);
 }
 
 static int
-ja4_build_exts_list(const int *ext_types, size_t ext_count_total,
+ja4_build_exts_list(struct ws *ws, const int *ext_types, size_t ext_count_total,
     int sorted, int exclude_sni_alpn, char **out)
 {
 	size_t ext_count;
@@ -578,18 +565,15 @@ ja4_build_exts_list(const int *ext_types, size_t ext_count_total,
 		    ext_types[ei] != TLSEXT_TYPE_alpn)))
 			ext_count++;
 	}
-	*out = malloc(1);
+	*out = WS_Alloc(ws, 1);
 	if (*out == NULL)
 		return (-1);
 	**out = '\0';
 	if (ext_count == 0)
 		return (0);
-	exts = malloc(ext_count * sizeof(int));
-	if (exts == NULL) {
-		free(*out);
-		*out = NULL;
+	exts = WS_Alloc(ws, ext_count * sizeof(int));
+	if (exts == NULL)
 		return (-1);
-	}
 	for (ei = 0, ej = 0; ei < ext_count_total; ei++) {
 		if (!IS_GREASE_TLS(ext_types[ei]) &&
 		    (!exclude_sni_alpn ||
@@ -600,26 +584,21 @@ ja4_build_exts_list(const int *ext_types, size_t ext_count_total,
 	if (sorted)
 		qsort(exts, ext_count, sizeof(int), cmp_int);
 	buf_len = ext_count * JA4_HEX_ITEM_MAX;
-	buf = malloc(buf_len);
-	if (buf == NULL) {
-		free(exts);
-		free(*out);
-		*out = NULL;
+	buf = WS_Alloc(ws, buf_len);
+	if (buf == NULL)
 		return (-1);
-	}
 	off = 0;
 	for (ei = 0; ei < ext_count; ei++) {
 		off += (size_t)snprintf(buf + off, buf_len - off, "%s%04x",
 		    ei > 0 ? "," : "", exts[ei]);
 	}
-	free(exts);
-	free(*out);
 	*out = buf;
 	return (0);
 }
 
 static int
-ja4_exts_sigs_hash(const char *exts_str, const char *sig_algs, char out[JA4_HASH_BUF])
+ja4_exts_sigs_hash(struct ws *ws, const char *exts_str, const char *sig_algs,
+    char out[JA4_HASH_BUF])
 {
 	size_t exts_len, sig_len, total;
 	char *combined = NULL;
@@ -632,7 +611,7 @@ ja4_exts_sigs_hash(const char *exts_str, const char *sig_algs, char out[JA4_HASH
 		return (0);
 	}
 	total = exts_len + (sig_len > 0 ? 1 + sig_len : 0);
-	combined = malloc(total + 1);
+	combined = WS_Alloc(ws, total + 1);
 	if (combined == NULL)
 		return (-1);
 	if (exts_len > 0)
@@ -644,13 +623,12 @@ ja4_exts_sigs_hash(const char *exts_str, const char *sig_algs, char out[JA4_HASH
 		strcat(combined, sig_algs);
 	}
 	vtls_ja4_hash12(combined, total, out);
-	free(combined);
 	return (0);
 }
 
 static char *
-ja4_build_raw(const char *part_a, const char *ciphers_str, const char *exts_str,
-    const char *sig_algs)
+ja4_build_raw(struct ws *ws, const char *part_a, const char *ciphers_str,
+    const char *exts_str, const char *sig_algs)
 {
 	size_t l;
 	size_t cipher_len, exts_len, sig_len;
@@ -665,7 +643,7 @@ ja4_build_raw(const char *part_a, const char *ciphers_str, const char *exts_str,
 		l += 1 + sig_len;
 	l++;
 
-	out = malloc(l);
+	out = WS_Alloc(ws, l);
 	if (out == NULL)
 		return (NULL);
 	if (sig_len > 0)
@@ -707,8 +685,8 @@ ja4_build_part_a(const struct ja3_ja4_raw_ch *raw, char part_a[JA4_PART_A_MAX])
 }
 
 static char *
-ja4_build_hashed_result(const char *part_a, const char *ciphers_str,
-    const char *exts_str, const char *sig_algs)
+ja4_build_hashed_result(struct ws *ws, const char *part_a,
+    const char *ciphers_str, const char *exts_str, const char *sig_algs)
 {
 	char ciphers_hash[JA4_HASH_BUF];
 	char exts_sigs_hash[JA4_HASH_BUF];
@@ -717,16 +695,17 @@ ja4_build_hashed_result(const char *part_a, const char *ciphers_str,
 
 	cipher_len = strlen_safe(ciphers_str);
 	vtls_ja4_hash12(ciphers_str ? ciphers_str : "", cipher_len, ciphers_hash);
-	if (ja4_exts_sigs_hash(exts_str, sig_algs, exts_sigs_hash) != 0)
+	if (ja4_exts_sigs_hash(ws, exts_str, sig_algs, exts_sigs_hash) != 0)
 		return (NULL);
 	sprintf(ja4_buf, "%s_%s_%s", part_a, ciphers_hash, exts_sigs_hash);
-	return (strdup(ja4_buf));
+	return (WS_Copy(ws, ja4_buf, -1));
 }
 
 static int
 vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
     struct vtls_sess *tsp)
 {
+	struct ws *ws;
 	char part_a[JA4_PART_A_MAX];
 	char *sorted_ciphers = NULL;
 	char *original_ciphers = NULL;
@@ -739,38 +718,40 @@ vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 	char *ja4_ro_result = NULL;
 	uintptr_t sn;
 
-	sn = WS_Snapshot(sp->ws);
+	ws = sp->ws;
+	sn = WS_Snapshot(ws);
 	ja4_build_part_a(raw, part_a);
 
-	if (ja4_build_cipher_list_raw(raw->ciphers, raw->cipher_len, 1,
+	if (ja4_build_cipher_list_raw(ws, raw->ciphers, raw->cipher_len, 1,
 	    &sorted_ciphers) != 0)
 		goto fail;
-	if (ja4_build_cipher_list_raw(raw->ciphers, raw->cipher_len, 0,
+	if (ja4_build_cipher_list_raw(ws, raw->ciphers, raw->cipher_len, 0,
 	    &original_ciphers) != 0)
 		goto fail;
-	if (ja4_build_exts_list(raw->ext_types, raw->ext_count, 1, 1,
+	if (ja4_build_exts_list(ws, raw->ext_types, raw->ext_count, 1, 1,
 	    &sorted_exts) != 0)
 		goto fail;
-	if (ja4_build_exts_list(raw->ext_types, raw->ext_count, 0, 0,
+	if (ja4_build_exts_list(ws, raw->ext_types, raw->ext_count, 0, 0,
 	    &original_exts) != 0)
 		goto fail;
-	if (ja4_build_sig_algs_str_raw(raw->sig_algs, raw->sig_algs_len,
+	if (ja4_build_sig_algs_str_raw(ws, raw->sig_algs, raw->sig_algs_len,
 	    &sig_algs) != 0)
 		goto fail;
 
-	ja4_result = ja4_build_hashed_result(part_a, sorted_ciphers, sorted_exts,
-	    sig_algs);
+	ja4_result = ja4_build_hashed_result(ws, part_a, sorted_ciphers,
+	    sorted_exts, sig_algs);
 	if (ja4_result == NULL)
 		goto fail;
-	ja4_r_result = ja4_build_raw(part_a, sorted_ciphers, sorted_exts, sig_algs);
+	ja4_r_result = ja4_build_raw(ws, part_a, sorted_ciphers, sorted_exts,
+	    sig_algs);
 	if (ja4_r_result == NULL)
 		goto fail;
-	ja4_o_result = ja4_build_hashed_result(part_a, original_ciphers,
+	ja4_o_result = ja4_build_hashed_result(ws, part_a, original_ciphers,
 	    original_exts, sig_algs);
 	if (ja4_o_result == NULL)
 		goto fail;
-	ja4_ro_result = ja4_build_raw(part_a, original_ciphers, original_exts,
-	    sig_algs);
+	ja4_ro_result = ja4_build_raw(ws, part_a, original_ciphers,
+	    original_exts, sig_algs);
 	if (ja4_ro_result == NULL)
 		goto fail;
 
@@ -779,24 +760,12 @@ vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 	REPLACE(tsp->ja4_o, ja4_o_result);
 	REPLACE(tsp->ja4_ro, ja4_ro_result);
 
-	free(sig_algs);
-	free(original_exts);
-	free(sorted_exts);
-	free(original_ciphers);
-	free(sorted_ciphers);
-	WS_Reset(sp->ws, sn);
+	WS_Reset(ws, sn);
 	return (0);
 fail:
-	free(ja4_result);
-	free(ja4_r_result);
-	free(ja4_o_result);
-	free(ja4_ro_result);
-	free(sig_algs);
-	free(original_exts);
-	free(sorted_exts);
-	free(original_ciphers);
-	free(sorted_ciphers);
-	WS_Reset(sp->ws, sn);
+	VTLS_LOG(tsp->log, SLT_Error,
+	    "Out of workspace_session during JA4 handling");
+	WS_Reset(ws, sn);
 	return (1);
 }
 
