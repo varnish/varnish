@@ -525,6 +525,45 @@ VTLS_ja4(const struct vrt_ctx *ctx)
 	return (tsp->ja4);
 }
 
+/* VMOD accessor: get JA4 raw (sorted) fingerprint */
+const char *
+VTLS_ja4_r(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+
+	tsp = vtls_get_sess(ctx);
+	if (tsp == NULL)
+		return (NULL);
+
+	return (tsp->ja4_r);
+}
+
+/* VMOD accessor: get JA4 hashed original-order fingerprint */
+const char *
+VTLS_ja4_o(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+
+	tsp = vtls_get_sess(ctx);
+	if (tsp == NULL)
+		return (NULL);
+
+	return (tsp->ja4_o);
+}
+
+/* VMOD accessor: get JA4 raw original-order fingerprint */
+const char *
+VTLS_ja4_ro(const struct vrt_ctx *ctx)
+{
+	struct vtls_sess *tsp;
+
+	tsp = vtls_get_sess(ctx);
+	if (tsp == NULL)
+		return (NULL);
+
+	return (tsp->ja4_ro);
+}
+
 /*
  * This is the SSL_do_handshake/poll loop.
  *

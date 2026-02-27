@@ -57,6 +57,21 @@ $Function STRING ja4()
 Returns the JA4 fingerprint for this connection if the ``tls_ja4`` parameter
 has been enabled.
 
+$Function STRING ja4_r()
+
+Returns the JA4 raw fingerprint (sorted lists) for this connection if the
+``tls_ja4`` parameter has been enabled.
+
+$Function STRING ja4_o()
+
+Returns the JA4 fingerprint with original ordering (hashed) for this
+connection if the ``tls_ja4`` parameter has been enabled.
+
+$Function STRING ja4_ro()
+
+Returns the JA4 raw fingerprint with original ordering for this connection
+if the ``tls_ja4`` parameter has been enabled.
+
 $Function STRING cipher()
 $Restrict client vcl_backend_response vcl_pipe
 

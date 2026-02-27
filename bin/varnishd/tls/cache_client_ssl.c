@@ -122,6 +122,9 @@ VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp)
 
 	free(tsp->ja3);
 	free(tsp->ja4);
+	free(tsp->ja4_r);
+	free(tsp->ja4_o);
+	free(tsp->ja4_ro);
 
 	if (tsp->buf != NULL)
 		VTLS_buf_free(&tsp->buf);
@@ -871,19 +874,18 @@ ja4_alpn_first_last(SSL *ssl, char *alpn_first, char *alpn_last)
 	*alpn_last = (proto_len * 2 > 1 ? hex_buf[proto_len * 2 - 1] : hex_buf[0]);
 }
 
-/* JA4: collect non-GREASE ciphers, sort, format comma-sep hex, hash12. Returns 0 or -1. */
+/* JA4: build comma-sep cipher list (sorted or original order). *out is malloc'd. Returns 0 or -1. */
 static int
-ja4_build_ciphers_hash(SSL *ssl, struct sess *sp, char ciphers_hash[13])
+ja4_build_cipher_list(SSL *ssl, int sorted, char **out)
 {
 	const unsigned char *cipher_list;
 	size_t cipher_list_len;
 	size_t cipher_count;
 	size_t ci, cj;
 	size_t buf_len, off;
-	uint16_t *sorted_ciphers;
+	uint16_t *ciphers;
 	char *buf;
 
-	(void)sp;
 	cipher_list_len = SSL_client_hello_get0_ciphers(ssl, &cipher_list);
 	if (cipher_list == NULL && cipher_list_len > 0)
 		return (-1);
@@ -892,97 +894,143 @@ ja4_build_ciphers_hash(SSL *ssl, struct sess *sp, char ciphers_hash[13])
 		if (!IS_GREASE_TLS((uint16_t)(cipher_list[ci] << 8 | cipher_list[ci + 1])))
 			cipher_count++;
 	}
-	if (cipher_count == 0) {
-		vtls_ja4_hash12("", 0, ciphers_hash);
-		return (0);
-	}
-	sorted_ciphers = malloc(cipher_count * sizeof(uint16_t));
-	if (sorted_ciphers == NULL)
+	*out = malloc(1);
+	if (*out == NULL)
 		return (-1);
+	**out = '\0';
+	if (cipher_count == 0)
+		return (0);
+	ciphers = malloc(cipher_count * sizeof(uint16_t));
+	if (ciphers == NULL) {
+		free(*out);
+		*out = NULL;
+		return (-1);
+	}
 	for (ci = 0, cj = 0; ci + 2 <= cipher_list_len; ci += 2) {
 		uint16_t c = (uint16_t)cipher_list[ci] << 8 | cipher_list[ci + 1];
 		if (!IS_GREASE_TLS(c))
-			sorted_ciphers[cj++] = c;
+			ciphers[cj++] = c;
 	}
-	qsort(sorted_ciphers, cipher_count, sizeof(uint16_t), cmp_uint16);
-	/* "XXXX," per cipher; last is "XXXX" only -> (n*5 - 1) + 1 for NUL */
+	if (sorted)
+		qsort(ciphers, cipher_count, sizeof(uint16_t), cmp_uint16);
 	buf_len = cipher_count * 5;
 	buf = malloc(buf_len);
 	if (buf == NULL) {
-		free(sorted_ciphers);
+		free(ciphers);
+		free(*out);
+		*out = NULL;
 		return (-1);
 	}
 	off = 0;
 	for (ci = 0; ci < cipher_count; ci++) {
 		off += (size_t)snprintf(buf + off, buf_len - off, "%s%04x",
-		    ci > 0 ? "," : "", sorted_ciphers[ci]);
+		    ci > 0 ? "," : "", ciphers[ci]);
 	}
-	free(sorted_ciphers);
-	vtls_ja4_hash12(buf, off, ciphers_hash);
-	free(buf);
+	free(ciphers);
+	free(*out);
+	*out = buf;
 	return (0);
 }
 
-/* JA4: exts (excl. SNI/ALPN) sorted + "_" + sig algs, hash12. Returns 0 or -1. */
+/* JA4: build comma-sep extension list (sorted or original, optionally exclude SNI/ALPN). *out malloc'd. */
 static int
-ja4_build_exts_sigs_hash(SSL *ssl, struct sess *sp,
-    const int *ext_types, size_t ext_count_total, char exts_sigs_hash[13])
+ja4_build_exts_list(const int *ext_types, size_t ext_count_total,
+    int sorted, int exclude_sni_alpn, char **out)
 {
-	size_t ext_count_for_hash;
+	size_t ext_count;
 	size_t ei, ej;
-	int *exts_for_hash;
+	int *exts;
+	char *buf;
+	size_t buf_len, off;
+
+	ext_count = 0;
+	for (ei = 0; ei < ext_count_total; ei++) {
+		if (!IS_GREASE_TLS(ext_types[ei]) &&
+		    (!exclude_sni_alpn ||
+		    (ext_types[ei] != TLSEXT_TYPE_server_name &&
+		    ext_types[ei] != TLSEXT_TYPE_alpn)))
+			ext_count++;
+	}
+	*out = malloc(1);
+	if (*out == NULL)
+		return (-1);
+	**out = '\0';
+	if (ext_count == 0)
+		return (0);
+	exts = malloc(ext_count * sizeof(int));
+	if (exts == NULL) {
+		free(*out);
+		*out = NULL;
+		return (-1);
+	}
+	for (ei = 0, ej = 0; ei < ext_count_total; ei++) {
+		if (!IS_GREASE_TLS(ext_types[ei]) &&
+		    (!exclude_sni_alpn ||
+		    (ext_types[ei] != TLSEXT_TYPE_server_name &&
+		    ext_types[ei] != TLSEXT_TYPE_alpn)))
+			exts[ej++] = ext_types[ei];
+	}
+	if (sorted)
+		qsort(exts, ext_count, sizeof(int), cmp_int);
+	buf_len = ext_count * 5;
+	buf = malloc(buf_len);
+	if (buf == NULL) {
+		free(exts);
+		free(*out);
+		*out = NULL;
+		return (-1);
+	}
+	off = 0;
+	for (ei = 0; ei < ext_count; ei++) {
+		off += (size_t)snprintf(buf + off, buf_len - off, "%s%04x",
+		    ei > 0 ? "," : "", exts[ei]);
+	}
+	free(exts);
+	free(*out);
+	*out = buf;
+	return (0);
+}
+
+/* JA4: build comma-sep signature algorithms in order. *out malloc'd. */
+static int
+ja4_build_sig_algs_str(SSL *ssl, char **out)
+{
 	const unsigned char *sig_alg_data;
 	size_t sig_alg_len;
 	uint16_t sig_alg_list_len;
 	size_t si;
-	struct vsb vsb[1];
+	size_t n, buf_len, off;
+	char *buf;
 
-	ext_count_for_hash = 0;
-	for (ei = 0; ei < ext_count_total; ei++) {
-		if (!IS_GREASE_TLS(ext_types[ei]) &&
-		    ext_types[ei] != TLSEXT_TYPE_server_name &&
-		    ext_types[ei] != TLSEXT_TYPE_alpn)
-			ext_count_for_hash++;
-	}
-	exts_for_hash = NULL;
-	if (ext_count_for_hash > 0) {
-		exts_for_hash = malloc(ext_count_for_hash * sizeof(int));
-		if (exts_for_hash == NULL)
-			return (-1);
-		for (ei = 0, ej = 0; ei < ext_count_total; ei++) {
-			if (!IS_GREASE_TLS(ext_types[ei]) &&
-			    ext_types[ei] != TLSEXT_TYPE_server_name &&
-			    ext_types[ei] != TLSEXT_TYPE_alpn)
-				exts_for_hash[ej++] = ext_types[ei];
-		}
-		qsort(exts_for_hash, ext_count_for_hash, sizeof(int), cmp_int);
-	}
-	WS_VSB_new(vsb, sp->ws);
-	for (ei = 0; ei < ext_count_for_hash; ei++) {
-		if (ei > 0)
-			VSB_putc(vsb, ',');
-		VSB_printf(vsb, "%04x", exts_for_hash[ei]);
-	}
-	free(exts_for_hash);
-	exts_for_hash = NULL;
+	*out = malloc(1);
+	if (*out == NULL)
+		return (-1);
+	**out = '\0';
 	if (SSL_client_hello_get0_ext(ssl, TLSEXT_TYPE_signature_algorithms,
-	    &sig_alg_data, &sig_alg_len) == 1 && sig_alg_len >= 2) {
-		sig_alg_list_len = (sig_alg_data[0] << 8) | sig_alg_data[1];
-		VSB_putc(vsb, '_');
-		for (si = 2; si + 2 <= 2 + (size_t)sig_alg_list_len && si + 2 <= sig_alg_len;
-		    si += 2) {
-			if (si > 2)
-				VSB_putc(vsb, ',');
-			VSB_printf(vsb, "%02x%02x", sig_alg_data[si], sig_alg_data[si + 1]);
-		}
+	    &sig_alg_data, &sig_alg_len) != 1 || sig_alg_len < 2)
+		return (0);
+	sig_alg_list_len = (sig_alg_data[0] << 8) | sig_alg_data[1];
+	n = 0;
+	for (si = 2; si + 2 <= 2 + (size_t)sig_alg_list_len && si + 2 <= sig_alg_len;
+	    si += 2)
+		n++;
+	if (n == 0)
+		return (0);
+	buf_len = n * 5;
+	buf = malloc(buf_len);
+	if (buf == NULL) {
+		free(*out);
+		*out = NULL;
+		return (-1);
 	}
-	AZ(VSB_finish(vsb));
-	{
-		ssize_t vsb_len = VSB_len(vsb);
-		vtls_ja4_hash12(VSB_data(vsb), vsb_len, exts_sigs_hash);
-		WS_Release(sp->ws, (unsigned)(vsb_len + 1));
-		VSB_fini(vsb);
+	off = 0;
+	for (si = 2; si + 2 <= 2 + (size_t)sig_alg_list_len && si + 2 <= sig_alg_len;
+	    si += 2) {
+		off += (size_t)snprintf(buf + off, buf_len - off, "%s%02x%02x",
+		    (si > 2 ? "," : ""), sig_alg_data[si], sig_alg_data[si + 1]);
 	}
+	free(*out);
+	*out = buf;
 	return (0);
 }
 
@@ -993,7 +1041,7 @@ vtls_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 	size_t ext_count_total;
 	unsigned nr_exts_raw;
 	size_t cipher_count;
-	size_t ei;
+	size_t ei, ci;
 	unsigned nr_ciphers;
 	unsigned nr_exts;
 	const char *tls_version_str;
@@ -1001,9 +1049,18 @@ vtls_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 	char alpn_first;
 	char alpn_last;
 	char first_chunk[16];
+	char *sorted_ciphers = NULL;
+	char *original_ciphers = NULL;
+	char *sorted_exts = NULL;
+	char *original_exts = NULL;
+	char *sig_algs = NULL;
 	char ciphers_hash[13];
 	char exts_sigs_hash[13];
-	char *ja4_result;
+	size_t exts_sigs_len;
+	char *ja4_result = NULL;
+	char *ja4_r_result = NULL;
+	char *ja4_o_result = NULL;
+	char *ja4_ro_result = NULL;
 	uintptr_t sn;
 
 	sn = WS_Snapshot(sp->ws);
@@ -1023,8 +1080,8 @@ vtls_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 		size_t cipher_list_len;
 
 		cipher_list_len = SSL_client_hello_get0_ciphers(ssl, &cipher_list);
-		for (ei = 0; ei + 2 <= cipher_list_len; ei += 2) {
-			if (!IS_GREASE_TLS((uint16_t)(cipher_list[ei] << 8 | cipher_list[ei + 1])))
+		for (ci = 0; ci + 2 <= cipher_list_len; ci += 2) {
+			if (!IS_GREASE_TLS((uint16_t)(cipher_list[ci] << 8 | cipher_list[ci + 1])))
 				cipher_count++;
 		}
 	}
@@ -1039,29 +1096,136 @@ vtls_get_ja4(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 	sprintf(first_chunk, "t%s%c%02u%02u%c%c", tls_version_str, sni_marker,
 	    nr_ciphers, nr_exts, alpn_first, alpn_last);
 
-	if (ja4_build_ciphers_hash(ssl, sp, ciphers_hash) != 0)
+	if (ja4_build_cipher_list(ssl, 1, &sorted_ciphers) != 0)
 		goto fail;
-	if (ja4_build_exts_sigs_hash(ssl, sp, ext_types, ext_count_total, exts_sigs_hash) != 0)
+	if (ja4_build_cipher_list(ssl, 0, &original_ciphers) != 0)
+		goto fail;
+	if (ja4_build_exts_list(ext_types, ext_count_total, 1, 1, &sorted_exts) != 0)
+		goto fail;
+	if (ja4_build_exts_list(ext_types, ext_count_total, 0, 0, &original_exts) != 0)
+		goto fail;
+	if (ja4_build_sig_algs_str(ssl, &sig_algs) != 0)
 		goto fail;
 
-	{
-		char ja4_buf[64];	/* first_chunk + _ + 12 + _ + 12 + NUL */
-		size_t l;
+	/* Hash for JA4 part B (ciphers): sorted list; empty -> 000000000000 */
+	vtls_ja4_hash12(sorted_ciphers ? sorted_ciphers : "", sorted_ciphers ? strlen(sorted_ciphers) : 0, ciphers_hash);
 
-		snprintf(ja4_buf, sizeof(ja4_buf), "%s_%s_%s",
-		    first_chunk, ciphers_hash, exts_sigs_hash);
-		l = strlen(ja4_buf) + 1;
-		ja4_result = malloc(l);
-		if (ja4_result == NULL)
-			goto fail;
-		memcpy(ja4_result, ja4_buf, l);
+	/* Hash for JA4 part C (exts + sig algs): sorted exts, optional _sigs */
+	exts_sigs_len = strlen(sorted_exts ? sorted_exts : "");
+	if (sig_algs != NULL && sig_algs[0] != '\0') {
+		exts_sigs_len += 1 + strlen(sig_algs);
 	}
+	{
+		char *exts_sigs_str = NULL;
+		if (exts_sigs_len > 0) {
+			exts_sigs_str = malloc(exts_sigs_len + 1);
+			if (exts_sigs_str == NULL)
+				goto fail;
+			if (sorted_exts != NULL && sorted_exts[0] != '\0')
+				strcpy(exts_sigs_str, sorted_exts);
+			else
+				exts_sigs_str[0] = '\0';
+			if (sig_algs != NULL && sig_algs[0] != '\0') {
+				strcat(exts_sigs_str, "_");
+				strcat(exts_sigs_str, sig_algs);
+			}
+			vtls_ja4_hash12(exts_sigs_str, strlen(exts_sigs_str), exts_sigs_hash);
+			free(exts_sigs_str);
+		} else
+			vtls_ja4_hash12("", 0, exts_sigs_hash);
+	}
+
+	/* JA4: hashed sorted */
+	ja4_result = malloc(strlen(first_chunk) + 1 + 12 + 1 + 12 + 1);
+	if (ja4_result == NULL)
+		goto fail;
+	sprintf(ja4_result, "%s_%s_%s", first_chunk, ciphers_hash, exts_sigs_hash);
+
+	/* JA4_r: raw sorted */
+	{
+		size_t l = strlen(first_chunk) + 1 + (sorted_ciphers ? strlen(sorted_ciphers) : 0) + 1 +
+		    (sorted_exts ? strlen(sorted_exts) : 0) + 1 + (sig_algs && sig_algs[0] ? strlen(sig_algs) + 1 : 0) + 1;
+		ja4_r_result = malloc(l);
+		if (ja4_r_result == NULL)
+			goto fail;
+		if (sig_algs != NULL && sig_algs[0] != '\0')
+			sprintf(ja4_r_result, "%s_%s_%s_%s", first_chunk,
+			    sorted_ciphers ? sorted_ciphers : "", sorted_exts ? sorted_exts : "", sig_algs);
+		else
+			sprintf(ja4_r_result, "%s_%s_%s", first_chunk,
+			    sorted_ciphers ? sorted_ciphers : "", sorted_exts ? sorted_exts : "");
+	}
+
+	/* JA4_o: hashed original order */
+	{
+		char orig_ciphers_hash[13];
+		char orig_exts_sigs_hash[13];
+		size_t orig_exts_sigs_len = strlen(original_exts ? original_exts : "");
+		if (sig_algs != NULL && sig_algs[0] != '\0')
+			orig_exts_sigs_len += 1 + strlen(sig_algs);
+		vtls_ja4_hash12(original_ciphers ? original_ciphers : "", original_ciphers ? strlen(original_ciphers) : 0, orig_ciphers_hash);
+		if (orig_exts_sigs_len > 0) {
+			char *orig_exts_sigs_str = malloc(orig_exts_sigs_len + 1);
+			if (orig_exts_sigs_str == NULL)
+				goto fail;
+			if (original_exts != NULL && original_exts[0] != '\0')
+				strcpy(orig_exts_sigs_str, original_exts);
+			else
+				orig_exts_sigs_str[0] = '\0';
+			if (sig_algs != NULL && sig_algs[0] != '\0') {
+				strcat(orig_exts_sigs_str, "_");
+				strcat(orig_exts_sigs_str, sig_algs);
+			}
+			vtls_ja4_hash12(orig_exts_sigs_str, strlen(orig_exts_sigs_str), orig_exts_sigs_hash);
+			free(orig_exts_sigs_str);
+		} else
+			vtls_ja4_hash12("", 0, orig_exts_sigs_hash);
+		ja4_o_result = malloc(strlen(first_chunk) + 1 + 12 + 1 + 12 + 1);
+		if (ja4_o_result == NULL)
+			goto fail;
+		sprintf(ja4_o_result, "%s_%s_%s", first_chunk, orig_ciphers_hash, orig_exts_sigs_hash);
+	}
+
+	/* JA4_ro: raw original order */
+	{
+		size_t l = strlen(first_chunk) + 1 + (original_ciphers ? strlen(original_ciphers) : 0) + 1 +
+		    (original_exts ? strlen(original_exts) : 0) + 1 + (sig_algs && sig_algs[0] ? strlen(sig_algs) + 1 : 0) + 1;
+		ja4_ro_result = malloc(l);
+		if (ja4_ro_result == NULL)
+			goto fail;
+		if (sig_algs != NULL && sig_algs[0] != '\0')
+			sprintf(ja4_ro_result, "%s_%s_%s_%s", first_chunk,
+			    original_ciphers ? original_ciphers : "", original_exts ? original_exts : "", sig_algs);
+		else
+			sprintf(ja4_ro_result, "%s_%s_%s", first_chunk,
+			    original_ciphers ? original_ciphers : "", original_exts ? original_exts : "");
+	}
+
 	REPLACE(tsp->ja4, ja4_result);
+	REPLACE(tsp->ja4_r, ja4_r_result);
+	REPLACE(tsp->ja4_o, ja4_o_result);
+	REPLACE(tsp->ja4_ro, ja4_ro_result);
+	ja4_result = ja4_r_result = ja4_o_result = ja4_ro_result = NULL;
+
+	free(sig_algs);
+	free(original_exts);
+	free(sorted_exts);
+	free(original_ciphers);
+	free(sorted_ciphers);
 	WS_Reset(sp->ws, sn);
 	if (ext_types != NULL)
 		OPENSSL_free(ext_types);
 	return (0);
 fail:
+	free(ja4_result);
+	free(ja4_r_result);
+	free(ja4_o_result);
+	free(ja4_ro_result);
+	free(sig_algs);
+	free(original_exts);
+	free(sorted_exts);
+	free(original_ciphers);
+	free(sorted_ciphers);
 	if (ext_types != NULL)
 		OPENSSL_free(ext_types);
 	WS_Reset(sp->ws, sn);

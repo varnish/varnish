@@ -48,6 +48,9 @@
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);
 const char *VTLS_ja4(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_r(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_o(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_ro(const struct vrt_ctx *ctx);
 
 /*
  * For the backend-side, this VMOD is only callable when we have an
@@ -117,6 +120,57 @@ vmod_ja4(VRT_CTX)
 		return (NULL);
 
 	return (WS_Copy(ctx->ws, ja4, -1));
+}
+
+VCL_STRING
+vmod_ja4_r(VRT_CTX)
+{
+	const char *ja4_r;
+
+	if (!(ctx->method & VCL_MET_TASK_C)) {
+		VRT_fail(ctx, "tls.ja4_r() can only be used in client context");
+		return (NULL);
+	}
+
+	ja4_r = VTLS_ja4_r(ctx);
+	if (ja4_r == NULL)
+		return (NULL);
+
+	return (WS_Copy(ctx->ws, ja4_r, -1));
+}
+
+VCL_STRING
+vmod_ja4_o(VRT_CTX)
+{
+	const char *ja4_o;
+
+	if (!(ctx->method & VCL_MET_TASK_C)) {
+		VRT_fail(ctx, "tls.ja4_o() can only be used in client context");
+		return (NULL);
+	}
+
+	ja4_o = VTLS_ja4_o(ctx);
+	if (ja4_o == NULL)
+		return (NULL);
+
+	return (WS_Copy(ctx->ws, ja4_o, -1));
+}
+
+VCL_STRING
+vmod_ja4_ro(VRT_CTX)
+{
+	const char *ja4_ro;
+
+	if (!(ctx->method & VCL_MET_TASK_C)) {
+		VRT_fail(ctx, "tls.ja4_ro() can only be used in client context");
+		return (NULL);
+	}
+
+	ja4_ro = VTLS_ja4_ro(ctx);
+	if (ja4_ro == NULL)
+		return (NULL);
+
+	return (WS_Copy(ctx->ws, ja4_ro, -1));
 }
 
 VCL_STRING

@@ -85,6 +85,9 @@ struct vtls_sess {
 	int			sni_result;	/* SNI callback result */
 	char			*ja3;		/* JA3 fingerprint string */
 	char			*ja4;		/* JA4 fingerprint string */
+	char			*ja4_r;		/* JA4 raw (sorted) fingerprint */
+	char			*ja4_o;		/* JA4 hashed original-order fingerprint */
+	char			*ja4_ro;		/* JA4 raw original-order fingerprint */
 	struct vtls_buf		*buf;		/* TLS record buffer */
 	void			*priv_local;	/* Pointer to listen_sock->tls */
 };
@@ -125,6 +128,9 @@ extern struct transport TLS_transport;
 const SSL *VTLS_tls_ctx(const struct vrt_ctx *ctx);
 const char *VTLS_ja3(const struct vrt_ctx *ctx);
 const char *VTLS_ja4(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_r(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_o(const struct vrt_ctx *ctx);
+const char *VTLS_ja4_ro(const struct vrt_ctx *ctx);
 
 /* Log message macro - if vsl is NULL it is logged as non-transactional */
 #define VTLS_LOG(log, tag, ...)					\
