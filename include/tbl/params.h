@@ -1121,9 +1121,11 @@ PARAM_SIMPLE(
 	/* units */	"bool",
 	/* descr */
 	"Enable JA4 TLS client fingerprinting for incoming TLS connections. "
-	"When enabled, the JA4 fingerprint string can be accessed via the "
-	"tls VMOD using tls.ja4(). The fingerprint can be used for client "
-	"identification and classification."
+	"When enabled, JA4 fingerprint strings can be accessed via the tls "
+	"VMOD: tls.ja4() (hashed, sorted), tls.ja4_r() (raw, sorted), "
+	"tls.ja4_o() (hashed, original order), tls.ja4_ro() (raw, original "
+	"order). The fingerprints can be used for client identification and "
+	"classification."
 )
 
 PARAM_SIMPLE(
