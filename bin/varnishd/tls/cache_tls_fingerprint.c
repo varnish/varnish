@@ -488,10 +488,11 @@ ja4_alpn_first_last(const struct ja3_ja4_raw_ch *raw, char *first, char *last)
  * Sorted variants (ja4, ja4_r) use sorted order; hashed variants (ja4, ja4_o) use
  * 12-char hash; raw variants (ja4_r, ja4_ro) use comma-sep hex. One variant per call.
  */
-static int
-vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
-    struct vtls_sess *tsp, enum vtls_ja4_variant variant)
+int
+VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
+    enum vtls_ja4_variant variant)
 {
+	const struct ja3_ja4_raw_ch *raw;
 	struct ws *ws;
 	uintptr_t sn;
 	uint16_t wire, vmax;
@@ -510,8 +511,19 @@ vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 	int do_sort, do_hash;
 	char alpn_first, alpn_last;
 
-	if (raw == NULL || sp == NULL || tsp == NULL)
-		return (1);
+	if (sp == NULL || tsp == NULL)
+		return (-1);
+	if (tsp->ja3_ja4_raw == NULL)
+		return (-1);
+	switch (variant) {
+	case VTLS_JA4_MAIN: if (tsp->ja4 != NULL) return (0); break;
+	case VTLS_JA4_R:   if (tsp->ja4_r != NULL) return (0); break;
+	case VTLS_JA4_O:   if (tsp->ja4_o != NULL) return (0); break;
+	case VTLS_JA4_RO:  if (tsp->ja4_ro != NULL) return (0); break;
+	default: return (-1);
+	}
+
+	raw = tsp->ja3_ja4_raw;
 	ws = sp->ws;
 	sn = WS_Snapshot(ws);
 	do_sort = (variant <= VTLS_JA4_R);
@@ -680,24 +692,6 @@ fail:
 	    "Out of workspace_session during JA4 handling");
 	WS_Reset(ws, sn);
 	return (1);
-}
-
-int
-VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
-    enum vtls_ja4_variant variant)
-{
-	if (sp == NULL || tsp == NULL)
-		return (-1);
-	if (tsp->ja3_ja4_raw == NULL)
-		return (-1);
-	switch (variant) {
-	case VTLS_JA4_MAIN: if (tsp->ja4 != NULL) return (0); break;
-	case VTLS_JA4_R:   if (tsp->ja4_r != NULL) return (0); break;
-	case VTLS_JA4_O:   if (tsp->ja4_o != NULL) return (0); break;
-	case VTLS_JA4_RO:  if (tsp->ja4_ro != NULL) return (0); break;
-	default: return (-1);
-	}
-	return (vtls_get_ja4_one_variant(tsp->ja3_ja4_raw, sp, tsp, variant));
 }
 
 void

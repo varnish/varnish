@@ -115,13 +115,13 @@ struct vtls_options {
 };
 
 void
-VTLS_del_sess(struct vtls_sess **ptsp, struct sess *sp)
+VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp)
 {
 	struct vtls_sess *tsp;
 
 	if (ptsp == NULL)
 		return;
-	CHECK_OBJ_NOTNULL(sp->pool, POOL_MAGIC);
+	CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 	TAKE_OBJ_NOTNULL(tsp, ptsp, VTLS_SESS_MAGIC);
 
 	free(tsp->ja3);

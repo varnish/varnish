@@ -669,7 +669,7 @@ SES_Delete(struct sess *sp, stream_close_t reason, vtim_real now)
 	}
 
 	if (sp->tls != NULL)
-		VTLS_del_sess(&sp->tls, sp);
+		VTLS_del_sess(&sp->tls, sp->pool);
 
 	if (reason == SC_NULL) {
 		assert(sp->fd < 0 && -sp->fd < SCE_MAX);

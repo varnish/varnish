@@ -124,7 +124,7 @@ void VTLS_buf_free(struct vtls_buf **pbuf);
 void VTLS_buf_release(struct vtls_sess *tsp);
 
 /* Client-side TLS session management */
-void VTLS_del_sess(struct vtls_sess **ptsp, struct sess *sp);
+void VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp);
 void VTLS_vsl_set(struct vtls_sess *tsp, struct vsl_log *vsl);
 
 /* Certificate initialization (child process) */
