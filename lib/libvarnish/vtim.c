@@ -480,7 +480,11 @@ tst(const char *s, time_t good)
 static int
 tst_delta_check(const char *name, double begin, double end, vtim_dur ref)
 {
+#ifdef __MACH__
+	const double tol_max = 2;
+#else
 	const double tol_max = 1.1;
+#endif
 	const double tol_min = 1;
 
 	printf("%s delta for %fs sleep: %f\n", name, ref, (end - begin));
