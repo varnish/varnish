@@ -42,9 +42,6 @@
 
 #include "cache_tls_fingerprint.h"
 
-#define IS_GREASE_TLS(x) \
-	((((x) & 0x0f0f) == 0x0a0a) && (((x) & 0xff) == (((x) >> 8) & 0xff)))
-
 /*
  * Raw Client Hello parse result for JA3/JA4. Extension list is wire-accurate
  * (all extensions, including those OpenSSL does not recognize). All pointer
@@ -292,7 +289,8 @@ vtls_get_ja3_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 		return (1);
 	}
 	REPLACE(tsp->ja3, ja3_str);
-	WS_Reset(sp->ws, sn);
+	/* Do not WS_Reset on success: tsp->ja3 points into session workspace
+	 * and must remain valid for the rest of the request (e.g. VCL deliver). */
 	return (0);
 }
 
@@ -732,9 +730,9 @@ ja4_build_hashed_result(struct ws *ws, const char *part_a,
  * the result in the matching tsp field. Returns 0 on success, 1 on workspace
  * failure.
  *
- * We compute one variant at a time and WS_Reset after each so we never hold
- * all four variants' intermediates in workspace at once; the loop in
- * vtls_get_ja4_from_raw is intentional to avoid running out of workspace.
+ * We compute one variant at a time to limit peak workspace. Do not WS_Reset
+ * on success: the result points into session workspace and must remain valid
+ * for the rest of the request (e.g. VCL deliver).
  */
 static int
 vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
@@ -785,7 +783,7 @@ vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 		REPLACE(tsp->ja4_ro, result);
 		break;
 	}
-	WS_Reset(ws, sn);
+	/* Do not WS_Reset on success: result points into session workspace. */
 	return (0);
 fail:
 	VTLS_LOG(tsp->log, SLT_Error,
@@ -815,8 +813,8 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 }
 
 /*
- * Compute all four JA4 variants. Done one at a time with WS_Reset between
- * each so peak workspace stays low (one variant's intermediates only).
+ * Compute all four JA4 variants one at a time to limit peak workspace
+ * (one variant's intermediates at a time). Results stay in session workspace.
  */
 static int
 vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,

@@ -8,6 +8,9 @@
 #include <openssl/ssl.h>
 #include <stddef.h>
 
+#define IS_GREASE_TLS(x) \
+	((((x) & 0x0f0f) == 0x0a0a) && (((x) & 0xff) == (((x) >> 8) & 0xff)))
+
 struct sess;
 struct vtls_sess;
 
