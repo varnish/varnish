@@ -240,25 +240,18 @@ vtls_ja3_parsefields(int bytes_per_field, const unsigned char *data, int len,
 	}
 }
 
-/*
- * JA3 output buffer. Worst case from JA3_JA4_RAW_MAX_*: version (4) + 4 fields
- * of up to 256 items each (decimal + hyphens), ~5 chars/item + separators,
- * is under 6k. Use 6k so any valid parsed Client Hello fits.
- */
-#define JA3_BUF_SIZE	6144
-
 static int
 vtls_get_ja3_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
     struct vtls_sess *tsp)
 {
 	struct vsb ja3[1];
-	char ja3_buf[JA3_BUF_SIZE];
 	size_t i;
 	int first, type;
-	const char *ja3_str;
+	char *ja3_str;
+	uintptr_t sn;
 
-	(void)sp;
-	VSB_init(ja3, ja3_buf, sizeof(ja3_buf));
+	sn = WS_Snapshot(sp->ws);
+	WS_VSB_new(ja3, sp->ws);
 	VSB_printf(ja3, "%i,", (int)raw->legacy_version);
 
 	if (raw->ciphers != NULL && raw->cipher_len > 0)
@@ -288,14 +281,15 @@ vtls_get_ja3_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 		    raw->ec_point_formats_len - 1, ja3);
 	}
 
-	if (VSB_error(ja3)) {
+	ja3_str = WS_VSB_finish(ja3, sp->ws, NULL);
+	if (ja3_str == NULL) {
 		VTLS_LOG(tsp->log, SLT_Error,
-		    "JA3 string overflow");
+		    "Out of workspace_session during JA3 handling");
+		WS_Reset(sp->ws, sn);
 		return (1);
 	}
-	VSB_finish(ja3);
-	ja3_str = VSB_data(ja3);
 	REPLACE(tsp->ja3, ja3_str);
+	WS_Reset(sp->ws, sn);
 	return (0);
 }
 
@@ -330,43 +324,6 @@ vtls_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 #define JA4_PART_A_MAX		16	/* max length of Part A string */
 #define JA4_RESULT_MAX		(JA4_PART_A_MAX + 1 + JA4_HASH_LEN + 1 + JA4_HASH_LEN + 1)
 #define JA4_HEX_ITEM_MAX	5	/* max chars per comma-sep hex item (e.g. "abcd,") */
-/*
- * JA4 scratch size for one variant. Worst case from JA3_JA4_RAW_MAX_*: hex
- * lists (256*5 each for ciphers, exts, sig_algs), arrays (256*2, 256*4, 256*2),
- * combined string and result. Sum is ~16k; round up.
- */
-#define JA4_SCRATCH_SIZE	16384
-
-/* Bump allocator for JA4 so we do not use session workspace. */
-struct ja4_scratch {
-	char	*buf;
-	size_t	 size;
-	size_t	 off;
-};
-
-static void *
-ja4_scratch_alloc(struct ja4_scratch *s, size_t n)
-{
-	if (s->off + n > s->size)
-		return (NULL);
-	void *p = s->buf + s->off;
-	s->off += n;
-	return (p);
-}
-
-static char *
-ja4_scratch_copy(struct ja4_scratch *s, const char *str, ssize_t len)
-{
-	char *p;
-
-	if (len < 0)
-		len = (ssize_t)strlen(str);
-	p = ja4_scratch_alloc(s, (size_t)len + 1);
-	if (p == NULL)
-		return (NULL);
-	memcpy(p, str, (size_t)len + 1);
-	return (p);
-}
 
 /* ALPN wire layout: 2-byte list length, then for each protocol 1-byte length + payload. */
 #define ALPN_LIST_LEN_OFFSET		0
@@ -409,9 +366,9 @@ cmp_int(const void *a, const void *b)
 	return (x < y ? -1 : (x > y ? 1 : 0));
 }
 
-/* Format array as comma-separated hex string from scratch buffer. */
+/* Format array as comma-separated hex string in workspace. */
 static char *
-ja4_format_hex_list_uint16(struct ja4_scratch *s, const uint16_t *arr, size_t n)
+ja4_format_hex_list_uint16(struct ws *ws, const uint16_t *arr, size_t n)
 {
 	size_t buf_len, off, i;
 	char *buf;
@@ -419,7 +376,7 @@ ja4_format_hex_list_uint16(struct ja4_scratch *s, const uint16_t *arr, size_t n)
 	if (n == 0)
 		return (NULL);
 	buf_len = n * JA4_HEX_ITEM_MAX;
-	buf = ja4_scratch_alloc(s, buf_len);
+	buf = WS_Alloc(ws, buf_len);
 	if (buf == NULL)
 		return (NULL);
 	off = 0;
@@ -430,7 +387,7 @@ ja4_format_hex_list_uint16(struct ja4_scratch *s, const uint16_t *arr, size_t n)
 }
 
 static char *
-ja4_format_hex_list_int(struct ja4_scratch *s, const int *arr, size_t n)
+ja4_format_hex_list_int(struct ws *ws, const int *arr, size_t n)
 {
 	size_t buf_len, off, i;
 	char *buf;
@@ -438,7 +395,7 @@ ja4_format_hex_list_int(struct ja4_scratch *s, const int *arr, size_t n)
 	if (n == 0)
 		return (NULL);
 	buf_len = n * JA4_HEX_ITEM_MAX;
-	buf = ja4_scratch_alloc(s, buf_len);
+	buf = WS_Alloc(ws, buf_len);
 	if (buf == NULL)
 		return (NULL);
 	off = 0;
@@ -450,7 +407,7 @@ ja4_format_hex_list_int(struct ja4_scratch *s, const int *arr, size_t n)
 
 /* Format uint16 array as comma-sep byte pairs (high byte first) for JA4 sig_algs. */
 static char *
-ja4_format_hex_list_sig_algs(struct ja4_scratch *s, const uint16_t *arr, size_t n)
+ja4_format_hex_list_sig_algs(struct ws *ws, const uint16_t *arr, size_t n)
 {
 	size_t buf_len, off, i;
 	char *buf;
@@ -458,7 +415,7 @@ ja4_format_hex_list_sig_algs(struct ja4_scratch *s, const uint16_t *arr, size_t 
 	if (n == 0)
 		return (NULL);
 	buf_len = n * JA4_HEX_ITEM_MAX;
-	buf = ja4_scratch_alloc(s, buf_len);
+	buf = WS_Alloc(ws, buf_len);
 	if (buf == NULL)
 		return (NULL);
 	off = 0;
@@ -557,7 +514,7 @@ ja4_alpn_first_last_raw(const unsigned char *alpn_data, size_t alpn_len,
 }
 
 static int
-ja4_build_cipher_list_raw(struct ja4_scratch *s, const unsigned char *cipher_list,
+ja4_build_cipher_list_raw(struct ws *ws, const unsigned char *cipher_list,
     size_t cipher_list_len, int sorted, char **out)
 {
 	size_t cipher_count, ci, cj;
@@ -568,13 +525,13 @@ ja4_build_cipher_list_raw(struct ja4_scratch *s, const unsigned char *cipher_lis
 		if (!IS_GREASE_TLS(vbe16dec(cipher_list + ci)))
 			cipher_count++;
 	}
-	*out = ja4_scratch_alloc(s, 1);
+	*out = WS_Alloc(ws, 1);
 	if (*out == NULL)
 		return (-1);
 	**out = '\0';
 	if (cipher_count == 0)
 		return (0);
-	ciphers = ja4_scratch_alloc(s, cipher_count * sizeof(uint16_t));
+	ciphers = WS_Alloc(ws, cipher_count * sizeof(uint16_t));
 	if (ciphers == NULL)
 		return (-1);
 	for (ci = 0, cj = 0; ci + 2 <= cipher_list_len; ci += 2) {
@@ -584,19 +541,19 @@ ja4_build_cipher_list_raw(struct ja4_scratch *s, const unsigned char *cipher_lis
 	}
 	if (sorted)
 		qsort(ciphers, cipher_count, sizeof(uint16_t), cmp_uint16);
-	*out = ja4_format_hex_list_uint16(s, ciphers, cipher_count);
+	*out = ja4_format_hex_list_uint16(ws, ciphers, cipher_count);
 	return (*out == NULL ? -1 : 0);
 }
 
 static int
-ja4_build_sig_algs_str_raw(struct ja4_scratch *s, const unsigned char *sig_alg_data,
+ja4_build_sig_algs_str_raw(struct ws *ws, const unsigned char *sig_alg_data,
     size_t sig_alg_len, char **out)
 {
 	uint16_t sig_alg_list_len;
 	size_t si, n, sj;
 	uint16_t *sigs;
 
-	*out = ja4_scratch_alloc(s, 1);
+	*out = WS_Alloc(ws, 1);
 	if (*out == NULL)
 		return (-1);
 	**out = '\0';
@@ -611,7 +568,7 @@ ja4_build_sig_algs_str_raw(struct ja4_scratch *s, const unsigned char *sig_alg_d
 	}
 	if (n == 0)
 		return (0);
-	sigs = ja4_scratch_alloc(s, n * sizeof(uint16_t));
+	sigs = WS_Alloc(ws, n * sizeof(uint16_t));
 	if (sigs == NULL)
 		return (-1);
 	for (si = 2, sj = 0; si + 2 <= 2 + (size_t)sig_alg_list_len && si + 2 <= sig_alg_len;
@@ -620,12 +577,12 @@ ja4_build_sig_algs_str_raw(struct ja4_scratch *s, const unsigned char *sig_alg_d
 		if (!IS_GREASE_TLS(sa))
 			sigs[sj++] = sa;
 	}
-	*out = ja4_format_hex_list_sig_algs(s, sigs, n);
+	*out = ja4_format_hex_list_sig_algs(ws, sigs, n);
 	return (*out == NULL ? -1 : 0);
 }
 
 static int
-ja4_build_exts_list(struct ja4_scratch *s, const int *ext_types, size_t ext_count_total,
+ja4_build_exts_list(struct ws *ws, const int *ext_types, size_t ext_count_total,
     int sorted, int exclude_sni_alpn, char **out)
 {
 	size_t ext_count;
@@ -640,13 +597,13 @@ ja4_build_exts_list(struct ja4_scratch *s, const int *ext_types, size_t ext_coun
 		    ext_types[ei] != TLSEXT_TYPE_alpn)))
 			ext_count++;
 	}
-	*out = ja4_scratch_alloc(s, 1);
+	*out = WS_Alloc(ws, 1);
 	if (*out == NULL)
 		return (-1);
 	**out = '\0';
 	if (ext_count == 0)
 		return (0);
-	exts = ja4_scratch_alloc(s, ext_count * sizeof(int));
+	exts = WS_Alloc(ws, ext_count * sizeof(int));
 	if (exts == NULL)
 		return (-1);
 	for (ei = 0, ej = 0; ei < ext_count_total; ei++) {
@@ -658,12 +615,12 @@ ja4_build_exts_list(struct ja4_scratch *s, const int *ext_types, size_t ext_coun
 	}
 	if (sorted)
 		qsort(exts, ext_count, sizeof(int), cmp_int);
-	*out = ja4_format_hex_list_int(s, exts, ext_count);
+	*out = ja4_format_hex_list_int(ws, exts, ext_count);
 	return (*out == NULL ? -1 : 0);
 }
 
 static int
-ja4_exts_sigs_hash(struct ja4_scratch *s, const char *exts_str, const char *sig_algs,
+ja4_exts_sigs_hash(struct ws *ws, const char *exts_str, const char *sig_algs,
     char out[JA4_HASH_BUF])
 {
 	size_t exts_len, sig_len, total;
@@ -677,7 +634,7 @@ ja4_exts_sigs_hash(struct ja4_scratch *s, const char *exts_str, const char *sig_
 		return (0);
 	}
 	total = exts_len + (sig_len > 0 ? 1 + sig_len : 0);
-	combined = ja4_scratch_alloc(s, total + 1);
+	combined = WS_Alloc(ws, total + 1);
 	if (combined == NULL)
 		return (-1);
 	if (exts_len > 0)
@@ -693,7 +650,7 @@ ja4_exts_sigs_hash(struct ja4_scratch *s, const char *exts_str, const char *sig_
 }
 
 static char *
-ja4_build_raw(struct ja4_scratch *s, const char *part_a, const char *ciphers_str,
+ja4_build_raw(struct ws *ws, const char *part_a, const char *ciphers_str,
     const char *exts_str, const char *sig_algs)
 {
 	size_t l;
@@ -709,7 +666,7 @@ ja4_build_raw(struct ja4_scratch *s, const char *part_a, const char *ciphers_str
 		l += 1 + sig_len;
 	l++;
 
-	out = ja4_scratch_alloc(s, l);
+	out = WS_Alloc(ws, l);
 	if (out == NULL)
 		return (NULL);
 	if (sig_len > 0)
@@ -751,7 +708,7 @@ ja4_build_part_a(const struct ja3_ja4_raw_ch *raw, char part_a[JA4_PART_A_MAX])
 }
 
 static char *
-ja4_build_hashed_result(struct ja4_scratch *s, const char *part_a,
+ja4_build_hashed_result(struct ws *ws, const char *part_a,
     const char *ciphers_str, const char *exts_str, const char *sig_algs)
 {
 	char ciphers_hash[JA4_HASH_BUF];
@@ -761,54 +718,50 @@ ja4_build_hashed_result(struct ja4_scratch *s, const char *part_a,
 
 	cipher_len = strlen_safe(ciphers_str);
 	vtls_ja4_hash12(ciphers_str ? ciphers_str : "", cipher_len, ciphers_hash);
-	if (ja4_exts_sigs_hash(s, exts_str, sig_algs, exts_sigs_hash) != 0)
+	if (ja4_exts_sigs_hash(ws, exts_str, sig_algs, exts_sigs_hash) != 0)
 		return (NULL);
 	sprintf(ja4_buf, "%s_%s_%s", part_a, ciphers_hash, exts_sigs_hash);
-	return (ja4_scratch_copy(s, ja4_buf, -1));
+	return (WS_Copy(ws, ja4_buf, -1));
 }
 
 /*
  * Run one JA4 phase: build the intermediates for that variant and store
- * the result in the matching tsp field. Uses a malloc'd scratch buffer
- * so we do not use session workspace (fits in original workspace budget).
+ * the result in the matching tsp field. Uses session workspace with
+ * WS_Reset after each variant so peak usage stays low. REPLACE strdups
+ * the result so it survives the reset.
  */
 static int
 vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
     struct vtls_sess *tsp, enum vtls_ja4_variant variant)
 {
-	struct ja4_scratch scratch[1];
+	struct ws *ws;
 	char part_a[JA4_PART_A_MAX];
 	char *ciphers = NULL;
 	char *exts = NULL;
 	char *sig_algs = NULL;
 	char *result = NULL;
+	uintptr_t sn;
 	int sorted;
 
-	(void)sp;
-	scratch->buf = malloc(JA4_SCRATCH_SIZE);
-	if (scratch->buf == NULL) {
-		VTLS_LOG(tsp->log, SLT_Error, "JA4 scratch alloc failed");
-		return (1);
-	}
-	scratch->size = JA4_SCRATCH_SIZE;
-	scratch->off = 0;
+	ws = sp->ws;
+	sn = WS_Snapshot(ws);
 	ja4_build_part_a(raw, part_a);
 
 	/* MAIN,R = sorted; O,RO = original. MAIN,O = hashed; R,RO = raw. */
 	sorted = (variant <= VTLS_JA4_R);
-	if (ja4_build_cipher_list_raw(scratch, raw->ciphers, raw->cipher_len,
+	if (ja4_build_cipher_list_raw(ws, raw->ciphers, raw->cipher_len,
 	    sorted, &ciphers) != 0)
 		goto fail;
-	if (ja4_build_exts_list(scratch, raw->ext_types, raw->ext_count,
+	if (ja4_build_exts_list(ws, raw->ext_types, raw->ext_count,
 	    sorted, sorted, &exts) != 0)
 		goto fail;
-	if (ja4_build_sig_algs_str_raw(scratch, raw->sig_algs, raw->sig_algs_len,
+	if (ja4_build_sig_algs_str_raw(ws, raw->sig_algs, raw->sig_algs_len,
 	    &sig_algs) != 0)
 		goto fail;
 
 	result = (variant & 1) == 0
-	    ? ja4_build_hashed_result(scratch, part_a, ciphers, exts, sig_algs)
-	    : ja4_build_raw(scratch, part_a, ciphers, exts, sig_algs);
+	    ? ja4_build_hashed_result(ws, part_a, ciphers, exts, sig_algs)
+	    : ja4_build_raw(ws, part_a, ciphers, exts, sig_algs);
 	if (result == NULL)
 		goto fail;
 
@@ -826,11 +779,12 @@ vtls_get_ja4_one_variant(const struct ja3_ja4_raw_ch *raw, struct sess *sp,
 		REPLACE(tsp->ja4_ro, result);
 		break;
 	}
-	free(scratch->buf);
+	WS_Reset(ws, sn);
 	return (0);
 fail:
-	VTLS_LOG(tsp->log, SLT_Error, "JA4 scratch overflow");
-	free(scratch->buf);
+	VTLS_LOG(tsp->log, SLT_Error,
+	    "Out of workspace_session during JA4 handling");
+	WS_Reset(ws, sn);
 	return (1);
 }
 
@@ -855,8 +809,8 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 }
 
 /*
- * Compute all four JA4 variants one at a time; each uses a malloc'd scratch
- * buffer (no session workspace).
+ * Compute all four JA4 variants one at a time with WS_Reset between each
+ * so peak workspace stays low (one variant's intermediates only).
  */
 static int
 vtls_get_ja4_from_raw(const struct ja3_ja4_raw_ch *raw, struct sess *sp,

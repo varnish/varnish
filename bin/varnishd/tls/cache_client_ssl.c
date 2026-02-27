@@ -129,12 +129,13 @@ VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp, struct sess *sp)
 	free(tsp->ja4_ro);
 	VTLS_fingerprint_raw_free(&tsp->ja3_ja4_raw);
 
-	/* Release lazy Client Hello buffer from session workspace */
-	if (tsp->client_hello_buf != NULL && sp != NULL)
-		WS_Reset(sp->ws, tsp->client_hello_ws_snapshot);
-	tsp->client_hello_buf = NULL;
-	tsp->client_hello_len = 0;
-	tsp->client_hello_ws_snapshot = 0;
+	/* Release lazy Client Hello buffer (malloc'd) */
+	if (tsp->client_hello_buf != NULL) {
+		free(tsp->client_hello_buf);
+		tsp->client_hello_buf = NULL;
+		tsp->client_hello_len = 0;
+		tsp->client_hello_ws_snapshot = 0;
+	}
 
 	if (tsp->buf != NULL)
 		VTLS_buf_free(&tsp->buf);
@@ -649,7 +650,6 @@ vtls_msg_cb(int write_p, int version, int content_type, const void *buf,
 	struct sess *sp;
 	struct vtls_sess *tsp;
 	unsigned char *copy;
-	uintptr_t sn;
 
 	(void)version;
 	(void)arg;
@@ -663,21 +663,19 @@ vtls_msg_cb(int write_p, int version, int content_type, const void *buf,
 	tsp = sp->tls;
 	if (tsp == NULL || tsp->magic != VTLS_SESS_MAGIC)
 		return;
-	/* Release any previous lazy Client Hello buffer */
+	/* Release any previous lazy Client Hello buffer (malloc'd, not session ws) */
 	if (tsp->client_hello_buf != NULL) {
-		WS_Reset(sp->ws, tsp->client_hello_ws_snapshot);
+		free(tsp->client_hello_buf);
 		tsp->client_hello_buf = NULL;
 		tsp->client_hello_len = 0;
 		tsp->client_hello_ws_snapshot = 0;
 	}
-	sn = WS_Snapshot(sp->ws);
-	copy = WS_Alloc(sp->ws, len);
+	copy = malloc(len);
 	if (copy == NULL)
 		return;
 	memcpy(copy, buf, len);
 	tsp->client_hello_buf = copy;
 	tsp->client_hello_len = len;
-	tsp->client_hello_ws_snapshot = sn;
 }
 
 static int
@@ -708,7 +706,7 @@ vtls_clienthello_cb(SSL *ssl, int *al, void *priv)
 	if (tsp->client_hello_buf != NULL) {
 		(void)VTLS_fingerprint_parse_clienthello(tsp->client_hello_buf,
 		    tsp->client_hello_len, &tsp->ja3_ja4_raw);
-		WS_Reset(sp->ws, tsp->client_hello_ws_snapshot);
+		free(tsp->client_hello_buf);
 		tsp->client_hello_buf = NULL;
 		tsp->client_hello_len = 0;
 		tsp->client_hello_ws_snapshot = 0;
