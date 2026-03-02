@@ -229,9 +229,6 @@ As of SmartOS pkgsrc 2025Q4, install the following packages::
 	pkgin in autoconf automake editline libtool ncurses \
                 pcre2 python311 py311-sphinx py311-docutils gmake gcc13 pkg-config
 
-Instead of (or in addition to) gcc, you can also install clang (e.g.
-``clang-19.1.7nb1``).
-
 Optionally, to rebuild the svg files::
 
 	pkgin in graphviz
