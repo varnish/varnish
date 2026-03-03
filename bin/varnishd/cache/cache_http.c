@@ -1645,7 +1645,7 @@ http_SetWellKnownMethod(struct http *hp)
 	hp->wkm = WKM_UNKNOWN;
 #define WKM(wk, bit)							\
 	do {								\
-		if (l == vstrlen(#wk) && !vstrcmp(#wk, method)) {	\
+		if (l == vstrlen(#wk) && !vmemcmp(#wk, method, l)) {	\
 			hp->wkm = WKM_##wk;				\
 			return;						\
 		}							\

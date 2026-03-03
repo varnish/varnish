@@ -344,4 +344,10 @@ typedef struct {
 #  define vstrlen(s) strlen(s)
 #endif
 
+#if __has_builtin(__builtin_memcmp)
+#  define vmemcmp(s1, s2, n) __builtin_memcmp(s1, s2, n)
+#else
+#  define vmemcmp(s1, s2, n) memcmp(s1, s2, n)
+#endif
+
 // ... to be extended
