@@ -353,7 +353,6 @@ uint16_t
 HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 {
 	uint16_t retval;
-	const char *p;
 	const char *b = NULL, *e;
 
 	CHECK_OBJ_NOTNULL(htc, HTTP_CONN_MAGIC);
@@ -386,8 +385,6 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 	if (htc->body_status == BS_ERROR)
 		return (400);
 
-	p = http_GetMethod(hp);
-	AN(p);
 	http_SetWellKnownMethod(hp);
 
 	if (htc->body_status == BS_EOF) {
