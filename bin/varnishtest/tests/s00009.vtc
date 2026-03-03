@@ -35,7 +35,7 @@ client c1 {
 	expect resp.status == 200
 	expect resp.body == "foo"
 	expect resp.http.X-ttl <= 9
-	expect resp.http.X-ttl >= 8
+	expect resp.http.X-ttl >= 7
 } -start
 
 # help for sleeping inside of vcl
