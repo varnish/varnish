@@ -1641,10 +1641,10 @@ http_SetWellKnownMethod(struct http *hp)
 
 	method = http_GetMethod(hp);
 	AN(method);
+	l = vstrlen(method);
 	hp->wkm = WKM_UNKNOWN;
 #define WKM(wk, bit)							\
 	do {								\
-		l = vstrlen(method);					\
 		if (l == vstrlen(#wk) && !vstrcmp(#wk, method)) {	\
 			hp->wkm = WKM_##wk;				\
 			return;						\
