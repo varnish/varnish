@@ -32,6 +32,7 @@ shell -match _.secret {
 	    sleep 0.1
 	    t=$(($t - 1))
 	done
+	sleep 0.2
 	find "${tmpdir}"/v2/_.secret -perm 0640 -size 256c
 }
 
