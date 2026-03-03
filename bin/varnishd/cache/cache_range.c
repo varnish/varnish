@@ -102,23 +102,24 @@ vrg_range_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 /*--------------------------------------------------------------------*/
 
 static const char *
-vrg_dorange(struct req *req, void **priv)
+vrg_dorange(struct req *req, intmax_t *clen, void **priv)
 {
 	ssize_t low, high;
 	struct vrg_priv *vrg_priv;
 	const char *err;
 
-	err = http_GetRange(req->http, &low, &high, req->resp_len);
+	AN(clen);
+	err = http_GetRange(req->http, &low, &high, *clen);
 	if (err != NULL)
 		return (err);
 
 	if (low < 0 || high < 0)
 		return (NULL);		// Allow 200 response
 
-	if (req->resp_len >= 0) {
+	if (*clen >= 0) {
 		http_PrintfHeader(req->resp, "Content-Range: bytes %jd-%jd/%jd",
-		    (intmax_t)low, (intmax_t)high, (intmax_t)req->resp_len);
-		req->resp_len = (intmax_t)(1 + high - low);
+		    (intmax_t)low, (intmax_t)high, *clen);
+		*clen = (intmax_t)(1 + high - low);
 	} else
 		http_PrintfHeader(req->resp, "Content-Range: bytes %jd-%jd/*",
 		    (intmax_t)low, (intmax_t)high);
@@ -211,25 +212,26 @@ vrg_range_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 		return (1);
 	}
 
+	AN(vdc->clen);
+
 	// not using vdc->{hd,cl}, because range needs req anyway for Req_Fail()
 
 	if (!vrg_ifrange(ctx->req))		// rfc7233,l,455,456
 		return (1);
-	err = vrg_dorange(ctx->req, priv);
+	err = vrg_dorange(ctx->req, vdc->clen, priv);
 	if (err == NULL)
 		return (*priv == NULL ? 1 : 0);
 
 	VSLb(vdc->vsl, SLT_Debug, "RANGE_FAIL %s", err);
-	if (ctx->req->resp_len >= 0)
+	if (*vdc->clen >= 0)
 		http_PrintfHeader(ctx->req->resp,
-		    "Content-Range: bytes */%jd",
-		    (intmax_t)ctx->req->resp_len);
+		    "Content-Range: bytes */%jd", *vdc->clen);
 	http_PutResponse(ctx->req->resp, "HTTP/1.1", 416, NULL);
 	/*
 	 * XXX: We ought to produce a body explaining things.
 	 * XXX: That really calls for us to hit vcl_synth{}
 	 */
-	ctx->req->resp_len = 0;
+	*vdc->clen = 0;
 	return (1);
 }
 

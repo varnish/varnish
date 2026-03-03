@@ -802,6 +802,12 @@ struct viov {
 	struct iovec	iov;
 };
 
+/*
+ * special empty iovec to return a lease with no data once delivery has reached
+ * this point. Allows AN(iov_base) to catch unintentional cases
+ */
+#define IOV_NIL ((struct iovec){.iov_base = TRUST_ME(0x42), .iov_len = 0})
+
 struct vscarab {
 	unsigned	magic;
 #define VSCARAB_MAGIC	0x05ca7ab0

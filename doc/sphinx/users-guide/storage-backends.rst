@@ -111,7 +111,6 @@ If `libumem`_ is already loaded when Varnish initializes, this message
 is output::
 
   notice: libumem was already found to be loaded
-          and will likely be used for all allocations
 
 to indicate that `libumem`_ will not only be used for storage. Likely
 reasons for this to be the case are:

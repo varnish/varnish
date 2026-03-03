@@ -224,13 +224,10 @@ Then continue `Compiling Varnish`_, using the ``--with-unwind``
 Build dependencies on a SmartOS Zone
 ------------------------------------
 
-As of SmartOS pkgsrc 2019Q4, install the following packages::
+As of SmartOS pkgsrc 2025Q4, install the following packages::
 
 	pkgin in autoconf automake editline libtool ncurses \
-		 pcre2 python37 py37-sphinx py37-docutils gmake gcc8 pkg-config
-
-*Note:* you will probably need to add ``/opt/local/gcc8/bin`` to
-``PATH`` in order to have ``gcc`` available.
+                pcre2 python311 py311-sphinx py311-docutils gmake gcc13 pkg-config
 
 Optionally, to rebuild the svg files::
 
@@ -265,6 +262,17 @@ considering the following recommendations:
 	        CPPFLAGS="-I/opt/local/include" \
 	        CFLAGS="-m64" \
 	        LDFLAGS="-L/opt/local/lib -R/opt/local/lib"
+
+Known issues on SmartOS
+-----------------------
+
+If you see this error from GNU ``cp``::
+
+	make[6]: Entering directory '/tmp/vinyl-cache/doc/sphinx'
+	cp: preserving permissions for '../../vinyl-trunk/doc/sphinx/dev-guide': Operation not applicable
+	make[6]: *** [Makefile:409: distdir-am] Error 1
+
+put ``/usr/bin`` first in  ``PATH``.
 
 Compiling Varnish
 -----------------

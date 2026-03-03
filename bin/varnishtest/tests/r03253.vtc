@@ -5,7 +5,7 @@ server s1 -repeat 100 {
 	txresp -gzipbody "<html>"
 } -start
 
-varnish v1 -vcl+backend {
+varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		return (pass);
@@ -16,7 +16,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-client c1 -repeat 100 {
+client c1 -connect ${tmpdir}/v1.sock -repeat 100 {
 	txreq -url "/"
 	# some responses will fail (503), some won't. All we care
 	# about here is the fact that we don't panic

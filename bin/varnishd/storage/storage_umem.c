@@ -261,8 +261,7 @@ smu_umem_loaded_warn(void)
 	if (warned++)
 		return;
 
-	fprintf(stderr, "notice:\tlibumem was already found to be loaded\n"
-		"\tand will likely be used for all allocations\n");
+	fprintf(stderr, "notice:\tlibumem was already found to be loaded\n");
 
 	e = getenv(env_umem_options);
 	if (e == NULL || ! strstr(e, def_umem_options))

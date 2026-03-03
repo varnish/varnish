@@ -48,8 +48,6 @@
 
 // marker pointer for sml_trimstore
 static void *trim_once = &trim_once;
-// for delayed return of hdl->last resume pointer
-static void *null_iov = &null_iov;
 
 /*-------------------------------------------------------------------*/
 
@@ -484,8 +482,7 @@ sml_ai_lease_boc(struct worker *wrk, vai_hdl vhdl, struct vscarab *scarab)
 	if (hdl->last != NULL && state < BOS_FINISHED) {
 		viov = VSCARAB_GET(scarab);
 		AN(viov);
-		viov->iov.iov_base = null_iov;
-		viov->iov.iov_len = 0;
+		viov->iov = IOV_NIL;
 		viov->lease = ptr2lease(hdl->last);
 		r++;
 	}
@@ -801,7 +798,7 @@ sml_iterator(struct worker *wrk, struct objcore *oc,
 
 			// null iov with the only purpose to return the resume ptr lease
 			// exception needed because assert(len > 0) in VDP_bytes()
-			if (vio->iov.iov_base == null_iov)
+			if (vio->iov.iov_base == IOV_NIL.iov_base)
 				r = 0;
 			else
 				r = func(priv, uu, vio->iov.iov_base, vio->iov.iov_len);
