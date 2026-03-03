@@ -366,6 +366,8 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 	if (hp->protover < 10 || hp->protover > 11)
 		return (400);
 
+	http_SetWellKnownMethod(hp);
+
 	/* RFC2616, section 5.2, point 1 */
 	if (http_scheme_at(hp->hd[HTTP_HDR_URL].b, http))
 		b = hp->hd[HTTP_HDR_URL].b + 7;
@@ -384,8 +386,6 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 	htc->body_status = http1_body_status(hp, htc, 1);
 	if (htc->body_status == BS_ERROR)
 		return (400);
-
-	http_SetWellKnownMethod(hp);
 
 	if (htc->body_status == BS_EOF) {
 		assert(hp->protover == 10);
