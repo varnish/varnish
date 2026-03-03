@@ -1,5 +1,11 @@
 varnishtest "SES_Reserve_proto_priv() overflow"
 
+# NB this test needs to hit a failing allocation request of exactly the right 8
+# bytes. Consequently, it depends on the exact size of struct sess which, in
+# turn, depends on vsa_suckaddr_len, wich is slightly bigger (36 vs. 32 bytes)
+# on SunOS
+feature cmd "uname -s | grep -v SunOS"
+
 feature 64bit ipv4
 
 server s1 {
