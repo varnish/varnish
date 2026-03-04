@@ -245,7 +245,7 @@ AC_CHECK_FUNCS([pthread_mutex_isowned_np])
 LIBS="${save_LIBS}"
 
 # zlib-specific flags
-VGZ_CFLAGS="-Wno-error=strict-prototypes -Wno-unknown-warning-option"
+VGZ_CFLAGS="-Wno-error=strict-prototypes -Wno-error=old-style-definition -Wno-unknown-warning-option"
 
 dnl https://github.com/madler/zlib/issues/633
 AX_CHECK_COMPILE_FLAG([-Wno-error=deprecated-non-prototype],
