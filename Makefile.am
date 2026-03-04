@@ -47,7 +47,7 @@ install-data-local:
 
 
 distclean-local:
-	find . '(' -name '*.gcda' -o -name '*.gcda' ')' -exec rm '{}' ';'
+	-find . '(' -name '*.gcda' -o -name '*.gcda' ')' -exec rm '{}' ';'
 
 distcleancheck_listfiles = \
 	find . -type f -exec sh -c 'test -f $(srcdir)/$$1 || echo $$1' \
