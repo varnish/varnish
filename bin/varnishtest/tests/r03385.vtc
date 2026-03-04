@@ -21,3 +21,5 @@ client c1 {
 	txreq
 	rxresp
 } -run
+
+server s1 -wait
