@@ -26,10 +26,11 @@ client c1 {
 
 	txreq -url https://www.example.com/bar
 	rxresp
-	expect resp.status == 400
+	expect resp.http.rxhost == www.example.com
+	expect resp.http.rxurl == /bar
 } -run
 
-varnish v1 -cliok "param.set feature +https_scheme"
+varnish v1 -cliok "param.set feature -https_scheme"
 
 client c1 {
 	txreq -url http://www.example.com/bar
@@ -39,6 +40,5 @@ client c1 {
 
 	txreq -url https://www.example.com/bar
 	rxresp
-	expect resp.http.rxhost == www.example.com
-	expect resp.http.rxurl == /bar
+	expect resp.status == 400
 } -run

@@ -224,6 +224,7 @@ tweak_feature(struct vsb *vsb, const struct parspec *par, const char *arg)
 		if (!strcmp(arg, "default")) {
 			AZ(bit_tweak(vsb, mgt_param.feature_bits,
 				FEATURE_Reserved,
+				"+https_scheme,"
 				"+vcl_req_reset",
 				feature_tags, "feature bit", "+"));
 		}else if (!strcmp(arg, "none")) {

@@ -914,7 +914,7 @@
 
 	Number of requests for which an absolute form request target (e.g.
 	http://example.com/ or https://example.com/) was handled. The https://
-	scheme is only handled if the feature ``https_scheme`` is enabled (see
+	scheme is handled unless the feature ``https_scheme`` is disabled (see
 	RUN TIME PARAMETERS in `varnishd(1)`).
 
 	See also ReqTarget in `vsl(7)`. This counter is approximately correct.
