@@ -74,6 +74,9 @@ Varnish-Cache 8.0.1 (2026-03-16)
   times an HTTP/1.1 request with an absolute form request target has been
   handled.
 
+* The ``https_scheme`` parameter is now enabled by default to process
+  ``https://`` absolute form URLs by default.
+
 ================================
 Varnish-Cache 8.0.0 (2025-09-15)
 ================================

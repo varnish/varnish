@@ -124,6 +124,14 @@ client c1 {
 	expect resp.http.rxhost == "another"
 	expect resp.http.url == "*"
 
+	# https, otherwise like 1005
+	txreq -url https://www.example.com -hdr "host: another"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.Foo == 1
+	expect resp.http.rxhost == www.example.com
+	expect resp.http.url == /
+
 	txreq -url http:///bar -hdr "host: another"
 	rxresp
 	expect resp.status == 400
@@ -141,7 +149,7 @@ client c3 {
 	expect resp.status == 400
 } -run
 
-varnish v1 -expect MAIN.http1_absolute_form == 7
+varnish v1 -expect MAIN.http1_absolute_form == 8
 
 logexpect l1001 -wait
 logexpect l1003 -wait

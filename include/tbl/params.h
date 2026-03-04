@@ -1987,6 +1987,7 @@ PARAM_BITS(
 	/* fld */	feature_bits,
 	/* def */
 	"none,"
+	"+https_scheme,"
 	"+validate_headers,"
 	"+vcl_req_reset",
 	/* descr */
