@@ -377,6 +377,10 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 		e = strchr(b, '/');
 		if (e == NULL)
 			e = hp->hd[HTTP_HDR_URL].e;
+		if (e == b) {
+			// rfc9110 4.2.1 4.2.2 reject empty host
+			return (400);
+		}
 		http_Unset(hp, H_Host);
 		http_PrintfHeader(hp, "Host: %.*s", (int)(e - b), b);
 		hp->hd[HTTP_HDR_URL].b = e;
