@@ -36,16 +36,17 @@ client c1 {
 
 	txreq -url http:///bar -hdr "host: another"
 	rxresp
-	expect resp.http.rxhost == ""
-	expect resp.http.url == /bar
+	expect resp.status == 400
+} -run
 
+client c2 {
 	txreq -url http:// -hdr "host: another"
 	rxresp
-	expect resp.http.rxhost == ""
-	expect resp.http.url == /
+	expect resp.status == 400
+} -run
 
+client c3 {
 	txreq -req OPTIONS -url http:// -hdr "host: another"
 	rxresp
-	expect resp.http.rxhost == ""
-	expect resp.http.url == *
+	expect resp.status == 400
 } -run

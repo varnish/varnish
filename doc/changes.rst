@@ -46,6 +46,9 @@ Varnish-Cache 6.0.17 (2026-03-16)
 
   (`VSV18`_)
 
+* For requests to an absolute form URI, the host field is now required. Requests
+  without a host field are rejected with a Status 400 error.
+
 =================================
 Varnish-Cache 6.0.16 (2025-08-20)
 =================================
