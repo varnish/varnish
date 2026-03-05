@@ -355,6 +355,7 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 	uint16_t retval;
 	const char *p;
 	const char *b = NULL, *e;
+	char c = '\0';
 
 	CHECK_OBJ_NOTNULL(htc, HTTP_CONN_MAGIC);
 	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
@@ -377,9 +378,11 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 		b = hp->hd[HTTP_HDR_URL].b + 8;
 	if (b) {
 		VSC_C_main->http1_absolute_form++;
-		e = strchr(b, '/');
+		e = strpbrk(b, "/?");
 		if (e == NULL)
 			e = hp->hd[HTTP_HDR_URL].e;
+		else
+			c = *e;
 		if (e == b) {
 			// rfc9110 4.2.1 4.2.2 reject empty host
 			return (400);
@@ -388,10 +391,15 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 		http_PrintfHeader(hp, "Host: %.*s", (int)(e - b), b);
 		hp->hd[HTTP_HDR_URL].b = e;
 		if (Tlen(hp->hd[HTTP_HDR_URL]) == 0) {
+			// empty path
 			if (http_method_eq(http_GetMethod(hp), OPTIONS))
 				hp->hd[HTTP_HDR_URL] = Tstr("*");
 			else
 				hp->hd[HTTP_HDR_URL] = Tstr("/");
+		} else if (c == '?') {
+			hp->hd[HTTP_HDR_URL].b--;
+			char *t = TRUST_ME(hp->hd[HTTP_HDR_URL].b);
+			*t = '/';
 		}
 	}
 
