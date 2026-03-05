@@ -46,6 +46,7 @@
 #include "cache/cache_conn_pool.h"
 #include "cache/cache_pool.h"
 #include "cache_tls.h"
+#include "cache_tls_fingerprint.h"
 
 #include "vtim.h"
 
@@ -486,31 +487,38 @@ vtls_get_sess(const struct vrt_ctx *ctx)
 	return (NULL);
 }
 
-/* VMOD accessor: get SSL context */
-const SSL *
-VTLS_tls_ctx(const struct vrt_ctx *ctx)
-{
-	struct vtls_sess *tsp;
-
-	tsp = vtls_get_sess(ctx);
-	if (tsp == NULL)
-		return (NULL);
-
-	return (tsp->ssl);
+#define VTLS_VMOD_ACCESSOR(ret_type, name, member)			\
+ret_type								\
+name(const struct vrt_ctx *ctx)						\
+{									\
+	struct vtls_sess *tsp;						\
+	tsp = vtls_get_sess(ctx);					\
+	if (tsp == NULL)						\
+		return (NULL);						\
+	return (tsp->member);						\
 }
 
-/* VMOD accessor: get JA3 fingerprint */
-const char *
-VTLS_ja3(const struct vrt_ctx *ctx)
-{
-	struct vtls_sess *tsp;
-
-	tsp = vtls_get_sess(ctx);
-	if (tsp == NULL)
-		return (NULL);
-
-	return (tsp->ja3);
+/* JA4: variants are computed in the Client Hello callback when the
+ * corresponding param is on (same flow as JA3). Accessors just return
+ * the precomputed value.
+ */
+#define VTLS_JA4_ACCESSOR(name, member, param_on)				\
+const char *								\
+name(const struct vrt_ctx *ctx)						\
+{									\
+	struct vtls_sess *tsp;						\
+	tsp = vtls_get_sess(ctx);					\
+	if (tsp == NULL || !(param_on))					\
+		return (NULL);						\
+	return (tsp->member);						\
 }
+
+VTLS_VMOD_ACCESSOR(const SSL *, VTLS_tls_ctx, ssl)
+VTLS_VMOD_ACCESSOR(const char *, VTLS_ja3, ja3)
+VTLS_JA4_ACCESSOR(VTLS_ja4, ja4, cache_param->tls_ja4)
+VTLS_JA4_ACCESSOR(VTLS_ja4_r, ja4_r, cache_param->tls_ja4_r)
+VTLS_JA4_ACCESSOR(VTLS_ja4_o, ja4_o, cache_param->tls_ja4_o)
+VTLS_JA4_ACCESSOR(VTLS_ja4_ro, ja4_ro, cache_param->tls_ja4_ro)
 
 /*
  * This is the SSL_do_handshake/poll loop.

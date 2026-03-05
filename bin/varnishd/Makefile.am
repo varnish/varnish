@@ -87,6 +87,7 @@ varnishd_SOURCES = \
 	tls/cache_tls.c \
 	tls/cache_backend_ssl.c \
 	tls/cache_client_ssl.c \
+	tls/cache_tls_fingerprint.c \
 	mgt/mgt_child.c \
 	mgt/mgt_tls_conf.c \
 	mgt/vtls_cfg/vtls_cfg_lexer.l \
@@ -170,6 +171,7 @@ noinst_HEADERS = \
 	http2/cache_http2.h \
 	tls/cache_tls.h \
 	tls/cache_client_ssl.h \
+	tls/cache_tls_fingerprint.h \
 	cache/cache_conn_pool_ssl.h \
 	mgt/mgt.h \
 	mgt/mgt_tls_conf.h \

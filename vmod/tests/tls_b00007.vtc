@@ -1,0 +1,53 @@
+varnishtest "Test vmod-tls ja4 fingerprint"
+
+feature tls_1_3
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "*"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  tls-protos = TLSv1.3
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {
+	import tls;
+
+	sub vcl_deliver {
+		set resp.http.ja4 = tls.ja4();
+		set resp.http.ja4_r = tls.ja4_r();
+		set resp.http.ja4_o = tls.ja4_o();
+		set resp.http.ja4_ro = tls.ja4_ro();
+	}
+}
+
+varnish v1 -cli "param.set tls_ja4 on"
+varnish v1 -cli "param.set tls_ja4_r on"
+varnish v1 -cli "param.set tls_ja4_o on"
+varnish v1 -cli "param.set tls_ja4_ro on"
+varnish v1 -start
+
+# JA4 variants: ja4 (hashed sorted), ja4_r (raw sorted), ja4_o (hashed original), ja4_ro (raw original)
+# Spec: https://github.com/FoxIO-LLC/ja4/blob/main/technical_details/JA4.md
+client c1 {
+	tls_config {
+		version = TLSv1.3
+		ciphersuites = "TLS_AES_128_GCM_SHA256"
+	}
+	tls_handshake
+	txreq
+	rxresp
+	expect resp.http.ja4 ~ "^t13[di][0-9]{2}[0-9]{2}[0-9a-zA-Z]{2}_[0-9a-f]{12}_[0-9a-f]{12}$"
+	expect resp.http.ja4_r ~ "^t13[di][0-9]{2}[0-9]{2}[0-9a-zA-Z]{2}_[0-9a-f,]+_[0-9a-f,]+(_[0-9a-f,]+)?$"
+	expect resp.http.ja4_o ~ "^t13[di][0-9]{2}[0-9]{2}[0-9a-zA-Z]{2}_[0-9a-f]{12}_[0-9a-f]{12}$"
+	expect resp.http.ja4_ro ~ "^t13[di][0-9]{2}[0-9]{2}[0-9a-zA-Z]{2}_[0-9a-f,]+_[0-9a-f,]+(_[0-9a-f,]+)?$"
+} -run

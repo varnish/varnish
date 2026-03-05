@@ -40,5 +40,8 @@ client c1 {
 	tls_handshake
 	txreq
 	rxresp
-	expect resp.http.ja3 != ""
+	# JA3 format per https://github.com/salesforce/ja3: five comma-separated
+	# fields (SSLVersion,Cipher,SSLExtension,EllipticCurve,EllipticCurvePointFormat),
+	# decimals with hyphens within fields; fields may be empty.
+	expect resp.http.ja3 ~ {^\d+,(\d+(-\d+)*)?,(\d+(-\d+)*)?,(\d+(-\d+)*)?,(\d+(-\d+)*)?$}
 } -run

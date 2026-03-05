@@ -93,6 +93,7 @@ cscope.*out
 /bin/varnishd/varnishd
 /bin/varnishhist/varnishhist
 /bin/varnishlog/varnishlog
+/bin/varnishlog-json/varnishlog-json
 /bin/varnishncsa/varnishncsa
 /bin/varnishstat/varnishstat
 /bin/varnishstat/varnishstat_help_gen
