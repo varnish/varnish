@@ -1,0 +1,294 @@
+/* Vinyl Cache homepage theme */
+/* Extends Furo for Sphinx */
+
+/* Fonts */
+
+@font-face {
+	font-family: "Host Grotesk";
+	src: url("fonts/HostGrotesk-Bold.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Host Grotesk";
+	src: url("fonts/HostGrotesk-BoldItalic.woff2") format("woff2");
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Literata";
+	src: url("fonts/Literata-Regular.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Literata";
+	src: url("fonts/Literata-Italic.woff2") format("woff2");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Literata";
+	src: url("fonts/Literata-SemiBold.woff2") format("woff2");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Literata";
+	src: url("fonts/Literata-SemiBoldItalic.woff2") format("woff2");
+	font-weight: 600;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "DM Mono";
+	src: url("fonts/DMMono-Medium.woff2") format("woff2");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+body {
+	--font-stack: "Literata", Georgia, serif;
+	--font-stack--monospace: "DM Mono", monospace;
+	--font-stack--headings: "Host Grotesk", system-ui, sans-serif;
+}
+
+.toc-drawer {
+	font-family: var(--font-stack--monospace);
+	--toc-font-size: 0.6rem;
+}
+
+h1 {
+	font-size: 3.5em;
+	margin-bottom: 1.5rem;
+}
+
+h2 {
+	font-size: 2em;
+}
+
+h3 {
+	font-size: 1.25em;
+	font-family: var(--font-stack);
+}
+
+h4 {
+	font-size: 1.25em;
+	font-family: var(--font-stack);
+}
+
+h5 {
+	font-size: 1.125em;
+}
+
+h6 {
+	font-size: 1em;
+}
+
+/* Colors */
+
+:root {
+	/* Vinyl Cache colors */
+	--color-vinyl-brand: #660066;
+	--color-vinyl-white: #ffffff;
+	--color-vinyl-red: #ff9f8c;
+	--color-vinyl-red-lighter: #ff9f8c;
+	--color-vinyl-red-lightest: #ffcfc5;
+	--color-vinyl-yellow: #ffee99;
+	--color-vinyl-yellow-lighter: #fff6cc;
+	--color-vinyl-yellow-lightest: #ffe7e2;
+	--color-vinyl-blue: #a6ffe1;
+	--color-vinyl-blue-lighter: #d2fff0;
+	--color-vinyl-blue-lightest: #e9fff7;
+	accent-color: var(--color-vinyl-brand);
+}
+
+:root {
+	color-scheme: light dark;
+	--color-theme-main: light-dark(
+		var(--color-vinyl-brand),
+		color-mix(in srgb, var(--color-vinyl-brand) 40%, white 60%)
+		);
+	--color-theme-background: light-dark(
+		white,
+		color-mix(in srgb, var(--color-vinyl-brand) 40%, black 60%)
+		);
+	--color-theme-contrast: light-dark(
+		color-mix(in srgb, var(--color-vinyl-brand) 40%, black 60%),
+		color-mix(in srgb, var(--color-vinyl-brand) 10%, white 90%)
+		);
+	--color-theme-main-80: rgb(from var(--color-theme-main) r g b / 80%);
+	--color-theme-main-60: rgb(from var(--color-theme-main) r g b / 60%);
+	--color-theme-main-40: rgb(from var(--color-theme-main) r g b / 40%);
+	--color-theme-main-20: rgb(from var(--color-theme-main) r g b / 20%);
+	--color-theme-main-10: rgb(from var(--color-theme-main) r g b / 10%);
+	--color-theme-main-05: rgb(from var(--color-theme-main) r g b / 05%);
+	--color-theme-main-02: rgb(from var(--color-theme-main) r g b / 02%);
+	--color-theme-main-variant-80: color-mix(in srgb, var(--color-theme-main) 80%, var(--color-theme-background) 20%);
+	--color-theme-main-variant-60: color-mix(in srgb, var(--color-theme-main) 60%, var(--color-theme-background) 40%);
+	--color-theme-main-variant-40: color-mix(in srgb, var(--color-theme-main) 40%, var(--color-theme-background) 60%);
+	--color-theme-main-variant-20: color-mix(in srgb, var(--color-theme-main) 20%, var(--color-theme-background) 80%);
+	--color-theme-main-variant-10: color-mix(in srgb, var(--color-theme-main) 10%, var(--color-theme-background) 90%);
+	--color-theme-main-variant-05: color-mix(in srgb, var(--color-theme-main) 05%, var(--color-theme-background) 95%);
+	--color-theme-main-variant-02: color-mix(in srgb, var(--color-theme-main) 02%, var(--color-theme-background) 98%);
+}
+
+@media (prefers-color-scheme: light) { :root {
+	color-scheme: light;
+}}
+
+@media (prefers-color-scheme: dark) { :root {
+	color-scheme: dark;
+}}
+
+:root:has([data-theme="light"]) {
+	color-scheme: light;
+}
+
+:root:has([data-theme="dark"]) {
+	color-scheme: dark;
+}
+
+body {
+	--color-brand-primary: var(--color-theme-main) !important;
+	--color-brand-content: var(--color-theme-main) !important;
+	--color-brand-visited: var(--color-theme-main) !important;
+	--color-foreground-primary: var(--color-theme-contrast) !important;
+	--color-foreground-secondary: var(--color-theme-main-80) !important;
+	--color-foreground-muted: var(--color-theme-main-60) !important;
+	--color-foreground-border: var(--color-theme-main) !important;
+	--color-background-primary: var(--color-theme-background) !important;
+	--color-background-secondary: var(--color-theme-main-05) !important;
+	--color-background-hover: var(--color-theme-main-05) !important; 
+	--color-background-hover--transparent: transparent !important;
+	--color-background-border: transparent !important; 
+	--color-background-item: var(--color-theme-main-05) !important;
+	--color-link: var(--color-theme-main) !important;
+	--color-link-underline: var(--color-theme-main-40) !important;
+	--color-link--hover: var(--color-theme-main-60) !important;
+	--color-link-underline--hover: var(--color-link-underline) !important;
+	--color-link--visited: var(--color-link) !important;
+	--color-link-underline--visited: var(--color-link-underline) !important;
+	--color-link--visited--hover: var(--color-link--hover) !important;
+	--color-link-underline--visited--hover: var(--color-link-underline) !important;
+	--color-table-header-background: var(--color-theme-main-10) !important;
+	--color-table-border: var(--color-theme-main-20) !important;
+	--color-sidebar-background: linear-gradient(90deg, var(--color-theme-main-variant-02), var(--color-theme-main-variant-05)) !important;
+	--color-sidebar-background-border: transparent !important;
+	--color-sidebar-search-text: var(--color-theme-main) !important;
+	--color-sidebar-search-background: var(--color-theme-main-05) !important;
+	--color-sidebar-search-background--focus: var(--color-theme-main-02) !important;
+	--color-sidebar-search-border: transparent !important;
+	--color-toc-background: var(color-theme-background) !important;
+	--color-toc-title-text: var(--color-theme-main) !important;
+	--color-toc-item-text: rgb(from var(--color-theme-contrast) r g b / 60%) !important;
+	--color-toc-item-text--hover: rgb(from var(--color-theme-contrast) r g b / 80%) !important;
+	--color-toc-item-text--active: var(--color-theme-main) !important;
+	--color-header-background: var(--color-theme-main-variant-10) !important;
+	--color-header-text: var(--color-theme-main) !important;
+	--color-highlight-on-target: var(--color-theme-main-10) !important;
+}
+
+h1, h2 {
+	color: light-dark(var(--color-theme-main), var(--color-theme-contrast));
+}
+
+h3, h4, h5, h6 {
+	color: var(--color-theme-main);
+}
+
+.bottom-of-page, 
+.bottom-of-page a {
+	color: rgb(from var(--color-theme-contrast) r g b / 60%);
+}
+
+.sidebar-logo-container {
+	background-color: light-dark(transparent, var(--color-theme-contrast));
+	border-radius: .5rem;
+	margin: 0;
+}
+
+/* Spacing */
+
+body {
+	--header-padding: 1rem;
+	--sidebar-tree-space-above: .75rem;
+	--sidebar-item-line-height: 1rem;
+	--sidebar-item-spacing-vertical: .75rem;
+	--sidebar-item-spacing-horizontal: .5rem;
+	--sidebar-search-space-above: 0;
+	--toc-spacing-vertical: .75rem;
+	--toc-spacing-horizontal: .5rem;
+	--toc-item-spacing-vertical: .25rem;
+	--toc-item-spacing-horizontal: .5rem;
+}
+
+/* Elements */
+
+.intro-card {
+	background-color: light-dark(
+		var(--color-theme-main-10),
+		var(--color-vinyl-brand)
+	);
+	padding: 1rem 1.5rem;
+	margin-inline: -1.5rem;
+}
+
+.intro-card h2 {
+	margin-top: .5rem;
+}
+
+.intro-card a {
+	display: inline-block;
+	background-color: var(--color-theme-main-20);
+	padding: .5rem 1rem;
+	margin-right: .5rem;
+	font-family: var(--font-stack--monospace);
+	font-size: .8rem;
+	text-decoration: none;
+}
+
+.intro-card a:is(:hover, :focus) {
+	background-color: var(--color-theme-main-10);
+}
+
+.intro-card a:first-of-type {
+	background-color: var(--color-theme-main);
+	color: var(--color-theme-background);
+}
+
+.intro-card a:first-of-type:is(:hover, :focus) {
+	background-color: var(--color-theme-main-80);
+}
+
+time:has(+h3),
+h3 + time {
+	font-family: var(--font-stack--monospace);
+	color: var(--color-theme-main);
+	font-size: .8rem;
+}
+
+time + h3 {
+	margin-top: 0;
+}
+
+section {
+	margin-bottom: 1.5rem;
+}
+
+.bottom-of-page * {
+	display: inline;
+}
+

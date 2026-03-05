@@ -107,6 +107,7 @@ cscope.*out
 /doc/*.html
 /doc/sphinx/build/
 /doc/sphinx/conf.py
+!/doc/sphinx/_static/
 /doc/sphinx/reference/vmod_*.generated.rst
 
 
