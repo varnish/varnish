@@ -393,10 +393,10 @@ ved_vdp_esi_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 				/* FALLTHROUGH */
 			case VEC_IC:
 				ecx->p++;
-				q = (void*)strchr((const char*)ecx->p, '\0');
+				q = (const void*)strchr((const char*)ecx->p, '\0');
 				AN(q);
 				q++;
-				r = (void*)strchr((const char*)q, '\0');
+				r = (const void*)strchr((const char*)q, '\0');
 				AN(r);
 				if (VDP_bytes(vdc, VDP_FLUSH, NULL, 0)) {
 					ecx->p = ecx->e;
