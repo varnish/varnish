@@ -131,13 +131,7 @@ VTLS_del_sess(struct pool *pp, struct vtls_sess **ptsp)
 	free(tsp->ja4_ro);
 	VTLS_fingerprint_raw_free(&tsp->ja3_ja4_raw);
 
-	/* Release lazy Client Hello buffer (malloc'd) */
-	if (tsp->client_hello_buf != NULL) {
-		free(tsp->client_hello_buf);
-		tsp->client_hello_buf = NULL;
-		tsp->client_hello_len = 0;
-		tsp->client_hello_ws_snapshot = 0;
-	}
+	free(tsp->client_hello_buf);
 
 	if (tsp->buf != NULL)
 		VTLS_buf_free(&tsp->buf);
@@ -655,7 +649,8 @@ vtls_msg_cb(int write_p, int version, int content_type, const void *buf,
 
 	(void)version;
 	(void)arg;
-	if (write_p != 0 || content_type != SSL3_RT_HANDSHAKE)
+	if (write_p != 0 || content_type != SSL3_RT_HANDSHAKE ||
+	    len < 1 || ((const unsigned char *)buf)[0] != SSL3_MT_CLIENT_HELLO)
 		return;
 	if (!cache_param->tls_ja3 && !cache_param->tls_ja4 &&
 	    !cache_param->tls_ja4_r && !cache_param->tls_ja4_o &&
@@ -667,13 +662,9 @@ vtls_msg_cb(int write_p, int version, int content_type, const void *buf,
 	tsp = sp->tls;
 	if (tsp == NULL || tsp->magic != VTLS_SESS_MAGIC)
 		return;
-	/* Release any previous lazy Client Hello buffer (malloc'd, not session ws) */
-	if (tsp->client_hello_buf != NULL) {
-		free(tsp->client_hello_buf);
-		tsp->client_hello_buf = NULL;
-		tsp->client_hello_len = 0;
-		tsp->client_hello_ws_snapshot = 0;
-	}
+	free(tsp->client_hello_buf);
+	tsp->client_hello_buf = NULL;
+	tsp->client_hello_len = 0;
 	/* Reject oversized Client Hello to avoid malloc DoS from malicious client */
 	if (len > VTLS_CLIENT_HELLO_MAX_LEN)
 		return;
@@ -716,10 +707,9 @@ vtls_clienthello_cb(SSL *ssl, int *al, void *priv)
 		free(tsp->client_hello_buf);
 		tsp->client_hello_buf = NULL;
 		tsp->client_hello_len = 0;
-		tsp->client_hello_ws_snapshot = 0;
 	}
 
-	if (cache_param->tls_ja3 && VTLS_fingerprint_get_ja3(ssl, sp, tsp) != 0)
+	if (cache_param->tls_ja3 && VTLS_fingerprint_get_ja3(sp, tsp) != 0)
 		return (SSL_CLIENT_HELLO_ERROR);
 
 	if (cache_param->tls_ja4 && VTLS_fingerprint_get_ja4_variant(sp, tsp, VTLS_JA4_MAIN) != 0)

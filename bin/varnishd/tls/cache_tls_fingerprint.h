@@ -5,7 +5,9 @@
  * Opaque raw Client Hello blob; implementation in cache_tls_fingerprint.c.
  */
 
-#include <openssl/ssl.h>
+#ifndef CACHE_TLS_FINGERPRINT_H
+#define CACHE_TLS_FINGERPRINT_H
+
 #include <stddef.h>
 
 /* Max Client Hello size we accept (TLS 1.3 record payload max); reject larger. */
@@ -25,7 +27,7 @@ int VTLS_fingerprint_parse_clienthello(const unsigned char *buf, size_t len,
     void **out_raw);
 
 /* Compute JA3 from tsp->ja3_ja4_raw into tsp->ja3. Returns 0 on success. */
-int VTLS_fingerprint_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp);
+int VTLS_fingerprint_get_ja3(struct sess *sp, struct vtls_sess *tsp);
 
 /* JA4 dimensions (bitfield): sorted vs original order, hashed vs raw. */
 #define VTLS_JA4_SORTED	0x01u
@@ -41,3 +43,5 @@ int VTLS_fingerprint_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp);
  * variant uses VTLS_JA4_SORTED and/or VTLS_JA4_HASHED. Returns 0 on success. */
 int VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
     unsigned variant);
+
+#endif /* CACHE_TLS_FINGERPRINT_H */

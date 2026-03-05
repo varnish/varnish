@@ -73,11 +73,12 @@ const char *VTLS_ja4_ro(const struct vrt_ctx *ctx);
 	VCL_STRING								\
 	vmod_ ## name(VRT_CTX)							\
 	{									\
+		const char *p;							\
 		AN(ctx->method & VCL_MET_TASK_C);				\
-		const char *_p = VTLS_ ## name(ctx);				\
-		if (_p == NULL)							\
+		p = VTLS_ ## name(ctx);						\
+		if (p == NULL)							\
 			return (NULL);						\
-		return (WS_Copy(ctx->ws, _p, -1));				\
+		return (WS_Copy(ctx->ws, p, -1));				\
 	}
 
 VMOD_TLS_CLIENT_STRING(ja3)

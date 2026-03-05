@@ -27,14 +27,12 @@
 
 #include "config.h"
 
-#include <openssl/ssl.h>
-#include <openssl/ssl3.h>
-#undef SHA256_DIGEST_LENGTH
-#include "vsha256.h"
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
+
+#include "vsha256.h"
 
 #include "cache/cache_varnishd.h"
 #include "cache_tls.h"
@@ -42,6 +40,11 @@
 #include "vsb.h"
 
 #include "cache_tls_fingerprint.h"
+
+#define IS_ASCII_ALNUM(c) \
+	(((c) >= '0' && (c) <= '9') || \
+	 ((c) >= 'A' && (c) <= 'Z') || \
+	 ((c) >= 'a' && (c) <= 'z'))
 
 /*
  * Raw Client Hello parse result for JA3/JA4.  Extension list is wire-accurate
@@ -71,6 +74,11 @@ struct ja3_ja4_raw_ch {
 	unsigned char	ec_point_formats[256];
 	size_t		ec_point_formats_len;
 };
+
+/* TLS wire constants. */
+#ifndef SSL3_MT_CLIENT_HELLO
+#define SSL3_MT_CLIENT_HELLO			1
+#endif
 
 /* TLS extension types (IANA registry values). */
 #ifndef TLSEXT_TYPE_server_name
@@ -146,13 +154,14 @@ vtls_ja3_ja4_raw_parse_clienthello(const unsigned char *buf, size_t len,
 	if (ext_end > len)
 		return (-1);
 
-	while (off + 4 <= ext_end && out->ext_count < JA3_JA4_RAW_MAX_EXTS) {
+	while (off + 4 <= ext_end) {
 		uint16_t etype = vbe16dec(buf + off);
 		uint16_t elen = vbe16dec(buf + off + 2);
 		off += 4;
 		if (off + elen > ext_end)
 			break;
-		out->ext_types[out->ext_count++] = etype;
+		if (out->ext_count < JA3_JA4_RAW_MAX_EXTS)
+			out->ext_types[out->ext_count++] = etype;
 		if (etype == TLSEXT_TYPE_server_name)
 			out->has_sni = 1;
 		else if (etype == TLSEXT_TYPE_supported_groups &&
@@ -182,10 +191,10 @@ vtls_ja3_ja4_raw_parse_clienthello(const unsigned char *buf, size_t len,
 }
 
 static void
-vtls_ja3_parsefields(int bytes_per_field, const unsigned char *data, int len,
+vtls_ja3_parsefields(int bytes_per_field, const unsigned char *data, size_t len,
     struct vsb *ja3)
 {
-	int cnt;
+	size_t cnt;
 	uint16_t tmp;
 	int first = 1;
 
@@ -211,7 +220,7 @@ vtls_ja3_parsefields(int bytes_per_field, const unsigned char *data, int len,
 }
 
 int
-VTLS_fingerprint_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
+VTLS_fingerprint_get_ja3(struct sess *sp, struct vtls_sess *tsp)
 {
 	const struct ja3_ja4_raw_ch *raw;
 	struct vsb ja3[1];
@@ -220,7 +229,6 @@ VTLS_fingerprint_get_ja3(SSL *ssl, struct sess *sp, struct vtls_sess *tsp)
 	char *ja3_str;
 	uintptr_t sn;
 
-	(void)ssl;
 	AN(sp);
 	AN(tsp);
 	if (tsp->ja3_ja4_raw == NULL)
@@ -361,7 +369,7 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 	(void)sp;
 	AN(tsp);
 	if (tsp->ja3_ja4_raw == NULL)
-		return (-1);
+		return (0);
 	switch (variant) {
 	case VTLS_JA4_MAIN: slot = &tsp->ja4; break;
 	case VTLS_JA4_R:    slot = &tsp->ja4_r; break;
@@ -437,7 +445,7 @@ VTLS_fingerprint_get_ja4_variant(struct sess *sp, struct vtls_sess *tsp,
 
 		if (plen > 0 && ll > 0 && plen <= ll - 1 &&
 		    3 + plen <= raw->alpn_len) {
-			if (isalnum(p[0]) && isalnum(p[plen - 1])) {
+			if (IS_ASCII_ALNUM(p[0]) && IS_ASCII_ALNUM(p[plen - 1])) {
 				alpn_first = (char)p[0];
 				alpn_last = (char)p[plen - 1];
 			} else {

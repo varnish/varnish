@@ -498,11 +498,10 @@ name(const struct vrt_ctx *ctx)						\
 	return (tsp->member);						\
 }
 
-/* JA4: variants are computed in the Client Hello callback when the
- * corresponding param is on (same flow as JA3). Accessors just return
- * the precomputed value.
+/* Fingerprint accessors: return the precomputed value only when
+ * the corresponding param is enabled.
  */
-#define VTLS_JA4_ACCESSOR(name, member, param_on)				\
+#define VTLS_FP_ACCESSOR(name, member, param_on)				\
 const char *								\
 name(const struct vrt_ctx *ctx)						\
 {									\
@@ -514,11 +513,11 @@ name(const struct vrt_ctx *ctx)						\
 }
 
 VTLS_VMOD_ACCESSOR(const SSL *, VTLS_tls_ctx, ssl)
-VTLS_VMOD_ACCESSOR(const char *, VTLS_ja3, ja3)
-VTLS_JA4_ACCESSOR(VTLS_ja4, ja4, cache_param->tls_ja4)
-VTLS_JA4_ACCESSOR(VTLS_ja4_r, ja4_r, cache_param->tls_ja4_r)
-VTLS_JA4_ACCESSOR(VTLS_ja4_o, ja4_o, cache_param->tls_ja4_o)
-VTLS_JA4_ACCESSOR(VTLS_ja4_ro, ja4_ro, cache_param->tls_ja4_ro)
+VTLS_FP_ACCESSOR(VTLS_ja3, ja3, cache_param->tls_ja3)
+VTLS_FP_ACCESSOR(VTLS_ja4, ja4, cache_param->tls_ja4)
+VTLS_FP_ACCESSOR(VTLS_ja4_r, ja4_r, cache_param->tls_ja4_r)
+VTLS_FP_ACCESSOR(VTLS_ja4_o, ja4_o, cache_param->tls_ja4_o)
+VTLS_FP_ACCESSOR(VTLS_ja4_ro, ja4_ro, cache_param->tls_ja4_ro)
 
 /*
  * This is the SSL_do_handshake/poll loop.
