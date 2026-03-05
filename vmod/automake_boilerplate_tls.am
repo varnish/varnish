@@ -18,6 +18,9 @@ libvmod_tls_la_LDFLAGS = \
 	$(VMOD_LDFLAGS) \
 	-rpath $(vmoddir)
 
+libvmod_tls_la_LIBADD = \
+	$(OPENSSL_LIBS)
+
 nodist_libvmod_tls_la_SOURCES = vcc_tls_if.c vcc_tls_if.h
 
 EXTRA_libvmod_tls_la_DEPENDENCIES = $(nodist_libvmod_tls_la_SOURCES)
