@@ -64,17 +64,19 @@ EXTRA_DIST = \
 	vcl-design-patterns \
 	vtc-syntax.py \
 	whats-new \
-	_static/vinyl-cache-logo-primary.svg \
+	_static/custom.css \
 	_static/fonts/DMMono-Medium.woff2 \
 	_static/fonts/HostGrotesk-BoldItalic.woff2 \
-	_static/fonts/Literata-SemiBoldItalic.woff2 \
-	_static/fonts/Literata-SemiBold.woff2 \
+	_static/fonts/HostGrotesk-Bold.woff2 \
+	_static/fonts/LICENSE.txt \
 	_static/fonts/Literata-Italic.woff2 \
 	_static/fonts/Literata-Regular.woff2 \
-	_static/fonts/HostGrotesk-Bold.woff2 \
-	_static/vinyl-cache-symbol-crop-square.svg \
+	_static/fonts/Literata-SemiBoldItalic.woff2 \
+	_static/fonts/Literata-SemiBold.woff2 \
+	_static/LICENSE.txt \
 	_static/vinyl-cache-logo-primary.png \
-	_static/custom.css \
+	_static/vinyl-cache-logo-primary.svg \
+	_static/vinyl-cache-symbol-crop-square.svg \
 	_static/vinyl-cache-symbol.ico
 
 dist-hook:
