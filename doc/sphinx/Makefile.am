@@ -19,15 +19,17 @@ clean:
 	-rm -rf $(BUILDDIR)/* $(CLEANFILES)
 
 # use index.rst as an indicator if we have copied already
-.PHONY: link_srcdir _static
-link_srcdir: graphviz conf.py $(BUILT_SOURCES) _static
+.PHONY: link_srcdir
+link_srcdir: graphviz conf.py $(BUILT_SOURCES)
 	if test "x$(srcdir)" != "x$(builddir)" && test ! -f index.rst; then \
 		s=`cd $(srcdir) && pwd`; \
 		for f in `cd $$s && find . -type f`; do \
 			d=`dirname $$f`; \
 			test -d $$d || mkdir -p $$d; \
 			test -f $$f || ln -s $$s/$$f $$f; \
-		done \
+		done; \
+		rm -f _static; \
+		ln -s $$s/_static; \
 	fi
 
 # workaround for make html called within doc/sphinx
