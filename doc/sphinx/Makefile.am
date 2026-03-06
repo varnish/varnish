@@ -27,9 +27,7 @@ link_srcdir: graphviz conf.py $(BUILT_SOURCES)
 			d=`dirname $$f`; \
 			test -d $$d || mkdir -p $$d; \
 			test -f $$f || ln -s $$s/$$f $$f; \
-		done; \
-		rm -f _static; \
-		ln -s $$s/_static; \
+		done \
 	fi
 
 # workaround for make html called within doc/sphinx
@@ -65,7 +63,19 @@ EXTRA_DIST = \
 	users-guide \
 	vcl-design-patterns \
 	vtc-syntax.py \
-	whats-new
+	whats-new \
+	_static/vinyl-cache-logo-primary.svg \
+	_static/fonts/DMMono-Medium.woff2 \
+	_static/fonts/HostGrotesk-BoldItalic.woff2 \
+	_static/fonts/Literata-SemiBoldItalic.woff2 \
+	_static/fonts/Literata-SemiBold.woff2 \
+	_static/fonts/Literata-Italic.woff2 \
+	_static/fonts/Literata-Regular.woff2 \
+	_static/fonts/HostGrotesk-Bold.woff2 \
+	_static/vinyl-cache-symbol-crop-square.svg \
+	_static/vinyl-cache-logo-primary.png \
+	_static/custom.css \
+	_static/vinyl-cache-symbol.ico
 
 dist-hook:
 	$(MAKE) html
