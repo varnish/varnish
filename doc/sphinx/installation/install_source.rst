@@ -48,6 +48,8 @@ Or if you want the built from sources::
 	cd /usr/ports/www/varnish6
 	make depends clean
 
+.. XXX furo for sphinx
+
 Then continue `Compiling Varnish`_
 
 Build dependencies on Debian / Ubuntu
@@ -84,6 +86,10 @@ Recommended, in particular if you plan on building custom vmods::
 Optionally, to pull from a repository::
 
     sudo apt-get install git
+
+Optionally, to build the HTML documentation::
+
+    sudo apt-get install pip furo
 
 Then continue `Compiling Varnish`_
 
@@ -149,6 +155,8 @@ Optionally, to pull from a repository::
 
     yum install git
 
+.. XXX furo for sphinx
+
 .. XXX autoconf-archive ? is this any helpful on the notoriously
    outdated Redhats?
 
@@ -171,6 +179,8 @@ dependencies:
 	libtool \
 	docutils \
 	sphinx-doc
+
+.. XXX furo for sphinx
 
 * Add the sphinx tools and the docutils to PATH so `configure` will find them.
 
@@ -216,6 +226,8 @@ Optionally, to pull from a repository::
 
     apk add -q git
 
+.. XXX furo for sphinx
+
 Then continue `Compiling Varnish`_, using the ``--with-unwind``
 ``configure`` option.
 
@@ -236,6 +248,11 @@ Optionally, to rebuild the svg files::
 Optionally, to pull from a repository::
 
 	pkgin in git
+
+Optionally, to build the HTML documentation::
+
+        pkgin in py311-pip-25.3
+        pip install furo
 
 Building on Solaris and other Solaris-ish OSes
 ----------------------------------------------
