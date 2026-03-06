@@ -19,8 +19,8 @@ clean:
 	-rm -rf $(BUILDDIR)/* $(CLEANFILES)
 
 # use index.rst as an indicator if we have copied already
-.PHONY: link_srcdir
-link_srcdir: graphviz conf.py $(BUILT_SOURCES)
+.PHONY: link_srcdir _static
+link_srcdir: graphviz conf.py $(BUILT_SOURCES) _static
 	if test "x$(srcdir)" != "x$(builddir)" && test ! -f index.rst; then \
 		s=`cd $(srcdir) && pwd`; \
 		for f in `cd $$s && find . -type f`; do \
