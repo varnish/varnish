@@ -20,7 +20,7 @@ Display Varnish logs
 SYNOPSIS
 ========
 
-.. include:: ../include/varnishlog_synopsis.rst
+.. include:: ../include/vinyllog_synopsis.rst
 varnishlog |synopsis|
 
 OPTIONS
@@ -28,7 +28,7 @@ OPTIONS
 
 The following options are available:
 
-.. include:: ../include/varnishlog_options.rst
+.. include:: ../include/vinyllog_options.rst
 
 SIGNALS
 =======

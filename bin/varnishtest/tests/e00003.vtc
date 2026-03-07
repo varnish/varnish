@@ -162,8 +162,8 @@ shell {
 	diff -u expected.txt ncsa.txt
 }
 
-shell -err {varnishlog -n ${v1_name} -d -c -i Begin | grep esi}
-shell -err {varnishlog -n ${v1_name} -d -c -i Begin -g request | grep esi}
-shell {varnishlog -n ${v1_name} -d -c -i Begin -g raw | grep esi}
-shell {varnishlog -n ${v1_name} -d -E -i Begin | grep esi}
-shell {varnishlog -n ${v1_name} -d -E -i Begin | grep rxreq}
+shell -err {vinyllog -n ${v1_name} -d -c -i Begin | grep esi}
+shell -err {vinyllog -n ${v1_name} -d -c -i Begin -g request | grep esi}
+shell {vinyllog -n ${v1_name} -d -c -i Begin -g raw | grep esi}
+shell {vinyllog -n ${v1_name} -d -E -i Begin | grep esi}
+shell {vinyllog -n ${v1_name} -d -E -i Begin | grep rxreq}

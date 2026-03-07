@@ -26,7 +26,7 @@ vinyl v1 -vcl+backend {
 
 } -start
 
-process p1 -winsz 100 200 {exec varnishlog -n ${v1_name} -g raw} -start
+process p1 -winsz 100 200 {exec vinyllog -n ${v1_name} -g raw} -start
 process p1 -expect-text 0 0 CLI
 
 vinyl v1 -cliok "param.set debug +syncvsl"

@@ -29,17 +29,17 @@ client c1 {
 
 # records with malformed fields don't show up
 shell -expect "2" {
-	 varnishlog -d -n ${v1_name} -g raw -q 'VCL_Log[3]' | wc -l
+	 vinyllog -d -n ${v1_name} -g raw -q 'VCL_Log[3]' | wc -l
 }
 
 server s1 -wait
 
 shell -expect "Went healthy" {
-	varnishlog -d -n ${v1_name} -g raw \
+	vinyllog -d -n ${v1_name} -g raw \
 	    -q 'Backend_health[10] eq "HTTP/1.1 200 OK"'
 }
 
 # s1 starts sick before the first probe request is made
 shell -expect "Went sick" {
-	varnishlog -d -n ${v1_name} -g raw -q 'Backend_health[10] eq ""'
+	vinyllog -d -n ${v1_name} -g raw -q 'Backend_health[10] eq ""'
 }

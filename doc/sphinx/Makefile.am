@@ -117,14 +117,14 @@ include/varnishncsa_synopsis.rst: $(top_builddir)/bin/varnishncsa/varnishncsa
 BUILT_SOURCES += include/varnishncsa_options.rst \
 	include/varnishncsa_synopsis.rst
 
-include/varnishlog_options.rst: $(top_builddir)/bin/varnishlog/varnishlog
-	$(top_builddir)/bin/varnishlog/varnishlog --options > ${@}_
+include/vinyllog_options.rst: $(top_builddir)/bin/vinyllog/vinyllog
+	$(top_builddir)/bin/vinyllog/vinyllog --options > ${@}_
 	mv -f ${@}_ ${@}
-include/varnishlog_synopsis.rst: $(top_builddir)/bin/varnishlog/varnishlog
-	$(top_builddir)/bin/varnishlog/varnishlog --synopsis > ${@}_
+include/vinyllog_synopsis.rst: $(top_builddir)/bin/vinyllog/vinyllog
+	$(top_builddir)/bin/vinyllog/vinyllog --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/varnishlog_options.rst \
-	include/varnishlog_synopsis.rst
+BUILT_SOURCES += include/vinyllog_options.rst \
+	include/vinyllog_synopsis.rst
 
 include/varnishlog-json_options.rst: $(top_builddir)/bin/varnishlog-json/varnishlog-json
 	$(top_builddir)/bin/varnishlog-json/varnishlog-json --options > ${@}_

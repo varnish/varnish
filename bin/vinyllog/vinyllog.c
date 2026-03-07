@@ -29,7 +29,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Log tailer for Varnish
+ * Log tailer for Vinyl
  */
 
 #include "config.h"
@@ -43,7 +43,7 @@
 #include <stdint.h>
 
 #define VOPT_DEFINITION
-#define VOPT_INC "varnishlog_options.h"
+#define VOPT_INC "vinyllog_options.h"
 
 #include "vdef.h"
 

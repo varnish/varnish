@@ -31,7 +31,7 @@
  * Define the tags in the shared memory in a reusable format.
  * Whoever includes this get to define what the SLTM macro does.
  *
- * REMEMBER to update the documentation (especially the varnishlog(1) man
+ * REMEMBER to update the documentation (especially the vinyllog(1) man
  * page) whenever this list changes.
  *
  * XXX: Please add new entries at the end to not break saved log-segments.

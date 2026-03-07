@@ -1,4 +1,4 @@
-vtest "varnishlog coverage"
+vtest "vinyllog coverage"
 
 server s1 -repeat 2 {
 	rxreq
@@ -9,119 +9,119 @@ vinyl v1 -vcl+backend {} -start
 
 # We use this to make sure we know there is a "0 CLI" in the binary log.
 process p1 {
-	exec varnishlog -n ${v1_name} -g raw -u -A -w -
+	exec vinyllog -n ${v1_name} -g raw -u -A -w -
 } -start
 
 shell {
-	exec varnishlog -n ${v1_name} -D -P ${tmpdir}/vlog.pid \
+	exec vinyllog -n ${v1_name} -D -P ${tmpdir}/vlog.pid \
 	    -w ${tmpdir}/vlog.bin -R 10/s \
 	    -i RespStatus -i ReqURL -i BereqURL
 }
 
-shell -match "Usage: .*varnishlog <options>" \
-	"varnishlog -h"
+shell -match "Usage: .*vinyllog <options>" \
+	"vinyllog -h"
 shell -expect "Copyright (c) 2006 Verdens Gang AS" \
-	"varnishlog -V"
-shell -err -match "Usage: .*varnishlog <options>" \
-	"varnishlog extra"
+	"vinyllog -V"
+shell -err -match "Usage: .*vinyllog <options>" \
+	"vinyllog extra"
 shell -err -expect "Missing -w option" \
-	"varnishlog -D"
+	"vinyllog -D"
 shell -err -expect "Daemon cannot write to stdout" \
-	"varnishlog -D -w -"
+	"vinyllog -D -w -"
 shell -err -expect "Ambiguous grouping type: r" \
-	"varnishlog -g r"
+	"vinyllog -g r"
 shell -err -expect "Unknown grouping type: foo" \
-	"varnishlog -g foo"
+	"vinyllog -g foo"
 shell -err -expect "-k: Invalid number 'foo'" \
-	"varnishlog -k foo"
+	"vinyllog -k foo"
 shell -err -expect "-L: Range error" \
-	"varnishlog -L 0"
+	"vinyllog -L 0"
 
 shell -err -expect {-i: "foo" matches zero tags} \
-	"varnishlog -i foo"
+	"vinyllog -i foo"
 shell -err -expect {-i: "Resp" is ambiguous} \
-	"varnishlog -i Resp"
+	"vinyllog -i Resp"
 shell -err -expect {-i: Syntax error in "Re**sp"} \
-	"varnishlog -i Re**sp"
+	"vinyllog -i Re**sp"
 
 shell -err -expect {-I: "foo" matches zero tags} \
-	"varnishlog -I foo:bar"
+	"vinyllog -I foo:bar"
 shell -err -expect {-I: "Resp" is ambiguous} \
-	"varnishlog -I Resp:bar"
+	"vinyllog -I Resp:bar"
 shell -err -expect {-I: Regex error at position 4 (missing closing parenthesis)} \
-	{varnishlog -I "(foo"}
+	{vinyllog -I "(foo"}
 shell -err -expect "-t: Invalid argument" \
-	"varnishlog -t -1"
+	"vinyllog -t -1"
 shell -err -expect "-t: Invalid argument" \
-	"varnishlog -t foo"
+	"vinyllog -t foo"
 shell -err -expect "-t: Invalid argument" \
-	"varnishlog -t NaN"
+	"vinyllog -t NaN"
 shell -err -expect {-x: Syntax error in "**"} \
-	{varnishlog -x "**"}
+	{vinyllog -x "**"}
 shell -err -expect {-X: Syntax error in "**"} \
-	{varnishlog -X "**:bar"}
+	{vinyllog -X "**:bar"}
 shell -err -expect "Cannot open output file (No such file or directory)" \
-	{varnishlog -w /nonexistent/file}
+	{vinyllog -w /nonexistent/file}
 shell -err -expect "Only one of -n and -r options may be used" \
-	{varnishlog -n ${v1_name} -r ${v1_name}/_.vsm}
+	{vinyllog -n ${v1_name} -r ${v1_name}/_.vsm}
 
 shell -err -expect "Unterminated string" \
-	{varnishlog -q '"b\\la'}
+	{vinyllog -q '"b\\la'}
 shell -err -expect "Syntax error" \
-	{varnishlog -q ' / '}
+	{vinyllog -q ' / '}
 shell -err -expect "Expected integer got '}" \
-	"varnishlog -q {}"
+	"vinyllog -q {}"
 shell -err -expect "Expected positive integer" \
-	"varnishlog -q {-1}"
+	"vinyllog -q {-1}"
 shell -err -expect "Syntax error in level limit" \
-	"varnishlog -q {1a}"
+	"vinyllog -q {1a}"
 shell -err -expect "Expected VSL tag name got '['" \
-	{varnishlog -q "[]"}
+	{vinyllog -q "[]"}
 shell -err -expect "Tag name matches zero tags" \
-	"varnishlog -q foo"
+	"vinyllog -q foo"
 shell -err -expect "Tag name is ambiguous" \
-	"varnishlog -q Resp"
+	"vinyllog -q Resp"
 shell -err -expect "Expected string got '['" \
-	{varnishlog -q "ReqHeader:[]"}
+	{vinyllog -q "ReqHeader:[]"}
 shell -err -expect "Expected integer got ']'" \
-	{varnishlog -q "ReqHeader:foo[]"}
+	{vinyllog -q "ReqHeader:foo[]"}
 shell -err -expect "Expected positive integer" \
-	{varnishlog -q "ReqHeader:foo[a]"}
+	{vinyllog -q "ReqHeader:foo[a]"}
 shell -err -expect "Syntax error in tag name" \
-	{varnishlog -q '*x* eq "foo"'}
+	{vinyllog -q '*x* eq "foo"'}
 shell -err -expect "Expected number got '>'" \
-	{varnishlog -q "RespStatus > >"}
+	{vinyllog -q "RespStatus > >"}
 shell -err -expect "Floating point parse error" \
-	{varnishlog -q "Timestamp:Start[1] > 0.foo"}
+	{vinyllog -q "Timestamp:Start[1] > 0.foo"}
 shell -err -expect "Integer parse error" \
-	{varnishlog -q "RespStatus > foo"}
+	{vinyllog -q "RespStatus > foo"}
 shell -err -expect "Expected string got '>'" \
-	{varnishlog -q "ReqMethod eq >"}
+	{vinyllog -q "ReqMethod eq >"}
 shell -err -expect "Expected regular expression got '>'" \
-	{varnishlog -q "ReqMethod ~ >"}
+	{vinyllog -q "ReqMethod ~ >"}
 shell -err -expect "Regular expression error: " \
-	{varnishlog -q 'ReqMethod ~ "("'}
+	{vinyllog -q 'ReqMethod ~ "("'}
 shell -err -expect "Expected operator got 'ReqMethod'" \
-	{varnishlog -q "RespStatus ReqMethod 200"}
+	{vinyllog -q "RespStatus ReqMethod 200"}
 
 shell -err -expect "-R: Syntax error" \
-	"varnishlog -R 1foo"
+	"vinyllog -R 1foo"
 shell -err -expect "-R: Range error" \
-	"varnishlog -R 0"
+	"vinyllog -R 0"
 shell -err -expect "-R: Range error" \
-	"varnishlog -R -1"
+	"vinyllog -R -1"
 shell -err -expect "-R: Range error" \
-	"varnishlog -R 3000000000"
+	"vinyllog -R 3000000000"
 shell -err -expect "-R: Syntax error: Invalid duration" \
-	"varnishlog -R 10/0s"
+	"vinyllog -R 10/0s"
 shell -err -expect "-R: Syntax error: Invalid duration" \
-	"varnishlog -R 10/-10s"
+	"vinyllog -R 10/-10s"
 shell -err -expect "-R: Syntax error: Invalid duration" \
-	"varnishlog -R 10/1q"
+	"vinyllog -R 10/1q"
 shell -err -expect "-R: Syntax error: Invalid duration" \
-	"varnishlog -R 10/11f09s"
+	"vinyllog -R 10/11f09s"
 shell -err -expect "-R: Syntax error" \
-	"varnishlog -R 1000000000/1000000000000000000000000000000s"
+	"vinyllog -R 1000000000/1000000000000000000000000000000s"
 
 # Wait until the binary also (must) contain a "0 CLI"
 process p1 -expect-text 0 0 "0 CLI"
@@ -129,10 +129,10 @@ process p1 -screen_dump
 process p1 -stop
 
 shell -match "0 CLI[ ]+- Wr 200 [0-9]+ PONG" \
-	{varnishlog -n ${v1_name} -d -g raw -X "Wr 200 [0-9]+ [^P]"}
+	{vinyllog -n ${v1_name} -d -g raw -X "Wr 200 [0-9]+ [^P]"}
 
 shell -match "0 CLI[ ]+- Wr 200 [0-9]+ PONG" \
-	{VARNISH_DEFAULT_N="${v1_name}" varnishlog -d -g raw -X "Wr 200 [0-9]+ [^P]"}
+	{VARNISH_DEFAULT_N="${v1_name}" vinyllog -d -g raw -X "Wr 200 [0-9]+ [^P]"}
 
 client c1 {
 	txreq -url /foo
@@ -156,23 +156,23 @@ shell "kill `cat ${tmpdir}/vlog.pid`"
 shell -match {^\*[ ]+<< Request\s+>>[ ]+1001[ ]+
 -[ ]+1001 ReqURL[ ]+c /foo
 $} \
-	{varnishlog -r ${tmpdir}/vlog.bin~ -i ReqURL -v \
+	{vinyllog -r ${tmpdir}/vlog.bin~ -i ReqURL -v \
 	-q "RespStatus == 200"}
 shell -match "-[ ]+BereqURL[ ]+/bar" \
-	"varnishlog -r ${tmpdir}/vlog.bin -x ReqURL"
+	"vinyllog -r ${tmpdir}/vlog.bin -x ReqURL"
 shell -match {^\*[ ]+<< BeReq\s+>>[ ]+1005[ ]+
 -[ ]+BereqURL[ ]+/bar
 $} \
-	"varnishlog -r ${tmpdir}/vlog.bin -b -C -I BAR"
+	"vinyllog -r ${tmpdir}/vlog.bin -b -C -I BAR"
 
 shell -match {^\*[ ]+<< BeReq\s+>>[ ]+1005[ ]+} \
-	"cat ${tmpdir}/vlog.bin | varnishlog -r - -b -C -I BAR"
+	"cat ${tmpdir}/vlog.bin | vinyllog -r - -b -C -I BAR"
 
 shell "rm -f ${tmpdir}/foo"
 shell -err -expect "Cannot open ${tmpdir}/foo: " \
-	"varnishlog -r ${tmpdir}/foo"
+	"vinyllog -r ${tmpdir}/foo"
 shell "echo foobar > ${tmpdir}/foo"
 shell -err -expect "Not a VSL file: ${tmpdir}/foo" \
-	"varnishlog -r ${tmpdir}/foo"
+	"vinyllog -r ${tmpdir}/foo"
 
 # ESI coverage in e00003.vtc

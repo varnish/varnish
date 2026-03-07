@@ -23,7 +23,7 @@ vinyl v1 -cliok "param.set debug +syncvsl"
 
 vinyl v1 -cliok "param.set vsl_mask +H2RxHdr,+H2RxBody,+H2TxHdr,+H2TxBody"
 
-process p1 {exec varnishlog -n ${v1_name} -g raw -w ${tmpdir}/vlog -A} -start
+process p1 {exec vinyllog -n ${v1_name} -g raw -w ${tmpdir}/vlog -A} -start
 
 shell {while ! test -s ${tmpdir}/vlog ; do sleep 1 ; done}
 
