@@ -44,7 +44,7 @@
 #include <unistd.h>
 
 #define VOPT_DEFINITION
-#define VOPT_INC "varnishhist_options.h"
+#define VOPT_INC "vinylhist_options.h"
 
 #include "vdef.h"
 #include "vcurses.h"
@@ -123,7 +123,7 @@ struct profile {
 #define HIS_CLIENT	'c'
 #define HIS_BACKEND	'b'
 static const struct profile profiles[] = {
-#include "varnishhist_profiles.h"
+#include "vinylhist_profiles.h"
 	{ NULL }
 };
 #undef HIS_NO_PREFIX

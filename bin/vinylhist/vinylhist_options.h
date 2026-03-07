@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Option definitions for varnishhist
+ * Option definitions for vinylhist
  */
 
 #include "vapi/vapi_options.h"
@@ -87,7 +87,7 @@ HIS_OPT_p
 	     "Predefined " cb " profile: " doc				\
 	     " (field " #fld " of " #tg " " prefix " VSL tag)."		\
 	    )
-#include "varnishhist_profiles.h"
+#include "vinylhist_profiles.h"
 #undef HIS_NO_PREFIX
 #undef HIS_BACKEND
 #undef HIS_CLIENT

@@ -3,7 +3,7 @@
 SUBDIRS = \
 	vinyladm \
 	vinyld \
-	varnishhist \
+	vinylhist \
 	varnishlog \
 	varnishlog-json \
 	varnishncsa \

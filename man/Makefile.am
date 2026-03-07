@@ -12,7 +12,7 @@ dist_man_MANS = \
 	vsl-query.7 \
 	vinyladm.1 \
 	vinyld.1 \
-	varnishhist.1 \
+	vinylhist.1 \
 	varnishlog.1 \
 	varnishncsa.1 \
 	varnishstat.1 \
@@ -114,10 +114,10 @@ varnishtop.1: \
 	$(top_builddir)/doc/sphinx/include/varnishtop_synopsis.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishtop.rst $@
 
-varnishhist.1: \
+vinylhist.1: \
 	$(top_builddir)/doc/sphinx/reference/varnishhist.rst \
-	$(top_builddir)/doc/sphinx/include/varnishhist_options.rst \
-	$(top_builddir)/doc/sphinx/include/varnishhist_synopsis.rst
+	$(top_builddir)/doc/sphinx/include/vinylhist_options.rst \
+	$(top_builddir)/doc/sphinx/include/vinylhist_synopsis.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishhist.rst $@
 
 vmod_cookie.3: $(top_builddir)/vmod/vmod_cookie.man.rst

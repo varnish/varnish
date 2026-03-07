@@ -20,7 +20,7 @@ Varnish request histogram
 SYNOPSIS
 ========
 
-.. include:: ../include/varnishhist_synopsis.rst
+.. include:: ../include/vinylhist_synopsis.rst
 varnishhist |synopsis|
 
 DESCRIPTION
@@ -35,7 +35,7 @@ and misses are marked with a hash character ("#").
 
 The following options are available:
 
-.. include:: ../include/varnishhist_options.rst
+.. include:: ../include/vinylhist_options.rst
 
 SEE ALSO
 ========

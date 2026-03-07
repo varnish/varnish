@@ -144,14 +144,14 @@ include/varnishtop_synopsis.rst: $(top_builddir)/bin/varnishtop/varnishtop
 BUILT_SOURCES += include/varnishtop_options.rst \
 	 include/varnishtop_synopsis.rst
 
-include/varnishhist_options.rst: $(top_builddir)/bin/varnishhist/varnishhist
-	$(top_builddir)/bin/varnishhist/varnishhist --options > ${@}_
+include/vinylhist_options.rst: $(top_builddir)/bin/vinylhist/vinylhist
+	$(top_builddir)/bin/vinylhist/vinylhist --options > ${@}_
 	mv -f ${@}_ ${@}
-include/varnishhist_synopsis.rst: $(top_builddir)/bin/varnishhist/varnishhist
-	$(top_builddir)/bin/varnishhist/varnishhist --synopsis > ${@}_
+include/vinylhist_synopsis.rst: $(top_builddir)/bin/vinylhist/vinylhist
+	$(top_builddir)/bin/vinylhist/vinylhist --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/varnishhist_options.rst \
-	 include/varnishhist_synopsis.rst
+BUILT_SOURCES += include/vinylhist_options.rst \
+	 include/vinylhist_synopsis.rst
 
 include/varnishstat_options.rst: $(top_builddir)/bin/varnishstat/varnishstat
 	$(top_builddir)/bin/varnishstat/varnishstat --options > ${@}_
