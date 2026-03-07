@@ -1,5 +1,5 @@
 vtest "client.identity is 0.0.0.0 if unset & client addr is UDS"
-# varnishtest "vtc remote.ip, remote.port and remote.path" (a00020)
+# vinyltest "vtc remote.ip, remote.port and remote.path" (a00020)
 
 server s1 {
 	rxreq

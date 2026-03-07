@@ -1418,10 +1418,14 @@ cmd_vinyl(CMD_ARGS)
 	}
 }
 
+#ifdef VTEST_WITH_VTC_VARNISH
+
 void
 cmd_varnish(CMD_ARGS)
 {
 	cmd_vinyl(av, priv, vl);
 }
 
-#endif /* VTEST_WITH_VTC_VARNISH */
+#endif
+
+#endif /* VTEST_WITH_VTC_VINYL */

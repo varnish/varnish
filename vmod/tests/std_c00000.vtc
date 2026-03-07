@@ -89,7 +89,7 @@ vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.foo = std.toupper(resp.http.foo);
 		set resp.http.bar = std.tolower(resp.http.bar);
-		std.syslog(8 + 7, "Somebody runs varnishtest");
+		std.syslog(8 + 7, "Somebody runs vinyltest");
 		call log;
 	}
 }

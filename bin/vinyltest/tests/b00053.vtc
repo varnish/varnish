@@ -37,7 +37,7 @@ vinyl v1 -expect s_sess == 1
 vinyl v1 -expect s_resp_bodybytes == 7
 vinyl v1 -expect s_resp_hdrbytes == 158
 
-# varnishtest "vtc v_* macros when the listen address is UDS" (a00019)
+# vinyltest "vtc v_* macros when the listen address is UDS" (a00019)
 
 vinyl v2 -arg "-a ${tmpdir}/v1.sock -b '${bad_backend}'" -start
 

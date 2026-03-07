@@ -1,4 +1,4 @@
-## This file helps set up a varnishtest execution without a traditional
+## This file helps set up a vinyltest execution without a traditional
 ## pre-defined list of tests. Test cases are expected to be located in a
 ## tests/ directory relative to the Makefile's source directory.
 ##
@@ -8,7 +8,7 @@
 ## The current assumption is that all the tests for the Makefile are VTCs
 ## and may be revisited if needed.
 
-VTC_LOG_COMPILER = $(top_builddir)/bin/varnishtest/varnishtest -v -i
+VTC_LOG_COMPILER = $(top_builddir)/bin/vinyltest/vinyltest -v -i
 TEST_EXTENSIONS = .vtc
 
 check: vtc-check-tests

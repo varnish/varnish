@@ -5,7 +5,7 @@ Copyright 2010-2025 UPLEX - Nils Goroll Systemoptimierung])
 AC_REVISION([$Id$])
 AC_INIT([Varnish], [trunk], [varnish-dev@varnish-cache.org])
 AC_CONFIG_SRCDIR(include/miniobj.h)
-if ! test -f "${srcdir}/bin/varnishtest/vtest2/src/vtc_main.c" ; then
+if ! test -f "${srcdir}/bin/vinyltest/vtest2/src/vtc_main.c" ; then
   AC_MSG_ERROR([vtest2 seems to be missing, use "git clone --recursive" or "git submodule update --init"])
 fi
 AC_CONFIG_HEADERS([config.h])
@@ -896,7 +896,7 @@ AC_DEFINE_UNQUOTED([VCC_CC],"$VCC_CC",[C compiler command line for VCL code])
 AC_DEFINE_UNQUOTED([VCC_WARN],"$VCC_WARN",[C compiler warnings for VCL code])
 
 # Stupid automake needs this
-VTC_TESTS="$(cd $srcdir/bin/varnishtest && echo vtest2/tests/*.vtc tests/*.vtc)"
+VTC_TESTS="$(cd $srcdir/bin/vinyltest && echo vtest2/tests/*.vtc tests/*.vtc)"
 AC_SUBST(VTC_TESTS)
 AM_SUBST_NOTMAKE(VTC_TESTS)
 
@@ -932,7 +932,7 @@ AC_CONFIG_FILES([
     bin/vinylstat/Makefile
     bin/vinyltop/Makefile
     bin/vinylhist/Makefile
-    bin/varnishtest/Makefile
+    bin/vinyltest/Makefile
     bin/vinylncsa/Makefile
     contrib/Makefile
     doc/Makefile

@@ -55,7 +55,7 @@ vinyl v1 -vcl+backend {
 		debug.test_priv_vcl();
 		objx.test_priv_call();
 		objx.test_priv_vcl();
-		std.syslog(8 + 7, "Somebody runs varnishtest");
+		std.syslog(8 + 7, "Somebody runs vinyltest");
 		debug.rot52(resp);
 	}
 } -start

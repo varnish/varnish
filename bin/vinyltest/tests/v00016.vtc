@@ -1,18 +1,18 @@
 vtest "Various VCL compiler coverage tests"
 
-shell "true > ${tmpdir}/_varnishtest_empty_file"
+shell "true > ${tmpdir}/_vinyltest_empty_file"
 
 vinyl v1 -vcl {
 	backend b { .host = "${localhost}"; }
-	include "${tmpdir}/_varnishtest_empty_file" ;
+	include "${tmpdir}/_vinyltest_empty_file" ;
 }
 
 vinyl v1 -errvcl {include <string> not followed by semicolon.} {
 	backend b none;
-	include "${tmpdir}/_varnishtest_empty_file" |
+	include "${tmpdir}/_vinyltest_empty_file" |
 }
 
-shell "rm -f ${tmpdir}/_varnishtest_empty_file"
+shell "rm -f ${tmpdir}/_vinyltest_empty_file"
 
 vinyl v1 -errvcl {include not followed by string constant.} {
 	backend b none;

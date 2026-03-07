@@ -12,8 +12,8 @@ shell {
 	test ! -f "${tmpdir}"/v1/_.secret
 }
 
-# since varnishtest destroys workdir silently before startup
-# this must fool varnishtest to not manage the workdir
+# since vinyltest destroys workdir silently before startup
+# this must fool vinyltest to not manage the workdir
 shell -match _.secret {
 	set -e
 	mkdir -p "${tmpdir}"/v2/

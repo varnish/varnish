@@ -6,7 +6,7 @@ server s1 {
 	rxreq
 	expect req.url == "/hello/world"
 	expect req.http.host == helloworld
-	txresp -hdr "x-powered-by: varnishtest"
+	txresp -hdr "x-powered-by: vinyltest"
 } -start
 
 vinyl v1 -vcl+backend {
@@ -23,7 +23,7 @@ client c1 {
 	txreq -url "/hello" -hdr "host: hello"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.x-powered-by == varnishtest1002
+	expect resp.http.x-powered-by == vinyltest1002
 } -run
 
 # set BODY [+]= STRINGS|BLOB;

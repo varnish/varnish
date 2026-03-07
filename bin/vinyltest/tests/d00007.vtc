@@ -66,7 +66,7 @@ server s1 {
 #
 # we vtc.sleep to make sure that the health check is done and server
 # s1 has accepted again. We would rather want to use barriers, but
-# there is a (yet not understood) bug in varnishtest which prevents
+# there is a (yet not understood) bug in vinyltest which prevents
 # the bX_sock macros from being available in the second varnish
 # instance
 

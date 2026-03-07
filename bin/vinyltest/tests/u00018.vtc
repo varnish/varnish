@@ -2,18 +2,18 @@ vtest "Varnishtest coverage"
 
 # Cover usage processing
 shell -err -expect {usage:} {
-	varnishtest -v -l
+	vinyltest -v -l
 }
 
 # Cover argument processing
 shell {
-	echo 'varnishtest foo' > ${tmpdir}/_.vtc
-	varnishtest -j 4 -n 10 -C -v -b 100k -L -l ${tmpdir}/_.vtc
+	echo 'vtest foo' > ${tmpdir}/_.vtc
+	vinyltest -j 4 -n 10 -C -v -b 100k -L -l ${tmpdir}/_.vtc
 	ls -l ${tmpdir}
 }
 
 shell -err -expect {No such file or directory} {
 	rm -f ${tmpdir}/_.vtc
 	env VTEST_DURATION=15 \
-	    varnishtest -j 4 -n 10 -C -v -b 100k -L -l ${tmpdir}/_.vtc
+	    vinyltest -j 4 -n 10 -C -v -b 100k -L -l ${tmpdir}/_.vtc
 }
