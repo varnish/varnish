@@ -22,8 +22,8 @@ FLOPS='
 	proxy/*.c
 	storage/*.c
 	waiter/*.c
-	../../lib/libvarnish/flint.lnt
-	../../lib/libvarnish/*.c
+	../../lib/libvinyl/flint.lnt
+	../../lib/libvinyl/*.c
 	../../lib/libvcc/flint.lnt
 	../../lib/libvcc/*.c
 	../../vmod/flint.lnt

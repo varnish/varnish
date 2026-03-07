@@ -30,7 +30,7 @@
  *
  */
 
-/* from libvarnish/vtim.c */
+/* from libvinyl/vtim.c */
 extern unsigned VTIM_postel;
 #define VTIM_FORMAT_SIZE 30
 void VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE]);

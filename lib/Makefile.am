@@ -2,7 +2,7 @@
 
 SUBDIRS = \
 	libvsc \
-	libvarnish \
+	libvinyl \
 	libvinylapi \
 	libvcc \
 	libvgz

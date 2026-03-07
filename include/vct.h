@@ -30,7 +30,7 @@
  *
  */
 
-/* from libvarnish/vct.c */
+/* from libvinyl/vct.c */
 
 #include "vas.h"
 

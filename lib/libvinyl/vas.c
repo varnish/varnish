@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This is the default backend function for libvarnish' assert facilities.
+ * This is the default backend function for libvinyl' assert facilities.
  */
 
 #include "config.h"

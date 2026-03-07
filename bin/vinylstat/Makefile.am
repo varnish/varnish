@@ -33,4 +33,4 @@ vinylstat_LDADD = \
 	@CURSES_LIBS@ ${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}
 
 vinylstat_help_gen_LDADD = \
-	$(top_builddir)/lib/libvarnish/libvarnish.la
+	$(top_builddir)/lib/libvinyl/libvinyl.la

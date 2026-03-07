@@ -171,7 +171,7 @@
 // cache_vpi.c
 -esym(552, vpi_wrk_len)
 
-// from libvarnish
+// from libvinyl
 --emacro((835),VBH_NOIDX)
 --emacro((835),O_CLOEXEC)
 

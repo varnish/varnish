@@ -122,7 +122,7 @@ cscope.*out
 /bin/varnishtest/tests/*.log-t
 /include/vrt_test*
 /include/vbm_test
-/lib/libvarnish/*_test
+/lib/libvinyl/*_test
 /lib/libvinylapi/*_test
 
 # GCOV droppings

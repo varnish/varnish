@@ -943,7 +943,7 @@ AC_CONFIG_FILES([
     include/Makefile
     lib/Makefile
     lib/libvsc/Makefile
-    lib/libvarnish/Makefile
+    lib/libvinyl/Makefile
     lib/libvinylapi/Makefile
     lib/libvcc/Makefile
     lib/libvgz/Makefile

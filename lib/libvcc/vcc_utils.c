@@ -110,7 +110,7 @@ vcc_regexp(struct vcc *tl, struct vsb *vgc_name)
 
 /*
  * The IPv6 crew royally screwed up the entire idea behind
- * struct sockaddr, see libvarnish/vsa.c for blow-by-blow account.
+ * struct sockaddr, see libvinyl/vsa.c for blow-by-blow account.
  *
  * There is no sane or even remotely portable way to initialize
  * a sockaddr for random protocols at compile time.

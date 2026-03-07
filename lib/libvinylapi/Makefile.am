@@ -38,7 +38,7 @@ libvinylapi_la_CFLAGS = \
 	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"'
 
 libvinylapi_la_LIBADD = \
-	$(top_builddir)/lib/libvarnish/libvarnish.la \
+	$(top_builddir)/lib/libvinyl/libvinyl.la \
 	${NET_LIBS} ${RT_LIBS} ${LIBM}
 
 if HAVE_LD_VERSION_SCRIPT
@@ -80,7 +80,7 @@ vxp_test_CFLAGS = \
 	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"' \
 	-DVXP_DEBUG
 vxp_test_LDADD = \
-	$(top_builddir)/lib/libvarnish/libvarnish.la \
+	$(top_builddir)/lib/libvinyl/libvinyl.la \
 	${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}
 
 noinst_PROGRAMS += vsl_glob_test

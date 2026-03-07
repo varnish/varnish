@@ -45,7 +45,7 @@
 #include "vas.h"
 
 /*
- * Copied from libvarnish/vfil.c to avoid pulling libvarnish or vfil.c
+ * Copied from libvinyl/vfil.c to avoid pulling libvinyl or vfil.c
  * directly when daemon() is not working/available (i.e. OSX).
  *
  */

@@ -106,7 +106,7 @@ void VCLS_AddFunc(struct VCLS *cs, struct cli_proto *clp);
 int VCLS_Poll(struct VCLS *cs, const struct cli*, int timeout);
 void VCLS_Destroy(struct VCLS **);
 
-/* From libvarnish/cli.c */
+/* From libvinyl/cli.c */
 cli_func_t	VCLS_func_close;
 cli_func_t	VCLS_func_help;
 cli_func_t	VCLS_func_help_json;
