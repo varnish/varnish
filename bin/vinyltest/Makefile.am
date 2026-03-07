@@ -23,7 +23,7 @@ vtest: varnishtest
 	ln -f varnishtest vtest
 
 install-exec-hook:
-	ln -f $(DESTDIR)$(bindir)/vinyltest$(EXEEXT) \
+	ln -f $(DESTDIR)$(bindir)/varnishtest$(EXEEXT) \
 	   $(DESTDIR)$(bindir)/vtest$(EXEEXT)
 
 uninstall-hook:
@@ -74,24 +74,22 @@ varnishtest_SOURCES = \
 		vtc_varnish.c
 
 varnishtest_LDADD = \
-		$(top_builddir)/lib/libvinylapi/libvinylapi.la \
-		$(top_builddir)/lib/libvinyl/libvinyl.la \
+		$(top_builddir)/lib/libvarnishapi/libvarnishapi.la \
+		$(top_builddir)/lib/libvarnish/libvarnish.la \
 		$(top_builddir)/lib/libvgz/libvgz.la \
-		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
-		${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
+		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl
 
 varnishtest_CFLAGS = \
 		-DVTEST_WITH_VTC_LOGEXPECT \
 		-DVTEST_WITH_VTC_VINYL \
 		-DVTEST_WITH_VTC_VARNISH \
 		-DVTEST_WITH_VTC_VSM \
-		-DTOP_BUILDDIR='"${top_builddir}"' \
-		${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
+		-DTOP_BUILDDIR='"${top_builddir}"'
 
 EXTRA_DIST = $(srcdir)/vtest2/src/../tests/*.vtc \
-	$(top_srcdir)/bin/vinyltest/tests/*.vtc \
-	$(top_srcdir)/bin/vinyltest/tests/common.pem \
-	$(top_srcdir)/bin/vinyltest/tests/README \
+	$(top_srcdir)/bin/varnishtest/tests/*.vtc \
+	$(top_srcdir)/bin/varnishtest/tests/common.pem \
+	$(top_srcdir)/bin/varnishtest/tests/README \
 	vtest2/src/gensequences \
 	vtest2/src/sequences \
 	vtest2/src/teken.3 \
