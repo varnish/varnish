@@ -1,4 +1,4 @@
-vtest "varnishstat coverage"
+vtest "vinylstat coverage"
 
 
 server s1 {
@@ -7,7 +7,7 @@ server s1 {
 } -start
 
 vinyl v1 -vcl+backend {} -start
-process p1 -dump {varnishstat -n ${v1_name}} -start
+process p1 -dump {vinylstat -n ${v1_name}} -start
 delay 2
 
 client c1 -repeat 11 {

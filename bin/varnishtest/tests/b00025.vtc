@@ -110,4 +110,4 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-shell -match "d99" "varnishstat -1 -n ${v1_name}"
+shell -match "d99" "vinylstat -1 -n ${v1_name}"

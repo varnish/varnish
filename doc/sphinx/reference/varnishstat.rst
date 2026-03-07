@@ -20,7 +20,7 @@ Varnish Cache statistics
 SYNOPSIS
 ========
 
-.. include:: ../include/varnishstat_synopsis.rst
+.. include:: ../include/vinylstat_synopsis.rst
 varnishstat |synopsis|
 
 DESCRIPTION
@@ -30,7 +30,7 @@ The varnishstat utility displays statistics from a running varnishd(1) instance.
 
 The following options are available:
 
-.. include:: ../include/varnishstat_options.rst
+.. include:: ../include/vinylstat_options.rst
 
 CURSES MODE
 ===========
@@ -78,7 +78,7 @@ Avg_1000
 Key bindings
 ------------
 
-.. include:: ../include/varnishstat_bindings.rst
+.. include:: ../include/vinylstat_bindings.rst
 
 OUTPUTS
 =======

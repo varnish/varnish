@@ -48,7 +48,7 @@
 #include "vtim.h"
 #include "vapi/vsig.h"
 
-#include "varnishstat.h"
+#include "vinylstat.h"
 #include "vcurses.h"
 
 #define LINES_STATUS		3
@@ -69,7 +69,7 @@
 enum kb_e {
 #define BINDING(name, desc) KB_ ## name,
 #define BINDING_SIG
-#include "varnishstat_bindings.h"
+#include "vinylstat_bindings.h"
 };
 
 struct ma {
@@ -1098,7 +1098,7 @@ handle_keypress(struct vsc *vsc, int ch)
 		kb = KB_ ## name;	\
 		break;
 #define BINDING_SIG
-#include "varnishstat_bindings.h"
+#include "vinylstat_bindings.h"
 	default:
 		return;
 	}

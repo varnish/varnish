@@ -15,7 +15,7 @@ dist_man_MANS = \
 	vinylhist.1 \
 	vinyllog.1 \
 	vinylncsa.1 \
-	varnishstat.1 \
+	vinylstat.1 \
 	varnishtest.1 \
 	vtc.7 \
 	varnishtop.1 \
@@ -95,10 +95,10 @@ vinyllog.1: \
 	$(top_builddir)/doc/sphinx/include/vinyllog_synopsis.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishlog.rst $@
 
-varnishstat.1: $(top_builddir)/doc/sphinx/reference/varnishstat.rst \
-	$(top_builddir)/doc/sphinx/include/varnishstat_options.rst \
-	$(top_builddir)/doc/sphinx/include/varnishstat_synopsis.rst \
-	$(top_builddir)/doc/sphinx/include/varnishstat_bindings.rst
+vinylstat.1: $(top_builddir)/doc/sphinx/reference/varnishstat.rst \
+	$(top_builddir)/doc/sphinx/include/vinylstat_options.rst \
+	$(top_builddir)/doc/sphinx/include/vinylstat_synopsis.rst \
+	$(top_builddir)/doc/sphinx/include/vinylstat_bindings.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishstat.rst $@
 
 varnishtest.1: $(top_builddir)/doc/sphinx/reference/varnishtest.rst

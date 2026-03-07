@@ -44,14 +44,14 @@
 #include <math.h>
 
 #define VOPT_DEFINITION
-#define VOPT_INC "varnishstat_options.h"
+#define VOPT_INC "vinylstat_options.h"
 
 #include "vapi/voptget.h"
 #include "vapi/vsl.h"
 #include "vdef.h"
 #include "vut.h"
 
-#include "varnishstat.h"
+#include "vinylstat.h"
 
 static struct VUT *vut;
 int has_f = 0;
@@ -88,9 +88,9 @@ do_xml(struct vsm *vsm, struct vsc *vsc)
 	printf("<?xml version=\"1.0\"?>\n");
 	now = time(NULL);
 	(void)strftime(time_stamp, 20, "%Y-%m-%dT%H:%M:%S", localtime(&now));
-	printf("<varnishstat timestamp=\"%s\">\n", time_stamp);
+	printf("<vinylstat timestamp=\"%s\">\n", time_stamp);
 	(void)VSC_Iter(vsc, vsm, do_xml_cb, NULL);
-	printf("</varnishstat>\n");
+	printf("</vinylstat>\n");
 }
 
 
@@ -268,7 +268,7 @@ key_bindings(void)
 	printf("<%s>" next, name);
 #define BINDING(name, desc)		\
 	printf("\n%s\n\n", desc);
-#include "varnishstat_bindings.h"
+#include "vinylstat_bindings.h"
 	return (0);
 }
 
@@ -362,7 +362,7 @@ main(int argc, char * const *argv)
 	else if (f_list)
 		list_fields(vd, vsc);
 	else
-		WRONG("undefined varnishstat mode");
+		WRONG("undefined vinylstat mode");
 
 	exit(0);
 }

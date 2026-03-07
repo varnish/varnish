@@ -1,4 +1,4 @@
-vtest "varnishstat -j"
+vtest "vinylstat -j"
 
 feature cmd "python3 -c 'import json'"
 
@@ -16,6 +16,6 @@ client c1 -repeat 5 {
 
 delay 1
 
-shell { varnishstat -n ${v1_name}  -j }
-shell -match "^1$" { varnishstat -n ${v1_name} -j | python3 -c 'import sys, json; print(json.load(sys.stdin)["version"])' }
-shell -match "^5$" { varnishstat -n ${v1_name} -j | python3 -c 'import sys, json; print(json.load(sys.stdin)["counters"]["MAIN.client_req"]["value"])' }
+shell { vinylstat -n ${v1_name}  -j }
+shell -match "^1$" { vinylstat -n ${v1_name} -j | python3 -c 'import sys, json; print(json.load(sys.stdin)["version"])' }
+shell -match "^5$" { vinylstat -n ${v1_name} -j | python3 -c 'import sys, json; print(json.load(sys.stdin)["counters"]["MAIN.client_req"]["value"])' }

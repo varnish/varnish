@@ -153,18 +153,18 @@ include/vinylhist_synopsis.rst: $(top_builddir)/bin/vinylhist/vinylhist
 BUILT_SOURCES += include/vinylhist_options.rst \
 	 include/vinylhist_synopsis.rst
 
-include/varnishstat_options.rst: $(top_builddir)/bin/varnishstat/varnishstat
-	$(top_builddir)/bin/varnishstat/varnishstat --options > ${@}_
+include/vinylstat_options.rst: $(top_builddir)/bin/vinylstat/vinylstat
+	$(top_builddir)/bin/vinylstat/vinylstat --options > ${@}_
 	mv -f ${@}_ ${@}
-include/varnishstat_synopsis.rst: $(top_builddir)/bin/varnishstat/varnishstat
-	$(top_builddir)/bin/varnishstat/varnishstat --synopsis > ${@}_
+include/vinylstat_synopsis.rst: $(top_builddir)/bin/vinylstat/vinylstat
+	$(top_builddir)/bin/vinylstat/vinylstat --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-include/varnishstat_bindings.rst: $(top_builddir)/bin/varnishstat/varnishstat
-	$(top_builddir)/bin/varnishstat/varnishstat --bindings > ${@}_
+include/vinylstat_bindings.rst: $(top_builddir)/bin/vinylstat/vinylstat
+	$(top_builddir)/bin/vinylstat/vinylstat --bindings > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/varnishstat_options.rst \
-	 include/varnishstat_synopsis.rst \
-	 include/varnishstat_bindings.rst
+BUILT_SOURCES += include/vinylstat_options.rst \
+	 include/vinylstat_synopsis.rst \
+	 include/vinylstat_bindings.rst
 
 include/vsl-tags.rst: $(top_builddir)/lib/libvarnishapi/vsl2rst
 	$(top_builddir)/lib/libvarnishapi/vsl2rst > ${@}_

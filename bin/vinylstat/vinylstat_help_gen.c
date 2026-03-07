@@ -39,7 +39,7 @@
 static const char help[] = "\n\n"
 #define BINDING_KEY(key, name, next) "<" name ">" next
 #define BINDING(name, desc) "\n\n" desc "\n\n"
-#include "varnishstat_bindings.h"
+#include "vinylstat_bindings.h"
 ;
 
 int
@@ -55,12 +55,12 @@ main(void)
 	    "/*\n"
 	    " * NB:  This file is machine generated, DO NOT EDIT!\n"
 	    " *\n"
-	    " * Edit varnishstat_bindings.h and run make instead\n"
+	    " * Edit vinylstat_bindings.h and run make instead\n"
 	    " */\n"
 	    "\n"
 	    "#include <stddef.h>\n"
 	    "#include \"vdef.h\"\n"
-	    "#include \"varnishstat.h\"\n"
+	    "#include \"vinylstat.h\"\n"
 	    "\n"
 	    "const char *const bindings_help[] = {\n");
 
