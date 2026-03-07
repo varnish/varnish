@@ -33,7 +33,7 @@
 #ifndef VIN_H_INCLUDED
 #define VIN_H_INCLUDED
 
-/* These functions live in both libvarnish and libvarnishapi */
+/* These functions live in both libvarnish and libvinylapi */
 char *VIN_n_Arg(const char *n_arg);
 void VIN_DumpDefaults(void);
 #endif

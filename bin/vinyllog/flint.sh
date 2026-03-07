@@ -7,6 +7,6 @@
 FLOPS='
 	-DVARNISH_STATE_DIR=\"foo\"
 	*.c
-	../../lib/libvarnishapi/flint.lnt
-	../../lib/libvarnishapi/*.c
+	../../lib/libvinylapi/flint.lnt
+	../../lib/libvinylapi/*.c
 ' ../../tools/flint_skel.sh $*

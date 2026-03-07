@@ -61,7 +61,7 @@ enum VCLI_status_e {
 #define CLI_AUTH_RESPONSE_LEN		64	/* 64 hex + NUL */
 
 #if !defined(VCLI_PROTOCOL_ONLY)
-/* Convenience functions exported in libvarnishapi */
+/* Convenience functions exported in libvinylapi */
 int VCLI_WriteResult(int fd, unsigned status, const char *result);
 int VCLI_ReadResult(int fd, unsigned *status, char **ptr, double tmo);
 void VCLI_AuthResponse(int S_fd, const char *challenge,

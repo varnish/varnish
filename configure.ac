@@ -944,7 +944,7 @@ AC_CONFIG_FILES([
     lib/Makefile
     lib/libvsc/Makefile
     lib/libvarnish/Makefile
-    lib/libvarnishapi/Makefile
+    lib/libvinylapi/Makefile
     lib/libvcc/Makefile
     lib/libvgz/Makefile
     man/Makefile

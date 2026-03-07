@@ -6,11 +6,11 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include
 
-lib_LTLIBRARIES = libvarnishapi.la
+lib_LTLIBRARIES = libvinylapi.la
 
-libvarnishapi_la_LDFLAGS = $(AM_LDFLAGS) -version-info 4:0:1
+libvinylapi_la_LDFLAGS = $(AM_LDFLAGS) -version-info 4:0:1
 
-libvarnishapi_la_SOURCES = \
+libvinylapi_la_SOURCES = \
 	../../include/vcs_version.h \
 	vsl_api.h \
 	vxp.h \
@@ -28,23 +28,23 @@ libvarnishapi_la_SOURCES = \
 	vxp_fixed_token.c \
 	vxp_lexer.c \
 	vxp_parse.c \
-	libvarnishapi.map
+	libvinylapi.map
 
 if ! HAVE_DAEMON
-libvarnishapi_la_SOURCES += daemon.c
+libvinylapi_la_SOURCES += daemon.c
 endif
 
-libvarnishapi_la_CFLAGS = \
+libvinylapi_la_CFLAGS = \
 	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"'
 
-libvarnishapi_la_LIBADD = \
+libvinylapi_la_LIBADD = \
 	$(top_builddir)/lib/libvarnish/libvarnish.la \
 	${NET_LIBS} ${RT_LIBS} ${LIBM}
 
 if HAVE_LD_VERSION_SCRIPT
-libvarnishapi_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libvarnishapi.map
+libvinylapi_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libvinylapi.map
 else
-libvarnishapi_la_LDFLAGS += -export-symbols-regex '^V'
+libvinylapi_la_LDFLAGS += -export-symbols-regex '^V'
 endif
 
 EXTRA_DIST = \
@@ -74,7 +74,7 @@ vxp_tokens.h: \
 noinst_PROGRAMS += vxp_test
 
 vxp_test_SOURCES = \
-	$(libvarnishapi_la_SOURCES) \
+	$(libvinylapi_la_SOURCES) \
 	vxp_test.c
 vxp_test_CFLAGS = \
 	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"' \
@@ -86,7 +86,7 @@ vxp_test_LDADD = \
 noinst_PROGRAMS += vsl_glob_test
 
 vsl_glob_test_SOURCES = vsl_glob_test.c
-vsl_glob_test_LDADD = libvarnishapi.la
+vsl_glob_test_LDADD = libvinylapi.la
 
 dist_noinst_SCRIPTS = vsl_glob_test_coverage.sh vxp_test_coverage.sh
 

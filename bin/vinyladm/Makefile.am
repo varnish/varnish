@@ -11,6 +11,6 @@ vinyladm_SOURCES = vinyladm.c
 vinyladm_CFLAGS = @LIBEDIT_CFLAGS@
 
 vinyladm_LDADD = \
-	$(top_builddir)/lib/libvarnishapi/libvarnishapi.la \
+	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
 	$(top_builddir)/lib/libvarnish/libvarnish.la \
 	${PTHREAD_LIBS} ${RT_LIBS} ${NET_LIBS} @LIBEDIT_LIBS@ ${LIBM}

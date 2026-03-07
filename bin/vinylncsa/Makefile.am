@@ -11,5 +11,5 @@ vinylncsa_SOURCES = \
 	vinylncsa_options.h
 
 vinylncsa_LDADD = \
-	$(top_builddir)/lib/libvarnishapi/libvarnishapi.la \
+	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
 	${RT_LIBS} ${LIBM}

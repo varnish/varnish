@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * NB: also used in libvarnishapi
+ * NB: also used in libvinylapi
  */
 
 #include "config.h"

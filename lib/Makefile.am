@@ -3,6 +3,6 @@
 SUBDIRS = \
 	libvsc \
 	libvarnish \
-	libvarnishapi \
+	libvinylapi \
 	libvcc \
 	libvgz

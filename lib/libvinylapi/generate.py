@@ -156,7 +156,7 @@ def file_header(fo):
     fo.write("""/*
  * NB:  This file is machine generated, DO NOT EDIT!
  *
- * Edit and run lib/libvarnishapi/generate.py instead
+ * Edit and run lib/libvinylapi/generate.py instead
  */
 """)
 
@@ -164,7 +164,7 @@ def file_header(fo):
 
 polish_tokens(tokens)
 
-fo = open(buildroot + "/lib/libvarnishapi/vxp_tokens.h", "w")
+fo = open(buildroot + "/lib/libvinylapi/vxp_tokens.h", "w")
 
 file_header(fo)
 
@@ -182,7 +182,7 @@ fo.close()
 
 #######################################################################
 
-fo = open(buildroot + "/lib/libvarnishapi/vxp_fixed_token.c", "w")
+fo = open(buildroot + "/lib/libvinylapi/vxp_fixed_token.c", "w")
 
 file_header(fo)
 fo.write("""

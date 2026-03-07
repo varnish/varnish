@@ -167,8 +167,8 @@ BUILT_SOURCES += include/vinylstat_options.rst \
 	 include/vinylstat_synopsis.rst \
 	 include/vinylstat_bindings.rst
 
-include/vsl-tags.rst: $(top_builddir)/lib/libvarnishapi/vsl2rst
-	$(top_builddir)/lib/libvarnishapi/vsl2rst > ${@}_
+include/vsl-tags.rst: $(top_builddir)/lib/libvinylapi/vsl2rst
+	$(top_builddir)/lib/libvinylapi/vsl2rst > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES += include/vsl-tags.rst
 

@@ -46,13 +46,13 @@ cscope.*out
 .dirstamp
 
 # Default vcl made from bin/varnishd/default.vcl
-/bin/varnishd/builtin_vcl.c
+/bin/vinyld/builtin_vcl.c
 /etc/builtin.vcl
 
 # Various auto-generated code snippets
-/bin/varnishd/vhp_hufdec.h
-/bin/varnishd/vhp_gen_hufdec
-/bin/varnishtest/vtc_h2_dectbl.h
+/bin/vinyld/vhp_hufdec.h
+/bin/vinyld/vhp_gen_hufdec
+/bin/vinyltest/vtc_h2_dectbl.h
 /include/vcl.h
 /include/vrt_obj.h
 /include/vmod_abi.h
@@ -64,9 +64,9 @@ cscope.*out
 /lib/libvcc/vcc_obj.c
 /lib/libvcc/vcc_token_defs.h
 /lib/libvcc/vcc_types.h
-/lib/libvarnishapi/vsl2rst
-/lib/libvarnishapi/vxp_fixed_token.c
-/lib/libvarnishapi/vxp_tokens.h
+/lib/libvinylapi/vsl2rst
+/lib/libvinylapi/vxp_fixed_token.c
+/lib/libvinylapi/vxp_tokens.h
 
 # Stats
 /lib/libvsc/VSC_*.c
@@ -89,19 +89,19 @@ cscope.*out
 /man/*.3
 /man/*.7
 /doc/sphinx/include
-/bin/varnishadm/varnishadm
-/bin/varnishd/varnishd
-/bin/varnishhist/varnishhist
-/bin/varnishlog/varnishlog
-/bin/varnishncsa/varnishncsa
-/bin/varnishstat/varnishstat
-/bin/varnishstat/varnishstat_help_gen
-/bin/varnishstat/varnishstat_curses_help.c
+/bin/vinyladm/vinyladm
+/bin/vinyld/vinyld
+/bin/vinylhist/vinylhist
+/bin/vinyllog/vinyllog
+/bin/vinylncsa/vinylncsa
+/bin/vinylstat/vinylstat
+/bin/vinylstat/vinylstat_help_gen
+/bin/vinylstat/vinylstat_curses_help.c
 /bin/varnishstat/vsc2rst
-/bin/varnishtest/teken_state.h
-/bin/varnishtest/varnishtest
-/bin/varnishtest/vtest
-/bin/varnishtop/varnishtop
+/bin/vinyltest/teken_state.h
+/bin/vinyltest/vinyltest
+/bin/vinyltest/vtest
+/bin/vinyltop/vinyltop
 
 # Doc-stuff generated from xml
 /doc/*.html
@@ -118,12 +118,12 @@ cscope.*out
 /nbproject/private/
 
 # Test droppings
-/bin/varnishd/*_test
+/bin/vinyld/*_test
 /bin/varnishtest/tests/*.log-t
 /include/vrt_test*
 /include/vbm_test
 /lib/libvarnish/*_test
-/lib/libvarnishapi/*_test
+/lib/libvinylapi/*_test
 
 # GCOV droppings
 *.gcda
@@ -140,7 +140,7 @@ cscope.*out
 /tools/vt_key.pub
 
 # fuzzers
-/bin/varnishd/esi_parse_fuzzer
+/bin/vinyld/esi_parse_fuzzer
 
 # Coverity output
 /cov-int

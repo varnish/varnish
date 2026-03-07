@@ -30,7 +30,7 @@
  *
  * Varnish process internal CLI stuff.
  *
- * XXX: at a latter date we may want to move some to cli.h/libvarnishapi
+ * XXX: at a latter date we may want to move some to cli.h/libvinylapi
  */
 
 #include "vcli.h"

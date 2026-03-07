@@ -9,6 +9,6 @@ FLOPS='
 	varnishstat_curses.c
 	varnishstat_curses_help.c
 
-	../../lib/libvarnishapi/flint.lnt
-	../../lib/libvarnishapi/*.c
+	../../lib/libvinylapi/flint.lnt
+	../../lib/libvinylapi/*.c
 ' ../../tools/flint_skel.sh $*

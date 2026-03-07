@@ -74,7 +74,7 @@ vinyltest_SOURCES = \
 		vtc_vinyl.c
 
 vinyltest_LDADD = \
-		$(top_builddir)/lib/libvarnishapi/libvarnishapi.la \
+		$(top_builddir)/lib/libvinylapi/libvinylapi.la \
 		$(top_builddir)/lib/libvarnish/libvarnish.la \
 		$(top_builddir)/lib/libvgz/libvgz.la \
 		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \

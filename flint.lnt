@@ -269,7 +269,7 @@
 -emacro(446, TOSTRAND, TOSTRANDS)	// side effect in initializer
 
 ///////////////////////////////////////////////////////////////////////
-// <libvarnishapi>
+// <libvinylapi>
 
 -esym(765, vsl_vbm_bitclr)
 -esym(759, vsl_vbm_bitclr)
