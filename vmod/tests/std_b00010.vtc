@@ -1,11 +1,11 @@
-varnishtest "Test std.substr"
+vtest "Test std.substr"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

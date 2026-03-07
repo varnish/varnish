@@ -1,4 +1,4 @@
-varnishtest "#1672: Bogus 304 backend reply"
+vtest "#1672: Bogus 304 backend reply"
 
 # First serve a non-200 status object to the cache,
 # then revalidate it unconditionally
@@ -11,7 +11,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.1s;
 		set beresp.grace = 0s;

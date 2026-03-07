@@ -1,4 +1,4 @@
-varnishtest "Test Vary with gzip/gunzip"
+vtest "Test Vary with gzip/gunzip"
 
 server s1 {
 	rxreq
@@ -34,7 +34,7 @@ server s1 {
 	txresp -hdr "Vary: fooqux, Accept-Encoding" -gzipbody "fooqux"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url ~ "/baz") {
 			set beresp.do_gzip = true;

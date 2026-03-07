@@ -1,12 +1,12 @@
-varnishtest "h2 ReqAcct"
+vtest "h2 ReqAcct"
 
 server s1 {
 	rxreq
 	txresp -noserver -bodylen 12345
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		# make ReqAcct deterministic
 		unset resp.http.via;

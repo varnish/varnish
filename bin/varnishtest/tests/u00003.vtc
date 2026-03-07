@@ -1,11 +1,11 @@
-varnishtest "varnishncsa coverage"
+vtest "varnishncsa coverage"
 
 server s1 -repeat 2 {
 	rxreq
 	txresp -bodylen 100
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -180,7 +180,7 @@ client c3 {
 	expect resp.status == 400
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 shell -expect ${localhost} {
 	varnishncsa -n ${v1_name} -d -q 'RespStatus == 400'

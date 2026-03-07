@@ -1,4 +1,4 @@
-varnishtest "Regression test for #255: Segfault on header token separation"
+vtest "Regression test for #255: Segfault on header token separation"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	    -body "012345\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.backend = s1;
 	}

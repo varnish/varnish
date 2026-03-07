@@ -1,6 +1,6 @@
-varnishtest "Test connection error on pipe"
+vtest "Test connection error on pipe"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
        backend default { .host = "${bad_backend}"; }
        sub vcl_recv {
 		return (pipe);
@@ -12,4 +12,4 @@ client c1 {
        expect_close
 } -run
 
-varnish v1 -expect sc_tx_error == 1
+vinyl v1 -expect sc_tx_error == 1

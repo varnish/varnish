@@ -1,4 +1,4 @@
-varnishtest "H2 POST"
+vtest "H2 POST"
 
 barrier b2 sock 2
 barrier b3 sock 2
@@ -13,7 +13,7 @@ server s1 {
 	txresp -noserver -hdr "Accept-ranges: bytes"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.url == "/a") {
@@ -28,7 +28,7 @@ varnish v1 -vcl+backend {
 		unset resp.http.via;
 	}
 } -cliok "param.set feature +http2" -start
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 logexpect l1 -v v1 -g raw {
 	expect	* 1001 ReqAcct	"160 7 167 78 16 94"

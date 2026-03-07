@@ -1,9 +1,9 @@
-varnishtest "#1287 - check NULL as first pointer to VRT_synth_page"
+vtest "#1287 - check NULL as first pointer to VRT_synth_page"
 
 server s1 {
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (synth(200, "OK"));
 	}

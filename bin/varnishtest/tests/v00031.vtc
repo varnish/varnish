@@ -1,35 +1,35 @@
-varnishtest "param vcc_feature::err_unref"
+vtest "param vcc_feature::err_unref"
 
-varnish v1 -errvcl {Unused backend c, defined:} {
+vinyl v1 -errvcl {Unused backend c, defined:} {
 	backend b { .host = "${localhost}"; }
 	backend c { .host = "${localhost}"; }
 }
 
-varnish v1 -cliok "param.set vcc_feature -err_unref"
+vinyl v1 -cliok "param.set vcc_feature -err_unref"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b { .host = "${localhost}"; }
 	backend c { .host = "${localhost}"; }
 }
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend default none;
 	probe p { }
 	sub sb { }
 }
 
-varnish v1 -cliok "param.set vcc_feature +err_unref"
+vinyl v1 -cliok "param.set vcc_feature +err_unref"
 
-varnish v1 -errvcl {Unused backend c, defined:} {
+vinyl v1 -errvcl {Unused backend c, defined:} {
 	backend b { .host = "${localhost}"; }
 	backend c { .host = "${localhost}"; }
 }
 
-varnish v1 -errvcl {Unused probe p, defined:} {
+vinyl v1 -errvcl {Unused probe p, defined:} {
 	backend default none;
 	probe p { }
 }
 
-varnish v1 -errvcl {Unused sub sb, defined:} {
+vinyl v1 -errvcl {Unused sub sb, defined:} {
 	sub sb { }
 }

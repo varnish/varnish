@@ -1,4 +1,4 @@
-varnishtest "haproxy tcp-mode, tcp, send-proxy-v2, client ip and acl"
+vtest "haproxy tcp-mode, tcp, send-proxy-v2, client ip and acl"
 
 # same as h00006.vtc, but using tcp for haproxy->varnish
 
@@ -12,7 +12,7 @@ server s1 {
     shutdown
 } -start
 
-varnish v1 -proto "PROXY" -vcl+backend {} -start
+vinyl v1 -proto "PROXY" -vcl+backend {} -start
 
 haproxy h1 -D -conf {
     defaults
@@ -26,7 +26,7 @@ haproxy h1 -D -conf {
 	server v1 ${v1_sock} send-proxy-v2
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	acl localhost -fold {
@@ -60,6 +60,6 @@ client c1 -connect ${h1_fe1_sock} {
     expect resp.body == "s1 >>> Hello world!"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 haproxy h1 -wait

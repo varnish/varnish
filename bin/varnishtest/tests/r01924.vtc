@@ -1,11 +1,11 @@
-varnishtest "Test std.{log,syslog} from vcl_{init,fini}"
+vtest "Test std.{log,syslog} from vcl_{init,fini}"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_init {
@@ -27,8 +27,8 @@ logexpect l1 -v v1 -g raw -d 1 {
 	expect 0 =    VCL_Log		{^fini one two}
 } -start
 
-varnish v1 -vcl+backend { }
+vinyl v1 -vcl+backend { }
 
-varnish v1 -cliok "vcl.discard vcl1"
+vinyl v1 -cliok "vcl.discard vcl1"
 
 logexpect l1 -wait

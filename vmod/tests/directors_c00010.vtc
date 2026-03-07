@@ -1,4 +1,4 @@
-varnishtest "shard director reconfiguration in init"
+vtest "shard director reconfiguration in init"
 
 server s1 {
 } -start
@@ -11,7 +11,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 
@@ -285,4 +285,4 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -cliexpect {(?s)Ident.*s3 +1 +h.*s3 +2 +h.*s3 +4a +h.*s3 +5a +h.*s3 +6 +h.*s3 +7 +h} "backend.list -p"
+vinyl v1 -cliexpect {(?s)Ident.*s3 +1 +h.*s3 +2 +h.*s3 +4a +h.*s3 +5a +h.*s3 +6 +h.*s3 +7 +h} "backend.list -p"

@@ -818,7 +818,7 @@ VSM_Attach(struct vsm *vd, int progress)
 			if (progress >= 0 && n > 4)
 				(void)write(progress, "\n", 1);
 			return (vsm_diag(vd,
-			    "Could not get hold of varnishd, is it running?"));
+			    "Could not get hold of vinyld, is it running?"));
 		}
 		if (progress >= 0 && !(++n % 4))
 			(void)write(progress, ".", 1);

@@ -1,11 +1,11 @@
-varnishtest "Test boolean parameters work without stdbool.h in vgc.c"
+vtest "Test boolean parameters work without stdbool.h in vgc.c"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {

@@ -1,4 +1,4 @@
-varnishtest "Varnishtest coverage"
+vtest "Varnishtest coverage"
 
 # Cover usage processing
 shell -err -expect {usage:} {

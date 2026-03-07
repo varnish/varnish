@@ -1,4 +1,4 @@
-varnishtest "directors_c00007.vtc but setting backend in fetch"
+vtest "directors_c00007.vtc but setting backend in fetch"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 	import blob;
 

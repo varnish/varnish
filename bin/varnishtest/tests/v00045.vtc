@@ -1,9 +1,9 @@
-varnishtest "Hold a reference to a VCL after a COLD event"
+vtest "Hold a reference to a VCL after a COLD event"
 
 server s1 -start
 
 # Load and use a VCL that will hold a reference
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 	sub vcl_init {
 		debug.vcl_discard_delay(3s);
@@ -11,23 +11,23 @@ varnish v1 -vcl+backend {
 } -start
 
 # Load and use a new VCL, freeze the first
-varnish v1 -vcl+backend {}
-varnish v1 -cliok "vcl.state vcl1 cold"
+vinyl v1 -vcl+backend {}
+vinyl v1 -cliok "vcl.state vcl1 cold"
 
 # We should now see it as cooling
 delay 1
 
-varnish v1 -cliexpect "available   cold   cooling   0   vcl1" vcl.list
-varnish v1 -clijson "vcl.list -j"
+vinyl v1 -cliexpect "available   cold   cooling   0   vcl1" vcl.list
+vinyl v1 -clijson "vcl.list -j"
 
 # It can't be warmed up yet
 delay 1
-varnish v1 -cliexpect "vmod-debug ref on vcl1" "vcl.state vcl1 warm"
+vinyl v1 -cliexpect "vmod-debug ref on vcl1" "vcl.state vcl1 warm"
 
 # It will eventually cool down
 delay 2
-varnish v1 -cliexpect "available   cold   cold   0   vcl1" vcl.list
-varnish v1 -clijson "vcl.list -j"
+vinyl v1 -cliexpect "available   cold   cold   0   vcl1" vcl.list
+vinyl v1 -clijson "vcl.list -j"
 
 # At this point it becomes possible to warm up again
-varnish v1 -cliok "vcl.state vcl1 warm"
+vinyl v1 -cliok "vcl.state vcl1 warm"

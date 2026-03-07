@@ -1,4 +1,4 @@
-varnishtest "VCL/VRT: status >1000 handling"
+vtest "VCL/VRT: status >1000 handling"
 
 
 server s1 {
@@ -15,7 +15,7 @@ server s1 -start
 # - internal status code visible ?
 # - reason phrase set for status %1000 ?
 # - status < 1000 stored/delivered
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	probe sick_probe {

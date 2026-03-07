@@ -1,4 +1,4 @@
-varnishtest "Test dynamic backends"
+vtest "Test dynamic backends"
 
 # the use case for via-proxy is to have a(n ha)proxy make a(n ssl)
 # connection on our behalf. For the purpose of testing, we use another
@@ -6,7 +6,7 @@ varnishtest "Test dynamic backends"
 # not use any prior information for the actual backend connection -
 # just the information from the proxy protocol
 
-varnish v2 -proto PROXY -vcl {
+vinyl v2 -proto PROXY -vcl {
 	import debug;
 	import std;
 	import proxy;
@@ -70,7 +70,7 @@ server s1 {
 # the bX_sock macros from being available in the second varnish
 # instance
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	import vtc;
 
@@ -117,7 +117,7 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -expect MAIN.n_backend == 3
+vinyl v1 -expect MAIN.n_backend == 3
 
 client c1 {
 	txreq -url /1

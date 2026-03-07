@@ -1,11 +1,11 @@
-varnishtest "http header collision -/_"
+vtest "http header collision -/_"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		if (req.http.foo_bar == req.http.foo-bar) {
 			set resp.http.foo = "xxx";

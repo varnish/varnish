@@ -1,4 +1,4 @@
-varnishtest "subset headers in packed format"
+vtest "subset headers in packed format"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp	-hdr "Foo:bax"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_hit {
 		if (obj.http.foo == "bar") {
 			return (pass);

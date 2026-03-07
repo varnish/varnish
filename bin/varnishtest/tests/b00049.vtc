@@ -1,11 +1,11 @@
-varnishtest "RFC 9110 compliance"
+vtest "RFC 9110 compliance"
 
 server s1 {
 	rxreq
 	txresp -gzipbody "FOOOOOOBAR"
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 logexpect l1 -v v1 -g raw {
 	expect * 1004	BogoHeader	"Illegal char 0x20 in header name"

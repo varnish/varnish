@@ -1,11 +1,11 @@
-varnishtest "Test varnishadm and the Telnet CLI"
+vtest "Test varnishadm and the Telnet CLI"
 
-varnish v1 -vcl {backend foo { .host = "${localhost}"; } } -start
+vinyl v1 -vcl {backend foo { .host = "${localhost}"; } } -start
 
 shell -err -expect {Usage: varnishadm} \
 	"varnishadm -7"
 
-shell -err -expect {Could not get hold of varnishd, is it running?} \
+shell -err -expect {Could not get hold of vinyld, is it running?} \
 	"varnishadm -n ${v1_name}/nonexistent"
 
 shell -err -expect {Connection failed} \

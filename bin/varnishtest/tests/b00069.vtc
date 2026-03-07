@@ -1,4 +1,4 @@
-varnishtest "HTTP/1 parsing checks"
+vtest "HTTP/1 parsing checks"
 
 # Some tricky requests that have been known to cause parsing errors in the past.
 
@@ -7,7 +7,7 @@ server s1 -repeat 3 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
 # This test checks a bug that was dependent on the contents of the buffer left behind
 # by the previous request

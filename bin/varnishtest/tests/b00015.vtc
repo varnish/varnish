@@ -1,10 +1,10 @@
-varnishtest "Check synthetic error page caching"
+vtest "Check synthetic error page caching"
 
 # First test that an internally generated error is not cached
 
-varnish v1 -cliok "param.set backend_remote_error_holddown 60"
+vinyl v1 -cliok "param.set backend_remote_error_holddown 60"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend foo {
 		.host = "${bad_backend}";
 	}
@@ -22,19 +22,19 @@ client c1 {
 	expect resp.http.X-varnish == "1003"
 } -run
 
-varnish v1 -expect VBE.vcl1.foo.fail_econnrefused > 0
-varnish v1 -expect VBE.vcl1.foo.helddown > 0
+vinyl v1 -expect VBE.vcl1.foo.fail_econnrefused > 0
+vinyl v1 -expect VBE.vcl1.foo.helddown > 0
 
 # Then check that a cacheable error from the backend is
 
-varnish v1 -cliok "ban req.url ~ .*"
+vinyl v1 -cliok "ban req.url ~ .*"
 
 server s1 {
 	rxreq
 	txresp -status 301
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.ttl = beresp.ttl;
 		set beresp.http.uncacheable = beresp.uncacheable;
@@ -62,7 +62,7 @@ server s1 {
 	txresp -status 502
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.status == 502) {
 			set beresp.ttl = 10m;

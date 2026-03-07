@@ -1,4 +1,4 @@
-varnishtest "H2 on waiting list"
+vtest "H2 on waiting list"
 
 barrier b1 cond 2
 
@@ -9,9 +9,9 @@ server s1 {
 	txresp -hdr "Content-Type: text/plain" -body response
 } -start
 
-varnish v1 -vcl+backend {} -start
-varnish v1 -cliok {param.set feature +http2}
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -vcl+backend {} -start
+vinyl v1 -cliok {param.set feature +http2}
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	stream 1 {
@@ -30,4 +30,4 @@ client c1 {
 	stream 1 -wait
 } -run
 
-varnish v1 -expect client_req == 2
+vinyl v1 -expect client_req == 2

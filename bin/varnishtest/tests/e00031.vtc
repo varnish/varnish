@@ -1,4 +1,4 @@
-varnishtest "ESI with http_gzip_support off"
+vtest "ESI with http_gzip_support off"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -gzipbody "bar"
 } -start
 
-varnish v1 -arg "-p http_gzip_support=off" -vcl+backend {
+vinyl v1 -arg "-p http_gzip_support=off" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

@@ -1,10 +1,10 @@
-varnishtest "VMOD blob blob object interface coverage"
+vtest "VMOD blob blob object interface coverage"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend proforma none;
 } -start
 
-varnish v1 -errvcl {vmod blob error: cannot create blob err, illegal encoding beginning with "g"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob err, illegal encoding beginning with "g"} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -12,7 +12,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob err, illegal encoding be
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob bad64, illegal encoding beginning with "-_-_"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob bad64, illegal encoding beginning with "-_-_"} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -20,7 +20,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob bad64, illegal encoding 
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "+/+/"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "+/+/"} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -28,7 +28,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob badpad, illegal encoding beginning with "YWI="} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob badpad, illegal encoding beginning with "YWI="} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -36,7 +36,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob badpad, illegal encoding
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%"} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -44,7 +44,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%2"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%2"} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -52,7 +52,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%q"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%q"} {
 	import blob;
 	backend b None;
 	sub vcl_init {
@@ -60,7 +60,7 @@ varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding
 	}
 }
 
-varnish v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%2q"} {
+vinyl v1 -errvcl {vmod blob error: cannot create blob badurl, illegal encoding beginning with "%2q"} {
 	import blob;
 	backend b None;
 	sub vcl_init {

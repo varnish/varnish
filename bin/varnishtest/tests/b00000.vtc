@@ -1,4 +1,4 @@
-varnishtest "Does anything get through at all ?"
+vtest "Does anything get through at all ?"
 
 feature ipv4
 feature ipv6
@@ -13,7 +13,7 @@ server s2 -listen [::1]:0 {
 	txresp -body "012345\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/1") {
 			set req.backend_hint = s1;
@@ -30,15 +30,15 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +workspace"
-varnish v1 -cliok "param.set debug +witness"
+vinyl v1 -cliok "param.set debug +workspace"
+vinyl v1 -cliok "param.set debug +witness"
 
 #varnish v1 -vsc *
 
-varnish v1 -expect MAIN.n_object == 0
-varnish v1 -expect MAIN.sess_conn == 0
-varnish v1 -expect MAIN.client_req == 0
-varnish v1 -expect MAIN.cache_miss == 0
+vinyl v1 -expect MAIN.n_object == 0
+vinyl v1 -expect MAIN.sess_conn == 0
+vinyl v1 -expect MAIN.client_req == 0
+vinyl v1 -expect MAIN.cache_miss == 0
 
 client c1 {
 	txreq -url "/1"
@@ -46,13 +46,13 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect n_object == 1
-varnish v1 -expect sess_conn == 1
-varnish v1 -expect client_req == 1
-varnish v1 -expect cache_miss == 1
-varnish v1 -expect s_sess == 1
-varnish v1 -expect s_resp_bodybytes == 7
-varnish v1 -expect s_resp_hdrbytes == 158
+vinyl v1 -expect n_object == 1
+vinyl v1 -expect sess_conn == 1
+vinyl v1 -expect client_req == 1
+vinyl v1 -expect cache_miss == 1
+vinyl v1 -expect s_sess == 1
+vinyl v1 -expect s_resp_bodybytes == 7
+vinyl v1 -expect s_resp_hdrbytes == 158
 client c1 {
 	txreq -url "/2"
 	rxresp
@@ -60,10 +60,10 @@ client c1 {
 } -run
 
 # varnish v1 -vsc *
-varnish v1 -expect n_object == 2
-varnish v1 -expect sess_conn == 2
-varnish v1 -expect client_req == 2
-varnish v1 -expect cache_miss == 2
-varnish v1 -expect s_sess == 2
-varnish v1 -expect s_resp_bodybytes == 14
-varnish v1 -expect s_resp_hdrbytes == 316
+vinyl v1 -expect n_object == 2
+vinyl v1 -expect sess_conn == 2
+vinyl v1 -expect client_req == 2
+vinyl v1 -expect cache_miss == 2
+vinyl v1 -expect s_sess == 2
+vinyl v1 -expect s_resp_bodybytes == 14
+vinyl v1 -expect s_resp_hdrbytes == 316

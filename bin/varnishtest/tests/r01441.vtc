@@ -1,4 +1,4 @@
-varnishtest "Session grouping on ESI"
+vtest "Session grouping on ESI"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "included"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;

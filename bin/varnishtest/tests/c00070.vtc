@@ -1,4 +1,4 @@
-varnishtest "Test workspace functions in vmod_vtc"
+vtest "Test workspace functions in vmod_vtc"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.url == "/overflow") {
@@ -68,5 +68,5 @@ client c1 {
 
 logexpect l2 -wait
 
-varnish v1 -expect client_resp_500 == 1
-varnish v1 -expect ws_client_overflow == 2
+vinyl v1 -expect client_resp_500 == 1
+vinyl v1 -expect ws_client_overflow == 2

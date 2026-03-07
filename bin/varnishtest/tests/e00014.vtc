@@ -1,4 +1,4 @@
-varnishtest "Check <esi: detector"
+vtest "Check <esi: detector"
 
 server s1 {
 	rxreq
@@ -9,13 +9,13 @@ server s1 {
 	send {           <a>   <esi/>                          }
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
 } -start
 
-varnish v1 -cliok "debug.fragfetch 4"
+vinyl v1 -cliok "debug.fragfetch 4"
 
 client c1 {
 	txreq -url /foo
@@ -23,4 +23,4 @@ client c1 {
 	expect resp.bodylen == 49
 } -run
 
-varnish v1 -expect esi_errors == 0
+vinyl v1 -expect esi_errors == 0

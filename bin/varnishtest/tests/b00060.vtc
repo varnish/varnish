@@ -1,11 +1,11 @@
-varnishtest "VSL tags affected by the use of UDS addresses"
+vtest "VSL tags affected by the use of UDS addresses"
 
 server s1 -listen "${tmpdir}/s1.sock" {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -arg "-a foo=${tmpdir}/v1.sock" -vcl+backend {} -start
+vinyl v1 -arg "-a foo=${tmpdir}/v1.sock" -vcl+backend {} -start
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	txreq

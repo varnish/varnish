@@ -1,11 +1,11 @@
-varnishtest "Ticket 1665 regression test: wrong behavior of timeout_req"
+vtest "Ticket 1665 regression test: wrong behavior of timeout_req"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

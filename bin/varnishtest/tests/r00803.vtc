@@ -1,4 +1,4 @@
-varnishtest "304 response in pass mode"
+vtest "304 response in pass mode"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv { return (pass); }
 } -start
 

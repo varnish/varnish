@@ -1,11 +1,11 @@
-varnishtest "VMOD debug reembarking transport"
+vtest "VMOD debug reembarking transport"
 
 server s1 {
 	rxreq
 	txresp -bodylen 131072
 } -start
 
-varnish v1 \
+vinyl v1 \
     -vcl+backend {
 	import debug;
 
@@ -22,8 +22,8 @@ varnish v1 \
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set debug +req_state"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +req_state"
 
 client c1 -repeat 16 -keepalive {
 	txreq

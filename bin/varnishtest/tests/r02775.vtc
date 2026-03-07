@@ -1,13 +1,13 @@
-varnishtest "Regression test for #2775: allow PRIORITY on closed stream"
+vtest "Regression test for #2775: allow PRIORITY on closed stream"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -vcl+backend {} -start
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	stream 1 {

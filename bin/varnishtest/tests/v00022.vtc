@@ -1,8 +1,8 @@
-varnishtest "Various VCL compiler coverage tests - DNS dependent"
+vtest "Various VCL compiler coverage tests - DNS dependent"
 
 feature dns
 
-varnish v1 -errvcl {resolves to too many addresses} {
+vinyl v1 -errvcl {resolves to too many addresses} {
 	backend b none;
 	sub vcl_recv {
 		if (remote.ip == "dns-canary-multi.varnish-cache.org") {}

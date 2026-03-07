@@ -1,11 +1,11 @@
-varnishtest "Test VMOD ACLs (jail-compatible)"
+vtest "Test VMOD ACLs (jail-compatible)"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	acl loopback {

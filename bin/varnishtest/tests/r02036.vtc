@@ -1,13 +1,13 @@
-varnishtest "NULL directors in vcl_init"
+vtest "NULL directors in vcl_init"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
-varnish v1 -errvcl "None backend cannot be added" {
+vinyl v1 -errvcl "None backend cannot be added" {
 	import directors;
 
 	probe cacheprobe {

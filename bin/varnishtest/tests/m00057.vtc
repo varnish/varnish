@@ -1,4 +1,4 @@
-varnishtest "Softpurging a stale object"
+vtest "Softpurging a stale object"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp -hdr "version: 2"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import purge;
 
 	sub vcl_hit {

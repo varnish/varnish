@@ -1,6 +1,6 @@
-varnishtest "#2946 - objcore leak for backend_synth"
+vtest "#2946 - objcore leak for backend_synth"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend bad None;
 
 	sub vcl_backend_error {
@@ -44,5 +44,5 @@ client c1 {
 
 delay 1
 
-varnish v1 -expect s_fetch > s_bgfetch
-varnish v1 -expect n_objectcore == 1
+vinyl v1 -expect s_fetch > s_bgfetch
+vinyl v1 -expect n_objectcore == 1

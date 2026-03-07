@@ -1,11 +1,11 @@
-varnishtest "Test WS_Reset off-by-one when workspace is full"
+vtest "Test WS_Reset off-by-one when workspace is full"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import vtc;
 

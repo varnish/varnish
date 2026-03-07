@@ -1,11 +1,11 @@
-varnishtest "Check hash is logged when the Hash bit is set"
+vtest "Check hash is logged when the Hash bit is set"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -arg "-p vsl_mask=+Hash" -vcl+backend {
+vinyl v1 -arg "-p vsl_mask=+Hash" -vcl+backend {
 	sub vcl_hash {
 		hash_data("1" + req.http.foo + "3");
 	}

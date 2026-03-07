@@ -1,26 +1,26 @@
-varnishtest "SF-decimal/SF-integer ranges"
+vtest "SF-decimal/SF-integer ranges"
 
-varnish v1 -errvcl {Too many digits for integer.} {
+vinyl v1 -errvcl {Too many digits for integer.} {
 	sub vcl_recv { set req.http.foo = 1234567890123456; }
 }
 
-varnish v1 -errvcl {Too many digits for real.} {
+vinyl v1 -errvcl {Too many digits for real.} {
 	sub vcl_recv { set req.http.foo = 1234567890123.; }
 }
 
-varnish v1 -errvcl {Too many digits for real.} {
+vinyl v1 -errvcl {Too many digits for real.} {
 	sub vcl_recv { set req.http.foo = 123456789012.1234; }
 }
 
-varnish v1 -errvcl {Too many digits for real.} {
+vinyl v1 -errvcl {Too many digits for real.} {
 	sub vcl_recv { set req.http.foo = 0.1234; }
 }
 
-varnish v1 -errvcl {Unexpected character 'e'.} {
+vinyl v1 -errvcl {Unexpected character 'e'.} {
 	sub vcl_recv { set req.http.foo = 42.42e42; }
 }
 
-varnish v1 -errvcl {Unexpected character 'e'.} {
+vinyl v1 -errvcl {Unexpected character 'e'.} {
 	import std;
 	sub vcl_synth { set resp.http.foo = std.integer(real=1e10); }
 }
@@ -30,7 +30,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.http.foo1 = 123456789012345;
 		set req.http.foo2 = 123456789012.;

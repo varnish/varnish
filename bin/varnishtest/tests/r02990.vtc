@@ -1,6 +1,6 @@
-varnishtest "Initial varnishstat verbosity"
+vtest "Initial varnishstat verbosity"
 
-varnish v1 -vcl {backend be none;} -start
+vinyl v1 -vcl {backend be none;} -start
 
 process p1 -dump {varnishstat -n ${v1_name}} -start
 process p2 -dump {varnishstat -n ${v1_name} -f MGT.child_start} -start

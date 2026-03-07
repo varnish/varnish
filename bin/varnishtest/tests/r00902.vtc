@@ -1,4 +1,4 @@
-varnishtest "Ticket #902 http_CollectHdr() failure on consecutive headers"
+vtest "Ticket #902 http_CollectHdr() failure on consecutive headers"
 
 server s1 {
 	rxreq
@@ -12,10 +12,10 @@ server s1 {
 		-bodylen 5
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
-varnish v1 -cliok "param.set debug +req_state"
+vinyl v1 -cliok "param.set debug +req_state"
 
 client c1 {
 	txreq  -hdr "foo: /foo"

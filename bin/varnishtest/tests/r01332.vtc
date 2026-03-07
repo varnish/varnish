@@ -1,11 +1,11 @@
-varnishtest "#1332 - Check enum as argument in vmod object"
+vtest "#1332 - Check enum as argument in vmod object"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {

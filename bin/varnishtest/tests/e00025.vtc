@@ -1,4 +1,4 @@
-varnishtest "Test that esi+gzip correctly bypasses Vary: accept-encoding"
+vtest "Test that esi+gzip correctly bypasses Vary: accept-encoding"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -hdr "Vary: Accept-encoding" -gzipbody {FOO}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

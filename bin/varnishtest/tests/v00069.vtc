@@ -1,11 +1,11 @@
-varnishtest "Unset session timeouts"
+vtest "Unset session timeouts"
 
-varnish v1 -cliok "param.set timeout_idle 42"
-varnish v1 -cliok "param.set timeout_linger 42"
-varnish v1 -cliok "param.set idle_send_timeout 42"
-varnish v1 -cliok "param.set send_timeout 42"
+vinyl v1 -cliok "param.set timeout_idle 42"
+vinyl v1 -cliok "param.set timeout_linger 42"
+vinyl v1 -cliok "param.set idle_send_timeout 42"
+vinyl v1 -cliok "param.set send_timeout 42"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend be none;
 
 	sub vcl_recv {

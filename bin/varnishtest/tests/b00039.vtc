@@ -1,4 +1,4 @@
-varnishtest "Test Backend IMS"
+vtest "Test Backend IMS"
 
 server s1 {
 	rxreq
@@ -11,8 +11,8 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 -cliok "param.set vsl_mask +ExpKill"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set vsl_mask +ExpKill"
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 2s;
 		set beresp.grace = 20s;
@@ -68,4 +68,4 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -expect MAIN.n_superseded == 2
+vinyl v1 -expect MAIN.n_superseded == 2

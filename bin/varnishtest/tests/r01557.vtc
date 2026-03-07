@@ -1,4 +1,4 @@
-varnishtest "Test case for #1557"
+vtest "Test case for #1557"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.url = regsuball(req.url,
 		    "(?<=[&\?])(foo|bar)=[^&]+(?:&|$)", "");

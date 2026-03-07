@@ -1,4 +1,4 @@
-varnishtest "Test PRIV_TOP"
+vtest "Test PRIV_TOP"
 
 # same as v00042.vtc, but the priv remains the same across esi includes
 
@@ -55,7 +55,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
+vinyl v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
 	import debug;
 	backend be none;
 	sub vcl_backend_fetch {
@@ -63,7 +63,7 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
 	}
 }
 
-varnish v1 -errvcl "Not available in subroutine 'vcl_init'" {
+vinyl v1 -errvcl "Not available in subroutine 'vcl_init'" {
 	import debug;
 	backend be none;
 	sub vcl_init {
@@ -72,10 +72,10 @@ varnish v1 -errvcl "Not available in subroutine 'vcl_init'" {
 }
 
 # give enough stack to 32bit systems
-varnish v1 -cliok "param.set thread_pool_stack 128k"
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set thread_pool_stack 128k"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {
@@ -125,5 +125,5 @@ client c1 {
 	expect resp.http.x1 == "/b0"
 } -run
 
-varnish v1 -expect client_req == 2
+vinyl v1 -expect client_req == 2
 

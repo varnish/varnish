@@ -1,4 +1,4 @@
-varnishtest "truncated gzip from backend"
+vtest "truncated gzip from backend"
 
 server s1 -repeat 2 {
 	rxreq
@@ -17,7 +17,7 @@ server s1 -repeat 2 {
 
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
@@ -28,9 +28,9 @@ varnish v1 \
 	}
 }
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
-varnish v1 -start
+vinyl v1 -start
 
 client c1 {
 	txreq

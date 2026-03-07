@@ -1,4 +1,4 @@
-varnishtest "Check grace with sick backends"
+vtest "Check grace with sick backends"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -37,7 +37,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";

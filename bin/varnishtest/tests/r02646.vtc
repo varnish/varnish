@@ -1,6 +1,6 @@
-varnishtest "#2646: VUT should fail gracefully when removing a pid file fails"
+vtest "#2646: VUT should fail gracefully when removing a pid file fails"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend be {
 		.host = "${bad_backend}";
 	}

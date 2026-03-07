@@ -1,11 +1,11 @@
-varnishtest "Use a priv in vcl_pipe"
+vtest "Use a priv in vcl_pipe"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_recv {

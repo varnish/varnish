@@ -1,4 +1,4 @@
-varnishtest "304 revalidations with purge.soft()"
+vtest "304 revalidations with purge.soft()"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -status 304 -hdr "etag: foo"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import purge;
 
 	sub vcl_hit {

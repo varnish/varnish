@@ -1,4 +1,4 @@
-varnishtest "VMOD vfp & vdp"
+vtest "VMOD vfp & vdp"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "Ponto Facto, Caesar Transit!"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_response {
@@ -24,9 +24,9 @@ client c1 {
 	expect resp.body == "Cbagb Snpgb, Pnrfne Genafvg!"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_response {
@@ -41,7 +41,7 @@ client c1 {
 } -run
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_response {
@@ -61,7 +61,7 @@ server s1 {
 	txresp -body "Ponto Facto, Caesar Transit!"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_deliver {
@@ -80,7 +80,7 @@ client c1 -repeat 2 {
 	expect resp.body == "Cbagb Snpgb, Pnrfne Genafvg!"
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	backend none none;
 

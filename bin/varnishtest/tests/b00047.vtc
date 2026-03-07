@@ -1,11 +1,11 @@
-varnishtest "Check that all but HTTP/1.0 and HTTP/1.1 get 400"
+vtest "Check that all but HTTP/1.0 and HTTP/1.1 get 400"
 
 server s1 {
 	rxreq
 	txresp -body "FOO"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

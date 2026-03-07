@@ -1,4 +1,4 @@
-varnishtest "Check expiry of non-instantiated object"
+vtest "Check expiry of non-instantiated object"
 
 feature persistent_storage
 
@@ -9,7 +9,7 @@ server s1 {
 	txresp -hdr "Foo: foo1"
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
 	-arg "-pban_lurker_sleep=0" \
 	-arg "-pshortlived=0" \
@@ -21,8 +21,8 @@ varnish v1 \
 		}
 	} -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set feature +wait_silo"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set feature +wait_silo"
 
 logexpect l1 -v v1 -g vxid -q "Begin ~ bereq" {
     expect * 1002 Storage         "persistent s0"
@@ -37,16 +37,16 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-varnish v1 -expect n_object == 1
+vinyl v1 -expect n_object == 1
 
-varnish v1 -stop
+vinyl v1 -stop
 
 server s1 -wait {
 	rxreq
 	txresp -hdr "Foo: foo2"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 		sub vcl_backend_response {
 			set beresp.ttl = 3s;
 		}
@@ -54,7 +54,7 @@ varnish v1 -vcl+backend {
 
 delay 5
 
-varnish v1 -expect n_object == 0
+vinyl v1 -expect n_object == 0
 
 logexpect l1 -v v1 -g vxid -q "Begin ~ bereq" {
     expect * 1002 Storage         "persistent s0"
@@ -69,4 +69,4 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-varnish v1 -expect n_object == 1
+vinyl v1 -expect n_object == 1

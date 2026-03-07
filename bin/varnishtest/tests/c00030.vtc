@@ -1,13 +1,13 @@
-varnishtest "debug storage"
+vtest "debug storage"
 
 shell -err -expect {Error: Only one -sdebug instance supported} \
-	"varnishd -b none -a ${tmpdir}/vtc.sock -sdebug -sdebug"
+	"vinyld -b none -a ${tmpdir}/vtc.sock -sdebug -sdebug"
 
 shell -err -expect {Error: -sdebug conflicting options} \
-	"varnishd -b none -a ${tmpdir}/vtc.sock -sdebug,lessspace,maxspace=1KB"
+	"vinyld -b none -a ${tmpdir}/vtc.sock -sdebug,lessspace,maxspace=1KB"
 
 shell -err -expect {Error: Unknown BYTES} \
-	"varnishd -b none -a ${tmpdir}/vtc.sock -sdebug,maxspace=1DJT"
+	"vinyld -b none -a ${tmpdir}/vtc.sock -sdebug,maxspace=1DJT"
 
 # lessspace is implicitly tested in b00017.vtc
 
@@ -29,7 +29,7 @@ server s1 {
 } -start
 
 
-varnish v1 -arg "-sTransient=debug,maxspace=1KB" -vcl+backend {
+vinyl v1 -arg "-sTransient=debug,maxspace=1KB" -vcl+backend {
 	sub vcl_recv {
 		return(pass);
 	}

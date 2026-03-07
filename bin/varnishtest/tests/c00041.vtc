@@ -1,4 +1,4 @@
-varnishtest "test purging from vcl"
+vtest "test purging from vcl"
 
 server s1 {
 	rxreq
@@ -38,7 +38,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv { if (req.http.purge == "yes") { return(purge); } }
 	sub vcl_purge {
 		if (req.http.restart == "yes") {

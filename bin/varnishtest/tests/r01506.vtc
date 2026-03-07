@@ -1,4 +1,4 @@
-varnishtest "range requests on streamed response"
+vtest "range requests on streamed response"
 
 barrier b1 cond 2 -cyclic
 
@@ -20,9 +20,9 @@ server s0 {
 
 } -dispatch
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -url /1 -hdr "Range: bytes=17-101"
@@ -67,6 +67,6 @@ client c1 {
 	expect resp.bodylen == 85
 } -run
 
-varnish v1 -expect sc_range_short == 0
-varnish v1 -stop
+vinyl v1 -expect sc_range_short == 0
+vinyl v1 -stop
 server s1 -wait

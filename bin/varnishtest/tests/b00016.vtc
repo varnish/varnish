@@ -1,11 +1,11 @@
-varnishtest "Check naming of backends"
+vtest "Check naming of backends"
 
 server s1 -repeat 2 -keepalive {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 
 	sub vcl_recv {
@@ -23,7 +23,7 @@ client c1 {
 	expect resp.http.X-Backend-Name == "s1"
 } -run
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -49,7 +49,7 @@ client c1 {
 	expect resp.http.X-Backend-Name == "s1"
 } -run
 
-varnish v1 -errvcl "Not available in subroutine 'vcl_recv'" {
+vinyl v1 -errvcl "Not available in subroutine 'vcl_recv'" {
 	import directors;
 
 	backend dummy None;

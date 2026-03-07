@@ -1,6 +1,6 @@
-varnishtest "VSL query lenient int #3463 and float precision comparisons #4088"
+vtest "VSL query lenient int #3463 and float precision comparisons #4088"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 	backend be none;
 	sub vcl_recv {

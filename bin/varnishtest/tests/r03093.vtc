@@ -1,4 +1,4 @@
-varnishtest "r03093 - fail retry on missing req body"
+vtest "r03093 - fail retry on missing req body"
 
 barrier b1 sock 2
 
@@ -19,7 +19,7 @@ server s2 {
 	txresp -body bar
 } -start
 
-varnish v1 -arg "-p debug=+syncvsl" -vcl+backend {
+vinyl v1 -arg "-p debug=+syncvsl" -vcl+backend {
 	import vtc;
 	sub vcl_backend_fetch {
 		set bereq.http.retries = bereq.retries;

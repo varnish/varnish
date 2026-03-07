@@ -1,4 +1,4 @@
-varnishtest "Regression test for ticket 412"
+vtest "Regression test for ticket 412"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "12345"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.status == 303) {
 			set beresp.ttl = 60 s;

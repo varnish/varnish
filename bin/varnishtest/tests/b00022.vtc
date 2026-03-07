@@ -1,4 +1,4 @@
-varnishtest "Check the between_bytes_timeout behaves from backend definition"
+vtest "Check the between_bytes_timeout behaves from backend definition"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	send "Baba\n"
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";

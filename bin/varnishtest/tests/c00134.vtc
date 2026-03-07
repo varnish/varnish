@@ -1,4 +1,4 @@
-varnishtest "Optimized HSH_Lookup - ban is checked after Vary is matched"
+vtest "Optimized HSH_Lookup - ban is checked after Vary is matched"
 
 server s1 {
 	rxreq
@@ -28,7 +28,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.url = bereq.url;
 	}
@@ -54,33 +54,33 @@ client c1 {
 
 } -run
 
-varnish v1 -expect n_object == 3
-varnish v1 -expect cache_hit == 0
-varnish v1 -expect cache_miss == 3
+vinyl v1 -expect n_object == 3
+vinyl v1 -expect cache_hit == 0
+vinyl v1 -expect cache_miss == 3
 
 client c1 {
 	txreq -url /foo -hdr "Foobar: 1"
 	rxresp
 } -run
 
-varnish v1 -expect cache_hit == 1
-varnish v1 -expect cache_miss == 3
+vinyl v1 -expect cache_hit == 1
+vinyl v1 -expect cache_miss == 3
 
-varnish v1 -cliok "ban obj.http.url == /foo"
-varnish v1 -cliok "ban obj.http.url == /bar"
-varnish v1 -cliok "ban obj.http.url == /baz"
+vinyl v1 -cliok "ban obj.http.url == /foo"
+vinyl v1 -cliok "ban obj.http.url == /bar"
+vinyl v1 -cliok "ban obj.http.url == /baz"
 
 client c1 {
 	txreq -url /foo -hdr "Foobar: 1"
 	rxresp
 } -run
 
-varnish v1 -expect bans_tested == 1
-varnish v1 -expect bans_tests_tested == 3
-varnish v1 -expect bans_obj_killed == 1
-varnish v1 -expect n_object == 3
+vinyl v1 -expect bans_tested == 1
+vinyl v1 -expect bans_tests_tested == 3
+vinyl v1 -expect bans_obj_killed == 1
+vinyl v1 -expect n_object == 3
 
 
-varnish v1 -expect cache_hit == 1
-varnish v1 -expect cache_miss == 4
-varnish v1 -expect client_req == 5
+vinyl v1 -expect cache_hit == 1
+vinyl v1 -expect cache_miss == 4
+vinyl v1 -expect client_req == 5

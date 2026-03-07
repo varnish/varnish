@@ -1,4 +1,4 @@
-varnishtest "Test X-Forward-For headers"
+vtest "Test X-Forward-For headers"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

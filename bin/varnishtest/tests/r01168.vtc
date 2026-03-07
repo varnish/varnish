@@ -1,4 +1,4 @@
-varnishtest "Test ESI rollback interaction"
+vtest "Test ESI rollback interaction"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "1"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	sub vcl_recv {
 		std.rollback(req);

@@ -1,14 +1,14 @@
-varnishtest "#2937: Panic on OU pool failure"
+vtest "#2937: Panic on OU pool failure"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "debug.reqpool.fail F"
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "debug.reqpool.fail F"
 
 client c1 {
 	send "GET / HTTP/1.1\r\n"

@@ -1,11 +1,11 @@
-varnishtest "Check Pid file locking"
+vtest "Check Pid file locking"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq
@@ -15,17 +15,17 @@ client c1 {
 delay .2
 
 shell -err -expect {Error: Could not open pid-file} {
-	varnishd -P /dev/tty -b None -a :0
+	vinyld -P /dev/tty -b None -a :0
 }
 
 shell -err -expect {Error: Varnishd is already running} {
-	varnishd -P ${v1_name}/varnishd.pid -b None -a :0
+	vinyld -P ${v1_name}/vinyld.pid -b None -a :0
 }
 
 shell -err -expect {Error: Varnishd is already running} {
-	varnishd -b None -a:0 -n ${tmpdir}/v1 -F
+	vinyld -b None -a:0 -n ${tmpdir}/v1 -F
 }
 
 shell -err -expect {Error: Varnishd is already running} {
-	VARNISH_DEFAULT_N="${tmpdir}/v1" varnishd -b None -a:0 -F
+	VARNISH_DEFAULT_N="${tmpdir}/v1" vinyld -b None -a:0 -F
 }

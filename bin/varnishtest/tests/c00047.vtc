@@ -1,4 +1,4 @@
-varnishtest "Test VCL regsuball()"
+vtest "Test VCL regsuball()"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 		-hdr "bar: bbbar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.baz1 = regsuball(beresp.http.foo, "barb", "zz");
 		set beresp.http.baz2 = regsuball(beresp.http.foo, "ar", "zz");

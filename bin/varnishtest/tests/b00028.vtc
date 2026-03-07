@@ -1,11 +1,11 @@
-varnishtest "regexp match and no-match"
+vtest "regexp match and no-match"
 
 server s1 {
 	rxreq
 	txresp -hdr "Foo: bar" -hdr "Bar: foo" -body "1111\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		if (beresp.http.foo ~ "b" + "ar") {

@@ -1,6 +1,6 @@
 
 
-varnishtest "looped backends"
+vtest "looped backends"
 
 server s1 {
 } -start
@@ -14,7 +14,7 @@ server s3 {
 server s4 {
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 	import std;
 
@@ -31,7 +31,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 	import std;
 
@@ -44,5 +44,5 @@ varnish v1 -vcl+backend {
 	}
 }
 
-varnish v1 -cliok "vcl.discard vcl1"
-varnish v1 -cliok "vcl.list"
+vinyl v1 -cliok "vcl.discard vcl1"
+vinyl v1 -cliok "vcl.list"

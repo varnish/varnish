@@ -1,4 +1,4 @@
-varnishtest "ESI include is 204"
+vtest "ESI include is 204"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	    -hdr "Content-encoding: gzip"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -21,4 +21,4 @@ client c1 {
 	expect resp.body == "<A></A>"
 } -run
 
-varnish v1 -expect esi_errors == 0
+vinyl v1 -expect esi_errors == 0

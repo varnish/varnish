@@ -1,4 +1,4 @@
-varnishtest "HTTP 1.0 backend not getting reused"
+vtest "HTTP 1.0 backend not getting reused"
 
 
 server s1 {
@@ -22,7 +22,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv { return (pass); }
 } -start
 

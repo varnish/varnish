@@ -1,4 +1,4 @@
-varnishtest "Check we ignore a zero C-L with a 204"
+vtest "Check we ignore a zero C-L with a 204"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -status 204
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

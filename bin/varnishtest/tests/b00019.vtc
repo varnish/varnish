@@ -1,11 +1,11 @@
-varnishtest "Check that max_restarts outside vcl_recv works and that we don't fall over"
+vtest "Check that max_restarts outside vcl_recv works and that we don't fall over"
 
 server s1 {
 	rxreq
 	txresp -body "012345\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_hit {
 	       return (restart);
 	}
@@ -26,7 +26,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set max_restarts 2"
+vinyl v1 -cliok "param.set max_restarts 2"
 
 client c1 {
 	txreq -url "/"
@@ -34,7 +34,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -cliok "param.set max_restarts 3"
+vinyl v1 -cliok "param.set max_restarts 3"
 
 client c1 {
 	txreq -url "/"
@@ -42,7 +42,7 @@ client c1 {
 	expect resp.status == 501
 } -run
 
-varnish v1 -cliok "param.set max_restarts 1"
+vinyl v1 -cliok "param.set max_restarts 1"
 
 client c1 {
 	txreq -url "/"

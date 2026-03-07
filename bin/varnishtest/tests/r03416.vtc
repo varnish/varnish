@@ -1,12 +1,12 @@
-varnishtest "Filter hop-by-hop headers out of h2 responses"
+vtest "Filter hop-by-hop headers out of h2 responses"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.Keep-Alive = "timeout=5, max=1000";
 		set resp.http.Connection = "other";

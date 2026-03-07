@@ -1,4 +1,4 @@
-varnishtest "Check Expect headers / 100 Continue"
+vtest "Check Expect headers / 100 Continue"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

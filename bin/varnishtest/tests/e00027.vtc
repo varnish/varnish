@@ -1,4 +1,4 @@
-varnishtest "test HEAD against ESI processing"
+vtest "test HEAD against ESI processing"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

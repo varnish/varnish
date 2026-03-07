@@ -1,4 +1,4 @@
-varnishtest "Check backend wait limit fail"
+vtest "Check backend wait limit fail"
 
 barrier b1 cond 2
 
@@ -12,7 +12,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -42,5 +42,5 @@ client c2 -connect ${v1_sock} {
 
 client c1 -wait
 
-varnish v1 -expect backend_wait == 1
-varnish v1 -expect backend_wait_fail == 1
+vinyl v1 -expect backend_wait == 1
+vinyl v1 -expect backend_wait_fail == 1

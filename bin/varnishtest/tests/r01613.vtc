@@ -1,17 +1,17 @@
-varnishtest "Extra Connection header erroneously inserted."
+vtest "Extra Connection header erroneously inserted."
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v2 -vcl+backend {
+vinyl v2 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.Connection = "close";
 	}
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 
 	backend b {

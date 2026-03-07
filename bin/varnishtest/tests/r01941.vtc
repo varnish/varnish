@@ -1,4 +1,4 @@
-varnishtest "ESI memory should only be fully allocated"
+vtest "ESI memory should only be fully allocated"
 
 # In this test case, the cache is almost filled. Then we force the
 # allocation of ESI memory that does not fit in the cache, is bigger
@@ -28,7 +28,7 @@ server s1 {
 	txresp -body {fo}
 } -start
 
-varnish v1 -arg "-pfetch_chunksize=4k" \
+vinyl v1 -arg "-pfetch_chunksize=4k" \
 	-arg "-p feature=+esi_disable_xml_check" \
 	-arg "-sdefault,1m" -vcl+backend {
 	sub vcl_backend_fetch {
@@ -48,4 +48,4 @@ client c1 {
 	rxresp
 } -run
 
-varnish v1 -expect SM?.s0.c_fail == 1
+vinyl v1 -expect SM?.s0.c_fail == 1

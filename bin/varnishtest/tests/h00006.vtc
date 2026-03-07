@@ -1,4 +1,4 @@
-varnishtest "haproxy tcp-mode, uds, send-proxy-v2, client ip and acl"
+vtest "haproxy tcp-mode, uds, send-proxy-v2, client ip and acl"
 
 # same as h00007.vtc, but using uds for haproxy->varnish
 
@@ -23,7 +23,7 @@ haproxy h1 -D -conf {
 	server v1 ${tmpdir}/v1.sock send-proxy-v2
 } -start
 
-varnish v1 -arg "-a ${tmpdir}/v1.sock,PROXY" -vcl+backend {
+vinyl v1 -arg "-a ${tmpdir}/v1.sock,PROXY" -vcl+backend {
 	import std;
 
 	acl localhost {

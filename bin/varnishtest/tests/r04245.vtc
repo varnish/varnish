@@ -1,4 +1,4 @@
-varnishtest "cache a HEAD as a fallback for a GET - Content-Length preserved for cached HEAD"
+vtest "cache a HEAD as a fallback for a GET - Content-Length preserved for cached HEAD"
 
 server s1 {
 	rxreq
@@ -12,7 +12,7 @@ server s1 {
 	txresp -bodylen 42
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
     sub vcl_recv {
 	if (req.method == "HEAD") {
 	    set req.http.X-Fetch-Method = "HEAD";

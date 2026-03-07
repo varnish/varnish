@@ -1,4 +1,4 @@
-varnishtest "Test vmod usage and test vmods (debug & vtc)"
+vtest "Test vmod usage and test vmods (debug & vtc)"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	txresp -hdr "foo: bAr" -hdr "bar: fOo" -bodylen 4
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import debug;
 	import vtc;
@@ -60,7 +60,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -expect DEBUG.count == 0
+vinyl v1 -expect DEBUG.count == 0
 
 client c1 {
 	txreq -url "/bar"
@@ -78,7 +78,7 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c1 {
 	txreq -url "/priv-task-no-mem"
@@ -86,9 +86,9 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -expect DEBUG.count == 1
+vinyl v1 -expect DEBUG.count == 1
 
 logexpect l1 -v v1 -g raw -d 1 {
 	expect * 0    CLI		{^Rd vcl.load}
@@ -105,42 +105,42 @@ logexpect l1 -v v1 -g raw -d 1 {
 	expect 0 =    VCL_return	{^deliver}
 } -run
 
-varnish v1 -errvcl {Wrong enum value.  Expected one of:} {
+vinyl v1 -errvcl {Wrong enum value.  Expected one of:} {
 	import debug;
 	sub vcl_deliver {
 		set resp.http.who = debug.author(ENUM);
 	}
 }
 
-varnish v1 -errvcl {Wrong enum value.  Expected one of:} {
+vinyl v1 -errvcl {Wrong enum value.  Expected one of:} {
 	import debug;
 	sub vcl_deliver {
 		set resp.http.who = debug.author(slink);
 	}
 }
 
-varnish v1 -errvcl {Expression has type STRING, expected REAL} {
+vinyl v1 -errvcl {Expression has type STRING, expected REAL} {
 	import std;
 	sub vcl_deliver {
 		set resp.http.who = std.random("foo", "bar");
 	}
 }
 
-varnish v1 -errvcl {Symbol not found: 'obj'} {
+vinyl v1 -errvcl {Symbol not found: 'obj'} {
 	import debug;
 	sub vcl_hit {
 		debug.rot52(obj);
 	}
 }
 
-varnish v1 -errvcl {Symbol not found: 'obj'} {
+vinyl v1 -errvcl {Symbol not found: 'obj'} {
 	import debug;
 	sub vcl_deliver {
 		debug.rot52(obj);
 	}
 }
 
-varnish v1 -errvcl {rot13: VFP already registered (per-vcl)} {
+vinyl v1 -errvcl {rot13: VFP already registered (per-vcl)} {
 	import debug;
 	backend none none;
 	sub vcl_init {
@@ -148,7 +148,7 @@ varnish v1 -errvcl {rot13: VFP already registered (per-vcl)} {
 	}
 }
 
-varnish v1 -errvcl {Failed from VCL} {
+vinyl v1 -errvcl {Failed from VCL} {
 	import debug;
 	import directors;
 	backend default { .host = "${localhost}"; }
@@ -165,7 +165,7 @@ varnish v1 -errvcl {Failed from VCL} {
 	}
 }
 
-varnish v1 -errvcl {Failed initialization} {
+vinyl v1 -errvcl {Failed initialization} {
 	import debug;
 	backend none none;
 	sub vcl_init {
@@ -184,14 +184,14 @@ shell {
 	EOF
 }
 
-varnish v1 -clierr 300 "vcl.load f1 ${tmpdir}/f1"
+vinyl v1 -clierr 300 "vcl.load f1 ${tmpdir}/f1"
 
 shell -exit 1 -expect {failing as requested} {
 	varnishadm -t 10 -n ${tmpdir}/v1 vcl.load f1 ${tmpdir}/f1
 }
 
-varnish v1 -cliok "param.set vcc_feature +allow_inline_c"
-varnish v1 -vcl {
+vinyl v1 -cliok "param.set vcc_feature +allow_inline_c"
+vinyl v1 -vcl {
 	import vtc;
 
 	backend be none;
@@ -305,24 +305,24 @@ client c1 {
 	expect resp.http.uzp-match == true
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -vcl+backend { }
+vinyl v1 -vcl+backend { }
 
-varnish v1 -cliok "debug.vmod"
-varnish v1 -cliok "vcl.list"
+vinyl v1 -cliok "debug.vmod"
+vinyl v1 -cliok "vcl.list"
 
-varnish v1 -expect vmods == 3
+vinyl v1 -expect vmods == 3
 
-varnish v1 -cliok "vcl.discard vcl[1-9] vcl10"
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "debug.vmod"
+vinyl v1 -cliok "vcl.discard vcl[1-9] vcl10"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "debug.vmod"
 
 delay .5
 
-varnish v1 -expect vmods == 0
+vinyl v1 -expect vmods == 0
 
-varnish v1 -errvcl {Symbol 'std' type (vmod) cannot be used in expression.} {
+vinyl v1 -errvcl {Symbol 'std' type (vmod) cannot be used in expression.} {
 	import std;
 
 	sub vcl_recv {
@@ -331,6 +331,6 @@ varnish v1 -errvcl {Symbol 'std' type (vmod) cannot be used in expression.} {
 	}
 }
 
-varnish v1 -cliok "debug.vmod"
-varnish v1 -cliok "vcl.list"
-varnish v1 -expect vmods == 0
+vinyl v1 -cliok "debug.vmod"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -expect vmods == 0

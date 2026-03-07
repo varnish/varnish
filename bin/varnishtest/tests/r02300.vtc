@@ -1,4 +1,4 @@
-varnishtest "ESI Cookie"
+vtest "ESI Cookie"
 
 server s1 {
 	fatal
@@ -11,11 +11,11 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -cliok {param.set feature +http2}
-varnish v1 -cliok {param.set debug +syncvsl}
+vinyl v1 -cliok {param.set feature +http2}
+vinyl v1 -cliok {param.set debug +syncvsl}
 
 
-varnish v1 -vcl+backend  {
+vinyl v1 -vcl+backend  {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

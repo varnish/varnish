@@ -1,8 +1,8 @@
-varnishtest "Test std.getenv"
+vtest "Test std.getenv"
 
 setenv FOO "BAR BAZ"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 
 	backend dummy { .host = "${bad_backend}"; }

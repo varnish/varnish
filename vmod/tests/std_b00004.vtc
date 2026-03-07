@@ -1,11 +1,11 @@
-varnishtest "Test std.integer()"
+vtest "Test std.integer()"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

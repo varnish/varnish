@@ -1,11 +1,11 @@
-varnishtest "VXID log filtering"
+vtest "VXID log filtering"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -arg "-p thread_pools=1" -vcl+backend { } -start
+vinyl v1 -arg "-p thread_pools=1" -vcl+backend { } -start
 
 logexpect l1 -v v1 -q "vxid == 1001" {
 	expect 0 1001 Begin "req 1000 rxreq"

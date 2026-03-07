@@ -1,4 +1,4 @@
-varnishtest "pipe of chunked request"
+vtest "pipe of chunked request"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	txresp -body "ABCD"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pipe);
 	}

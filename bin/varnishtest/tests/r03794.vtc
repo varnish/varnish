@@ -1,4 +1,4 @@
-varnishtest "Append configurable Via header"
+vtest "Append configurable Via header"
 
 server s1 {
 	rxreq
@@ -7,9 +7,9 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
-varnish v2 -vcl {
+vinyl v2 -vcl {
 	backend v1 {
 		.host = "${v1_sock}";
 	}

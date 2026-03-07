@@ -1,11 +1,11 @@
-varnishtest "SLT_Debug can be printed by varnishncsa -j"
+vtest "SLT_Debug can be printed by varnishncsa -j"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import cookie;
 
 	sub vcl_recv {
@@ -13,7 +13,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set vsl_mask +Debug"
+vinyl v1 -cliok "param.set vsl_mask +Debug"
 
 client c1 {
 	txreq

@@ -1,4 +1,4 @@
-varnishtest "Check Range forwarding to backend"
+vtest "Check Range forwarding to backend"
 
 server s1 {
 	rxreq
@@ -20,7 +20,7 @@ server s1 {
 		-body "012345\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url ~ "bar") {
 			return(pass);
@@ -28,7 +28,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -url "/foo" -hdr "Range: bytes=1-2"
@@ -38,7 +38,7 @@ client c1 {
 	expect resp.http.X-Varnish == "1001"
 } -run
 
-varnish v1 -cliok "param.set http_range_support off"
+vinyl v1 -cliok "param.set http_range_support off"
 
 client c2 {
 	# NB: Deliberately bogus Range header

@@ -1,11 +1,11 @@
-varnishtest "Changing Last Modified in vcl_deliver"
+vtest "Changing Last Modified in vcl_deliver"
 
 server s1 {
 	rxreq
 	txresp -hdr "Last-Modified: Wed, 27 Apr 2016 14:00:00 GMT"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		if (req.http.deliver == "modify") {
 			set resp.http.Last-Modified = "Wed, 27 Apr 2016 16:00:00 GMT";

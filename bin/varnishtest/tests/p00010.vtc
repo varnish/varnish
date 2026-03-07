@@ -1,8 +1,8 @@
-varnishtest "status codes"
+vtest "status codes"
 
 server s1 {} -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	sub vcl_recv {
 		return (synth(std.integer(req.http.x-vtc-response-code, 999)));

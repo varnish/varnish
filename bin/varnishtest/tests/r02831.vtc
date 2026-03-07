@@ -1,4 +1,4 @@
-varnishtest "#2831: Out of storage in cache_req_body"
+vtest "#2831: Out of storage in cache_req_body"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	txresp -noserver -bodylen 1048400
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-p nuke_limit=0" \
 	-arg "-sTransient=default,1m" \
 	-syntax 4.0 \
@@ -25,7 +25,7 @@ varnish v1 \
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 delay .1
 
@@ -38,8 +38,8 @@ client c1 {
 
 delay .1
 
-varnish v1 -expect SM?.Transient.g_bytes > 1048400
-varnish v1 -expect SM?.Transient.g_space < 100
+vinyl v1 -expect SM?.Transient.g_bytes > 1048400
+vinyl v1 -expect SM?.Transient.g_space < 100
 
 client c1 {
 	# No space for caching this req.body
@@ -47,7 +47,7 @@ client c1 {
 	delay 1
 } -run
 
-varnish v1 -expect SM?.Transient.c_fail == 1
+vinyl v1 -expect SM?.Transient.c_fail == 1
 
 client c1 {
 	# Check that Varnish is still alive

@@ -1,4 +1,4 @@
-varnishtest "Dropping polling of a backend"
+vtest "Dropping polling of a backend"
 
 server s1 -repeat 40 {
 	non_fatal
@@ -6,7 +6,7 @@ server s1 -repeat 40 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -21,12 +21,12 @@ varnish v1 -vcl {
 
 delay 1
 
-varnish v1 -vcl+backend { } -cliok "vcl.use vcl2" -cliok "vcl.discard vcl1"
+vinyl v1 -vcl+backend { } -cliok "vcl.use vcl2" -cliok "vcl.discard vcl1"
 
 delay 1
 
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "backend.list -p"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "backend.list -p"
 
 server s1 -break {
 	rxreq

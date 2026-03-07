@@ -1,6 +1,6 @@
-varnishtest "Test PRIV_TOP vs PRIV_TASK"
+vtest "Test PRIV_TOP vs PRIV_TASK"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 
 	backend bad { .host = "${bad_backend}"; }

@@ -1,4 +1,4 @@
-varnishtest "Test bereq.retry_connect aka extrachance"
+vtest "Test bereq.retry_connect aka extrachance"
 
 server s0 {
 	rxreq
@@ -11,7 +11,7 @@ server s0 {
 	txresp -hdr "Connection: keep-alive" -body "hello"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -47,7 +47,7 @@ client c2 {
 server s0 -break
 server s0 -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -73,7 +73,7 @@ client c3 {
 server s0 -break
 server s0 -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -98,7 +98,7 @@ client c4 {
 server s0 -break
 server s0 -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}

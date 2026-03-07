@@ -1,6 +1,6 @@
-varnishtest "long string coverage"
+vtest "long string coverage"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend default none;
 
 	sub vcl_recv {

@@ -1,6 +1,6 @@
-varnishtest "Test failing in director callbacks"
+vtest "Test failing in director callbacks"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	import std;
 

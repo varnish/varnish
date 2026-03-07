@@ -1,4 +1,4 @@
-varnishtest "Backend IMS header merging"
+vtest "Backend IMS header merging"
 
 server s1 {
 	rxreq
@@ -16,7 +16,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.grace = 0s;
 		set beresp.keep = 60s;

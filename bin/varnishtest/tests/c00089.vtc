@@ -1,4 +1,4 @@
-varnishtest "Backend close retry with a UDS"
+vtest "Backend close retry with a UDS"
 
 server s1 -listen "${tmpdir}/s1.sock" -repeat 1 {
 	rxreq
@@ -12,7 +12,7 @@ server s1 -listen "${tmpdir}/s1.sock" -repeat 1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return(pass);
 	}
@@ -30,4 +30,4 @@ client c1 {
 	expect resp.bodylen == 6
 } -run
 
-varnish v1 -expect backend_retry == 1
+vinyl v1 -expect backend_retry == 1

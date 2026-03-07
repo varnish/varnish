@@ -1,11 +1,11 @@
-varnishtest "Ticket #894"
+vtest "Ticket #894"
 
 server s1 {
 	rxreq
 	txresp -body {<XXX><esi:include src="a" src="b"/><YYY>}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

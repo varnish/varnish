@@ -1,4 +1,4 @@
-varnishtest "#345, ESI waitinglist trouble"
+vtest "#345, ESI waitinglist trouble"
 
 barrier b1 cond 2
 
@@ -11,7 +11,7 @@ server s1 {
 	txresp -body {DATA}
 } -start
 
-varnish v1 -arg "-p debug=+workspace" -vcl+backend {
+vinyl v1 -arg "-p debug=+workspace" -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;

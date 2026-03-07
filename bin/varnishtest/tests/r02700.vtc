@@ -1,4 +1,4 @@
-varnishtest "#2700: IMS and return (retry)"
+vtest "#2700: IMS and return (retry)"
 
 server s1 {
 	rxreq
@@ -16,7 +16,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.retries = bereq.retries;
 	}

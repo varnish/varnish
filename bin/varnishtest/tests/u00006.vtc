@@ -1,11 +1,11 @@
-varnishtest "varnishlog coverage"
+vtest "varnishlog coverage"
 
 server s1 -repeat 2 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 # We use this to make sure we know there is a "0 CLI" in the binary log.
 process p1 {

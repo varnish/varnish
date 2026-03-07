@@ -1,4 +1,4 @@
-varnishtest "shard director LAZY and layering"
+vtest "shard director LAZY and layering"
 
 server s1 -repeat 3 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 -repeat 3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 

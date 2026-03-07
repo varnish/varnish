@@ -1,4 +1,4 @@
-varnishtest "test ban obj.* except obj.http.*"
+vtest "test ban obj.* except obj.http.*"
 
 # see c00021.vtc for obj.http.* tests
 
@@ -22,7 +22,7 @@ server s1 {
 	txresp -bodylen 7
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.hits = obj.hits;
 	}
@@ -42,7 +42,7 @@ client c1 {
 	expect resp.bodylen == 1
 } -run
 
-varnish v1 -cliok "ban obj.status == 201"
+vinyl v1 -cliok "ban obj.status == 201"
 
 client c1 {
 	txreq
@@ -50,9 +50,9 @@ client c1 {
 	expect resp.bodylen == 1
 } -run
 
-varnish v1 -cliok "ban obj.status == 200"
-varnish v1 -cliok "ban.list"
-varnish v1 -clijson "ban.list -j"
+vinyl v1 -cliok "ban obj.status == 200"
+vinyl v1 -cliok "ban.list"
+vinyl v1 -clijson "ban.list -j"
 
 client c1 {
 	txreq
@@ -60,11 +60,11 @@ client c1 {
 	expect resp.bodylen == 2
 } -run
 
-varnish v1 -cliok "ban obj.keep == 0s && obj.ttl > 1d"
-varnish v1 -cliok "ban obj.keep == 0s && obj.ttl > 1d"
+vinyl v1 -cliok "ban obj.keep == 0s && obj.ttl > 1d"
+vinyl v1 -cliok "ban obj.keep == 0s && obj.ttl > 1d"
 
 # BANS_FLAG_NODEDUP
-varnish v1 -cliexpect {(?s) obj\.ttl > 1d\b.*obj\.ttl > 1d\b} "ban.list"
+vinyl v1 -cliexpect {(?s) obj\.ttl > 1d\b.*obj\.ttl > 1d\b} "ban.list"
 
 client c1 {
 	txreq
@@ -72,7 +72,7 @@ client c1 {
 	expect resp.bodylen == 2
 } -run
 
-varnish v1 -cliok "ban obj.status == 200 && obj.ttl <= 2m"
+vinyl v1 -cliok "ban obj.status == 200 && obj.ttl <= 2m"
 
 client c1 {
 	txreq
@@ -80,11 +80,11 @@ client c1 {
 	expect resp.bodylen == 3
 } -run
 
-varnish v1 -cliok "ban obj.age > 1d"
-varnish v1 -cliok "ban obj.age > 1d"
+vinyl v1 -cliok "ban obj.age > 1d"
+vinyl v1 -cliok "ban obj.age > 1d"
 
 # BANS_FLAG_NODEDUP
-varnish v1 -cliexpect {(?s) obj\.age > 1d\b.*obj\.age > 1d\b} "ban.list"
+vinyl v1 -cliexpect {(?s) obj\.age > 1d\b.*obj\.age > 1d\b} "ban.list"
 
 client c1 {
 	txreq
@@ -92,7 +92,7 @@ client c1 {
 	expect resp.bodylen == 3
 } -run
 
-varnish v1 -cliok "ban obj.status == 200 && obj.age < 1m"
+vinyl v1 -cliok "ban obj.status == 200 && obj.age < 1m"
 
 client c1 {
 	txreq
@@ -100,11 +100,11 @@ client c1 {
 	expect resp.bodylen == 4
 } -run
 
-varnish v1 -cliok "ban obj.grace != 10s"
-varnish v1 -cliok "ban obj.grace != 10s"
+vinyl v1 -cliok "ban obj.grace != 10s"
+vinyl v1 -cliok "ban obj.grace != 10s"
 
 # ! BANS_FLAG_NODEDUP
-varnish v1 -cliexpect {(?s) obj\.grace != 10s\b.* \d C\b} "ban.list"
+vinyl v1 -cliexpect {(?s) obj\.grace != 10s\b.* \d C\b} "ban.list"
 
 client c1 {
 	txreq
@@ -112,7 +112,7 @@ client c1 {
 	expect resp.bodylen == 4
 } -run
 
-varnish v1 -cliok "ban obj.status == 200 && obj.grace == 10s"
+vinyl v1 -cliok "ban obj.status == 200 && obj.grace == 10s"
 
 client c1 {
 	txreq
@@ -120,11 +120,11 @@ client c1 {
 	expect resp.bodylen == 5
 } -run
 
-varnish v1 -cliok "ban obj.keep != 0s"
-varnish v1 -cliok "ban obj.keep != 0s"
+vinyl v1 -cliok "ban obj.keep != 0s"
+vinyl v1 -cliok "ban obj.keep != 0s"
 
 # ! BANS_FLAG_NODEDUP
-varnish v1 -cliexpect {(?s) obj\.keep != 0s\b.* \d C\b} "ban.list"
+vinyl v1 -cliexpect {(?s) obj\.keep != 0s\b.* \d C\b} "ban.list"
 
 client c1 {
 	txreq
@@ -132,8 +132,8 @@ client c1 {
 	expect resp.bodylen == 5
 } -run
 
-varnish v1 -cli "param.set ban_lurker_age 0.1"
-varnish v1 -cliok "ban obj.status == 200 && obj.keep == 0s"
+vinyl v1 -cli "param.set ban_lurker_age 0.1"
+vinyl v1 -cliok "ban obj.status == 200 && obj.keep == 0s"
 delay 1
 
 client c1 {
@@ -148,9 +148,9 @@ client c1 {
 } -run
 
 # now we should have two objects, /old from the beginning and the len==6 object
-varnish v1 -cliexpect { 2 C} "ban.list"
-varnish v1 -cli "param.set ban_lurker_age 600"
-varnish v1 -cliok "ban obj.last_hit < 1s"
+vinyl v1 -cliexpect { 2 C} "ban.list"
+vinyl v1 -cli "param.set ban_lurker_age 600"
+vinyl v1 -cliok "ban obj.last_hit < 1s"
 
 # /old survives, but len==6 gets removed
 client c1 {
@@ -166,29 +166,29 @@ client c1 {
 } -run
 
 # duration formatting - 0s is being tested above
-varnish v1 -cliok "ban obj.keep == 123ms"
-varnish v1 -cliexpect {(?s) obj\.keep == 12[1-3]ms\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 0.456s"
-varnish v1 -cliexpect {(?s) obj\.keep == 45[3-6]ms\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 6.789s"
-varnish v1 -cliexpect {(?s) obj\.keep == 6.78[5-9]s\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 42y"
-varnish v1 -cliexpect {(?s) obj\.keep == 42y\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 365d"
-varnish v1 -cliexpect {(?s) obj\.keep == 1y\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 9w"
-varnish v1 -cliexpect {(?s) obj\.keep == 9w\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 7d"
-varnish v1 -cliexpect {(?s) obj\.keep == 1w\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 3d"
-varnish v1 -cliexpect {(?s) obj\.keep == 3d\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 24h"
-varnish v1 -cliexpect {(?s) obj\.keep == 1d\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 18h"
-varnish v1 -cliexpect {(?s) obj\.keep == 18h\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 1.5h"
-varnish v1 -cliexpect {(?s) obj\.keep == 90m\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 10m"
-varnish v1 -cliexpect {(?s) obj\.keep == 10m\b} "ban.list"
-varnish v1 -cliok "ban obj.keep == 0.5m"
-varnish v1 -cliexpect {(?s) obj\.keep == 30s\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 123ms"
+vinyl v1 -cliexpect {(?s) obj\.keep == 12[1-3]ms\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 0.456s"
+vinyl v1 -cliexpect {(?s) obj\.keep == 45[3-6]ms\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 6.789s"
+vinyl v1 -cliexpect {(?s) obj\.keep == 6.78[5-9]s\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 42y"
+vinyl v1 -cliexpect {(?s) obj\.keep == 42y\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 365d"
+vinyl v1 -cliexpect {(?s) obj\.keep == 1y\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 9w"
+vinyl v1 -cliexpect {(?s) obj\.keep == 9w\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 7d"
+vinyl v1 -cliexpect {(?s) obj\.keep == 1w\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 3d"
+vinyl v1 -cliexpect {(?s) obj\.keep == 3d\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 24h"
+vinyl v1 -cliexpect {(?s) obj\.keep == 1d\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 18h"
+vinyl v1 -cliexpect {(?s) obj\.keep == 18h\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 1.5h"
+vinyl v1 -cliexpect {(?s) obj\.keep == 90m\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 10m"
+vinyl v1 -cliexpect {(?s) obj\.keep == 10m\b} "ban.list"
+vinyl v1 -cliok "ban obj.keep == 0.5m"
+vinyl v1 -cliexpect {(?s) obj\.keep == 30s\b} "ban.list"

@@ -1,11 +1,11 @@
-varnishtest "Junk request should not go to vcl_synth"
+vtest "Junk request should not go to vcl_synth"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_synth {
 		return (restart);
 	}

@@ -1,4 +1,4 @@
-varnishtest "request with body parked on waitinglist - almost identical to c00013.vtc"
+vtest "request with body parked on waitinglist - almost identical to c00013.vtc"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -17,15 +17,15 @@ server s1 {
 } -start
 
 # -cli because accept_filter may not be supported
-varnish v1 -cli "param.set accept_filter off"
+vinyl v1 -cli "param.set accept_filter off"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -url "/foo" -hdr "client: c1"
@@ -49,5 +49,5 @@ client c2 {
 
 client c1 -wait
 
-varnish v1 -expect busy_sleep >= 1
-varnish v1 -expect busy_wakeup >= 1
+vinyl v1 -expect busy_sleep >= 1
+vinyl v1 -expect busy_wakeup >= 1

@@ -1,4 +1,4 @@
-varnishtest "#1818: verify that grace works for hit_for_pass objects"
+vtest "#1818: verify that grace works for hit_for_pass objects"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -22,7 +22,7 @@ server s2 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.c) {
 			set req.backend_hint = s2;
@@ -53,9 +53,9 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set debug +waitinglist"
-varnish v1 -cliok "param.show debug"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +waitinglist"
+vinyl v1 -cliok "param.show debug"
 
 client c1 {
 	# This is a plain miss

@@ -1,4 +1,4 @@
-varnishtest "hash_always_miss overrides hit-for-pass"
+vtest "hash_always_miss overrides hit-for-pass"
 
 server s1 {
 	rxreq
@@ -14,7 +14,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.hash_always_miss = (req.http.Hash == "always-miss");
 	}

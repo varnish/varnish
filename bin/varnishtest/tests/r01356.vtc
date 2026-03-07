@@ -1,11 +1,11 @@
-varnishtest "#1356, req.body failure"
+vtest "#1356, req.body failure"
 
 server s1 {
 	rxreqhdrs
 	expect_close
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 client c1 {
 	txreq -req POST -nolen -hdr "Transfer-Encoding: carrier-pigeon"
@@ -23,7 +23,7 @@ client c1 {
 	txreq -req POST -nolen -hdr "Content-Length: 56"
 } -run
 
-# Check that varnishd still runs
+# Check that vinyld still runs
 
 server s1 {
 	rxreq

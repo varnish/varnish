@@ -1,4 +1,4 @@
-varnishtest "Streaming delivery and waitinglist rushing"
+vtest "Streaming delivery and waitinglist rushing"
 
 # Barrier to make sure that c1 connects to s1
 barrier b1 cond 2
@@ -23,7 +23,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-varnish v1 -arg "-p thread_pools=1" -arg "-p thread_pool_min=20" -arg "-p rush_exponent=2" -arg "-p debug=+syncvsl" -arg "-p debug=+waitinglist" -vcl+backend {
+vinyl v1 -arg "-p thread_pools=1" -arg "-p thread_pool_min=20" -arg "-p rush_exponent=2" -arg "-p debug=+syncvsl" -arg "-p debug=+waitinglist" -vcl+backend {
 	import vtc;
 	sub vcl_hit {
 		vtc.barrier_sync("${b3_sock}");
@@ -53,8 +53,8 @@ client c4 {
 } -start
 
 # Wait until c2-c4 are on the waitinglist
-varnish v1 -vsl_catchup
-varnish v1 -expect busy_sleep == 3
+vinyl v1 -vsl_catchup
+vinyl v1 -expect busy_sleep == 3
 
 # Open up the response headers from s1, and as a result HSH_Unbusy
 barrier b2 sync

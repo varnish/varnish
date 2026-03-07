@@ -1,11 +1,11 @@
-varnishtest "Test std.file_exists"
+vtest "Test std.file_exists"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

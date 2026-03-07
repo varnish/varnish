@@ -1,4 +1,4 @@
-varnishtest "shard director/int key"
+vtest "shard director/int key"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 

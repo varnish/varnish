@@ -1,4 +1,4 @@
-varnishtest "#2219: PROXY tight workspace handling"
+vtest "#2219: PROXY tight workspace handling"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-p workspace_client=9k" \
+vinyl v1 -arg "-p workspace_client=9k" \
 	   -arg "-p vsl_buffer=4k" \
 	   -proto PROXY \
 	   -vcl+backend {

@@ -1,4 +1,4 @@
-varnishtest "Test that we properly wait for certain 304 cases"
+vtest "Test that we properly wait for certain 304 cases"
 
 server s1 {
 	rxreq
@@ -21,7 +21,7 @@ server s1 {
 	txresp -body "x"
 } -start
 
-varnish v1 -arg "-p fetch_maxchunksize=64k" -vcl+backend {
+vinyl v1 -arg "-p fetch_maxchunksize=64k" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1s;
 		set beresp.grace = 1s;

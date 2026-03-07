@@ -1,4 +1,4 @@
-varnishtest "#1086 junk after gzip from backend and streaming enabled"
+vtest "#1086 junk after gzip from backend and streaming enabled"
 
 barrier b1 cond 2
 
@@ -30,7 +30,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.http.set-cookie == "BAR") {
 			set beresp.do_stream = false;

@@ -1,4 +1,4 @@
-varnishtest "VMOD unix"
+vtest "VMOD unix"
 
 # This test requires some manual verification, by checking the log,
 # because support for peer credentials via UDS varies by platform, see
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import unix;
 
 	sub vcl_backend_response {
@@ -58,7 +58,7 @@ logexpect l1 -v v1 -d 1 -c {
 } -run
 
 
-varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
+vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -68,7 +68,7 @@ varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
+vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -78,7 +78,7 @@ varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
+vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -88,7 +88,7 @@ varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
+vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -98,11 +98,11 @@ varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-varnish v1 -stop
+vinyl v1 -stop
 server s1 -wait
 server s1 -start
 
-varnish v2 -arg "-a ${tmpdir}/v2.sock" -vcl+backend {
+vinyl v2 -arg "-a ${tmpdir}/v2.sock" -vcl+backend {
 	import unix;
 
 	sub vcl_backend_response {

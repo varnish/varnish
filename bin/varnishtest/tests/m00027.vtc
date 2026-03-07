@@ -1,8 +1,8 @@
-varnishtest "Test object initialization failure"
+vtest "Test object initialization failure"
 
 server s1 { } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 logexpect l1 -v v1 -g raw {
 	fail add * VCL_Log "Should not happen"
@@ -11,7 +11,7 @@ logexpect l1 -v v1 -g raw {
 	fail clear
 } -start
 
-varnish v1 -errvcl "Missing dynamic backend address or port" {
+vinyl v1 -errvcl "Missing dynamic backend address or port" {
 	import debug;
 	import std;
 

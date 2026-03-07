@@ -1,4 +1,4 @@
-varnishtest "Test obj_stale vcl variables"
+vtest "Test obj_stale vcl variables"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.http.vbresp = "true";

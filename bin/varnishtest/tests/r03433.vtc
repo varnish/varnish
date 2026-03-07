@@ -1,4 +1,4 @@
-varnishtest "req.body and restarts"
+vtest "req.body and restarts"
 
 server s1 -repeat 2 {
 	rxreq
@@ -10,7 +10,7 @@ server s2 -repeat 2 {
 	txresp -bodylen 1000
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import vtc;
 

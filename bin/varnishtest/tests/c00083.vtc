@@ -1,6 +1,6 @@
-varnishtest "Test VSM _.index rewrite when too many deletes"
+vtest "Test VSM _.index rewrite when too many deletes"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend default { .host = "${bad_ip}"; }
 } -start
 
@@ -16,7 +16,7 @@ process p1 {
 #process p2 {tail -F ${tmpdir}/v1/_.vsm_child/_.index} -dump -start
 #process p3 {tail -F ${tmpdir}/v1/_.vsm_mgt/_.index} -dump -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b00 { .host = "${bad_ip}"; }
 	backend b01 { .host = "${bad_ip}"; }
 	backend b02 { .host = "${bad_ip}"; }
@@ -30,12 +30,12 @@ varnish v1 -vcl {
 	}
 }
 
-varnish v1 -cliok vcl.list
+vinyl v1 -cliok vcl.list
 
 process p1 -run
 
-varnish v1 -cliok "vcl.use vcl1"
-varnish v1 -cliok "vcl.discard vcl2"
+vinyl v1 -cliok "vcl.use vcl1"
+vinyl v1 -cliok "vcl.discard vcl2"
 
 delay 1
 
@@ -45,7 +45,7 @@ process p1 -run
 # and spent 10 lines on vcl2, so it takes ~ 15 backends to
 # cause a _.index rewrite.
 # Make it 20 to be on the safe side.
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b00 { .host = "${bad_ip}"; }
 	backend b01 { .host = "${bad_ip}"; }
 	backend b02 { .host = "${bad_ip}"; }
@@ -91,15 +91,15 @@ varnish v1 -vcl {
 	}
 }
 
-varnish v1 -cliok vcl.list
-varnish v1 -cliok backend.list
+vinyl v1 -cliok vcl.list
+vinyl v1 -cliok backend.list
 
 delay 1
 
 process p1 -run
 
-varnish v1 -cliok "vcl.use vcl1"
-varnish v1 -cliok "vcl.discard vcl3"
+vinyl v1 -cliok "vcl.use vcl1"
+vinyl v1 -cliok "vcl.discard vcl3"
 
 delay 1
 
@@ -123,7 +123,7 @@ process p1 {
 	test $nminus -eq 0
 } -run
 
-varnish v1 -cliok "stop"
+vinyl v1 -cliok "stop"
 
 delay 1
 
@@ -135,7 +135,7 @@ process p1 {
 	test $nminus -eq 2
 } -run
 
-varnish v1 -cliok "start"
+vinyl v1 -cliok "start"
 
 delay 1
 

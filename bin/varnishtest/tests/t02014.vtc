@@ -1,4 +1,4 @@
-varnishtest "Exercise h/2 sender flow control code"
+vtest "Exercise h/2 sender flow control code"
 
 barrier b1 sock 3
 barrier b2 sock 3
@@ -19,7 +19,7 @@ server s2 {
 	txresp -bodylen 66300
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_backend_fetch {
@@ -35,9 +35,9 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.reset h2_initial_window_size"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.reset h2_initial_window_size"
 
 client c1 {
 	stream 0 {
@@ -67,7 +67,7 @@ client c1 {
 	stream 0 -wait
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 logexpect l2 -v v1 -g raw {
 	expect * * ReqMethod GET

@@ -1,4 +1,4 @@
-varnishtest "Backend IMS'ing g[un]zip'ed objects"
+vtest "Backend IMS'ing g[un]zip'ed objects"
 
 server s1 {
 	rxreq
@@ -29,7 +29,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.foobar = beresp.http.content-encoding;
 		if (bereq.url == "/1") {

@@ -1,4 +1,4 @@
-varnishtest "Test timestamps"
+vtest "Test timestamps"
 
 # We can't test the value of a timestamp, but this should fail
 # if we can't set the header at all.
@@ -18,7 +18,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	import std;
 

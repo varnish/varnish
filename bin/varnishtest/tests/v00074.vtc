@@ -1,4 +1,4 @@
-varnishtest "Clients in backend wait queue wakeup when backend goes sick"
+vtest "Clients in backend wait queue wakeup when backend goes sick"
 
 ################### Backend goes sick from CLI ##########################
 barrier b1 cond 4 -cyclic
@@ -11,7 +11,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -65,21 +65,21 @@ client c4 {
 barrier b2 sync
 
 # Going from auto to sick should wakeup reqs in the wait queue
-varnish v1 -cliok "backend.set_health s1 sick"
+vinyl v1 -cliok "backend.set_health s1 sick"
 
 client c1 -wait
 client c2 -wait
 client c3 -wait
 client c4 -wait
-varnish v1 -expect backend_wait == 3
-varnish v1 -expect backend_wait_fail == 3
+vinyl v1 -expect backend_wait == 3
+vinyl v1 -expect backend_wait_fail == 3
 
 #################### Backend goes sick from probe #######################
 
 barrier b3 sock 4
 barrier b4 sock 4 -cyclic
 
-varnish v0 -vcl {
+vinyl v0 -vcl {
 	import vtc;
 
 	backend be none;
@@ -95,8 +95,8 @@ varnish v0 -vcl {
 	}
 } -start
 
-varnish v1 -stop
-varnish v1 -vcl {
+vinyl v1 -stop
+vinyl v1 -vcl {
 	backend be {
 		.host = "${v0_addr}";
 		.port = "${v0_port}";
@@ -118,7 +118,7 @@ varnish v1 -vcl {
 		return(pass);
 	}
 } -start
-varnish v1 -cliok "backend.set_health be auto"
+vinyl v1 -cliok "backend.set_health be auto"
 
 client c5 {
 	txreq
@@ -161,14 +161,14 @@ client c5 -wait
 client c6 -wait
 client c7 -wait
 client c8 -wait
-varnish v1 -expect backend_wait == 3
-varnish v1 -expect backend_wait_fail == 3
+vinyl v1 -expect backend_wait == 3
+vinyl v1 -expect backend_wait_fail == 3
 
 ########## Admin Healthy -> auto and probe indicates sick ###############
 barrier b5 sock 4 -cyclic
 barrier b6 sock 4
 
-varnish v0 -vcl {
+vinyl v0 -vcl {
 	import vtc;
 	import std;
 
@@ -184,8 +184,8 @@ varnish v0 -vcl {
 	}
 }
 
-varnish v1 -stop
-varnish v1 -vcl {
+vinyl v1 -stop
+vinyl v1 -vcl {
 	backend be {
 		.host = "${v0_addr}";
 		.port = "${v0_port}";
@@ -204,9 +204,9 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -cliok "backend.set_health be healthy"
-varnish v1 -cliok "param.set backend_wait_timeout 1h"
-varnish v1 -cliok "param.set backend_wait_limit 10"
+vinyl v1 -cliok "backend.set_health be healthy"
+vinyl v1 -cliok "param.set backend_wait_timeout 1h"
+vinyl v1 -cliok "param.set backend_wait_limit 10"
 
 client c9 {
 	txreq
@@ -247,17 +247,17 @@ client c12 {
 # make sure c10-12 are already in the queue
 barrier b6 sync
 
-varnish v1 -cliok "param.reset backend_wait_timeout"
-varnish v1 -cliok "param.reset backend_wait_limit"
+vinyl v1 -cliok "param.reset backend_wait_timeout"
+vinyl v1 -cliok "param.reset backend_wait_limit"
 
 # Going back to probe (auto) that is sick should
 # wake up reqs in the wait queue, even if queuing
 # is currently disabled.
-varnish v1 -cliok "backend.set_health be auto"
+vinyl v1 -cliok "backend.set_health be auto"
 
 client c9 -wait
 client c10 -wait
 client c11 -wait
 client c12 -wait
-varnish v1 -expect backend_wait == 3
-varnish v1 -expect backend_wait_fail == 3
+vinyl v1 -expect backend_wait == 3
+vinyl v1 -expect backend_wait_fail == 3

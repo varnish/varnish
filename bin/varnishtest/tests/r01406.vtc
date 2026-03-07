@@ -1,11 +1,11 @@
-varnishtest "#1406 empty header"
+vtest "#1406 empty header"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -arg "-p vcc_feature=+allow_inline_c" -vcl+backend {
+vinyl v1 -arg "-p vcc_feature=+allow_inline_c" -vcl+backend {
 	import std ;
 
 	C{

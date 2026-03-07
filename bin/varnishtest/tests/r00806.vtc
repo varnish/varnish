@@ -1,4 +1,4 @@
-varnishtest "Content-Length in pass'ed 304 does not trigger body fetch"
+vtest "Content-Length in pass'ed 304 does not trigger body fetch"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv { return(pass);}
 	sub vcl_deliver {
 		set resp.http.CL = resp.http.content-length;

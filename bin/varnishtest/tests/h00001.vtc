@@ -1,4 +1,4 @@
-varnishtest "Basic HAproxy test"
+vtest "Basic HAproxy test"
 
 feature ignore_unknown_macro
 

@@ -1,11 +1,11 @@
-varnishtest "Test return(synth) from vcl_pipe"
+vtest "Test return(synth) from vcl_pipe"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pipe);
 	}

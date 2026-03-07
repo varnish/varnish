@@ -1,11 +1,11 @@
-varnishtest "Stevedores RR, beresp.storage"
+vtest "Stevedores RR, beresp.storage"
 
 server s1 -repeat 7 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 \
+vinyl v1 \
     -arg "-ss1=default,1m" \
     -arg "-ss2=default,1m" \
     -arg "-ss0=default,1m" \
@@ -56,7 +56,7 @@ client c1 {
 	expect resp.http.storage == resp.http.storage-hint
 } -run
 
-varnish v1 \
+vinyl v1 \
     -syntax 4.1 \
     -errvcl "Only available when VCL syntax <= 4.0" {
 	import vtc;

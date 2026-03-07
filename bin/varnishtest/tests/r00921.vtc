@@ -1,4 +1,4 @@
-varnishtest "VCC type issue in regsub arg 1"
+vtest "VCC type issue in regsub arg 1"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.http.bar = regsub(req.url, ".*", client.ip);
 		set req.http.foo = regsub(client.ip, "#.*", client.ip);

@@ -1,11 +1,11 @@
-varnishtest "Whitespace after colon is optional"
+vtest "Whitespace after colon is optional"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq -hdr "Host:qux" -hdr "Authorization:Basic Zm9vOmJhcg=="

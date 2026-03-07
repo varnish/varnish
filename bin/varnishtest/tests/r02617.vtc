@@ -1,11 +1,11 @@
-varnishtest "Test undefined-behaviour: signed integer overflow"
+vtest "Test undefined-behaviour: signed integer overflow"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 } -start
 

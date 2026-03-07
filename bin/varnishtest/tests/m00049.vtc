@@ -1,4 +1,4 @@
-varnishtest "VMOD vfp & vdp - request bodies"
+vtest "VMOD vfp & vdp - request bodies"
 
 # this test mirrors m00048.vtc with directions reversed
 
@@ -10,7 +10,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_fetch {
@@ -36,7 +36,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_fetch {
@@ -52,9 +52,9 @@ client c1 {
 
 # ---
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_fetch {
@@ -88,7 +88,7 @@ server s1 -repeat 4 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 	import std;
 

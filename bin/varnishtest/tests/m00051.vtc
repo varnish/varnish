@@ -1,6 +1,6 @@
-varnishtest "catflap"
+vtest "catflap"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	import std;
 	import vtc;

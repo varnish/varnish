@@ -1,4 +1,4 @@
-varnishtest "shard director by req.url (default)"
+vtest "shard director by req.url (default)"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {

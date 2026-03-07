@@ -1,4 +1,4 @@
-varnishtest "Sending proxy headers to backend"
+vtest "Sending proxy headers to backend"
 
 # This test is kind of hairy.
 # We don't have code in server to validate PROXY headers
@@ -43,7 +43,7 @@ server s1 {
 	txresp -hdr "Connection: close" -body "pipe"
 } -start
 
-varnish v1 -proto PROXY -vcl+backend {
+vinyl v1 -proto PROXY -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -51,7 +51,7 @@ varnish v1 -proto PROXY -vcl+backend {
 	}
 } -start
 
-varnish v2 -proto PROXY -vcl {
+vinyl v2 -proto PROXY -vcl {
 	import std;
 
 	backend bp1 {

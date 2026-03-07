@@ -1,4 +1,4 @@
-varnishtest "Test requests other than GET are cacheable"
+vtest "Test requests other than GET are cacheable"
 
 barrier b1 cond 2
 
@@ -14,7 +14,7 @@ server s1 {
 	barrier b1 sync
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		# We ignore the actual body for this test.
 		set req.http.method = req.method;

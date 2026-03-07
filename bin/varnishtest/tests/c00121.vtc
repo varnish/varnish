@@ -1,4 +1,4 @@
-varnishtest "Abstract UDS backend: change path, drop poll"
+vtest "Abstract UDS backend: change path, drop poll"
 
 feature abstract_uds
 
@@ -22,7 +22,7 @@ server s2 -listen "@${vtcid}.s2.sock" {
 	}
 } -start
 
-varnish v1 -arg "-a @${vtcid}.v1.sock" -vcl {
+vinyl v1 -arg "-a @${vtcid}.v1.sock" -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -36,7 +36,7 @@ varnish v1 -arg "-a @${vtcid}.v1.sock" -vcl {
 
 delay 1
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -50,7 +50,7 @@ varnish v1 -vcl {
 
 delay 1
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.path = "@${vtcid}.s1.sock";
 	}
@@ -58,8 +58,8 @@ varnish v1 -vcl {
 
 delay 1
 
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "backend.list -p"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "backend.list -p"
 
 server s1 -break {
 	rxreq
@@ -81,11 +81,11 @@ client c1 -connect "@${vtcid}.v1.sock" {
 ########################################
 # coverage
 
-varnish v1 -errvcl {Backend path: The empty abstract socket name is not supported} {
+vinyl v1 -errvcl {Backend path: The empty abstract socket name is not supported} {
 	backend s1 {
 		.path = "@";
 	}
 }
 
 shell -err -expect "Error: Got no socket(s) for a0=@ (The empty abstract socket name is not supported)" \
-	"varnishd -n ${tmpdir}/v0 -a @ -b None"
+	"vinyld -n ${tmpdir}/v0 -a @ -b None"

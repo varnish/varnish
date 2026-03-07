@@ -1,11 +1,11 @@
-varnishtest "VCC reference bug"
+vtest "VCC reference bug"
 
 server s1 {
 	rxreq
 	txresp -body "FOO"
 } -start
 
-varnish v1 -errvcl {Undefined backend s-1, first reference:} {
+vinyl v1 -errvcl {Undefined backend s-1, first reference:} {
 	backend b { .host = "${localhost}"; }
 	sub s1 {
 	}

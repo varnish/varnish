@@ -1,4 +1,4 @@
-varnishtest "Test case for #1109 - Gzip+ESI broken for large included objects"
+vtest "Test case for #1109 - Gzip+ESI broken for large included objects"
 
 server s1 {
 	rxreq
@@ -21,7 +21,7 @@ server s1 {
 	txresp -bodylen 4074
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-pfetch_chunksize=4k" \
 	-arg "-pgzip_level=0" \
 	-arg "-pthread_pool_stack=131072" \

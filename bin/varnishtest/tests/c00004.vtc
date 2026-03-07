@@ -1,4 +1,4 @@
-varnishtest "Test Vary functionality"
+vtest "Test Vary functionality"
 
 barrier b1 cond 3
 
@@ -35,7 +35,7 @@ server s1 {
 	txresp -hdr "Cache-Control: no-cache"
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq -hdr "Foobar: 1"

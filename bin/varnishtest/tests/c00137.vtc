@@ -1,4 +1,4 @@
-varnishtest "Tweak uncacheable_ttl for built-in VCL"
+vtest "Tweak uncacheable_ttl for built-in VCL"
 
 server s1 {
 	loop 3 {
@@ -12,11 +12,11 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -cliok "param.set default_ttl 0s"
-varnish v1 -cliok "param.set default_grace 0s"
-varnish v1 -cliok "param.set default_keep 0s"
-varnish v1 -cliok "param.set uncacheable_ttl 1ms"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set default_ttl 0s"
+vinyl v1 -cliok "param.set default_grace 0s"
+vinyl v1 -cliok "param.set default_keep 0s"
+vinyl v1 -cliok "param.set uncacheable_ttl 1ms"
+vinyl v1 -vcl+backend {
 	sub vcl_miss {
 		set req.http.is-hitmiss = req.is_hitmiss;
 	}
@@ -29,7 +29,7 @@ client c1 -repeat 2 {
 	delay 0.5
 } -run
 
-varnish v1 -cliok "param.set uncacheable_ttl 1m"
+vinyl v1 -cliok "param.set uncacheable_ttl 1m"
 
 client c1 -run
 server s1 -wait

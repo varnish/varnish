@@ -1,4 +1,4 @@
-varnishtest "r01879: Check duplicate headers handling on IMS header merge"
+vtest "r01879: Check duplicate headers handling on IMS header merge"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	txresp -status 304 -hdr {etag: "bar"}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_backend_response {

@@ -1,11 +1,11 @@
-varnishtest "For HTTP/1.1 requests, Host is mandatory"
+vtest "For HTTP/1.1 requests, Host is mandatory"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

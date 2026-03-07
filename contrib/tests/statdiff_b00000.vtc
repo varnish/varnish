@@ -1,4 +1,4 @@
-varnishtest "varnishstatdiff coverage"
+vtest "varnishstatdiff coverage"
 
 feature cmd "command -v diff"
 
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
 shell {
 	varnishstat -n ${v1_name} -1 \
@@ -20,7 +20,7 @@ client c1 {
 	rxresp
 } -start
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 shell {
 	varnishstat -n ${v1_name} -1 \

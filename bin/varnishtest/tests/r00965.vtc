@@ -1,11 +1,11 @@
-varnishtest "restart in vcl_miss #965"
+vtest "restart in vcl_miss #965"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.X-Banned == "check") {
 			unset req.http.X-Banned;

@@ -1,11 +1,11 @@
-varnishtest "test restart in miss"
+vtest "test restart in miss"
 
 server s1 {
 	rxreq
 	txresp -body "FOOBAR"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_recv {
 		if (req.restarts > 0) {

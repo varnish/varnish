@@ -1,4 +1,4 @@
-varnishtest	"test sigsegv handler"
+vtest	"test sigsegv handler"
 
 # Under ASAN, the stack layout is different and STACK OVERFLOW is
 # never printed.
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-p feature=+no_coredump" \
 	-arg "-p vcc_feature=+allow_inline_c" \
 	-arg "-p thread_pool_stack=128k" \
@@ -46,25 +46,25 @@ client c1 {
 
 delay 3
 
-varnish v1 -cliexpect "STACK OVERFLOW" "panic.show"
-varnish v1 -clijson "panic.show -j"
+vinyl v1 -cliexpect "STACK OVERFLOW" "panic.show"
+vinyl v1 -clijson "panic.show -j"
 
-varnish v1 -cliok "panic.clear"
+vinyl v1 -cliok "panic.clear"
 
 # Also check without the handler
-varnish v1 -cliok "param.set sigsegv_handler off"
-varnish v1 -vcl+backend {} -start
+vinyl v1 -cliok "param.set sigsegv_handler off"
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-varnish v1 -expectexit 0x40
+vinyl v1 -expectexit 0x40
 
 ####################
 
-varnish v2 \
+vinyl v2 \
 	-arg "-p feature=+no_coredump" \
 	-arg "-p vcc_feature=+allow_inline_c" \
 	-vcl+backend {
@@ -86,9 +86,9 @@ client c2 -connect ${v2_sock} {
 
 delay 3
 
-varnish v2 -cliexpect "[bB]us error|Segmentation [fF]ault" "panic.show"
-varnish v2 -clijson "panic.show -j"
+vinyl v2 -cliexpect "[bB]us error|Segmentation [fF]ault" "panic.show"
+vinyl v2 -clijson "panic.show -j"
 
-varnish v2 -cliok "panic.clear"
+vinyl v2 -cliok "panic.clear"
 
-varnish v2 -expectexit 0x40
+vinyl v2 -expectexit 0x40

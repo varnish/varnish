@@ -1,6 +1,6 @@
-varnishtest "VMOD blob blob object interface"
+vtest "VMOD blob blob object interface"
 
-varnish v1 -arg "-i serverid" -vcl {
+vinyl v1 -arg "-i serverid" -vcl {
 	import blob;
 	backend b None;
 
@@ -92,7 +92,7 @@ client c1 {
 # run twice to test retrieving cached encodings
 client c1 -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -165,7 +165,7 @@ client c1 {
 # run twice to test retrieving cached encodings
 client c1 -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -255,7 +255,7 @@ client c2 {
 # run twice
 client c2 -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -331,8 +331,8 @@ client c3 {
 client c3 -run
 
 # Discard to test object finalization
-varnish v1 -cliok "vcl.discard vcl1"
-varnish v1 -cliok "vcl.discard vcl2"
+vinyl v1 -cliok "vcl.discard vcl1"
+vinyl v1 -cliok "vcl.discard vcl2"
 
 # Require case=DEFAULT in the .encode() method where necessary
 
@@ -341,7 +341,7 @@ server s1 -repeat 8 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import blob;
 
 	sub vcl_init {

@@ -1,6 +1,6 @@
-varnishtest "retry in vcl_backend_error"
+vtest "retry in vcl_backend_error"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 
 	backend b1 { .host = "${bad_backend}"; }
 
@@ -13,9 +13,9 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set connect_timeout 1"
-varnish v1 -cliok "param.set max_retries 2"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set connect_timeout 1"
+vinyl v1 -cliok "param.set max_retries 2"
 
 client c1 {
 	txreq
@@ -23,5 +23,5 @@ client c1 {
 	expect resp.status == 504
 } -run
 
-varnish v1 -expect backend_fail == 3
-varnish v1 -expect fetch_failed == 3
+vinyl v1 -expect backend_fail == 3
+vinyl v1 -expect fetch_failed == 3

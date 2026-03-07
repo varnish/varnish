@@ -1,4 +1,4 @@
-varnishtest "very very very long return header"
+vtest "very very very long return header"
 
 server s1 {
 	rxreq
@@ -6,10 +6,10 @@ server s1 {
 	txresp -noserver -hdr "Location: ${string,repeat,8136,1}" -nodate -body {foo}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
-varnish v1 -cliok "param.set http_resp_hdr_len 32768"
+vinyl v1 -cliok "param.set http_resp_hdr_len 32768"
 
 client c1 {
 	txreq

@@ -1,4 +1,4 @@
-varnishtest "storage failure with 304 response"
+vtest "storage failure with 304 response"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 \
+vinyl v1 \
     -arg "-smalloc=malloc,1M" \
     -arg "-scondfetch=debug,maxspace=1024B" \
     -vcl+backend {
@@ -22,7 +22,7 @@ varnish v1 \
 	}
 } -start
 
-varnish v1 -cliok "debug.fragfetch 2048"
+vinyl v1 -cliok "debug.fragfetch 2048"
 
 client c1 {
 	txreq

@@ -1,11 +1,11 @@
-varnishtest "TIME +/- DURATION -> TIME"
+vtest "TIME +/- DURATION -> TIME"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_deliver {
 		set resp.http.bar = now + 4 d;

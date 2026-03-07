@@ -1,4 +1,4 @@
-varnishtest "Test all 8 gzip stopbit residuals"
+vtest "Test all 8 gzip stopbit residuals"
 
 server s1 {
 	rxreq
@@ -59,7 +59,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;
@@ -67,9 +67,9 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set http_gzip_support true"
-varnish v1 -cliok "param.set debug +esi_chop"
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set http_gzip_support true"
+vinyl v1 -cliok "param.set debug +esi_chop"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -hdr "Accept-Encoding: gzip"
@@ -86,4 +86,4 @@ client c1 {
 	expect resp.bodylen == 252
 } -run
 
-varnish v1 -expect esi_errors == 0
+vinyl v1 -expect esi_errors == 0

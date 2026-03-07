@@ -1,4 +1,4 @@
-varnishtest "Test VCL regsub()"
+vtest "Test VCL regsub()"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 		-body "012345\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.Snafu1 = regsub(beresp.http.Foobar, "ar", "\0\0");
 		set beresp.http.Snafu2 =

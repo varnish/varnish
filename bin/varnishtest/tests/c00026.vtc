@@ -1,4 +1,4 @@
-varnishtest "Test client If-None-Match and If-Modified-Since together"
+vtest "Test client If-None-Match and If-Modified-Since together"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	    -bodylen 10
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 client c1 {
 	txreq

@@ -1,4 +1,4 @@
-varnishtest "304 body handling with ESI"
+vtest "304 body handling with ESI"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

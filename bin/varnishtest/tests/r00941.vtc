@@ -1,4 +1,4 @@
-varnishtest "beresp.ttl set in vcl takes effect"
+vtest "beresp.ttl set in vcl takes effect"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -body "FOOBAR"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1000s;
 	}

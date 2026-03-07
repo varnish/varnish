@@ -1,4 +1,4 @@
-varnishtest "Test include vs. unsafe_path and include glob-ing"
+vtest "Test include vs. unsafe_path and include glob-ing"
 
 server s1 {
 	rxreq
@@ -7,20 +7,20 @@ server s1 {
 
 shell "echo > ${tmpdir}/_.c00053"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	include "${tmpdir}/_.c00053";
 }
 
-varnish v1 -cliok "param.set vcc_feature -unsafe_path"
+vinyl v1 -cliok "param.set vcc_feature -unsafe_path"
 
-varnish v1 -errvcl {' is unsafe} {
+vinyl v1 -errvcl {' is unsafe} {
 	backend default { .host = "${s1_sock}"; }
 	include "${tmpdir}/_.c00053";
 }
 
-varnish v1 -cliok "param.set vcl_path ${tmpdir}"
+vinyl v1 -cliok "param.set vcl_path ${tmpdir}"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	include "_.c00053";
 }
 
@@ -28,9 +28,9 @@ shell "rm -f ${tmpdir}/_.c00053"
 
 # Testing of include +glob
 
-varnish v1 -cliok "param.set vcc_feature +unsafe_path"
+vinyl v1 -cliok "param.set vcc_feature +unsafe_path"
 
-varnish v1 -errvcl "glob pattern matched no files." {
+vinyl v1 -errvcl "glob pattern matched no files." {
 	vcl 4.0;
 
 	include +glob "${tmpdir}/Q*.vcl";
@@ -42,7 +42,7 @@ shell {
 	echo 'vcl 4.0; backend default { .host = "0:0"; } include +glob "./sub_*.vcl";' > ${tmpdir}/top.vcl
 }
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	include +glob "${tmpdir}/sub_*.vcl";
 } -start
 
@@ -53,13 +53,13 @@ client c1 {
 	expect resp.http.bar == bar
 } -run
 
-varnish v1 -errvcl {needs absolute filename of including file.} {
+vinyl v1 -errvcl {needs absolute filename of including file.} {
 	include +glob "./sub_*.vcl";
 	backend default none;
 }
 
-varnish v1 -cliok "vcl.load foo ${tmpdir}/top.vcl"
-varnish v1 -cliok "vcl.use foo"
+vinyl v1 -cliok "vcl.load foo ${tmpdir}/top.vcl"
+vinyl v1 -cliok "vcl.use foo"
 
 client c1 {
 	txreq
@@ -68,7 +68,7 @@ client c1 {
 	expect resp.http.bar == bar
 } -run
 
-varnish v1 -errvcl "+glob can only be used with absolute paths or relative paths starting with './'" {
+vinyl v1 -errvcl "+glob can only be used with absolute paths or relative paths starting with './'" {
 	include +glob "sub_*.vcl";
 	backend default none;
 }

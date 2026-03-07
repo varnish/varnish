@@ -1,18 +1,18 @@
-varnishtest	"trivial run of varnishadm in pass mode"
+vtest	"trivial run of varnishadm in pass mode"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 process p1 -log {varnishadm -t 12 -p -n ${v1_name}} -start
 

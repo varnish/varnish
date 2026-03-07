@@ -1,4 +1,4 @@
-varnishtest "Decreasing http_max_hdr"
+vtest "Decreasing http_max_hdr"
 
 server s1 {
 	rxreq
@@ -30,7 +30,7 @@ server s1 {
 		-hdr "h24: 24"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {
@@ -40,7 +40,7 @@ client c1 {
 	expect resp.http.h24 == 24
 } -run
 
-varnish v1 -cliok {param.set http_max_hdr 32}
+vinyl v1 -cliok {param.set http_max_hdr 32}
 
 client c1 {
 	txreq

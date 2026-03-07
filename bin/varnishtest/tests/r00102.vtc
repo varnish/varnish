@@ -1,4 +1,4 @@
-varnishtest "Test POST->GET conversion"
+vtest "Test POST->GET conversion"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 		-body "012345\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.method == "POST") {
 			set req.method = "GET";

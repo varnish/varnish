@@ -1,4 +1,4 @@
-varnishtest "Check the between_bytes_timeout behaves from vcl"
+vtest "Check the between_bytes_timeout behaves from vcl"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	send "Baba\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.between_bytes_timeout = 2s;
 	}

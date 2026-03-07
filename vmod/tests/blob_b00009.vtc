@@ -1,11 +1,11 @@
-varnishtest "VMOD blob test all examples from the vcc/rst"
+vtest "VMOD blob test all examples from the vcc/rst"
 
 server s1 {
     rxreq
     txresp
 } -start
 
-varnish v1 -arg "-p http_max_hdr=128" -vcl+backend {
+vinyl v1 -arg "-p http_max_hdr=128" -vcl+backend {
     import blob;
     import std;
 

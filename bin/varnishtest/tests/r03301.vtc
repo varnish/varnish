@@ -1,6 +1,6 @@
-varnishtest "Issue 3301: Illegal error codes"
+vtest "Issue 3301: Illegal error codes"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend default none;
 	sub vcl_recv {
 		if (req.url == "/test1") {
@@ -20,7 +20,7 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set feature +http2"
 
 client c1 {
 	stream 1 {

@@ -1,4 +1,4 @@
-varnishtest "Check read-head / partial pipelining"
+vtest "Check read-head / partial pipelining"
 
 server s1 {
 	rxreq
@@ -9,11 +9,11 @@ server s1 {
 	txresp -body "foobar"
 } -start
 
-varnish v1 -vcl+backend {}
+vinyl v1 -vcl+backend {}
 
 # NB: The accept_filter param may not exist.
-varnish v1 -cli "param.set accept_filter false"
-varnish v1 -start
+vinyl v1 -cli "param.set accept_filter false"
+vinyl v1 -start
 
 client c1 {
 	send "GET /foo HTTP/1.1\r\nHost: foo\r\n\r\nGET "
@@ -33,4 +33,4 @@ client c1 {
 	expect resp.http.x-varnish == "1005 1004"
 } -run
 
-varnish v1 -expect sess_readahead == 2
+vinyl v1 -expect sess_readahead == 2

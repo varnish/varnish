@@ -1,4 +1,4 @@
-varnishtest "Change UDS backend: change path, drop poll"
+vtest "Change UDS backend: change path, drop poll"
 
 server s1 -listen "${tmpdir}/s1.sock" {
 	non_fatal
@@ -20,7 +20,7 @@ server s2 -listen "${tmpdir}/s2.sock" {
 	}
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -34,7 +34,7 @@ varnish v1 -vcl {
 
 delay 1
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -48,7 +48,7 @@ varnish v1 -vcl {
 
 delay 1
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.path = "${s1_sock}";
 	}
@@ -56,8 +56,8 @@ varnish v1 -vcl {
 
 delay 1
 
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "backend.list -p"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "backend.list -p"
 
 server s1 -break {
 	rxreq

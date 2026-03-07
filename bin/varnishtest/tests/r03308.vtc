@@ -1,4 +1,4 @@
-varnishtest "Unformattable VCL_TIME"
+vtest "Unformattable VCL_TIME"
 
 feature 64bit
 
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

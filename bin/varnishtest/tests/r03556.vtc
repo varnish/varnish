@@ -1,4 +1,4 @@
-varnishtest "#3556"
+vtest "#3556"
 
 server s1 {
 	rxreq
@@ -8,8 +8,8 @@ server s1 {
 	rxreq
 } -start
 
-varnish v1 -cliok "param.set first_byte_timeout 10"
-varnish v1 -vcl+backend {} -start
+vinyl v1 -cliok "param.set first_byte_timeout 10"
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq

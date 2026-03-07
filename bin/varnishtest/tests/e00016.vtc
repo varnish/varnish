@@ -1,4 +1,4 @@
-varnishtest "ESI request can't be turned off midstream"
+vtest "ESI request can't be turned off midstream"
 
 server s1 {
 	rxreq
@@ -27,10 +27,10 @@ server s1 {
 } -start
 
 # give enough stack to 32bit systems
-varnish v1 -cliok "param.set thread_pool_stack 128k"
-varnish v1 -cliok "param.set feature +esi_disable_xml_check"
+vinyl v1 -cliok "param.set thread_pool_stack 128k"
+vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
 
-varnish v1 -syntax 4.0 -vcl+backend {
+vinyl v1 -syntax 4.0 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -50,5 +50,5 @@ client c1 {
 }
 
 client c1 -run
-varnish v1 -expect esi_errors == 0
-varnish v1 -expect MAIN.s_resp_bodybytes == 105
+vinyl v1 -expect esi_errors == 0
+vinyl v1 -expect MAIN.s_resp_bodybytes == 105

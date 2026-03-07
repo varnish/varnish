@@ -1,11 +1,11 @@
-varnishtest "Duplicate pseudo-headers"
+vtest "Duplicate pseudo-headers"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -arg "-p feature=+http2" -vcl+backend {
+vinyl v1 -arg "-p feature=+http2" -vcl+backend {
 } -start
 
 #client c1 {

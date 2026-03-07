@@ -1,4 +1,4 @@
-varnishtest "backend connection close"
+vtest "backend connection close"
 
 server s1 {
 	rxreq
@@ -29,7 +29,7 @@ server s1 {
 	expect_close
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -65,5 +65,5 @@ client c1 {
 
 server s1 -wait
 
-varnish v1 -expect MAIN.backend_recycle == 0
-varnish v1 -expect VBE.vcl1.s1.conn == 0
+vinyl v1 -expect MAIN.backend_recycle == 0
+vinyl v1 -expect VBE.vcl1.s1.conn == 0

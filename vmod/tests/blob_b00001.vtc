@@ -1,6 +1,6 @@
-varnishtest "VMOD blob IDENTITY decode() n chars"
+vtest "VMOD blob IDENTITY decode() n chars"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	backend b None;
 

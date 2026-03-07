@@ -1,6 +1,6 @@
-varnishtest "Test WS_ReserveSize() overflow behavior"
+vtest "Test WS_ReserveSize() overflow behavior"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import vtc;
 	import std;
 

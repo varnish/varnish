@@ -1,4 +1,4 @@
-varnishtest "Streaming range early finish"
+vtest "Streaming range early finish"
 
 barrier b1 cond 2
 
@@ -17,7 +17,7 @@ server s1 {
 	send "B"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

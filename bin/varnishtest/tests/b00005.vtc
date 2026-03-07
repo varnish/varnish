@@ -1,11 +1,11 @@
-varnishtest "Check that -s works"
+vtest "Check that -s works"
 
 server s1 {
 	rxreq
 	txresp -hdr "Connection: close" -body "012345\n"
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-s file,${tmpdir}/varnishtest_backing,10M" \
 	-vcl+backend {} -start
 
@@ -17,5 +17,5 @@ client c1 {
 
 server s1 -wait
 
-varnish v1 -stop
+vinyl v1 -stop
 shell "rm ${tmpdir}/varnishtest_backing"

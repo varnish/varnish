@@ -1,6 +1,6 @@
-varnishtest "ACL folding with negative matches"
+vtest "ACL folding with negative matches"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	backend dummy None;

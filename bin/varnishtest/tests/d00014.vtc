@@ -1,8 +1,8 @@
-varnishtest "Backend as a boolean expression"
+vtest "Backend as a boolean expression"
 
 server s1 -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {

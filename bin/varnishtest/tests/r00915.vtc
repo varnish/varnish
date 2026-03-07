@@ -1,4 +1,4 @@
-varnishtest "error object allocation with persistent"
+vtest "error object allocation with persistent"
 
 feature persistent_storage
 
@@ -9,7 +9,7 @@ server s1 {
 
 shell "rm -f ${tmpdir}/_.per"
 
-varnish v1 \
+vinyl v1 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
 	-vcl+backend {

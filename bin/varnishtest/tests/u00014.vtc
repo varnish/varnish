@@ -1,4 +1,4 @@
-varnishtest "VSL compound queries"
+vtest "VSL compound queries"
 
 # This test case compares individual query scenarios to their
 # compounded queries counterparts.
@@ -11,7 +11,7 @@ server s1 {
 	txresp -status 503
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
 client c1 {
 	txreq
@@ -164,6 +164,6 @@ logexpect l1 -v v1 -g raw -q {CLI ~ "\\nvcl1.s1"} {
 	expect 0 0 CLI "vcl1.s1 +healthy"
 } -start
 
-varnish v1 -cliok backend.list
+vinyl v1 -cliok backend.list
 
 logexpect l1 -wait

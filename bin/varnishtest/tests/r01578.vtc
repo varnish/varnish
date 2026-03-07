@@ -1,11 +1,11 @@
-varnishtest "max-age and age"
+vtest "max-age and age"
 
 server s1 {
 	rxreq
 	txresp -hdr "Cache-Control: max-age=23" -hdr "Age: 4" -bodylen 40
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.x-ttl = beresp.ttl;
 	}

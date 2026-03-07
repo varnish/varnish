@@ -1,4 +1,4 @@
-varnishtest "Detect probe interval inversion"
+vtest "Detect probe interval inversion"
 
 # For lack of a better mechanism this test passes by not timing out.
 # This is not enough to guarantee that there wasn't a bug in probe
@@ -9,9 +9,9 @@ server s1 -repeat 5 { # probe requests
 	txresp
 } -start
 
-varnish v1 -cliok {param.set vcc_feature -err_unref}
+vinyl v1 -cliok {param.set vcc_feature -err_unref}
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b1 {
 		.host = "${s1_sock}";
 		.probe = { .interval = 1s; }

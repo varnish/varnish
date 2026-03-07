@@ -1,4 +1,4 @@
-varnishtest "Check that the first_byte_timeout works"
+vtest "Check that the first_byte_timeout works"
 
 # From VCL
 
@@ -8,7 +8,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -43,12 +43,12 @@ client c2 {
 
 # From CLI
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
 }
-varnish v1 -cliok "param.set first_byte_timeout 0.5"
+vinyl v1 -cliok "param.set first_byte_timeout 0.5"
 
 server s1 {
 	rxreq
@@ -74,7 +74,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -92,4 +92,4 @@ server s1 {
 
 client c2 -run
 
-varnish v1 -expect fetch_failed == 3
+vinyl v1 -expect fetch_failed == 3

@@ -1,4 +1,4 @@
-varnishtest "PROXY v2 test"
+vtest "PROXY v2 test"
 
 server s1 {
 	rxreq
@@ -37,7 +37,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -proto "PROXY" -vcl+backend {
+vinyl v1 -proto "PROXY" -vcl+backend {
 	import std;
 
 	acl fwd_client {

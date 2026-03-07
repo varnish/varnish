@@ -1,4 +1,4 @@
-varnishtest "directors_c00005.vtc but with weights"
+vtest "directors_c00005.vtc but with weights"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 	import blob;

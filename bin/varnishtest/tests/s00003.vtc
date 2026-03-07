@@ -1,4 +1,4 @@
-varnishtest "Coverage test for -sfile"
+vtest "Coverage test for -sfile"
 
 server s1 {
 	rxreq
@@ -16,7 +16,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-sTransient=file,${tmpdir}/_.file,10m" \
 	-arg "-sdir=file,${tmpdir}/,10m" \
 	-vcl+backend {
@@ -41,19 +41,19 @@ client c1 {
 	expect resp.bodylen == 262
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -cliok "ban obj.http.date ~ ."
+vinyl v1 -cliok "ban obj.http.date ~ ."
 
 process p1 {
-	varnishd -sTransient=file,${tmpdir}/foo,xxx -b${localhost} -a:0 2>&1
+	vinyld -sTransient=file,${tmpdir}/foo,xxx -b${localhost} -a:0 2>&1
 } -expect-exit 0x2 -dump -start -expect-text 0 0 "Invalid number" -wait -screen_dump
 
 process p1 {
-	varnishd -sTransient=file,${tmpdir}/foo,10M,xxx -b${localhost} -a:0 2>&1
+	vinyld -sTransient=file,${tmpdir}/foo,10M,xxx -b${localhost} -a:0 2>&1
 } -expect-exit 0x2 -dump -start -expect-text 0 0 "granularity" -wait -screen_dump
 
 process p1 {
-	varnishd -sTransient=file,${tmpdir}/foo,10m,,foo -b${localhost} -a:0 2>&1
+	vinyld -sTransient=file,${tmpdir}/foo,10m,,foo -b${localhost} -a:0 2>&1
 } -expect-exit 0x2 -dump -start -expect-text 0 0 "invalid advice" -wait
 

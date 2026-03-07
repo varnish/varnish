@@ -1,6 +1,6 @@
-varnishtest "Test vtc.vsl()"
+vtest "Test vtc.vsl()"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import vtc;
 
 	backend proforma none;

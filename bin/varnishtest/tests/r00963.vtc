@@ -1,4 +1,4 @@
-varnishtest "Test hsh_rush"
+vtest "Test hsh_rush"
 
 barrier b1 cond 5
 
@@ -8,10 +8,10 @@ server s1 {
 	txresp -bodylen 10
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
-varnish v1 -cliok "param.set rush_exponent 2"
+vinyl v1 -cliok "param.set rush_exponent 2"
 
 client c1 {
 	txreq

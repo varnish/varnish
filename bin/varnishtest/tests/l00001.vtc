@@ -1,11 +1,11 @@
-varnishtest "Test VSL query operators"
+vtest "Test VSL query operators"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.x-test = "123 321";
 	}

@@ -1,4 +1,4 @@
-varnishtest "regression for NULL string concatenation"
+vtest "regression for NULL string concatenation"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.http.Candy = " FOOBAR" + req.http.Cookie;
 		set req.http.Cookie = req.http.Cookie + " FOOBAR";

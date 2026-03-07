@@ -1,11 +1,11 @@
-varnishtest "varnishhist coverage"
+vtest "varnishhist coverage"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 shell -match "Usage: .*varnishhist <options>" \
 	"varnishhist -h"

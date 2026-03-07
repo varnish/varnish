@@ -1,4 +1,4 @@
-varnishtest "Content-Length in pass'ed 304 does not trigger body fetch"
+vtest "Content-Length in pass'ed 304 does not trigger body fetch"
 
 # XXX: Description doesn't make sense relative to actual goings on...
 
@@ -12,7 +12,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 # First load the objects into cache
 client c1 {

@@ -1,4 +1,4 @@
-varnishtest "Test https_scheme parameter"
+vtest "Test https_scheme parameter"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_deliver {
 		set resp.http.rxhost = req.http.host;
@@ -30,7 +30,7 @@ client c1 {
 	expect resp.http.rxurl == https://www.example.com/bar
 } -run
 
-varnish v1 -cliok "param.set feature +https_scheme"
+vinyl v1 -cliok "param.set feature +https_scheme"
 
 client c1 {
 	txreq -url http://www.example.com/bar

@@ -1,4 +1,4 @@
-varnishtest "shard director/int reconfiguration outside init"
+vtest "shard director/int reconfiguration outside init"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 

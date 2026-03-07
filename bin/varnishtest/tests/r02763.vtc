@@ -1,4 +1,4 @@
-varnishtest "Cacheable IMS replaced by HFM object"
+vtest "Cacheable IMS replaced by HFM object"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s1 {
 	txresp -hdr "ETag: foo" -bodylen 7
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_miss {
 		set req.http.X-Cache = "MISS";

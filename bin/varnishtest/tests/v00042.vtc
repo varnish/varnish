@@ -1,4 +1,4 @@
-varnishtest "Make sure we also get separate PRIV_TASK contexts in ESI subrequests."
+vtest "Make sure we also get separate PRIV_TASK contexts in ESI subrequests."
 
 server s1 {
 	rxreq
@@ -34,9 +34,9 @@ server s1 {
 } -start
 
 # give enough stack to 32bit systems
-varnish v1 -cliok "param.set thread_pool_stack 128k"
+vinyl v1 -cliok "param.set thread_pool_stack 128k"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {
@@ -76,4 +76,4 @@ client c1 {
 	expect resp.http.o1 == "/b0"
 } -run
 
-varnish v1 -expect client_req == 2
+vinyl v1 -expect client_req == 2

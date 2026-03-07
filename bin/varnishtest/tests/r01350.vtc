@@ -1,4 +1,4 @@
-varnishtest "IMS + Vary panic"
+vtest "IMS + Vary panic"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -status 304 -body ""
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 2s;
 		set beresp.grace = 1m;

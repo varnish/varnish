@@ -1,4 +1,4 @@
-varnishtest "Test purge vmod"
+vtest "Test purge vmod"
 
 server s1 {
 	rxreq
@@ -14,8 +14,8 @@ server s1 {
 	txresp -hdr "Vary: Accept-Language" -body en
 } -start
 
-varnish v1 -cliok "param.set vsl_mask +ExpKill"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set vsl_mask +ExpKill"
+vinyl v1 -vcl+backend {
 	import purge;
 
 	sub vcl_recv {

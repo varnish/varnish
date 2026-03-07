@@ -1,11 +1,11 @@
-varnishtest "Test restart in vcl_synth"
+vtest "Test restart in vcl_synth"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.restarts == 0) {
 			return (synth(701, "FOO"));

@@ -1,4 +1,4 @@
-varnishtest "sweep through tight backend workspace conditions"
+vtest "sweep through tight backend workspace conditions"
 
 # XXX almost the same as r01834.vtc - retire?
 
@@ -8,7 +8,7 @@ server s1 -repeat 100 {
 	send "HTTP/1.1 200 OK\r\nTransfer-encoding: chunked\r\n\r\n00000004\r\n1234\r\n00000000\r\n\r\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		return (pass);

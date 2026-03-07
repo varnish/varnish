@@ -1,11 +1,11 @@
-varnishtest "backend_(fetch|response) error state with custom status/reason"
+vtest "backend_(fetch|response) error state with custom status/reason"
 
 server s1 -repeat 3 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url == "/errorsynth") {
 			return (error(403));
@@ -75,4 +75,4 @@ client c1 {
 
 # Make sure we don't increment the failed fetch counter
 
-varnish v1 -expect fetch_failed == 0
+vinyl v1 -expect fetch_failed == 0

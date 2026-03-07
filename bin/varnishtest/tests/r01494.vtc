@@ -1,4 +1,4 @@
-varnishtest "Test retry in be_resp w/conn: close"
+vtest "Test retry in be_resp w/conn: close"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 	expect_close
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.retries == 0) {
 			return(retry);

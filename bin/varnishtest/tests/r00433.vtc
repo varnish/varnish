@@ -1,4 +1,4 @@
-varnishtest "noidx"
+vtest "noidx"
 
 server s1 {
 	rxreq
@@ -22,7 +22,7 @@ server s2 {
 	txresp -body "bar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url == "/foo") {
 			set bereq.backend = s1;
@@ -36,8 +36,8 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "debug.fragfetch 32"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "debug.fragfetch 32"
 
 client c1 {
 	txreq -url /foo

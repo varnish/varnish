@@ -1,11 +1,11 @@
-varnishtest "Test std.duration() and std.bytes()"
+vtest "Test std.duration() and std.bytes()"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

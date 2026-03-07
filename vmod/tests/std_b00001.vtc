@@ -1,11 +1,11 @@
-varnishtest "Test std.random(), std.now(), std.timed_call()"
+vtest "Test std.random(), std.now(), std.timed_call()"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	import std;
 
@@ -24,7 +24,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "debug.srandom"
+vinyl v1 -cliok "debug.srandom"
 
 client c1 {
 	txreq

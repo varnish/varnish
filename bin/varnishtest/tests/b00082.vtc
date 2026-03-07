@@ -1,4 +1,4 @@
-varnishtest "Backend IMS 304 response with Content-Length 0"
+vtest "Backend IMS 304 response with Content-Length 0"
 
 # this case tests invalid behaviour, which we should handle gracefully anyway
 
@@ -10,7 +10,7 @@ server s1 {
 	txresp -status 304 -nolen -hdr "Content-Length: 0" -hdr {Etag: "foo"}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1s;
 	}

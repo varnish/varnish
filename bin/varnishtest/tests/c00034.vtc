@@ -1,4 +1,4 @@
-varnishtest "Range headers"
+vtest "Range headers"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 ########################################################################
 # VCL control over range processing with built-in range support disabled
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
@@ -20,7 +20,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set http_range_support off"
+vinyl v1 -cliok "param.set http_range_support off"
 
 client c1 {
 	txreq -hdr "Range: bytes=0-9"
@@ -34,7 +34,7 @@ client c1 {
 ########################################################################
 # Neither explicit range processing nor built-in
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
@@ -48,14 +48,14 @@ client c1 {
 	expect resp.bodylen == 100
 } -run
 
-varnish v1 -expect s_resp_bodybytes == 110
+vinyl v1 -expect s_resp_bodybytes == 110
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 ########################################################################
 # Only built-in processing
 
-varnish v1 -cliok "param.set http_range_support on"
+vinyl v1 -cliok "param.set http_range_support on"
 
 client c2 {
 	# Invalid range requests
@@ -104,9 +104,9 @@ client c2 {
 	expect resp.bodylen == 0
 } -run
 
-varnish v1 -expect s_resp_bodybytes == 110
+vinyl v1 -expect s_resp_bodybytes == 110
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c3 {
 	# Valid range requests
@@ -155,9 +155,9 @@ client c3 {
 	expect resp.http.content-range == "bytes 0-99/100"
 } -run
 
-varnish v1 -expect s_resp_bodybytes == 511
+vinyl v1 -expect s_resp_bodybytes == 511
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 # Test Range streaming with streaming objects with C-L
 
@@ -179,7 +179,7 @@ server s1 {
 	}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/2") {
 			set beresp.do_gzip = true;
@@ -200,7 +200,7 @@ client c4 {
 	expect_close
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c5 {
 	# Closed C-L because we cannot use C-L
@@ -222,8 +222,8 @@ server s1 {
 	txresp -hdr "Content-length: 3" -body "BLA"
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -vcl+backend ""
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -vcl+backend ""
 
 client c6 {
 	stream 1 {
@@ -235,7 +235,7 @@ client c6 {
 	} -run
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 server s1 {
 	rxreq
@@ -244,7 +244,7 @@ server s1 {
 	txresp -hdr "Accept-Ranges: foobar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -297,7 +297,7 @@ server s1 {
 	txresp -hdr "content-range: bytes */*" -bodylen 100
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.return == "pass") {
 			return (pass);
@@ -348,7 +348,7 @@ server s1 {
 	txresp -bodylen 256
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.filters = "range";
 	}
@@ -382,7 +382,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}

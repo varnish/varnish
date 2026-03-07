@@ -1,4 +1,4 @@
-varnishtest "Test vcl_backend_refresh"
+vtest "Test vcl_backend_refresh"
 
 barrier b1 sock 2
 barrier b2 sock 2
@@ -21,7 +21,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.ttl = 1ms;
@@ -102,7 +102,7 @@ server s1 {
 	txresp -status 304 -hdr "be304-4: true"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	import vtc;
 
@@ -160,7 +160,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.01s;
 		set beresp.grace = 0s;
@@ -192,7 +192,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.ttl = 0.01s;
@@ -229,7 +229,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.ttl = 0.01s;

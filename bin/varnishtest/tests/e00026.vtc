@@ -1,4 +1,4 @@
-varnishtest "Test esi-include + gzip edgecase with respect to gzip hdr"
+vtest "Test esi-include + gzip edgecase with respect to gzip hdr"
 
 server s1 {
 	rxreq
@@ -35,7 +35,7 @@ server s1 {
 	txresp -bodylen 500
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url ~ "^/.$") {
 			set beresp.do_esi = true;
@@ -52,9 +52,9 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set feature +esi_disable_xml_check"
+vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -url /foo -hdr "Accept-Encoding: gzip"
@@ -100,4 +100,4 @@ client c1 {
 }
 
 client c1 -run
-varnish v1 -expect esi_errors == 0
+vinyl v1 -expect esi_errors == 0

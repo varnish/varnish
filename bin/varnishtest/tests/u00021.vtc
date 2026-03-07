@@ -1,4 +1,4 @@
-varnishtest "varnishstat coverage"
+vtest "varnishstat coverage"
 
 
 server s1 {
@@ -6,7 +6,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 process p1 -dump {varnishstat -n ${v1_name}} -start
 delay 2
 

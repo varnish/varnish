@@ -1,4 +1,4 @@
-varnishtest "VSL tags backend age & reuse"
+vtest "VSL tags backend age & reuse"
 
 server s1 {
 	rxreq
@@ -7,8 +7,8 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -vcl+backend {} -start
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq

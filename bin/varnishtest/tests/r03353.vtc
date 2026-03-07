@@ -1,4 +1,4 @@
-varnishtest "Test rollback and retry"
+vtest "Test rollback and retry"
 
 # ws_emu triggers #3550
 feature !workspace_emulator
@@ -13,7 +13,7 @@ server s1 {
 	txresp -body xxx
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_backend_response {

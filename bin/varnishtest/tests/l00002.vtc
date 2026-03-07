@@ -1,4 +1,4 @@
-varnishtest "Test request byte counters"
+vtest "Test request byte counters"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -hdr "Accept-ranges: bytes" -bodylen 2000
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
@@ -112,7 +112,7 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -expect s_req_hdrbytes == 133
-varnish v1 -expect s_req_bodybytes == 4
-varnish v1 -expect s_resp_hdrbytes == 325
-varnish v1 -expect s_resp_bodybytes == 5000
+vinyl v1 -expect s_req_hdrbytes == 133
+vinyl v1 -expect s_req_bodybytes == 4
+vinyl v1 -expect s_resp_hdrbytes == 325
+vinyl v1 -expect s_resp_bodybytes == 5000

@@ -1,4 +1,4 @@
-varnishtest "Test vtc.barrier_sync"
+vtest "Test vtc.barrier_sync"
 
 barrier b1 sock 2
 barrier b2 sock 2
@@ -8,7 +8,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {
@@ -20,7 +20,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq

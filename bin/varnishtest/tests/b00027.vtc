@@ -1,4 +1,4 @@
-varnishtest "test backend transmission corner cases"
+vtest "test backend transmission corner cases"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 	send "\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}

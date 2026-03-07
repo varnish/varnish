@@ -1,4 +1,4 @@
-varnishtest "#1157 - Connection close on pass and do_stream"
+vtest "#1157 - Connection close on pass and do_stream"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	expect req.url == "/"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv { return (pass); }
 	sub vcl_backend_response {	set beresp.do_stream = true; }
 } -start

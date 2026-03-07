@@ -1,4 +1,4 @@
-varnishtest "Test backend IMS with weak and strong LM"
+vtest "Test backend IMS with weak and strong LM"
 
 server s1 {
 	rxreq
@@ -33,7 +33,7 @@ server s1 {
 		-hdr {ETag: "foo"}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1ms;
 		set beresp.grace = 0s;

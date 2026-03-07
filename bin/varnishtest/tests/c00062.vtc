@@ -1,4 +1,4 @@
-varnishtest "Check that aborted backend body aborts client in streaming mode"
+vtest "Check that aborted backend body aborts client in streaming mode"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -12,7 +12,7 @@ server s1 {
 	barrier b2 sync
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl" -vcl+backend {
+vinyl v1 -cliok "param.set debug +syncvsl" -vcl+backend {
 
 } -start
 

@@ -1,6 +1,6 @@
-varnishtest "Test obj.http.x-cache in vcl_hit"
+vtest "Test obj.http.x-cache in vcl_hit"
 
-varnish v1 -errvcl {Variable is read only.} {
+vinyl v1 -errvcl {Variable is read only.} {
 	backend foo { .host = "${localhost}"; }
 
 	sub vcl_hit {

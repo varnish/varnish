@@ -1,4 +1,4 @@
-varnishtest "Test garbage after gzip end reaching gunzip vdp"
+vtest "Test garbage after gzip end reaching gunzip vdp"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 	sendhex "00 62 61 64 0a"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		# no gunzip check
 		set beresp.filters = "";

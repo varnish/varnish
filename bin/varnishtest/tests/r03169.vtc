@@ -1,4 +1,4 @@
-varnishtest "Ensure we don't override Content-Encoding on a cond fetch"
+vtest "Ensure we don't override Content-Encoding on a cond fetch"
 
 server s1 {
     rxreq
@@ -19,7 +19,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
     sub vcl_backend_response {
 	set beresp.ttl = 1s;
 	set beresp.grace = 0s;

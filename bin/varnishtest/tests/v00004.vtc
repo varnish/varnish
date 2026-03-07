@@ -1,4 +1,4 @@
-varnishtest "test if our default parameters make sense ..."
+vtest "test if our default parameters make sense ..."
 
 feature 64bit
 feature !sanitizer
@@ -141,7 +141,7 @@ server s1 {
 	}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import debug;
 	import vtc;
@@ -184,7 +184,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq \
@@ -204,4 +204,4 @@ client c1 {
 }
 
 client c1 -run
-varnish v1 -expect esi_errors == 0
+vinyl v1 -expect esi_errors == 0

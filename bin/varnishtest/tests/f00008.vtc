@@ -1,11 +1,11 @@
-varnishtest "VRB_Ignore and connection close"
+vtest "VRB_Ignore and connection close"
 
 server s1 {
 	rxreq
 	txresp -body HIT
 } -start
 
-varnish v1 -arg "-p timeout_idle=1" -vcl+backend {
+vinyl v1 -arg "-p timeout_idle=1" -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/synth") {
 			return (synth(200, "SYNTH"));

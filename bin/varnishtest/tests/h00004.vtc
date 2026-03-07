@@ -1,4 +1,4 @@
-varnishtest "Test -conf+backend"
+vtest "Test -conf+backend"
 
 feature ignore_unknown_macro
 

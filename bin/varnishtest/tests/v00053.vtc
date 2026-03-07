@@ -1,11 +1,11 @@
-varnishtest "Test VCL failures 2/2"
+vtest "Test VCL failures 2/2"
 
 # part 1 is in v00051.vtc
 
 #######################################################################
 # Fail in vcl_backend_fetch
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend proforma none;
 
 	import debug;
@@ -28,8 +28,8 @@ client c1 {
 	expect resp.reason == "Service Unavailable"
 } -run
 
-varnish v1 -expect vcl_fail == 1
-varnish v1 -expect sc_vcl_failure == 0
+vinyl v1 -expect vcl_fail == 1
+vinyl v1 -expect sc_vcl_failure == 0
 
 logexpect l1 -wait
 
@@ -41,7 +41,7 @@ server s1 {
 	expect req.url == /backend_error
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 	sub vcl_backend_error {
 		debug.fail();
@@ -62,8 +62,8 @@ client c1 {
 	expect resp.reason == "Service Unavailable"
 } -run
 
-varnish v1 -expect vcl_fail == 2
-varnish v1 -expect sc_vcl_failure == 0
+vinyl v1 -expect vcl_fail == 2
+vinyl v1 -expect sc_vcl_failure == 0
 
 logexpect l1 -wait
 
@@ -76,7 +76,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 	sub vcl_backend_response {
 		debug.fail();
@@ -97,15 +97,15 @@ client c1 {
 	expect resp.reason == "Service Unavailable"
 } -run
 
-varnish v1 -expect vcl_fail == 3
-varnish v1 -expect sc_vcl_failure == 0
+vinyl v1 -expect vcl_fail == 3
+vinyl v1 -expect sc_vcl_failure == 0
 
 logexpect l1 -wait
 
 #######################################################################
 # Fail in vmod call used in an if test
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 	sub vcl_recv {
 		if (debug.fail2()) {
@@ -127,15 +127,15 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-varnish v1 -expect vcl_fail == 4
-varnish v1 -expect sc_vcl_failure == 1
+vinyl v1 -expect vcl_fail == 4
+vinyl v1 -expect sc_vcl_failure == 1
 
 logexpect l1 -wait
 
 #######################################################################
 # Fail in vcl_init with direct VRT_fail()
 
-varnish v1 -errvcl {Forced failure} {
+vinyl v1 -errvcl {Forced failure} {
 	import debug;
 	backend proforma none;
 	sub vcl_init {
@@ -146,7 +146,7 @@ varnish v1 -errvcl {Forced failure} {
 #######################################################################
 # Fail in vcl_init via fini callback
 
-varnish v1 -errvcl {thou shalt not fini} {
+vinyl v1 -errvcl {thou shalt not fini} {
 	import debug;
 	backend proforma none;
 	sub vcl_init {
@@ -157,7 +157,7 @@ varnish v1 -errvcl {thou shalt not fini} {
 #######################################################################
 # Fail in vcl_fini with direct VRT_fail()
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	backend proforma none;
 	sub vcl_fini {
@@ -165,7 +165,7 @@ varnish v1 -vcl {
 	}
 }
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 }
 
 logexpect l1 -v v1 -g raw {
@@ -174,13 +174,13 @@ logexpect l1 -v v1 -g raw {
 	expect 0 0	VCL_Error	{^\QVRT_fail() from vcl_fini{} has no effect\E$}
 } -start
 
-varnish v1 -cliok "vcl.discard vcl7"
+vinyl v1 -cliok "vcl.discard vcl7"
 logexpect l1 -wait
 
 #######################################################################
 # Fail in vcl_fini via fini callback - ignored but logged as VMOD BUG
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	backend proforma none;
 	sub vcl_fini {
@@ -188,7 +188,7 @@ varnish v1 -vcl {
 	}
 }
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 }
 
 logexpect l1 -v v1 -g raw {
@@ -197,13 +197,13 @@ logexpect l1 -v v1 -g raw {
 	expect 0 0	VCL_Error	{^\QVRT_fail() from vcl_fini{} has no effect\E$}
 } -start
 
-varnish v1 -cliok "vcl.discard vcl9"
+vinyl v1 -cliok "vcl.discard vcl9"
 logexpect l1 -wait
 
 #######################################################################
 # Fail vcl - debug.client_ip function restricted to client and backend
 
-varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
+vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import debug;
 
 	sub vcl_init {
@@ -214,7 +214,7 @@ varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 #######################################################################
 # Fail vcl - obj.test_priv_top method restricted to client
 
-varnish v1 -errvcl {Not available in subroutine 'vcl_backend_response'} {
+vinyl v1 -errvcl {Not available in subroutine 'vcl_backend_response'} {
 	import debug;
 
 	sub vcl_init {

@@ -1,12 +1,12 @@
-varnishtest "deprecated parameters"
+vtest "deprecated parameters"
 
-varnish v1 -arg "-b none" -start
+vinyl v1 -arg "-b none" -start
 
 # permanent alias
 
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliexpect "[+]syncvsl" "param.show deprecated_dummy"
-varnish v1 -cliexpect "[+]syncvsl" "param.show -j deprecated_dummy"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliexpect "[+]syncvsl" "param.show deprecated_dummy"
+vinyl v1 -cliexpect "[+]syncvsl" "param.show -j deprecated_dummy"
 
 shell -err {
 	varnishadm -n ${v1_name} "param.show" | grep deprecated_dummy
@@ -22,6 +22,6 @@ shell -err {
 
 # temporary aliases
 
-varnish v1 -cliexpect vcc_feature "param.show vcc_allow_inline_c"
-varnish v1 -cliexpect vcc_feature "param.show vcc_err_unref"
-varnish v1 -cliexpect vcc_feature "param.show vcc_unsafe_path"
+vinyl v1 -cliexpect vcc_feature "param.show vcc_allow_inline_c"
+vinyl v1 -cliexpect vcc_feature "param.show vcc_err_unref"
+vinyl v1 -cliexpect vcc_feature "param.show vcc_unsafe_path"

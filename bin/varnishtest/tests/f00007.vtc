@@ -1,4 +1,4 @@
-varnishtest "H/2 content length smuggling attack"
+vtest "H/2 content length smuggling attack"
 
 server s1 {
 	rxreqhdrs
@@ -21,7 +21,7 @@ server s4 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_backend_fetch {
 		if (bereq.url == "/1") {
@@ -36,8 +36,8 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	stream 1 {

@@ -1,11 +1,11 @@
-varnishtest "Test std vmod"
+vtest "Test std vmod"
 
 server s1 {
 	rxreq
 	txresp -hdr "foo: bAr" -hdr "bar: fOo" -bodylen 4
 } -start
 
-varnish v1 -syntax 4.1 -vcl+backend {
+vinyl v1 -syntax 4.1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {
@@ -18,7 +18,7 @@ varnish v1 -syntax 4.1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +vclrel"
+vinyl v1 -cliok "param.set debug +vclrel"
 
 client c1 {
 	txreq -url "/bar"
@@ -32,7 +32,7 @@ client c1 {
 	expect resp.http.vcl42 == "false"
 } -run
 
-varnish v1 -syntax 4.0 -vcl+backend {
+vinyl v1 -syntax 4.0 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {
@@ -59,7 +59,7 @@ server s1 {
 	txresp -hdr "foo: bAr" -hdr "bar: fOo"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub log {

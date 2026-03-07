@@ -1,4 +1,4 @@
-varnishtest "Test Backend Polling"
+vtest "Test Backend Polling"
 
 barrier b1 cond 2
 
@@ -33,7 +33,7 @@ server s1 {
 	barrier b1 sync
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 
 	backend foo {
 		.host = "${s1_addr}";
@@ -48,4 +48,4 @@ varnish v1 -vcl {
 
 barrier b1 sync
 
-varnish v1 -cliexpect "^CLI RX|  -+H{10}-{5}H{2}-{0,5} Happy" "backend.list -p"
+vinyl v1 -cliexpect "^CLI RX|  -+H{10}-{5}H{2}-{0,5} Happy" "backend.list -p"

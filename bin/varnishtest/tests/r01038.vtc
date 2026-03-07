@@ -1,4 +1,4 @@
-varnishtest "ticket 1038 regression test"
+vtest "ticket 1038 regression test"
 
 server s1 {
 	rxreq
@@ -45,7 +45,7 @@ server s1 {
 	txresp -body "foo8"
 } -start
 
-varnish v1 -arg "-p workspace_backend=10k -p vsl_buffer=4k" -vcl+backend {
+vinyl v1 -arg "-p workspace_backend=10k -p vsl_buffer=4k" -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;
@@ -63,4 +63,4 @@ client c1 {
 	expect resp.bodylen == 42
 } -run
 
-varnish v1 -expect losthdr == 0
+vinyl v1 -expect losthdr == 0

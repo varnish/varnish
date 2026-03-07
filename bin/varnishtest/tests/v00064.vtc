@@ -1,4 +1,4 @@
-varnishtest "vbf_stp_condfetch could not get storage #3273"
+vtest "vbf_stp_condfetch could not get storage #3273"
 
 server s1 {
     rxreq
@@ -15,7 +15,7 @@ server s1 {
     txresp -noserver -status 304
 } -start
 
-varnish v1 \
+vinyl v1 \
  -arg "-s Transient=default,1m" \
  -arg "-s malloc,1m" \
  -arg "-p nuke_limit=0" \
@@ -30,7 +30,7 @@ varnish v1 \
     }
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 delay .1
 
@@ -43,8 +43,8 @@ client c1 {
 
 delay .1
 
-varnish v1 -expect SM?.Transient.g_bytes > 1048000
-varnish v1 -expect SM?.Transient.g_space < 50
+vinyl v1 -expect SM?.Transient.g_bytes > 1048000
+vinyl v1 -expect SM?.Transient.g_space < 50
 
 client c1 {
     # Fill malloc
@@ -55,8 +55,8 @@ client c1 {
     delay 3
 } -run
 
-varnish v1 -expect SM?.s0.g_bytes > 1048000
-varnish v1 -expect SM?.s0.g_space < 50
+vinyl v1 -expect SM?.s0.g_bytes > 1048000
+vinyl v1 -expect SM?.s0.g_space < 50
 
 client c1 {
     # Check that Varnish is still alive

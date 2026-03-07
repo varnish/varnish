@@ -1,4 +1,4 @@
-varnishtest "double sub unref warning / warnings output for -f"
+vtest "double sub unref warning / warnings output for -f"
 
 # Also tests #3160
 
@@ -9,7 +9,7 @@ filewrite ${tmpdir}/unref.vcl {
 }
 
 process p1 -log {
-	varnishd -F -n "${tmpdir}/t" -a "${tmpdir}/sock" \
+	vinyld -F -n "${tmpdir}/t" -a "${tmpdir}/sock" \
 	    -p vcc_feature=-err_unref -f "${tmpdir}/unref.vcl" \
 	    -l 2m 2>&1
 } -start -expect-exit 0x40

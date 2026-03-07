@@ -1,4 +1,4 @@
-varnishtest "#1598 - Missing ':' in server response headers"
+vtest "#1598 - Missing ':' in server response headers"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1s;
 		set beresp.grace = 0s;
@@ -17,7 +17,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq

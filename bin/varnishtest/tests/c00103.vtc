@@ -1,6 +1,6 @@
-varnishtest "REGEX expressions in VCL"
+vtest "REGEX expressions in VCL"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 	backend be none;
 	sub vcl_recv {

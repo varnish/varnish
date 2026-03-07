@@ -1,4 +1,4 @@
-varnishtest "PROXY v2 test on http2"
+vtest "PROXY v2 test on http2"
 
 server s1 {
 	rxreq
@@ -37,7 +37,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -proto "PROXY"	\
+vinyl v1 -proto "PROXY"	\
     -arg "-p feature=+http2"	\
     -vcl+backend {
 	import proxy;

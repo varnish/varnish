@@ -1,4 +1,4 @@
-varnishtest "ESI include out of workspace"
+vtest "ESI include out of workspace"
 
 server s1 {
 	rxreq
@@ -10,8 +10,8 @@ server s1 {
 	txresp -body "include"
 } -start
 
-varnish v1 -cliok "param.set feature +esi_disable_xml_check"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {

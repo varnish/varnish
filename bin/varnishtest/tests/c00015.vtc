@@ -1,4 +1,4 @@
-varnishtest "Test switching VCLs"
+vtest "Test switching VCLs"
 
 server s1 {
 	rxreq
@@ -9,17 +9,17 @@ server s1 {
 	txresp -body "foobar1"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
 }
 
-varnish v1 -cli "vcl.list"
-varnish v1 -cli "vcl.use vcl1"
+vinyl v1 -cli "vcl.list"
+vinyl v1 -cli "vcl.use vcl1"
 
 client c1 {
 	txreq -url "/foo"
@@ -29,7 +29,7 @@ client c1 {
 	expect resp.http.x-varnish == "1001"
 } -run
 
-varnish v1 -cli "vcl.use vcl2"
+vinyl v1 -cli "vcl.use vcl2"
 
 client c2 {
 	txreq -url "/foo"
@@ -39,7 +39,7 @@ client c2 {
 	expect resp.http.x-varnish == "1004"
 } -run
 
-varnish v1 -cli "vcl.use vcl1"
+vinyl v1 -cli "vcl.use vcl1"
 
 client c3 {
 	txreq -url "/foo"
@@ -49,14 +49,14 @@ client c3 {
 	expect resp.http.x-varnish == "1007 1002"
 } -run
 
-varnish v1 -cli "vcl.show vcl2"
-varnish v1 -cli "vcl.show -v vcl2"
-varnish v1 -cli "vcl.discard vcl2"
-varnish v1 -cli "vcl.list"
-varnish v1 -cli "vcl.show"
-varnish v1 -cli "vcl.show -v"
-varnish v1 -clierr 106 "vcl.show -x nowhere"
-varnish v1 -clierr 106 "vcl.show nothere"
-varnish v1 -clierr 106 "vcl.use nothere"
-varnish v1 -clierr 106 "vcl.discard nowhere"
-varnish v1 -clierr 300 "vcl.discard vcl1"
+vinyl v1 -cli "vcl.show vcl2"
+vinyl v1 -cli "vcl.show -v vcl2"
+vinyl v1 -cli "vcl.discard vcl2"
+vinyl v1 -cli "vcl.list"
+vinyl v1 -cli "vcl.show"
+vinyl v1 -cli "vcl.show -v"
+vinyl v1 -clierr 106 "vcl.show -x nowhere"
+vinyl v1 -clierr 106 "vcl.show nothere"
+vinyl v1 -clierr 106 "vcl.use nothere"
+vinyl v1 -clierr 106 "vcl.discard nowhere"
+vinyl v1 -clierr 300 "vcl.discard vcl1"

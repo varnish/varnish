@@ -1,4 +1,4 @@
-varnishtest "Check subroutine calls with no action return"
+vtest "Check subroutine calls with no action return"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -body "slash"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_recv {
 		call some_subr;

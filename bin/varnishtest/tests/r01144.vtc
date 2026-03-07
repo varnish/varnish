@@ -1,11 +1,11 @@
-varnishtest "very long backend names"
+vtest "very long backend names"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	backend fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210
 	{
 		.host = "${localhost}";
@@ -24,7 +24,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -errvcl {Expected ID got '0'} {
+vinyl v1 -errvcl {Expected ID got '0'} {
 	backend 0fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210
 	{
 		.host = "${localhost}";

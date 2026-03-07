@@ -1,4 +1,4 @@
-varnishtest "No zerolength verbatim before <esi:include...>"
+vtest "No zerolength verbatim before <esi:include...>"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -body "<pre>FOO</pre>\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

@@ -1,4 +1,4 @@
-varnishtest "#1648 - corrupt object in cache through IMS update"
+vtest "#1648 - corrupt object in cache through IMS update"
 
 barrier b1 cond 3
 
@@ -25,7 +25,7 @@ server s3 {
 	txresp -hdr "Server: s3" -body "abcdef"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.client == "c1") {
 			set req.backend_hint = s1;
@@ -44,7 +44,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 # This client gets a streaming failing result from s1
 client c1 {
@@ -76,4 +76,4 @@ client c3 {
 } -run
 
 client c1 -wait
-varnish v1 -expect fetch_failed == 2
+vinyl v1 -expect fetch_failed == 2

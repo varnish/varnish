@@ -1,4 +1,4 @@
-varnishtest "varnishstat coverage"
+vtest "varnishstat coverage"
 
 feature cmd "command -v cmp"
 
@@ -7,10 +7,10 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 # On fast systems the next varnishstat will return "inf" counters
-# if we don't give varnishd a chance to get going.
+# if we don't give vinyld a chance to get going.
 
 delay 1
 
@@ -49,9 +49,9 @@ shell -err -expect "-t: Invalid argument: Nan" \
 	"varnishstat -t Nan"
 shell -err -expect "-t: Invalid argument: foo" \
 	"varnishstat -t foo"
-shell -err -expect "Could not get hold of varnishd" \
+shell -err -expect "Could not get hold of vinyld" \
 	"varnishstat -n /nonexistent -t 1"
-shell -err -expect "Could not get hold of varnishd" \
+shell -err -expect "Could not get hold of vinyld" \
 	{VARNISH_DEFAULT_N="/nonexistent" varnishstat -t 1}
 shell -expect "MAIN.uptime" \
 	"varnishstat -n ${v1_name} -1"

@@ -1,4 +1,4 @@
-varnishtest "varnishstat -j"
+vtest "varnishstat -j"
 
 feature cmd "python3 -c 'import json'"
 
@@ -7,7 +7,7 @@ server s1 -repeat 5 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 -repeat 5 {
 	txreq

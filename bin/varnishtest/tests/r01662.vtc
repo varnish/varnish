@@ -1,4 +1,4 @@
-varnishtest "Unhide http_ForceField() calls in VSL"
+vtest "Unhide http_ForceField() calls in VSL"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 logexpect l1 -v v1 -g request {

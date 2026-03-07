@@ -1,11 +1,11 @@
-varnishtest "Test std.real() conversion and std.round"
+vtest "Test std.real() conversion and std.round"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {
@@ -38,7 +38,7 @@ client c1 {
 	expect resp.http.t9 == -42.000
 } -run
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

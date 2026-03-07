@@ -1,11 +1,11 @@
-varnishtest "Test vmod failure in vcl_init{}"
+vtest "Test vmod failure in vcl_init{}"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 logexpect l1 -v v1 -g raw {
 	fail add * VCL_Log "Should not happen"
@@ -14,7 +14,7 @@ logexpect l1 -v v1 -g raw {
 	fail clear
 } -start
 
-varnish v1 -errvcl "Forced failure" {
+vinyl v1 -errvcl "Forced failure" {
 
 	import debug;
 	import std;
@@ -36,9 +36,9 @@ varnish v1 -errvcl "Forced failure" {
 
 logexpect l1 -wait
 
-varnish v1 -cliok "param.set nuke_limit 42"
+vinyl v1 -cliok "param.set nuke_limit 42"
 
-varnish v1 -errvcl "nuke_limit is not the answer." {
+vinyl v1 -errvcl "nuke_limit is not the answer." {
 
 	import debug;
 

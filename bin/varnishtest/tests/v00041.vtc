@@ -1,4 +1,4 @@
-varnishtest "Test priv_task"
+vtest "Test priv_task"
 
 feature !sanitizer
 
@@ -17,7 +17,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-p debug=+vclrel -p workspace_client=1m" -vcl+backend {
+vinyl v1 -arg "-p debug=+vclrel -p workspace_client=1m" -vcl+backend {
 	import debug;
 	import std;
 
@@ -270,7 +270,7 @@ client c1 {
 
 shell "echo 'vcl 4.0; backend foo { .host = \"${s1_addr}\"; .port = \"${s1_port}\"; }' > ${tmpdir}/_b00014.vcl"
 
-varnish v1 -cliok "vcl.load foo ${tmpdir}/_b00014.vcl" \
+vinyl v1 -cliok "vcl.load foo ${tmpdir}/_b00014.vcl" \
 	-cliok "vcl.use foo" \
 	-cliok "vcl.list" \
 	-cliok "vcl.discard vcl1" \
@@ -281,7 +281,7 @@ client c1 {
 	rxresp
 } -run
 
-varnish v1 -cliok "vcl.list"
+vinyl v1 -cliok "vcl.list"
 
 logexpect l0 -wait
 logexpect l1001 -wait

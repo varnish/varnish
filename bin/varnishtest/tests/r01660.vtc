@@ -1,11 +1,11 @@
-varnishtest "#1660: range and synth"
+vtest "#1660: range and synth"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (synth(200, "OK"));
 	}

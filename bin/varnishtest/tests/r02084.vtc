@@ -1,11 +1,11 @@
-varnishtest "REAL - INT types"
+vtest "REAL - INT types"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

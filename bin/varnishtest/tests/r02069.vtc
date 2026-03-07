@@ -1,11 +1,11 @@
-varnishtest "Probe response without a reason"
+vtest "Probe response without a reason"
 
 server s1 -repeat 20 {
 	rxreq
 	send "HTTP/1.1 200\r\n\r\n"
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 
 	backend s1 {

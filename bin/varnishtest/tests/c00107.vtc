@@ -1,4 +1,4 @@
-varnishtest req.hash_ignore_vary
+vtest req.hash_ignore_vary
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -hdr "vary: cookie" -body b
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.hash_ignore_vary = req.http.user-agent ~ "bot";
 	}

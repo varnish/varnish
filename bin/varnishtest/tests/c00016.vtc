@@ -1,4 +1,4 @@
-varnishtest "Test header filtering Table/Connection header"
+vtest "Test header filtering Table/Connection header"
 
 server s1 {
 	rxreq
@@ -21,7 +21,7 @@ server s1 {
 		-body "foobar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.http.FromVCL = "123";
 	}
@@ -61,7 +61,7 @@ server s1 {
 	txresp -hdr "Foox: 1" -hdr "foox: 2" -hdr "Connection: foox"
 }  -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.baa = bereq.http.baax;
 	}

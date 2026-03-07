@@ -1,4 +1,4 @@
-varnishtest "ESI include"
+vtest "ESI include"
 
 feature cmd "command -v diff"
 
@@ -19,7 +19,7 @@ server s1 {
 	}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_synth {
 		set resp.body = """
 		""";
@@ -94,9 +94,9 @@ client c1 {
 }
 
 client c1 -run
-varnish v1 -expect esi_req == 4
-varnish v1 -expect esi_errors == 0
-varnish v1 -expect MAIN.s_resp_bodybytes == 150
+vinyl v1 -expect esi_req == 4
+vinyl v1 -expect esi_errors == 0
+vinyl v1 -expect MAIN.s_resp_bodybytes == 150
 
 logexpect l1 -wait
 logexpect l2 -wait

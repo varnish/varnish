@@ -1,4 +1,4 @@
-varnishtest "client abandoning hit-for-miss"
+vtest "client abandoning hit-for-miss"
 
 barrier b1 cond 2
 
@@ -16,7 +16,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 client c1 {
 	txreq

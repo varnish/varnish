@@ -1,4 +1,4 @@
-varnishtest "unset bereq.body tests"
+vtest "unset bereq.body tests"
 
 server s1 {
 	rxreq
@@ -44,7 +44,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

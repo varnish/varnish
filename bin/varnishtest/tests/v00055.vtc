@@ -1,4 +1,4 @@
-varnishtest "Check backend connection limit with UDS backends"
+vtest "Check backend connection limit with UDS backends"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -10,7 +10,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 
 	backend default {
 		.path = "${s1_sock}";
@@ -38,4 +38,4 @@ client c2 {
 barrier b2 sync
 client c1 -wait
 
-varnish v1 -expect backend_busy == 1
+vinyl v1 -expect backend_busy == 1

@@ -1,4 +1,4 @@
-varnishtest "test regsub(NULL)"
+vtest "test regsub(NULL)"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	txresp -body "foobar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.http.bar ~ "$") {
 			set beresp.http.foo = regsub(beresp.http.bar, "$", "XXX");

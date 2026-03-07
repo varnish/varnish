@@ -1,11 +1,11 @@
-varnishtest "Director cleanup fails on vcl.discard"
+vtest "Director cleanup fails on vcl.discard"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 
 	backend b2 {
@@ -27,15 +27,15 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "backend.list"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "backend.list"
 
-varnish v1 -vcl+backend { }
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "backend.list"
+vinyl v1 -vcl+backend { }
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "backend.list"
 
-varnish v1 -cliok "vcl.list"
-varnish v1 -cliok "vcl.discard vcl1"
+vinyl v1 -cliok "vcl.list"
+vinyl v1 -cliok "vcl.discard vcl1"
 
 client c1 {
 	txreq

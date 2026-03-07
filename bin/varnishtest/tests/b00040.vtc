@@ -1,4 +1,4 @@
-varnishtest "test certain malformed requests and validate_headers"
+vtest "test certain malformed requests and validate_headers"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_recv {
@@ -109,7 +109,7 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -cliok "param.set feature -validate_headers"
+vinyl v1 -cliok "param.set feature -validate_headers"
 
 client c1 {
 	txreq -url /9

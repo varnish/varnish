@@ -1,8 +1,8 @@
-varnishtest "Regression test off-by-one in VSLbs"
+vtest "Regression test off-by-one in VSLbs"
 
 # vsl_buffer=257 bytes - 2 bytes header -> 255 bytes
 
-varnish v1 -arg "-p vsl_buffer=267" -vcl {
+vinyl v1 -arg "-p vsl_buffer=267" -vcl {
 	import debug;
 	backend b None;
 	sub vcl_recv {

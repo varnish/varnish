@@ -1,11 +1,11 @@
-varnishtest "Test req.hash and bereq.hash"
+vtest "Test req.hash and bereq.hash"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import blob;
 
 	sub vcl_backend_response {

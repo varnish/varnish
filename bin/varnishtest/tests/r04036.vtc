@@ -1,6 +1,6 @@
-varnishtest "Undefined storage properties"
+vtest "Undefined storage properties"
 
-varnish v1 -arg "-s malloc=malloc -s file=file,${tmpdir}/file,16M" -vcl {
+vinyl v1 -arg "-s malloc=malloc -s file=file,${tmpdir}/file,16M" -vcl {
 	backend be none;
 
 	sub vcl_recv {
@@ -12,7 +12,7 @@ varnish v1 -arg "-s malloc=malloc -s file=file,${tmpdir}/file,16M" -vcl {
 client c1 {
 	txreq
 
-	# The test-criteria is that varnishd does not panic.
+	# The test-criteria is that vinyld does not panic.
 	rxresp
 	expect resp.status == 503
 } -run

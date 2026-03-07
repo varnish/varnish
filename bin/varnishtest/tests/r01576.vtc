@@ -1,8 +1,8 @@
-varnishtest "Test recursive regexp's fail before consuming all the stack"
+vtest "Test recursive regexp's fail before consuming all the stack"
 
 # Use 64bit defaults also on 32bit
-varnish v1 -cliok "param.set workspace_client 64k"
-varnish v1 -cliok "param.set http_req_size 32k"
+vinyl v1 -cliok "param.set workspace_client 64k"
+vinyl v1 -cliok "param.set http_req_size 32k"
 
 # If you want to play around, uncomment the next lines and adjust
 # the length of the ABAB strings below to suit your needs.
@@ -17,7 +17,7 @@ varnish v1 -cliok "param.set http_req_size 32k"
 # Approximate formula for FreeBSD/amd64:
 #	pcre2_depth_limit = thread_pool_stack * 2 - 9
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	backend proforma none;
 
 	sub vcl_recv {

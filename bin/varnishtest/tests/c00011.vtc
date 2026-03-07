@@ -1,4 +1,4 @@
-varnishtest "Test hit for miss (beresp.uncacheable = true)"
+vtest "Test hit for miss (beresp.uncacheable = true)"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -body foobar1
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.uncacheable = true;
 	}

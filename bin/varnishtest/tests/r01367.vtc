@@ -1,11 +1,11 @@
-varnishtest "blank GET"
+vtest "blank GET"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_synth {
 		return (restart);
 	}

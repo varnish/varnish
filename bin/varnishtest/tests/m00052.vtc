@@ -1,6 +1,6 @@
-varnishtest "priv_task with [optional] argument"
+vtest "priv_task with [optional] argument"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 
 	backend be none;

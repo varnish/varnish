@@ -1,4 +1,4 @@
-varnishtest "Test vmod_path param"
+vtest "Test vmod_path param"
 
 feature topbuild
 
@@ -9,58 +9,58 @@ server s1 {
 
 shell {
 	echo "vcl 4.1; import std; backend dummy None;" >${tmpdir}/test.vcl
-	varnishd -pvmod_path=${topbuild}/vmod/.libs \
+	vinyld -pvmod_path=${topbuild}/vmod/.libs \
 		 -C -f ${tmpdir}/test.vcl 2>/dev/null
 }
 
-varnish v1 -arg "-pvmod_path=${topbuild}/vmod/.libs/" -vcl+backend {
+vinyl v1 -arg "-pvmod_path=${topbuild}/vmod/.libs/" -vcl+backend {
 	import std;
 } -start
 
-varnish v1 -cliok "param.set vmod_path /nonexistent"
+vinyl v1 -cliok "param.set vmod_path /nonexistent"
 
-varnish v1 -errvcl {Could not find VMOD std} { import std; }
+vinyl v1 -errvcl {Could not find VMOD std} { import std; }
 
-varnish v1 -cliok "param.set vmod_path ${topbuild}/vmod/.libs/"
+vinyl v1 -cliok "param.set vmod_path ${topbuild}/vmod/.libs/"
 
-varnish v1 -vcl+backend { import std; }
+vinyl v1 -vcl+backend { import std; }
 
-varnish v1 -cliok "param.set vmod_path ${tmpdir}"
+vinyl v1 -cliok "param.set vmod_path ${tmpdir}"
 
 shell {
 	cp ${topbuild}/vmod/.libs/libvmod_debug.so \
 	   ${tmpdir}/libvmod_wrong.so
 }
 
-varnish v1 -errvcl {Wrong file for VMOD wrong} { import wrong; }
+vinyl v1 -errvcl {Wrong file for VMOD wrong} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so ""
-varnish v1 -errvcl {Error: No VMOD JSON found} { import wrong; }
+vinyl v1 -errvcl {Error: No VMOD JSON found} { import wrong; }
 
 shell "chmod 000 ${tmpdir}/libvmod_wrong.so"
-varnish v1 -errvcl {Could not open VMOD wrong} { import wrong; }
+vinyl v1 -errvcl {Could not open VMOD wrong} { import wrong; }
 shell "rm -f ${tmpdir}/libvmod_wrong.so"
 
 filewrite ${tmpdir}/libvmod_wrong.so "BLA" "VMOD_JSON_SPEC\x02" "BLA"
-varnish v1 -errvcl {Truncated VMOD JSON} { import wrong; }
+vinyl v1 -errvcl {Truncated VMOD JSON} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02" "BLA" "\x03"
-varnish v1 -errvcl {VMOD wrong: bad metadata} { import wrong; }
+vinyl v1 -errvcl {VMOD wrong: bad metadata} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02" "0" "\x03"
-varnish v1 -errvcl {Not array[0]} { import wrong; }
+vinyl v1 -errvcl {Not array[0]} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02" "[0]" "\x03"
-varnish v1 -errvcl {Not array[1]} { import wrong; }
+vinyl v1 -errvcl {Not array[1]} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02" "[[0]]" "\x03"
-varnish v1 -errvcl {Not string[2]} { import wrong; }
+vinyl v1 -errvcl {Not string[2]} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02" "[[\"$VBLA\"]]" "\x03"
-varnish v1 -errvcl {Not $VMOD[3]} { import wrong; }
+vinyl v1 -errvcl {Not $VMOD[3]} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02" "[[\"$VMOD\",\"1.0\"]]" "\x03"
-varnish v1 -errvcl {Syntax != 2.0} { import wrong; }
+vinyl v1 -errvcl {Syntax != 2.0} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
 filewrite -a ${tmpdir}/libvmod_wrong.so {
@@ -78,7 +78,7 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
     ]
 }
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
-varnish v1 -errvcl {Incompatible VMOD wrong} { import wrong; }
+vinyl v1 -errvcl {Incompatible VMOD wrong} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
 filewrite -a ${tmpdir}/libvmod_wrong.so {
@@ -96,7 +96,7 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
     ]
 }
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
-varnish v1 -errvcl {VMOD wants ABI version 1.0} { import wrong; }
+vinyl v1 -errvcl {VMOD wants ABI version 1.0} { import wrong; }
 
 #############################################################
 # NB: in the tests below "21" should track VRT_MAJOR_VERSION
@@ -119,7 +119,7 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
     ]
 }
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
-varnish v1 -errvcl {Unknown metadata stanza.} { import wrong; }
+vinyl v1 -errvcl {Unknown metadata stanza.} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
 filewrite -a ${tmpdir}/libvmod_wrong.so {
@@ -137,7 +137,7 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
     ]
 }
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
-varnish v1 -errvcl {Bad cproto stanza} { import wrong; }
+vinyl v1 -errvcl {Bad cproto stanza} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
 filewrite -a ${tmpdir}/libvmod_wrong.so {
@@ -159,7 +159,7 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
     ]
 }
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
-varnish v1 -errvcl {Bad vmod stanza} { import wrong; }
+vinyl v1 -errvcl {Bad vmod stanza} { import wrong; }
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
 filewrite -a ${tmpdir}/libvmod_wrong.so {
@@ -180,8 +180,8 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
 }
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
 
-varnish v1 -cliok "param.set vmod_path ${topbuild}/vmod/.libs/"
-varnish v1 -cliok "stop"
+vinyl v1 -cliok "param.set vmod_path ${topbuild}/vmod/.libs/"
+vinyl v1 -cliok "stop"
 
 filewrite  ${tmpdir}/wrong.vcl {
 	vcl 4.1;
@@ -190,7 +190,7 @@ filewrite  ${tmpdir}/wrong.vcl {
 	backend default none;
 }
 
-varnish v1 -cliexpect {Different version of VMOD std already loaded} {
+vinyl v1 -cliexpect {Different version of VMOD std already loaded} {
 	vcl.load dupvmod ${tmpdir}/wrong.vcl
 }
 

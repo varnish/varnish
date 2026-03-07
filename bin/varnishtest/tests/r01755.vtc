@@ -1,4 +1,4 @@
-varnishtest "The (struct backend).n_conn counter is never decremented"
+vtest "The (struct backend).n_conn counter is never decremented"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -26,4 +26,4 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect backend_busy == 0
+vinyl v1 -expect backend_busy == 0

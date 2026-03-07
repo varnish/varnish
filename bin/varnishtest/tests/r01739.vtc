@@ -1,4 +1,4 @@
-varnishtest "Check workspace overflow in fetch processor"
+vtest "Check workspace overflow in fetch processor"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_backend_response {
@@ -27,4 +27,4 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-varnish v1 -expect ws_backend_overflow == 1
+vinyl v1 -expect ws_backend_overflow == 1

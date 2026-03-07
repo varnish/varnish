@@ -1,4 +1,4 @@
-varnishtest "Check EOF responses work with HTTP/1.1"
+vtest "Check EOF responses work with HTTP/1.1"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	accept
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

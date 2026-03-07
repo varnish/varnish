@@ -1,11 +1,11 @@
-varnishtest "varnishncsa handling"
+vtest "varnishncsa handling"
 
 server s1 -repeat 4 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	backend none none;
 
 	sub vcl_backend_fetch {

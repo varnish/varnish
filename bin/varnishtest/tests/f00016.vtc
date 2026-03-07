@@ -1,11 +1,11 @@
-varnishtest "Do not tolerate anything else than CRLF as chunked ending"
+vtest "Do not tolerate anything else than CRLF as chunked ending"
 
 server s0 {
 	rxreq
 	expect_close
 } -dispatch
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 logexpect l1 -v v1 {
 	expect * 1001 FetchError "chunked tail no NL"
@@ -68,7 +68,7 @@ client c4 {
 
 logexpect l1 -wait
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

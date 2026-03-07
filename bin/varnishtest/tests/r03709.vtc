@@ -1,10 +1,10 @@
-varnishtest "h2 req limits"
+vtest "h2 req limits"
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set http_req_hdr_len 40b"
-varnish v1 -cliok "param.set http_req_size 512b"
-varnish v1 -cliok "param.set http_max_hdr 32"
-varnish v1 -vcl {
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set http_req_hdr_len 40b"
+vinyl v1 -cliok "param.set http_req_size 512b"
+vinyl v1 -cliok "param.set http_max_hdr 32"
+vinyl v1 -vcl {
 	backend be none;
 } -start
 

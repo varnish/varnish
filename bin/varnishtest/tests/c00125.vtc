@@ -1,4 +1,4 @@
-varnishtest "successful expired waiting list hit"
+vtest "successful expired waiting list hit"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -33,10 +33,10 @@ server s1 {
 	txresp -hdr "Cache-Control: no-cache"
 } -start
 
-varnish v1 -cliok "param.set default_grace 1h"
-varnish v1 -cliok "param.set thread_pools 1"
-varnish v1 -cliok "param.set debug +syncvsl,+waitinglist"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set default_grace 1h"
+vinyl v1 -cliok "param.set thread_pools 1"
+vinyl v1 -cliok "param.set debug +syncvsl,+waitinglist"
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.bgfetch = bereq.is_bgfetch;
 	}
@@ -78,18 +78,18 @@ client c2 {
 	expect resp.http.obj-ttl < 0
 } -start
 
-varnish v1 -expect busy_sleep == 1
+vinyl v1 -expect busy_sleep == 1
 barrier b2 sync
 
 client c1 -wait
 client c2 -wait
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -expect cache_miss == 1
-varnish v1 -expect cache_hit == 1
-varnish v1 -expect cache_hit_grace == 0
-varnish v1 -expect s_bgfetch == 0
+vinyl v1 -expect cache_miss == 1
+vinyl v1 -expect cache_hit == 1
+vinyl v1 -expect cache_hit_grace == 0
+vinyl v1 -expect s_bgfetch == 0
 
 client c3 {
 	txreq -url "/stale-hit"
@@ -100,17 +100,17 @@ client c3 {
 	expect resp.http.obj-ttl < 0
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -expect cache_miss == 1
-varnish v1 -expect cache_hit == 2
-varnish v1 -expect cache_hit_grace == 1
-varnish v1 -expect s_bgfetch == 1
+vinyl v1 -expect cache_miss == 1
+vinyl v1 -expect cache_hit == 2
+vinyl v1 -expect cache_hit_grace == 1
+vinyl v1 -expect s_bgfetch == 1
 
 # The only way for a plain no-cache to be hit is to have a non-zero keep.
-varnish v1 -cliok "param.set default_ttl 0"
-varnish v1 -cliok "param.set default_grace 0"
-varnish v1 -cliok "param.set default_keep 1h"
+vinyl v1 -cliok "param.set default_ttl 0"
+vinyl v1 -cliok "param.set default_grace 0"
+vinyl v1 -cliok "param.set default_keep 1h"
 
 client c4 {
 	txreq -url "/no-cache-hit"
@@ -132,18 +132,18 @@ client c5 {
 	expect resp.http.obj-ttl <= 0
 } -start
 
-varnish v1 -expect busy_sleep == 2
+vinyl v1 -expect busy_sleep == 2
 barrier b4 sync
 
 client c4 -wait
 client c5 -wait
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -expect cache_miss == 2
-varnish v1 -expect cache_hit == 3
-varnish v1 -expect cache_hit_grace == 1
-varnish v1 -expect s_bgfetch == 1
+vinyl v1 -expect cache_miss == 2
+vinyl v1 -expect cache_hit == 3
+vinyl v1 -expect cache_hit_grace == 1
+vinyl v1 -expect s_bgfetch == 1
 
 # No hit when not on the waiting list
 client c6 {

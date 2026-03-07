@@ -1,4 +1,4 @@
-varnishtest "range related panic"
+vtest "range related panic"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -17,7 +17,7 @@ server s1 {
 	barrier b2 sync
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 client c1 {

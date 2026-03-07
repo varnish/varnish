@@ -1,4 +1,4 @@
-varnishtest "tunnel basic coverage"
+vtest "tunnel basic coverage"
 
 barrier b1 cond 2 -cyclic
 barrier b2 sock 2 -cyclic
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		vtc.barrier_sync("${b2_sock}");

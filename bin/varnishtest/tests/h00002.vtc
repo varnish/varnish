@@ -1,4 +1,4 @@
-varnishtest "Basic HAproxy test (daemon mode)"
+vtest "Basic HAproxy test (daemon mode)"
 
 feature ignore_unknown_macro
 

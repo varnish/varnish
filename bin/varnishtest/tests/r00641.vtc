@@ -1,4 +1,4 @@
-varnishtest "Regression test for 524: HTTP/1.0 and ESI"
+vtest "Regression test for 524: HTTP/1.0 and ESI"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		// return (pass);
 	}

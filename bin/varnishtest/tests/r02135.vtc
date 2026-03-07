@@ -1,4 +1,4 @@
-varnishtest "#2135: fetch retry logic"
+vtest "#2135: fetch retry logic"
 
 barrier b1 cond 2
 
@@ -16,7 +16,7 @@ server s1 {
 	expect_close
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_error {
 		set beresp.http.url = bereq.url;
 	}

@@ -1,11 +1,11 @@
-varnishtest "Test vmod functions/constructor named arguments and defaults"
+vtest "Test vmod functions/constructor named arguments and defaults"
 
 server s1 {
 	rxreq
 	txresp -bodylen 6
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {
@@ -70,7 +70,7 @@ client c1 {
 
 delay .1
 
-varnish v1 -errvcl {Argument 'one' already used} {
+vinyl v1 -errvcl {Argument 'one' already used} {
 	import debug;
 	backend b1 {.host = "${localhost}";}
 	sub vcl_deliver {
@@ -78,7 +78,7 @@ varnish v1 -errvcl {Argument 'one' already used} {
 	}
 }
 
-varnish v1 -errvcl {Argument 'one' missing} {
+vinyl v1 -errvcl {Argument 'one' missing} {
 	import debug;
 	backend b1 {.host = "${localhost}";}
 	sub vcl_deliver {
@@ -86,7 +86,7 @@ varnish v1 -errvcl {Argument 'one' missing} {
 	}
 }
 
-varnish v1 -errvcl {Unknown argument 'five'} {
+vinyl v1 -errvcl {Unknown argument 'five'} {
 	import debug;
 	backend b1 {.host = "${localhost}";}
 	sub vcl_deliver {

@@ -1,4 +1,4 @@
-varnishtest "#1956: graced hit-for-miss, backend ims and obj flags inheritance"
+vtest "#1956: graced hit-for-miss, backend ims and obj flags inheritance"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	txresp -status 200 -hdr {ETag: "baz"} -body "asdf"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.1s;
 		set beresp.keep = 60s;

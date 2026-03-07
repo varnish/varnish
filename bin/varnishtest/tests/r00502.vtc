@@ -1,4 +1,4 @@
-varnishtest "multi element ban"
+vtest "multi element ban"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "foo: bar2" -body "22"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -27,4 +27,4 @@ client c1 {
 	expect resp.http.foo == "bar2"
 } -run
 
-varnish v1 -cliok ban.list
+vinyl v1 -cliok ban.list

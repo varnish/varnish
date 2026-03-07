@@ -1,11 +1,11 @@
-varnishtest "Double fail ESI sub request"
+vtest "Double fail ESI sub request"
 
 server s1 {
 	rxreq
 	txresp -body {<esi:include src="/inc"/>}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

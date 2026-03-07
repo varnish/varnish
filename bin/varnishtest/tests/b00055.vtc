@@ -1,4 +1,4 @@
-varnishtest "Check pipelining over a UDS listen address"
+vtest "Check pipelining over a UDS listen address"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -body "foobar"
 } -start
 
-varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {} -start
+vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {} -start
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	send "GET /foo HTTP/1.1\nHost: foo\n\nGET /bar HTTP/1.1\nHost: foo\n\nGET /bar HTTP/1.1\nHost: foo\n\n"
@@ -27,4 +27,4 @@ client c1 -connect "${tmpdir}/v1.sock" {
 	expect resp.http.x-varnish == "1005 1004"
 } -run
 
-varnish v1 -expect sess_readahead == 2
+vinyl v1 -expect sess_readahead == 2

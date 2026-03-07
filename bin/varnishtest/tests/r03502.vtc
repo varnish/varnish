@@ -1,4 +1,4 @@
-varnishtest "#3502 Panic in VEP_Finish() for out-of-storage in vbf_beresp2obj()"
+vtest "#3502 Panic in VEP_Finish() for out-of-storage in vbf_beresp2obj()"
 
 # see also r01637 for failure case in VFP
 
@@ -14,7 +14,7 @@ server s1 {
 	txresp -bodylen 1
 } -start
 
-varnish v1 -arg "-sTransient=default,1M -p debug=+syncvsl -p nuke_limit=0" -vcl+backend {
+vinyl v1 -arg "-sTransient=default,1M -p debug=+syncvsl -p nuke_limit=0" -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/") {
 			return (pass);

@@ -1,4 +1,4 @@
-varnishtest "Test stale-while-revalidate"
+vtest "Test stale-while-revalidate"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 	txresp -status 500 -hdr "Cache-Control: max-age=30, stale-while-revalidate=30"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.grace = beresp.grace;
 		set beresp.http.ttl = beresp.ttl;

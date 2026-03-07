@@ -1,4 +1,4 @@
-varnishtest "Hit-for-pass, pass, uncacheable, and conditional requests"
+vtest "Hit-for-pass, pass, uncacheable, and conditional requests"
 
 # hit-for-pass: if the conditions apply for sending a client response
 # with status 304, then do so, even if the hfp TTL had just expired,
@@ -40,7 +40,7 @@ server s1 {
 	    -bodylen 8
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_miss {
 		set req.http.X-Cache = "MISS";
@@ -110,7 +110,7 @@ client c1 {
 	expect resp.http.X-Cache == "MISS"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 # The next two tests are adapted from the former r01206.vtc, reflecting
 # changes for the recv->pass and beresp.uncacheable (hit-for-miss) cases
@@ -145,7 +145,7 @@ server s1 {
 	    -bodylen 8
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return(pass);
 	}
@@ -224,7 +224,7 @@ server s1 {
 	    -bodylen 8
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_miss {
 		set req.http.X-Cache = "MISS";
 	}

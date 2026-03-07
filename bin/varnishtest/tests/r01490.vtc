@@ -1,9 +1,9 @@
-varnishtest "#1490 - thread destruction"
+vtest "#1490 - thread destruction"
 
 server s1 {
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-p debug=+syncvsl" \
 	-arg "-p vsl_mask=+WorkThread" \
 	-arg "-p thread_pool_min=5" \
@@ -11,32 +11,32 @@ varnish v1 \
 	-arg "-p thread_pools=1" \
 	-arg "-p thread_pool_timeout=10" \
 	-vcl+backend {}
-varnish v1 -start
+vinyl v1 -start
 
 # we might have over-bred
 delay 11
 
-varnish v1 -expect threads == 5
+vinyl v1 -expect threads == 5
 
 logexpect l1 -v v1 -g raw {
 	expect * 0 WorkThread {^\S+ start$}
 	expect * 0 WorkThread {^\S+ end$}
 } -start
 
-varnish v1 -cliok "param.set thread_pool_min 6"
+vinyl v1 -cliok "param.set thread_pool_min 6"
 
 # Have to wait longer than thread_pool_timeout
 delay 11
 
-varnish v1 -expect threads == 6
+vinyl v1 -expect threads == 6
 
-varnish v1 -cliok "param.set thread_pool_min 5"
-varnish v1 -cliok "param.set thread_pool_max 5"
+vinyl v1 -cliok "param.set thread_pool_min 5"
+vinyl v1 -cliok "param.set thread_pool_max 5"
 
 # Have to wait longer than thread_pool_timeout
 delay 11
 
-varnish v1 -expect threads == 5
+vinyl v1 -expect threads == 5
 
 # Use logexpect to see that the thread actually exited
 logexpect l1 -wait

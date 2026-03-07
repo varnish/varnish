@@ -1,4 +1,4 @@
-varnishtest "VCP FIN-WAIT2"
+vtest "VCP FIN-WAIT2"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s2 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 	    .host = "${s1_sock}";
 	}
@@ -21,27 +21,27 @@ varnish v1 -vcl {
 
 # The waiter depend on the backend_idle_timeout for when to give up and
 # close the connection, so bump it up a bit.
-varnish v1 -cliok "param.set backend_idle_timeout 120"
+vinyl v1 -cliok "param.set backend_idle_timeout 120"
 
 # The shutdown is done on the CLI thread, and it blocks until the waiter has
 # killed the connection. So bump cli_timeout up as well
-varnish v1 -cliok "param.set cli_timeout 120"
+vinyl v1 -cliok "param.set cli_timeout 120"
 
 client c1 {
 	txreq -url "/"
 	rxresp
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s2 {
 	    .host = "${s2_sock}";
 	}
 }
 
-varnish v1 -cliok "vcl.use vcl2"
-varnish v1 -cliok "vcl.discard vcl1"
+vinyl v1 -cliok "vcl.use vcl2"
+vinyl v1 -cliok "vcl.discard vcl1"
 
-varnish v1 -expect n_backend == 1
-varnish v1 -expect backend_conn == 1
-varnish v1 -expect backend_reuse == 0
-varnish v1 -expect backend_recycle == 1
+vinyl v1 -expect n_backend == 1
+vinyl v1 -expect backend_conn == 1
+vinyl v1 -expect backend_reuse == 0
+vinyl v1 -expect backend_recycle == 1

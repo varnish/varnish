@@ -1,4 +1,4 @@
-varnishtest "r00979.vtc Test restart when do_stream in vcl_deliver"
+vtest "r00979.vtc Test restart when do_stream in vcl_deliver"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "11"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = true;
 		set beresp.uncacheable = true;
@@ -22,7 +22,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq

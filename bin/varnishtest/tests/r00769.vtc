@@ -1,11 +1,11 @@
-varnishtest "Test that set status code is readable again for obj.status and beresp.status"
+vtest "Test that set status code is readable again for obj.status and beresp.status"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url ~ "^/test1") {
 			return (synth(700));

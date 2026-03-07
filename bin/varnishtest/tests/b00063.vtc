@@ -1,4 +1,4 @@
-varnishtest "Abandon background fetch when backend serves 5xx"
+vtest "Abandon background fetch when backend serves 5xx"
 
 barrier b1 cond 2
 barrier b2 cond 3
@@ -31,8 +31,8 @@ server s1 {
 	txresp -body "4"
 } -start
 
-varnish v1 -cliok "param.set vsl_mask +ExpKill"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set vsl_mask +ExpKill"
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.status >= 500 && bereq.is_bgfetch) {
 			return (abandon);

@@ -1,4 +1,4 @@
-varnishtest "Test vcl defined via backends"
+vtest "Test vcl defined via backends"
 
 server s1 {
 	loop 5 {
@@ -18,7 +18,7 @@ server s2 {
 # not use any prior information for the actual backend connection -
 # just the information from the proxy protocol
 
-varnish v2 -proto PROXY -vcl+backend {
+vinyl v2 -proto PROXY -vcl+backend {
 	import std;
 	import proxy;
 
@@ -43,9 +43,9 @@ varnish v2 -proto PROXY -vcl+backend {
 	}
 } -start
 
-varnish v2 -cliok "param.set debug +syncvsl"
+vinyl v2 -cliok "param.set debug +syncvsl"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 	backend s1 { .via = v2; .authority = "1.2.3.4.example.com"; .host = "${s1_addr}"; .port = "${s1_port}"; }
 	backend s2 { .via = v2; .authority = "s2"; .host = "${s2_addr}"; .port = "${s2_port}"; }
@@ -81,7 +81,7 @@ client c1 {
 	expect resp.http.Server == "s1"
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend s1 {
@@ -103,7 +103,7 @@ client c1 {
 	expect resp.http.Authority == "authority.com"
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend s1 {
@@ -126,7 +126,7 @@ client c1 {
 } -run
 
 # Setting .authority = "" disables sending the TLV.
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend s1 {
@@ -150,7 +150,7 @@ client c1 {
 	expect resp.http.Authority == ""
 } -run
 
-varnish v1 -errvcl ".host used as authority can not be an ip address with .via" {
+vinyl v1 -errvcl ".host used as authority can not be an ip address with .via" {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend s1 {
@@ -160,7 +160,7 @@ varnish v1 -errvcl ".host used as authority can not be an ip address with .via" 
 	}
 }
 
-varnish v1 -errvcl ".host_header used as authority can not be an ip address with .via" {
+vinyl v1 -errvcl ".host_header used as authority can not be an ip address with .via" {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend s1 {
@@ -171,7 +171,7 @@ varnish v1 -errvcl ".host_header used as authority can not be an ip address with
 	}
 }
 
-varnish v1 -errvcl "Cannot set both .via and .path" {
+vinyl v1 -errvcl "Cannot set both .via and .path" {
 	backend v2 { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend s1 {
@@ -180,7 +180,7 @@ varnish v1 -errvcl "Cannot set both .via and .path" {
 	}
 }
 
-varnish v1 -errvcl "Cannot stack .via backends" {
+vinyl v1 -errvcl "Cannot stack .via backends" {
 	backend a { .host = "${v2_addr}"; .port = "${v2_port}"; }
 
 	backend b {
@@ -201,7 +201,7 @@ varnish v1 -errvcl "Cannot stack .via backends" {
 }
 
 # issue #4177: backend named default with .via property
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend via { .host = "${localhost}"; }
 	backend default { .via = via; .authority = "localhost"; .host = "${localhost}"; }
 }

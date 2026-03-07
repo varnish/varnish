@@ -1,6 +1,6 @@
-varnishtest "NULL/empty value checks"
+vtest "NULL/empty value checks"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import cookie;
 	backend be none;
 	sub vcl_recv { return (synth(200)); }

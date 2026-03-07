@@ -1,4 +1,4 @@
-varnishtest "Chunked with no space for iov's on workspace"
+vtest "Chunked with no space for iov's on workspace"
 
 # For this test to work with iovecs on the thread workspace (where
 # they belong!), we would need to circumvent the very sensible vrt
@@ -28,7 +28,7 @@ server s1 -repeat 2 {
 	chunkedlen 0
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_deliver {

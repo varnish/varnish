@@ -1,4 +1,4 @@
-varnishtest "Expiry during processing"
+vtest "Expiry during processing"
 
 # When a object runs out of ttl+grace during processing of a
 # request, we want the calculation in the builtin VCL to match
@@ -21,7 +21,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import vtc;
 

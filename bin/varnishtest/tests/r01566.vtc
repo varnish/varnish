@@ -1,6 +1,6 @@
-varnishtest "escape issue in regexp"
+vtest "escape issue in regexp"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend b1 { .host = "${localhost}"; }
 
 	sub vcl_recv {

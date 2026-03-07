@@ -1,4 +1,4 @@
-varnishtest "test gunzip on fetch"
+vtest "test gunzip on fetch"
 
 server s1 {
 	rxreq
@@ -35,7 +35,7 @@ server s1 {
 
 } -start
 
-varnish v1 -cliok "param.set http_gzip_support true" -vcl+backend {
+vinyl v1 -cliok "param.set http_gzip_support true" -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.do_gunzip = true;
@@ -58,7 +58,7 @@ client c1 {
 	expect resp.bodylen == 41
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c1 {
 	txreq -url /bar -hdr "Accept-Encoding: gzip"
@@ -67,7 +67,7 @@ client c1 {
 	expect resp.bodylen == 42
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c1 {
 	txreq -url /foobar -hdr "Accept-Encoding: gzip"
@@ -77,7 +77,7 @@ client c1 {
 	expect resp.bodylen == 43
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c1 {
 	txreq -url /foobar
@@ -86,13 +86,13 @@ client c1 {
 	expect resp.bodylen == 43
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -expect n_gzip == 1
-varnish v1 -expect n_gunzip == 2
-varnish v1 -expect n_test_gunzip == 0
+vinyl v1 -expect n_gzip == 1
+vinyl v1 -expect n_gunzip == 2
+vinyl v1 -expect n_test_gunzip == 0
 
-varnish v1 -cliok "param.set http_gzip_support false"
+vinyl v1 -cliok "param.set http_gzip_support false"
 
 client c1 {
 	txreq -url /nogzip -hdr "Accept-Encoding: gzip"
@@ -107,7 +107,7 @@ client c1 {
 	expect resp.body == "keep plain real"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c1 {
 	txreq -url /filters

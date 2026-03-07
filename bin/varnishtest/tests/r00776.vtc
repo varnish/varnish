@@ -1,4 +1,4 @@
-varnishtest "Edge case of chunked encoding, trimming storage to length."
+vtest "Edge case of chunked encoding, trimming storage to length."
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-p fetch_chunksize=4k" \
 	-arg "-s default,1m" -vcl+backend { } -start
 

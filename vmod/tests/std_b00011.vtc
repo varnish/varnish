@@ -1,11 +1,11 @@
-varnishtest "Test std.time() and std.strftime()"
+vtest "Test std.time() and std.strftime()"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import vtc;
 

@@ -1,4 +1,4 @@
-varnishtest "Test resp.is_streaming"
+vtest "Test resp.is_streaming"
 
 barrier b1 sock 2
 barrier b2 sock 2
@@ -11,7 +11,7 @@ server s1 {
 	send "1234567890"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.url == "/synth") {

@@ -1,4 +1,4 @@
-varnishtest "Test $Restrict scope"
+vtest "Test $Restrict scope"
 
 feature topbuild
 
@@ -8,7 +8,7 @@ server s1 {
 } -start
 
 
-varnish v1 -arg "-pvmod_path=${tmpdir}" -vcl+backend {} -start
+vinyl v1 -arg "-pvmod_path=${tmpdir}" -vcl+backend {} -start
 
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
@@ -54,6 +54,6 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
 
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
 
-varnish v1 -errvcl {invalid scope for $Restrict: foo} { import wrong; }
+vinyl v1 -errvcl {invalid scope for $Restrict: foo} { import wrong; }
 
 shell "rm -f ${tmpdir}/libvmod_wrong.so ${tmpdir}wrong.vcl"

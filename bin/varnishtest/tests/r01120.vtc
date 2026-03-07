@@ -1,4 +1,4 @@
-varnishtest "insanely long vary string"
+vtest "insanely long vary string"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "Vary: Foo" -body "yyyyy"
 } -start
 
-varnish v1 -arg "-p vsl_buffer=4k" \
+vinyl v1 -arg "-p vsl_buffer=4k" \
 	-cliok "param.set workspace_client 10k" \
 	-cliok "param.set workspace_backend 200k" \
 	-vcl+backend {

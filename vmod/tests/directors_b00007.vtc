@@ -1,11 +1,11 @@
-varnishtest "shard - single backend works"
+vtest "shard - single backend works"
 
 server s1 {
 	rxreq
 	txresp -body "ech3Ooj"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {

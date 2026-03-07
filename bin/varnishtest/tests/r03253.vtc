@@ -1,11 +1,11 @@
-varnishtest "ESI: sweep through tight backend workspace conditions"
+vtest "ESI: sweep through tight backend workspace conditions"
 
 server s1 -repeat 100 {
 	rxreq
 	txresp -gzipbody "<html>"
 } -start
 
-varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
+vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		return (pass);

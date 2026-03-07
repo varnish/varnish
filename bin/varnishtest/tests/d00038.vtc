@@ -1,4 +1,4 @@
-varnishtest "Test a dynamic UDS backend hot swap after it was hinted to a req"
+vtest "Test a dynamic UDS backend hot swap after it was hinted to a req"
 
 barrier b1 cond 2
 
@@ -10,7 +10,7 @@ server s2 -listen "${tmpdir}/s2.sock" {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 	import debug;
 	import vtc;
@@ -37,7 +37,7 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -expect MAIN.n_backend == 1
+vinyl v1 -expect MAIN.n_backend == 1
 
 client c1 {
 	txreq
@@ -58,4 +58,4 @@ client c1 -start
 client c2 -run
 client c1 -wait
 
-varnish v1 -cli backend.list
+vinyl v1 -cli backend.list

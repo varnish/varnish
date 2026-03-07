@@ -1,6 +1,6 @@
-varnishtest "workspace overflow with failed backend fetch"
+vtest "workspace overflow with failed backend fetch"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import vtc;
 
 	backend default {
@@ -40,4 +40,4 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-varnish v1 -expect ws_backend_overflow == 1
+vinyl v1 -expect ws_backend_overflow == 1

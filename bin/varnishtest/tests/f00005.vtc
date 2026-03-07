@@ -1,11 +1,11 @@
-varnishtest "proxy ws panic"
+vtest "proxy ws panic"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -proto "PROXY" -vcl+backend {}-start
+vinyl v1 -proto "PROXY" -vcl+backend {}-start
 
 # Too large proxy payload using TLV
 client c1 {

@@ -1,4 +1,4 @@
-varnishtest "Test XML 1.0 entity references"
+vtest "Test XML 1.0 entity references"
 
 server s1 {
 	rxreq
@@ -32,7 +32,7 @@ server s1 {
 	txresp -body "55555"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}

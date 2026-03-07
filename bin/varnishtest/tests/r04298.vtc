@@ -1,4 +1,4 @@
-varnishtest "Test HPACK dictionary sizing in upgrade settings"
+vtest "Test HPACK dictionary sizing in upgrade settings"
 
 server s1 {
 	rxreq 

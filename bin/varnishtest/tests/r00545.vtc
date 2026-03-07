@@ -1,11 +1,11 @@
-varnishtest "High-bit chars"
+vtest "High-bit chars"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.foo = "æøå";
 	}

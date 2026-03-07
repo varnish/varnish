@@ -1,4 +1,4 @@
-varnishtest "request resp and hdr length limits"
+vtest "request resp and hdr length limits"
 
 server s1 {
 	rxreq
@@ -53,12 +53,12 @@ server s1 {
 	send "asdf"
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-vcl+backend {
 	} -start
 
-varnish v1 -cliok "param.set http_resp_size 256"
-varnish v1 -cliok "param.set http_resp_hdr_len 40"
+vinyl v1 -cliok "param.set http_resp_size 256"
+vinyl v1 -cliok "param.set http_resp_hdr_len 40"
 
 client c1 {
 	txreq -url "/1"

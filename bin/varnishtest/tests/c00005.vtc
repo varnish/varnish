@@ -1,4 +1,4 @@
-varnishtest "Test ACLs"
+vtest "Test ACLs"
 
 server s1 {
 	rxreq
@@ -9,9 +9,9 @@ server s1 {
 	txresp -body "2222\n"
 } -start
 
-varnish v1 -arg "-p feature=+trace"
+vinyl v1 -arg "-p feature=+trace"
 
-varnish v1 -errvcl {Name acl1 must have type 'acl'.} {
+vinyl v1 -errvcl {Name acl1 must have type 'acl'.} {
 	sub vcl_recv {
 		if (client.ip ~ acl1) {
 			set req.url = "/";
@@ -23,7 +23,7 @@ varnish v1 -errvcl {Name acl1 must have type 'acl'.} {
 	}
 }
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (client.ip ~ acl1) {
 			set req.url = "/";
@@ -46,7 +46,7 @@ client c1 {
 	expect resp.http.acl == acl1
 } -run
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	acl acl1 {
 		! "${localhost}";
 		"0.0.0.0" / 0;
@@ -65,9 +65,9 @@ varnish v1 -vcl+backend {
 
 client c1 -run
 
-varnish v1 -cliok "param.set vsl_mask -VCL_trace"
+vinyl v1 -cliok "param.set vsl_mask -VCL_trace"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 
 	backend dummy None;
@@ -172,7 +172,7 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -errvcl {Non-zero bits in masked part} {
+vinyl v1 -errvcl {Non-zero bits in masked part} {
 	import std;
 
 	backend dummy None;
@@ -186,7 +186,7 @@ varnish v1 -errvcl {Non-zero bits in masked part} {
 	}
 }
 
-varnish v1 -errvcl {Non-zero bits in masked part} {
+vinyl v1 -errvcl {Non-zero bits in masked part} {
 	import std;
 
 	backend dummy None;
@@ -201,7 +201,7 @@ varnish v1 -errvcl {Non-zero bits in masked part} {
 }
 
 # this is both an OK test for pedantic and fold
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 
 	backend dummy None;
@@ -377,7 +377,7 @@ client c1 {
 logexpect l1 -wait
 
 # test +fold(-report)
-varnish v1 -cliexpect ! "fold" {vcl.inline silent << EOF
+vinyl v1 -cliexpect ! "fold" {vcl.inline silent << EOF
 	vcl 4.1;
 
 	backend dummy None;
@@ -396,7 +396,7 @@ varnish v1 -cliexpect ! "fold" {vcl.inline silent << EOF
 	EOF
 }
 
-varnish v1 -errvcl "-fold(...) is invalid, use -fold" {
+vinyl v1 -errvcl "-fold(...) is invalid, use -fold" {
 	backend dummy None;
 
 	acl acl1 +log +pedantic -fold(+foo) {
@@ -404,7 +404,7 @@ varnish v1 -errvcl "-fold(...) is invalid, use -fold" {
 	}
 }
 
-varnish v1 -errvcl "The only ACL fold sub-flag is `report`" {
+vinyl v1 -errvcl "The only ACL fold sub-flag is `report`" {
 	backend dummy None;
 
 	acl acl1 +log +pedantic +fold(+foo) {

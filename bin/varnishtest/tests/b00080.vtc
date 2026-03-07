@@ -1,4 +1,4 @@
-varnishtest "Keep-Alive is a hop-by-hop header"
+vtest "Keep-Alive is a hop-by-hop header"
 
 server s1 {
 	rxreq
@@ -28,7 +28,7 @@ server s1 {
 	txresp -hdr "Connection: Keep-Alive" -hdr "Keep-Alive: 4"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.http.req-keep-alive = !(!req.http.Keep-Alive);
 	}

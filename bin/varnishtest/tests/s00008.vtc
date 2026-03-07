@@ -1,4 +1,4 @@
-varnishtest "setting ttl in vcl_backend_response for slow backends"
+vtest "setting ttl in vcl_backend_response for slow backends"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -body "bar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 10s;
 	}

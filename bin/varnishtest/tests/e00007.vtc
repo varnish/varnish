@@ -1,4 +1,4 @@
-varnishtest "ESI spanning storage bits"
+vtest "ESI spanning storage bits"
 
 # The layout of the body in the response is very carefully
 # tuned to give the desired code coverage.
@@ -32,13 +32,13 @@ server s1 {
 	}
 } -start
 
-varnish v1 -arg "-sdefault,2m" -vcl+backend {
+vinyl v1 -arg "-sdefault,2m" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
 } -start
 
-varnish v1 -cliok "debug.fragfetch 32"
+vinyl v1 -cliok "debug.fragfetch 32"
 
 client c1 {
 	txreq -url /foo/bar -hdr "Host: froboz"
@@ -49,5 +49,5 @@ client c1 {
 }
 
 client c1 -run
-varnish v1 -expect esi_errors == 0
-varnish v1 -expect MAIN.s_resp_bodybytes == 120
+vinyl v1 -expect esi_errors == 0
+vinyl v1 -expect MAIN.s_resp_bodybytes == 120

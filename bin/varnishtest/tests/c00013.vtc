@@ -1,4 +1,4 @@
-varnishtest "Test parking second request on backend delay (waitinglist)"
+vtest "Test parking second request on backend delay (waitinglist)"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -16,13 +16,13 @@ server s1 {
 	send "line2\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -url "/foo" -hdr "client: c1"
@@ -46,8 +46,8 @@ client c2 {
 
 client c1 -wait
 
-varnish v1 -vsl_catchup
-varnish v1 -expect client_req == 2
-varnish v1 -expect busy_sleep >= 1
-varnish v1 -expect busy_wakeup >= 1
-varnish v1 -stop
+vinyl v1 -vsl_catchup
+vinyl v1 -expect client_req == 2
+vinyl v1 -expect busy_sleep >= 1
+vinyl v1 -expect busy_wakeup >= 1
+vinyl v1 -stop

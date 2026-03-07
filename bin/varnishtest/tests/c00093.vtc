@@ -1,4 +1,4 @@
-varnishtest "Test resp.is_streaming with a UDS backend"
+vtest "Test resp.is_streaming with a UDS backend"
 
 # Same as c00069 without the synth case
 
@@ -13,7 +13,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	send "1234567890"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_backend_response {
 		vtc.barrier_sync("${b1_sock}");

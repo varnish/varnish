@@ -1,6 +1,6 @@
-varnishtest "VMOD blob url encode and decode"
+vtest "VMOD blob url encode and decode"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	import std;
 	backend b None;
@@ -140,7 +140,7 @@ client c1 {
 	expect resp.http.urlucparam == "The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog"
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	import std;
 	backend b None;
@@ -287,7 +287,7 @@ server s1 -repeat 4 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import blob;
 
 	sub vcl_deliver {

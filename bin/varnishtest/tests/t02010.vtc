@@ -1,4 +1,4 @@
-varnishtest "Test H2 Client IMS"
+vtest "Test H2 Client IMS"
 
 server s1 {
 	rxreq
@@ -12,8 +12,8 @@ server s1 {
 	    -hdr {ETag: "bar"}
 } -start
 
-varnish v1 -vcl+backend { } -start
-varnish v1 -cliok "param.set feature +http2"
+vinyl v1 -vcl+backend { } -start
+vinyl v1 -cliok "param.set feature +http2"
 
 client c1 {
 	stream 1 {

@@ -1,4 +1,4 @@
-varnishtest "too many retries"
+vtest "too many retries"
 
 server s1 {
 	rxreq
@@ -37,7 +37,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.http.foo == "bar") {
 			return (retry);

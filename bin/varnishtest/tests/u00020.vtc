@@ -1,4 +1,4 @@
-varnishtest "new varnishncsa matching rules"
+vtest "new varnishncsa matching rules"
 
 # Test things we send to the backend
 
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_fetch {
 		set bereq.http.bereqhdr = "vbf-modified";
@@ -52,7 +52,7 @@ shell {
 	diff -u expected_sb.txt ncsa_sb.txt
 }
 
-varnish v1 -stop
+vinyl v1 -stop
 
 # Test things we receive from the backend
 
@@ -61,7 +61,7 @@ server s1 {
 	txresp -status 202 -hdr "beresp: origin" -hdr "unset: origin"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.http.beresp = "vbr-updated";
@@ -96,7 +96,7 @@ shell {
 	diff -u expected_rb.txt ncsa_rb.txt
 }
 
-varnish v1 -stop
+vinyl v1 -stop
 
 # Test things we send to the client
 
@@ -105,7 +105,7 @@ server s1 {
 	txresp -status 202 -hdr "resp: origin" -hdr "unset: origin"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.http.resp = "vbr-updated";
@@ -145,7 +145,7 @@ shell {
 	diff -u expected_sc.txt ncsa_sc.txt
 }
 
-varnish v1 -stop
+vinyl v1 -stop
 
 # Test things we receive from the client
 
@@ -154,7 +154,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_recv {
 		set req.http.reqhdr = "recv-modified";

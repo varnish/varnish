@@ -1,4 +1,4 @@
-varnishtest "Effective TTL for a slow backend"
+vtest "Effective TTL for a slow backend"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	txresp -body "bar"
 } -start
 
-varnish v1 -arg "-p default_ttl=3 -p default_grace=0" -vcl+backend {
+vinyl v1 -arg "-p default_ttl=3 -p default_grace=0" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.X-ttl = beresp.ttl;
 	}
@@ -40,4 +40,4 @@ client c1 {
 	expect resp.body == "foo"
 } -run
 
-varnish v1 -expect beresp_shortlived == 1
+vinyl v1 -expect beresp_shortlived == 1

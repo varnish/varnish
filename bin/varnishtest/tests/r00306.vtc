@@ -1,4 +1,4 @@
-varnishtest "Regression test for ticket #306, random director ignoring good backend"
+vtest "Regression test for ticket #306, random director ignoring good backend"
 
 server s1 {
 
@@ -17,7 +17,7 @@ server s2 {
 	txresp -status 404
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 
 	import directors;
 
@@ -38,8 +38,8 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -cliok "backend.set_health s2 sick"
-varnish v1 -cliok "backend.list"
+vinyl v1 -cliok "backend.set_health s2 sick"
+vinyl v1 -cliok "backend.list"
 
 client c1 {
 	timeout 10

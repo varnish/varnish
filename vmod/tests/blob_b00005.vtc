@@ -1,6 +1,6 @@
-varnishtest "VMOD blob base64 decode() n chars"
+vtest "VMOD blob base64 decode() n chars"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -162,7 +162,7 @@ server s1 -repeat 3 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import blob;
 
 	sub vcl_deliver {

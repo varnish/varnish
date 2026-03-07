@@ -1,11 +1,11 @@
-varnishtest "204 response with body"
+vtest "204 response with body"
 
 server s1 {
 	rxreq
 	txresp -status 204 -body "HiHo"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.http.foo == "bar") {
 			set beresp.status = 204;

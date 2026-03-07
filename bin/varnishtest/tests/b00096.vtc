@@ -1,4 +1,4 @@
-varnishtest "Test vcl_backend_refresh on streaming object"
+vtest "Test vcl_backend_refresh on streaming object"
 
 barrier b1 sock 2
 barrier b2 sock 2
@@ -18,7 +18,7 @@ server s2 {
 	txresp -status 304
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {

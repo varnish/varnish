@@ -1,4 +1,4 @@
-varnishtest "Test backend preamble"
+vtest "Test backend preamble"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.host = "${s1_sock}";
 		.preamble = :UE9TVCAvcHJlYW1ibGUgSFRUUC83LjMKSGVhZGVyOiA0MgoKCg==: ;

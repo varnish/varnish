@@ -1,11 +1,11 @@
-varnishtest "Connection: close in vcl_synth{}"
+vtest "Connection: close in vcl_synth{}"
 
 server s1 {
 	rxreq
 	txresp -status 400
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_miss {
 		if (req.url == "/333") {
 			return (synth(333, "FOO"));

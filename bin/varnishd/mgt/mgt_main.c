@@ -95,7 +95,7 @@ mgt_DumpOptions(void)
 	       "compiled VCLs etc.\n\n");
 	printf("  In performance critical applications, this directory "
 	       "should be on a RAM backed filesystem.\n\n");
-	printf("  When running multiple varnishd instances, separate "
+	printf("  When running multiple vinyld instances, separate "
 	       "directories need to be used.\n\n");
 	VIN_DumpDefaults();
 }
@@ -108,7 +108,7 @@ usage(void)
 #define FMT_NONL "  %-35s # %s"
 #define FMT FMT_NONL "\n"
 
-	printf( "Usage: varnishd [options]\n");
+	printf( "Usage: vinyld [options]\n");
 
 	printf("\nBasic options:\n");
 
@@ -584,7 +584,7 @@ create_bogo_n_arg(void)
 		VSB_printf(vsb, "%s", getenv("TMPDIR"));
 	else
 		VSB_cat(vsb, "/tmp");
-	VSB_cat(vsb, "/varnishd_C_XXXXXXX");
+	VSB_cat(vsb, "/vinyld_C_XXXXXXX");
 	AZ(VSB_finish(vsb));
 	p = strdup(VSB_data(vsb));
 	AN(p);
@@ -670,7 +670,7 @@ main(int argc, char * const *argv)
 				ARGV_ERR("-V must be the first argument\n");
 			if (argc != 2)
 				ARGV_ERR("Too many arguments for -V\n");
-			VCS_Message("varnishd");
+			VCS_Message("vinyld");
 			exit(0);
 		case 'x':
 			if (!first_arg)
@@ -889,7 +889,7 @@ main(int argc, char * const *argv)
 
 	mgt_ProcTitle("Mgt");
 
-	openlog("varnishd", LOG_PID, LOG_LOCAL0);
+	openlog("vinyld", LOG_PID, LOG_LOCAL0);
 
 	vsb = VSB_new_auto();
 	AN(vsb);

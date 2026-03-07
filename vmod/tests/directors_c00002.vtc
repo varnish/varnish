@@ -1,4 +1,4 @@
-varnishtest "Test vmod.directors round robin director in stacked fashion"
+vtest "Test vmod.directors round robin director in stacked fashion"
 
 
 server s1 {
@@ -22,7 +22,7 @@ server s4 {
 	txresp -body "4444"
 } -start
 
-varnish v1 -errvcl {Name of VCL object, 'rr1.xx', contains illegal character '.'} {
+vinyl v1 -errvcl {Name of VCL object, 'rr1.xx', contains illegal character '.'} {
 	import directors;
 	backend b1 { .host = "${localhost}"; .port = "8080";}
 	sub vcl_init {
@@ -30,7 +30,7 @@ varnish v1 -errvcl {Name of VCL object, 'rr1.xx', contains illegal character '.'
 	}
 }
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	import directors;
 	sub vcl_init {

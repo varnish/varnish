@@ -1,13 +1,13 @@
-varnishtest "Test uninitialized vmod objects"
+vtest "Test uninitialized vmod objects"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
-varnish v1 -errvcl "Object nullobj not initialized" {
+vinyl v1 -errvcl "Object nullobj not initialized" {
 	import debug;
 
 	backend default { .host = "${localhost}"; }
@@ -19,7 +19,7 @@ varnish v1 -errvcl "Object nullobj not initialized" {
 	}
 }
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 
 	backend default { .host = "${localhost}"; }

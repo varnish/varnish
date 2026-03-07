@@ -1,4 +1,4 @@
-varnishtest "ESI requests turned off and other filters with esi"
+vtest "ESI requests turned off and other filters with esi"
 
 server s1 {
 	rxreq
@@ -23,7 +23,7 @@ server s1 {
 	}
 } -start
 
-varnish v1 -syntax 4.0 -vcl+backend {
+vinyl v1 -syntax 4.0 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/") {
 			set req.esi = false;
@@ -45,10 +45,10 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -expect esi_errors == 0
-varnish v1 -expect MAIN.s_resp_bodybytes == 149
+vinyl v1 -expect esi_errors == 0
+vinyl v1 -expect MAIN.s_resp_bodybytes == 149
 
 server s1 {
 	rxreq
@@ -69,7 +69,7 @@ server s1 {
 	}
 } -start
 
-varnish v1 -syntax 4.1 -vcl+backend {
+vinyl v1 -syntax 4.1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.was = resp.do_esi;
 		set resp.http.filter0 = resp.filters;
@@ -131,5 +131,5 @@ client c1 {
 	expect resp.bodylen == 251
 } -run
 
-varnish v1 -expect esi_errors == 0
-varnish v1 -expect MAIN.s_resp_bodybytes == 673
+vinyl v1 -expect esi_errors == 0
+vinyl v1 -expect MAIN.s_resp_bodybytes == 673

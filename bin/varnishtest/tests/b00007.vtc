@@ -1,4 +1,4 @@
-varnishtest "Check chunked encoding from backend works"
+vtest "Check chunked encoding from backend works"
 
 server s1 {
 	rxreq
@@ -20,7 +20,7 @@ server s1 {
 	chunked ""
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq -url "/bar"

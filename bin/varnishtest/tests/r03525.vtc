@@ -1,11 +1,11 @@
-varnishtest "Clear beresp status and reason on a retry"
+vtest "Clear beresp status and reason on a retry"
 
 server s1 {
 	rxreq
 	txresp -status 500 -reason "my reason"
 } -start
 
-varnish v1 -arg "-p first_byte_timeout=0.2" -vcl+backend {
+vinyl v1 -arg "-p first_byte_timeout=0.2" -vcl+backend {
 	sub vcl_backend_response {
 		return (error(beresp.status, beresp.reason));
 	}

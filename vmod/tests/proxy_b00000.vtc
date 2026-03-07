@@ -1,11 +1,11 @@
-varnishtest "PROXY v2 TLV test"
+vtest "PROXY v2 TLV test"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -proto "PROXY" -vcl+backend {
+vinyl v1 -proto "PROXY" -vcl+backend {
 	import vtc;
 	import proxy;
 
@@ -67,6 +67,6 @@ client c1 {
 	expect resp.http.cn == ""
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 logexpect l1 -wait

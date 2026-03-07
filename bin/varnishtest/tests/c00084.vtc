@@ -1,6 +1,6 @@
-varnishtest "legal symbol names"
+vtest "legal symbol names"
 
-varnish v1 \
+vinyl v1 \
 	-syntax 4.0 \
 	-arg "-s my-store=default" \
 	-vcl {
@@ -30,9 +30,9 @@ varnish v1 \
 	}
 } -start
 
-varnish v1 -cli "vcl.label my-label vcl1"
+vinyl v1 -cli "vcl.label my-label vcl1"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend dummy { .host = "${bad_backend}"; }
 
 	sub vcl_recv {

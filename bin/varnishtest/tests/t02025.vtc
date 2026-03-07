@@ -1,11 +1,11 @@
-varnishtest "h2 reset interrupt"
+vtest "h2 reset interrupt"
 
 barrier b1 sock 2
 barrier b2 sock 2
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -vcl {
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -vcl {
 	import vtc;
 
 	backend be none;
@@ -43,8 +43,8 @@ barrier b2 sync
 
 client c1 -wait
 
-varnish v1 -vsl_catchup
-varnish v1 -expect req_reset == 1
+vinyl v1 -vsl_catchup
+vinyl v1 -expect req_reset == 1
 
 # NB: The varnishncsa command below shows a minimal pattern to collect
 # "rapid reset" suspects per session, with the IP address. Here rapid

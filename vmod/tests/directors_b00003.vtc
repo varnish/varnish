@@ -1,4 +1,4 @@
-varnishtest "Test hash director"
+vtest "Test hash director"
 
 server s1 {
 	rxreq
@@ -20,7 +20,7 @@ server s2 -repeat 2 -keepalive {
 	txresp -hdr "Foo: 9" -body "9"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 

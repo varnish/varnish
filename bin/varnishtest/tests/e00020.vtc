@@ -1,4 +1,4 @@
-varnishtest "ESI:remove"
+vtest "ESI:remove"
 
 
 server s1 {
@@ -13,14 +13,14 @@ server s1 {
 	}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 		set beresp.do_gunzip = true;
 	}
 } -start
 
-varnish v1 -cliok "param.set http_gzip_support true"
+vinyl v1 -cliok "param.set http_gzip_support true"
 
 logexpect l1 -v v1 -g vxid {
 	expect * * Fetch_Body
@@ -38,5 +38,5 @@ client c1 {
 }
 
 client c1 -run
-varnish v1 -expect esi_errors == 2
+vinyl v1 -expect esi_errors == 2
 logexpect l1 -wait

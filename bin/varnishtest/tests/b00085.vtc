@@ -1,6 +1,6 @@
-varnishtest "Test VSS_resolver_range"
+vtest "Test VSS_resolver_range"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend default none;
 
 	import debug;

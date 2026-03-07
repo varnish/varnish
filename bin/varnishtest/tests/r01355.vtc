@@ -1,4 +1,4 @@
-varnishtest "Test ESI ignoring BOMs"
+vtest "Test ESI ignoring BOMs"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s1 {
 	txresp -body "\xeb\xbc    <html>   <esi:remove>blabla</esi:remove>"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -40,7 +40,7 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -cliok "param.set feature +esi_remove_bom"
+vinyl v1 -cliok "param.set feature +esi_remove_bom"
 
 client c1 {
 	# BOM removed, ESI processing

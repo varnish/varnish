@@ -1,4 +1,4 @@
-varnishtest "Test that oc->oa_present is cleared when we create a new object"
+vtest "Test that oc->oa_present is cleared when we create a new object"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	       -body 1024
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.between_bytes_timeout = 0.001s;
 	}

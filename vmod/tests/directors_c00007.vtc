@@ -1,4 +1,4 @@
-varnishtest "shard director regression to vslp v01000"
+vtest "shard director regression to vslp v01000"
 
 server s1 {
 	rxreq
@@ -22,7 +22,7 @@ server s3 {
 #
 # shard:
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 	import blob;

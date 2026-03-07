@@ -1,4 +1,4 @@
-varnishtest "test access to cache_param from vmod"
+vtest "test access to cache_param from vmod"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	import debug;
 
@@ -16,7 +16,7 @@ varnish v1 -vcl+backend {
 
 } -start
 
-varnish v1 -cliok "param.set pcre2_match_limit 100"
+vinyl v1 -cliok "param.set pcre2_match_limit 100"
 
 client c1 {
 	txreq
@@ -24,7 +24,7 @@ client c1 {
 	expect resp.http.foo == 100
 } -run
 
-varnish v1 -cliok "param.set pcre2_match_limit 200"
+vinyl v1 -cliok "param.set pcre2_match_limit 200"
 
 client c1 {
 	txreq

@@ -1,4 +1,4 @@
-varnishtest "Softpurging an object cannot increase grace or keep"
+vtest "Softpurging an object cannot increase grace or keep"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -body "bar"
 } -start
 
-varnish v1 -arg "-p vsl_mask=+ExpKill" -vcl+backend {
+vinyl v1 -arg "-p vsl_mask=+ExpKill" -vcl+backend {
 	import purge;
 	import std;
 

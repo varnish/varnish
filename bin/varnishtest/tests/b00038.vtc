@@ -1,4 +1,4 @@
-varnishtest "Test abandon from vcl_backend_xxx"
+vtest "Test abandon from vcl_backend_xxx"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-pfirst_byte_timeout=0.1" -vcl+backend {
+vinyl v1 -arg "-pfirst_byte_timeout=0.1" -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url == "/foo") {
 			return (abandon);
@@ -36,4 +36,4 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-varnish v1 -expect fetch_failed == 1
+vinyl v1 -expect fetch_failed == 1

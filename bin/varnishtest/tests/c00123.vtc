@@ -1,4 +1,4 @@
-varnishtest "Low req.body streaming pressure on storage"
+vtest "Low req.body streaming pressure on storage"
 
 server s0 {
 	rxreq
@@ -6,7 +6,7 @@ server s0 {
 	expect req.bodylen == 100000
 } -dispatch
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -18,7 +18,7 @@ varnish v1 -vcl+backend {
 } -start
 
 # explicit setting to be robust against changes to the default value
-varnish v1 -cliok "param.set fetch_chunksize 16k"
+vinyl v1 -cliok "param.set fetch_chunksize 16k"
 
 # chunked req.body streaming uses approximately one fetch_chunksize'd chunk
 client c1 {
@@ -30,13 +30,13 @@ client c1 {
 } -run
 
 # in practice a little over fetch_chunksize is allocated
-varnish v1 -expect SM?.s0.c_bytes < 20000
-varnish v1 -vsl_catchup
+vinyl v1 -expect SM?.s0.c_bytes < 20000
+vinyl v1 -vsl_catchup
 
 # reset s0 counters
-varnish v1 -stop
-varnish v1 -start
-varnish v1 -expect SM?.s0.c_bytes == 0
+vinyl v1 -stop
+vinyl v1 -start
+vinyl v1 -expect SM?.s0.c_bytes == 0
 
 # content-length req.body streaming also needs one chunk
 client c2 {
@@ -45,12 +45,12 @@ client c2 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect SM?.s0.c_bytes < 20000
-varnish v1 -vsl_catchup
+vinyl v1 -expect SM?.s0.c_bytes < 20000
+vinyl v1 -vsl_catchup
 
 # reset s0 counters
-varnish v1 -stop
-varnish v1 -start
+vinyl v1 -stop
+vinyl v1 -start
 
 # chunked req.body caching allocates storage for the entire body
 client c3 {
@@ -61,12 +61,12 @@ client c3 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect SM?.s0.c_bytes > 100000
-varnish v1 -vsl_catchup
+vinyl v1 -expect SM?.s0.c_bytes > 100000
+vinyl v1 -vsl_catchup
 
 # reset s0 counters
-varnish v1 -stop
-varnish v1 -start
+vinyl v1 -stop
+vinyl v1 -start
 
 # content-length req.body caching allocates storage for the entire body
 client c4 {
@@ -75,5 +75,5 @@ client c4 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect SM?.s0.c_bytes > 100000
-varnish v1 -vsl_catchup
+vinyl v1 -expect SM?.s0.c_bytes > 100000
+vinyl v1 -vsl_catchup

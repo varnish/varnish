@@ -1,4 +1,4 @@
-varnishtest "Test If-None-Match"
+vtest "Test If-None-Match"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -hdr {ETag: W/"123456789"} -bodylen 10
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 client c1 {
 	txreq

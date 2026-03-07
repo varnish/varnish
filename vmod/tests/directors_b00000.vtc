@@ -1,4 +1,4 @@
-varnishtest "Test round robin director"
+vtest "Test round robin director"
 
 server s1 {
 	rxreq
@@ -20,7 +20,7 @@ server s4 {
 	txresp -body "4444"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 	import std;
 

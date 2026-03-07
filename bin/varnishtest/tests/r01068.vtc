@@ -1,11 +1,11 @@
-varnishtest "Bug 1068 restart on hit in vcl_deliver causes segfault"
+vtest "Bug 1068 restart on hit in vcl_deliver causes segfault"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		if (req.http.x-restart && req.restarts == 0) {
 			return (restart);

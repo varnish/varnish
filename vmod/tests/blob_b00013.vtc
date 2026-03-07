@@ -1,6 +1,6 @@
-varnishtest "VMOD blob test transcode() n chars"
+vtest "VMOD blob test transcode() n chars"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	import std;
 	backend b None;
@@ -131,7 +131,7 @@ client c1 {
 	expect resp.http.hexallup2urllc == resp.http.hexallup2url
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	import std;
 	backend b None;
@@ -267,7 +267,7 @@ client c1 {
 	expect resp.http.b64urlnopad2b64urlnopad == "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgg"
 } -run
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import blob;
 	import std;
 	backend b None;
@@ -419,7 +419,7 @@ server s1 -repeat 11 -keepalive {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import blob;
 
 	sub vcl_deliver {

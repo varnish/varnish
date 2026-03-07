@@ -1,11 +1,11 @@
-varnishtest "Test VCL STRINGS/STRANDS comparisons"
+vtest "Test VCL STRINGS/STRANDS comparisons"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.test = req.http.test;
 
@@ -95,7 +95,7 @@ client c1 {
 
 } -run
 
-varnish v1 -vsl_catchup -vcl+backend {
+vinyl v1 -vsl_catchup -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.test = req.http.test;
 
@@ -121,7 +121,7 @@ varnish v1 -vsl_catchup -vcl+backend {
 
 client c1 -run
 
-varnish v1 -vsl_catchup -vcl+backend {
+vinyl v1 -vsl_catchup -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.test = req.http.test;
 
@@ -147,7 +147,7 @@ varnish v1 -vsl_catchup -vcl+backend {
 
 client c1 -run
 
-varnish v1 -vsl_catchup -vcl+backend {
+vinyl v1 -vsl_catchup -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.test = req.http.test;
 

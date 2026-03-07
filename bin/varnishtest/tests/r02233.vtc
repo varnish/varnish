@@ -1,11 +1,11 @@
-varnishtest "Fail earlier if we cannot fit the query string"
+vtest "Fail earlier if we cannot fit the query string"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import vtc;
 
@@ -28,5 +28,5 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-varnish v1 -expect client_resp_500 == 1
-varnish v1 -expect ws_client_overflow == 1
+vinyl v1 -expect client_resp_500 == 1
+vinyl v1 -expect ws_client_overflow == 1

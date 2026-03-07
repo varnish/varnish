@@ -1,4 +1,4 @@
-varnishtest "#1499 - objcore ref leak on IMS update"
+vtest "#1499 - objcore ref leak on IMS update"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp -hdr "X-Resp: 2" -body {12}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.001s;
 		set beresp.grace = 0s;
@@ -31,4 +31,4 @@ client c1 {
 
 delay 3
 
-varnish v1 -expect n_object == 0
+vinyl v1 -expect n_object == 0

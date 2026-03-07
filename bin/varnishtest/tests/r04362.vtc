@@ -1,7 +1,7 @@
-varnishtest "No transit buffer for req.body and vcl_synth"
+vtest "No transit buffer for req.body and vcl_synth"
 
-varnish v1 -cliok "param.set transit_buffer 4k"
-varnish v1 -vcl {
+vinyl v1 -cliok "param.set transit_buffer 4k"
+vinyl v1 -vcl {
 	import std;
 
 	backend be none;
@@ -20,5 +20,5 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect transit_stored > 10240
-varnish v1 -expect transit_buffered == 0
+vinyl v1 -expect transit_stored > 10240
+vinyl v1 -expect transit_buffered == 0

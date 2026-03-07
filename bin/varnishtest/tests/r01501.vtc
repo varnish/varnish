@@ -1,11 +1,11 @@
-varnishtest "director fails to pick backend"
+vtest "director fails to pick backend"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {

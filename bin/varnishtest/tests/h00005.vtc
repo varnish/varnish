@@ -1,4 +1,4 @@
-varnishtest "Exercise varnishtest syslog facility"
+vtest "Exercise varnishtest syslog facility"
 
 feature ignore_unknown_macro
 feature cmd {haproxy --version 2>&1 | grep -q 'HA-*Proxy version'}

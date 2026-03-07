@@ -1,6 +1,6 @@
-varnishtest "Check timeout_idle"
+vtest "Check timeout_idle"
 
-varnish v1 -arg "-p timeout_idle=2"	\
+vinyl v1 -arg "-p timeout_idle=2"	\
 	   -arg "-a ${listen_addr}"	\
 	   -arg "-a ${tmpdir}/v1.sock"	\
 	   -vcl {

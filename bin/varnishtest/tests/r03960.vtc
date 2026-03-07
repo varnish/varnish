@@ -1,6 +1,6 @@
-varnishtest "invalid header name on RHS"
+vtest "invalid header name on RHS"
 
-varnish v1 -errvcl "Expected ID got '0'" {
+vinyl v1 -errvcl "Expected ID got '0'" {
 	vcl 4.1;
 	backend default none;
 	sub vcl_recv {

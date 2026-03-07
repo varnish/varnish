@@ -1,7 +1,7 @@
-varnishtest "VMOD blob hex encode and decode"
+vtest "VMOD blob hex encode and decode"
 
 # Some platforms need larger workspaces for this test
-varnish v1 -arg "-p workspace_client=256k" -vcl {
+vinyl v1 -arg "-p workspace_client=256k" -vcl {
 	import blob;
 	import std;
 	backend b None;
@@ -197,7 +197,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import blob;
 
 	sub vcl_deliver {

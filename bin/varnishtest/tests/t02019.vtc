@@ -1,4 +1,4 @@
-varnishtest "H/2 stream early buffer exhaustion"
+vtest "H/2 stream early buffer exhaustion"
 
 barrier b1 sock 2
 
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		vtc.barrier_sync("${b1_sock}");
@@ -15,10 +15,10 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set fetch_chunksize 64k"
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.reset h2_initial_window_size"
-varnish v1 -cliok "param.reset h2_rx_window_low_water"
+vinyl v1 -cliok "param.set fetch_chunksize 64k"
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.reset h2_initial_window_size"
+vinyl v1 -cliok "param.reset h2_rx_window_low_water"
 
 client c1 {
 	stream 1 {

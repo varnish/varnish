@@ -1,11 +1,11 @@
-varnishtest "VCL backend side access to IP#s and debug.proxy_header"
+vtest "VCL backend side access to IP#s and debug.proxy_header"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -proto PROXY -vcl+backend {
+vinyl v1 -proto PROXY -vcl+backend {
 	import vtc;
 	import blob;
 

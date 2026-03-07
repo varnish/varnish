@@ -1,4 +1,4 @@
-varnishtest "Test retry of straight insufficient bytes pass-fetch : do_stream = false"
+vtest "Test retry of straight insufficient bytes pass-fetch : do_stream = false"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s2 {
 server s1 -start
 server s2 -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}

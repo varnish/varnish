@@ -1,4 +1,4 @@
-varnishtest "#1485: Wrong response reason phrase"
+vtest "#1485: Wrong response reason phrase"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -status 304 -reason "Not Modified"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1ms;
 		set beresp.grace = 0s;

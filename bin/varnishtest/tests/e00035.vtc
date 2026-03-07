@@ -1,4 +1,4 @@
-varnishtest "ESI fragment fetch fail"
+vtest "ESI fragment fetch fail"
 
 server s1 {
 	rxreq
@@ -12,9 +12,9 @@ server s1 {
 	delay 0.1
 } -start
 
-varnish v1 -cliok "param.set feature +esi_disable_xml_check"
-varnish v1 -cliok "param.set feature +esi_include_onerror"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
+vinyl v1 -cliok "param.set feature +esi_include_onerror"
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = beresp.http.surrogate-control ~ "ESI/1.0";
 		set beresp.do_stream = beresp.http.stream != "false";

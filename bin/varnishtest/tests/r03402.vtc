@@ -1,4 +1,4 @@
-varnishtest "probe dripping reads timeout"
+vtest "probe dripping reads timeout"
 
 server s0 {
 	rxreq
@@ -10,7 +10,7 @@ server s0 {
 	send "\r\n"
 } -dispatch
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	probe default {
 		.window = 1;
 		.threshold = 1;
@@ -21,4 +21,4 @@ varnish v1 -vcl+backend {
 
 delay 5
 
-varnish v1 -cliexpect sick backend.list
+vinyl v1 -cliexpect sick backend.list

@@ -1,15 +1,15 @@
-varnishtest "H2 panic"
+vtest "H2 panic"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set feature +no_coredump"
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set feature +no_coredump"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {
@@ -26,6 +26,6 @@ client c1 {
 
 delay 2
 
-varnish v1 -cliok "panic.clear"
+vinyl v1 -cliok "panic.clear"
 
-varnish v1 -expectexit 0x40
+vinyl v1 -expectexit 0x40

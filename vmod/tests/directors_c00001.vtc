@@ -1,4 +1,4 @@
-varnishtest "Test round robin stacked within fallback"
+vtest "Test round robin stacked within fallback"
 
 server s1 -repeat 2 {
 	rxreq
@@ -20,7 +20,7 @@ server s4 -repeat 2 {
 	txresp -body "4444"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -61,10 +61,10 @@ client c1 {
 	expect resp.body == "22"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -cliok "backend.set_health s1 sick"
-varnish v1 -cliok "backend.list"
+vinyl v1 -cliok "backend.set_health s1 sick"
+vinyl v1 -cliok "backend.list"
 
 client c1 {
 	txreq
@@ -75,10 +75,10 @@ client c1 {
 	expect resp.body == "22"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
-varnish v1 -cliok "backend.set_health s2 sick"
-varnish v1 -cliok "backend.list"
+vinyl v1 -cliok "backend.set_health s2 sick"
+vinyl v1 -cliok "backend.list"
 
 client c1 {
 	txreq
@@ -95,5 +95,5 @@ client c1 {
 	expect resp.body == "4444"
 } -run
 
-varnish v1 -vsl_catchup
-varnish v1 -clijson "backend.list -j"
+vinyl v1 -vsl_catchup
+vinyl v1 -clijson "backend.list -j"

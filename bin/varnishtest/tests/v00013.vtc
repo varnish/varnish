@@ -1,4 +1,4 @@
-varnishtest "Check obj.hits"
+vtest "Check obj.hits"
 
 server s1 {
 	rxreq
@@ -12,7 +12,7 @@ server s1 {
 	txresp -body "pass"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/pass") {
 			return (pass);

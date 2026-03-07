@@ -1,4 +1,4 @@
-varnishtest "HTTP continuation lines"
+vtest "HTTP continuation lines"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp -hdr "Foo: bar,\n \t\n\tbarf: fail" -body "xxx"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.bar = beresp.http.foo;
 		unset beresp.http.foo;

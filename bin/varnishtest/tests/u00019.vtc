@@ -1,9 +1,9 @@
-varnishtest "varnishlog write vsl to stdout"
+vtest "varnishlog write vsl to stdout"
 
 feature cmd "command -v gzip"
 feature cmd "command -v gunzip"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend be none;
 } -start
 

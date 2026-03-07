@@ -1,4 +1,4 @@
-varnishtest "Built-in split subroutine"
+vtest "Built-in split subroutine"
 
 server s1 {
 	rxreq
@@ -6,7 +6,7 @@ server s1 {
 	    -hdr "cache-control: public, max-age=10, stale-while-revalidate=20"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_req_cookie {
 		return; # trust beresp headers
 	}
@@ -28,5 +28,5 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-varnish v1 -expect cache_hit == 1
-varnish v1 -expect cache_hit == cache_hit_grace
+vinyl v1 -expect cache_hit == 1
+vinyl v1 -expect cache_hit == cache_hit_grace

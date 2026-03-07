@@ -1,4 +1,4 @@
-varnishtest "Test dynamic backends hot swap during a pipe"
+vtest "Test dynamic backends hot swap during a pipe"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -18,7 +18,7 @@ server s2 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import debug;
 
 	backend dummy { .host = "${bad_backend}"; }
@@ -37,7 +37,7 @@ varnish v1 -vcl {
 	}
 } -start
 
-varnish v1 -expect MAIN.n_backend == 2
+vinyl v1 -expect MAIN.n_backend == 2
 
 client c1 {
 	txreq -url "/foo"
@@ -58,5 +58,5 @@ client c2 {
 
 client c1 -wait
 
-varnish v1 -cli backend.list
+vinyl v1 -cli backend.list
 #varnish v1 -expect MAIN.n_backend == 2

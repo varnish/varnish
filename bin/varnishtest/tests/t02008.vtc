@@ -1,13 +1,13 @@
-varnishtest "Test GOAWAY/session cleanup"
+vtest "Test GOAWAY/session cleanup"
 
 server s1 {
 	rxreq
 	txresp -hdr "Content-Type: text/plain" -body response
 } -start
 
-varnish v1 -vcl+backend {} -start
-varnish v1 -cliok {param.set feature +http2}
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -vcl+backend {} -start
+vinyl v1 -cliok {param.set feature +http2}
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	stream 1 {

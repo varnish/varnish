@@ -1,4 +1,4 @@
-varnishtest "Test backend fetch byte counters"
+vtest "Test backend fetch byte counters"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	send "HTTP/1.1\r\n\r\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		# make BereqAcct deterministic
 		unset req.http.via;

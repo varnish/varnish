@@ -1,11 +1,11 @@
-varnishtest "Test/coverage of varnish master signal handling"
+vtest "Test/coverage of varnish master signal handling"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend { } -start
+vinyl v1 -vcl+backend { } -start
 
 client c1 {
 	txreq
@@ -16,4 +16,4 @@ server s1 -wait
 
 shell "kill -15 ${v1_pid}"
 
-varnish v1 -cleanup
+vinyl v1 -cleanup

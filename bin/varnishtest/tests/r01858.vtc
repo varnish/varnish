@@ -1,4 +1,4 @@
-varnishtest "Test a hit-for-miss does not issue an IMS request"
+vtest "Test a hit-for-miss does not issue an IMS request"
 
 server s1 {
 	rxreq
@@ -12,7 +12,7 @@ server s1 {
 	    -body "bar"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.status == 200) {
 			set beresp.ttl = 1s;

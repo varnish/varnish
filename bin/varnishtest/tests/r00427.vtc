@@ -1,4 +1,4 @@
-varnishtest "client close in ESI delivery"
+vtest "client close in ESI delivery"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -26,7 +26,7 @@ server s1 {
 	txresp -body "[barf]"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;

@@ -1,9 +1,9 @@
-varnishtest "Increment counter if http_req_size is exhausted"
+vtest "Increment counter if http_req_size is exhausted"
 
 server s1 {
 } -start
 
-varnish v1 -arg "-p http_req_size=1024" -vcl+backend {
+vinyl v1 -arg "-p http_req_size=1024" -vcl+backend {
 } -start
 
 client c1 {
@@ -14,4 +14,4 @@ client c1 {
 	expect_close
 } -run
 
-varnish v1 -expect sc_rx_overflow == 1
+vinyl v1 -expect sc_rx_overflow == 1

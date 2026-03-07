@@ -1,4 +1,4 @@
-varnishtest "shard director LAZY - directors_c00003.vtc"
+vtest "shard director LAZY - directors_c00003.vtc"
 
 server s1 -repeat 2 {
 	rxreq
@@ -15,7 +15,7 @@ server s3 -repeat 2 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import directors;
 
@@ -98,7 +98,7 @@ client c1 {
 	expect resp.http.backend == "vd"
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 client c1 {
 	txreq -url /1 -hdr "pipe: true"

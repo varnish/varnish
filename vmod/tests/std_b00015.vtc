@@ -1,4 +1,4 @@
-varnishtest "std.rfc_ttl()"
+vtest "std.rfc_ttl()"
 
 server s1 {
 	rxreq
@@ -17,7 +17,7 @@ server s1 {
 	txresp -status 304 -hdr "Cache-Control: s-maxage=11, stale-while-revalidate=77"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_backend_refresh {

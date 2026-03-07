@@ -1,11 +1,11 @@
-varnishtest "Check that cache-control headers are collapsed"
+vtest "Check that cache-control headers are collapsed"
 
 server s1 {
 	rxreq
 	txresp -hdr "Cache-Control: foo" -hdr "Cache-control: bar" -bodylen 4
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.Foo = req.http.cache-control;
 	}

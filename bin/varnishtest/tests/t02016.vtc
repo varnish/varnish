@@ -1,14 +1,15 @@
-varnishtest "client h2 send timeouts"
+vtest "client h2 send timeouts"
 
 server s1 {
 	rxreq
 	txresp -bodylen 12345
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set timeout_idle 10"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set timeout_idle 10"
+vinyl v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url ~ "synth") {
 			return (synth(200));
@@ -18,7 +19,7 @@ varnish v1 -vcl+backend {
 
 # coverage for send_timeout with c1
 
-varnish v1 -cliok "param.set send_timeout 1"
+vinyl v1 -cliok "param.set send_timeout 1"
 
 logexpect l1 -v v1 {
 	expect * * Debug "Hit send_timeout"
@@ -49,8 +50,8 @@ logexpect l1 -wait
 
 # coverage for h2_window_timeout with c2
 
-varnish v1 -cliok "param.set h2_window_timeout 1"
-varnish v1 -cliok "param.reset send_timeout"
+vinyl v1 -cliok "param.set h2_window_timeout 1"
+vinyl v1 -cliok "param.reset send_timeout"
 
 logexpect l2 -v v1 {
 	expect * * Debug "Hit h2_window_timeout"
@@ -120,7 +121,7 @@ client c3 {
 } -start
 
 barrier b3 sync
-varnish v1 -cliok "param.reset h2_window_timeout"
+vinyl v1 -cliok "param.reset h2_window_timeout"
 
 client c3 -wait
 logexpect l3 -wait

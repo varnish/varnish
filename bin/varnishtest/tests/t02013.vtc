@@ -1,4 +1,4 @@
-varnishtest	"Direct H2 start over Unix domain sockets"
+vtest	"Direct H2 start over Unix domain sockets"
 
 server s1 -listen "${tmpdir}/s1.sock" {
 	rxreq
@@ -9,22 +9,22 @@ server s1 -listen "${tmpdir}/s1.sock" {
 		-bodylen 10
 } -start
 
-varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
+vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
 	sub vcl_recv {
 		return (pipe);
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
-varnish v1 -cliok "param.set feature -http2"
+vinyl v1 -cliok "param.set feature -http2"
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	txpri
 	expect_close
 } -run
 
-varnish v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set feature +http2"
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	stream 1 {
@@ -52,7 +52,7 @@ client c1 -connect "${tmpdir}/v1.sock" {
 	stream 7 -wait
 } -run
 
-varnish v1 -expect MEMPOOL.req0.live == 0
-varnish v1 -expect MEMPOOL.req1.live == 0
-varnish v1 -expect MEMPOOL.sess0.live == 0
-varnish v1 -expect MEMPOOL.sess1.live == 0
+vinyl v1 -expect MEMPOOL.req0.live == 0
+vinyl v1 -expect MEMPOOL.req1.live == 0
+vinyl v1 -expect MEMPOOL.sess0.live == 0
+vinyl v1 -expect MEMPOOL.sess1.live == 0

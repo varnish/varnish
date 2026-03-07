@@ -1,4 +1,4 @@
-varnishtest "Test case for #1123 - gunzip buffer reset"
+vtest "Test case for #1123 - gunzip buffer reset"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	txresp -body {INCLUDED}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;

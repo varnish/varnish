@@ -1,11 +1,11 @@
-varnishtest "#1627, wrong CL for gzipped+streamed content with HTTP/1.0 client"
+vtest "#1627, wrong CL for gzipped+streamed content with HTTP/1.0 client"
 
 server s1 {
 	rxreq
 	txresp -body "Testing"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = true;
 		set beresp.do_gzip = true;

@@ -1,4 +1,4 @@
-varnishtest "Test vcl ban()"
+vtest "Test vcl ban()"
 
 # see also v00009.vtc
 
@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "foo"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.method == "BAN") {
 			ban(req.http.doesntexist);

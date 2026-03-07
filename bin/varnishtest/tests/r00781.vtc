@@ -1,11 +1,11 @@
-varnishtest "NULL assignment to line1 fields."
+vtest "NULL assignment to line1 fields."
 
 server s1 {
 	rxreq
 	txresp  -bodylen 10
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		set req.url = req.http.foo;
 	}
@@ -18,7 +18,7 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.url = bereq.http.foo;
 	}

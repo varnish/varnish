@@ -1,4 +1,4 @@
-varnishtest "Test pass from miss"
+vtest "Test pass from miss"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -body foobar1
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_miss {
 		return(pass);
 	}

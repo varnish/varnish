@@ -1,4 +1,4 @@
-varnishtest "Demote condfetch to fetch on invalidated stale object"
+vtest "Demote condfetch to fetch on invalidated stale object"
 
 barrier b1 sock 2
 barrier b2 sock 2
@@ -12,7 +12,7 @@ server s1 {
 	txresp -hdr {ETag: "foo"} -body valid
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.method == "PURGE") {

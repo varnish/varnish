@@ -89,18 +89,18 @@ dist-hook:
 distclean-local:
 	rm -rf $(BUILDDIR)
 
-include/cli.rst: $(top_builddir)/bin/varnishd/varnishd
-	$(top_builddir)/bin/varnishd/varnishd -x cli > ${@}_
+include/cli.rst: $(top_builddir)/bin/varnishd/vinyld
+	$(top_builddir)/bin/varnishd/vinyld -x cli > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES = include/cli.rst
 
-include/params.rst: $(top_builddir)/bin/varnishd/varnishd
-	$(top_builddir)/bin/varnishd/varnishd -x parameter > ${@}_
+include/params.rst: $(top_builddir)/bin/varnishd/vinyld
+	$(top_builddir)/bin/varnishd/vinyld -x parameter > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES += include/params.rst
 
-include/options.rst: $(top_builddir)/bin/varnishd/varnishd
-	$(top_builddir)/bin/varnishd/varnishd -x options > ${@}_
+include/options.rst: $(top_builddir)/bin/varnishd/vinyld
+	$(top_builddir)/bin/varnishd/vinyld -x options > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES += include/options.rst
 

@@ -1,4 +1,4 @@
-varnishtest "test caching of req.body"
+vtest "test caching of req.body"
 
 server s1 {
 	rxreq
@@ -13,7 +13,7 @@ server s1 {
 	txresp -hdr "Foo: Foo" -body "56"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -30,7 +30,7 @@ varnish v1 -vcl+backend {
 
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -req "POST" -body "FOO"
@@ -54,7 +54,7 @@ logexpect l1 -wait
 
 delay .1
 
-varnish v1 -expect MGT.child_died == 0
+vinyl v1 -expect MGT.child_died == 0
 
 # no req body
 server s1 {

@@ -1,4 +1,4 @@
-varnishtest "Test fileread for std VMOD"
+vtest "Test fileread for std VMOD"
 
 shell {
 	printf "File One" > "${tmpdir}/one"
@@ -14,7 +14,7 @@ server s1 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

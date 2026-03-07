@@ -1,8 +1,8 @@
-varnishtest "Lost reason from pipe to synth"
+vtest "Lost reason from pipe to synth"
 
 server s1 {} -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.http.workspace) {

@@ -1,11 +1,11 @@
-varnishtest "Test conditional delivery and do_stream"
+vtest "Test conditional delivery and do_stream"
 
 server s1 {
 	rxreq
 	txresp -hdr {ETag: "foo"} -body "11111\n"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = true;
 	}

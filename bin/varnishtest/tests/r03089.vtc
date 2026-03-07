@@ -1,4 +1,4 @@
-varnishtest "r03089 - Assert error corrupt OA_GZIPBITS"
+vtest "r03089 - Assert error corrupt OA_GZIPBITS"
 
 barrier b1 cond 2
 
@@ -29,7 +29,7 @@ server s3 {
 	txresp -gzipbody {<esi:include src="/included"/>}
 } -start
 
-varnish v1 -arg "-p debug=+syncvsl" -vcl+backend {
+vinyl v1 -arg "-p debug=+syncvsl" -vcl+backend {
 	sub vcl_deliver {
 	}
 	sub vcl_backend_fetch {

@@ -1,4 +1,4 @@
-varnishtest "#1029"
+vtest "#1029"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/foo") {
 			set beresp.do_esi = true;

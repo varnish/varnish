@@ -1,4 +1,4 @@
-varnishtest "Check backend wait limit"
+vtest "Check backend wait limit"
 
 #
 # s1, v1, c1, c2 are the success case
@@ -16,7 +16,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend s1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -46,8 +46,8 @@ client c2 -connect ${v1_sock} {
 
 client c1 -wait
 
-varnish v1 -expect backend_wait == 1
-varnish v1 -expect backend_wait_fail == 0
+vinyl v1 -expect backend_wait == 1
+vinyl v1 -expect backend_wait_fail == 0
 
 #
 # s2, v2, c3, c4 are the fail case.
@@ -65,7 +65,7 @@ server s2 {
 	txresp
 } -start
 
-varnish v2 -vcl {
+vinyl v2 -vcl {
 	backend s2 {
 		.host = "${s2_addr}";
 		.port = "${s2_port}";
@@ -95,5 +95,5 @@ client c4 -connect ${v2_sock} {
 
 client c3 -wait
 
-varnish v2 -expect backend_wait == 1
-varnish v2 -expect backend_wait_fail == 1
+vinyl v2 -expect backend_wait == 1
+vinyl v2 -expect backend_wait_fail == 1

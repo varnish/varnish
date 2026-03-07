@@ -1,4 +1,4 @@
-varnishtest "#1468 - freeing failed obj"
+vtest "#1468 - freeing failed obj"
 
 barrier b1 cond 2
 barrier b2 cond 2
@@ -19,7 +19,7 @@ server s1 {
 	barrier b2 sync
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/2") {
 			return (pass);
@@ -53,4 +53,4 @@ client c1 {
 # Delay to allow expiry thread to do it's job
 delay 1
 
-varnish v1 -expect n_object == 0
+vinyl v1 -expect n_object == 0

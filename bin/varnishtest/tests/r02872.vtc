@@ -1,11 +1,11 @@
-varnishtest "VSL quoted fields"
+vtest "VSL quoted fields"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import std;
 	backend be {
 		.host = "${s1_sock}";

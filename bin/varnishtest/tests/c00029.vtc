@@ -1,11 +1,11 @@
-varnishtest "Out of thread workspace when opening V1L on the backend side"
+vtest "Out of thread workspace when opening V1L on the backend side"
 
 server s1 {
 	non_fatal
 	rxreq
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_fetch {

@@ -1,11 +1,11 @@
-varnishtest "bug 1014, Invalid C-L header with gzip"
+vtest "bug 1014, Invalid C-L header with gzip"
 
 server s1 {
 	rxreq
 	txresp -nolen -hdr "Content-Encoding: gzip" -hdr "Content-Length:"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}

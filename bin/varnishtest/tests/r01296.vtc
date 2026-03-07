@@ -1,4 +1,4 @@
-varnishtest "hash key depends on argument form to hash_data()"
+vtest "hash key depends on argument form to hash_data()"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "OK: no"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_hash {
 		if (req.http.foo == "1") {
@@ -19,7 +19,7 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set vsl_mask +Hash"
+vinyl v1 -cliok "param.set vsl_mask +Hash"
 
 client c1 {
 	txreq -hdr "foo: 1"

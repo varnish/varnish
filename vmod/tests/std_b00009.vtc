@@ -1,11 +1,11 @@
-varnishtest "Test conversion functions in std"
+vtest "Test conversion functions in std"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

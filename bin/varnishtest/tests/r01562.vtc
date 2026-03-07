@@ -1,4 +1,4 @@
-varnishtest "retrying a short client body read should not panic varnish"
+vtest "retrying a short client body read should not panic varnish"
 
 server s1 {
 	non_fatal
@@ -12,7 +12,7 @@ server s2 {
 	txresp -status 200 -hdr "Foo: Foo" -body "56"
 } -start
 
-varnish v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl+backend {
+vinyl v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -28,7 +28,7 @@ varnish v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl+backend {
 	}
 } -start
 
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -req "POST" -nolen -hdr "Content-Length: 10000" -bodylen 9999

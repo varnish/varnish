@@ -1,4 +1,4 @@
-varnishtest "SES_Reserve_proto_priv() overflow"
+vtest "SES_Reserve_proto_priv() overflow"
 
 # NB this test needs to hit a failing allocation request of exactly the right 8
 # bytes. Consequently, it depends on the exact size of struct sess which, in
@@ -13,7 +13,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-p pool_sess=0,0,0" -proto "PROXY" -vcl+backend {} -start
+vinyl v1 -arg "-p pool_sess=0,0,0" -proto "PROXY" -vcl+backend {} -start
 
 logexpect l1 -v v1 -g raw {
 	expect 0 1000	Begin		"sess 0 PROXY"
@@ -23,7 +23,7 @@ logexpect l1 -v v1 -g raw {
 	expect 0 =	SessClose	"RX_JUNK"
 } -start
 
-varnish v1 -cliok "param.set workspace_session 488"
+vinyl v1 -cliok "param.set workspace_session 480"
 
 client c1 {
 	# PROXY2 with CRC32C TLV

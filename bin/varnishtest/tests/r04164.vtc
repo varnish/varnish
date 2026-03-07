@@ -1,4 +1,4 @@
-varnishtest "pass, rollback, invalid range"
+vtest "pass, rollback, invalid range"
 
 # ws_emu triggers #3550
 feature !workspace_emulator
@@ -9,7 +9,7 @@ server s1 {
 	txresp -status 400
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

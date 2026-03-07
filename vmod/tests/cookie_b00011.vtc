@@ -1,6 +1,6 @@
-varnishtest "Test cookie.get_re()"
+vtest "Test cookie.get_re()"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	import cookie;
 	backend be none;
 	sub vcl_recv { return (synth(200)); }

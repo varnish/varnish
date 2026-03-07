@@ -1,4 +1,4 @@
-varnishtest "test vmod_std.collect()"
+vtest "test vmod_std.collect()"
 
 server s1 {
 	rxreq
@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "bar: a" -hdr "bar: b" -hdr "qux: c" -hdr "qux: d"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

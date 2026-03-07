@@ -1,10 +1,10 @@
-varnishtest "Rearm timeout_idle upon HTTP/1 keep-alive"
+vtest "Rearm timeout_idle upon HTTP/1 keep-alive"
 
 barrier b1 cond 2
 barrier b2 cond 2
 
-varnish v1 -cliok "param.set timeout_idle 1h"
-varnish v1 -vcl {
+vinyl v1 -cliok "param.set timeout_idle 1h"
+vinyl v1 -vcl {
 	backend be none;
 	sub vcl_recv {
 		set sess.timeout_idle = param.timeout_idle;
@@ -28,7 +28,7 @@ client c1 {
 } -start
 
 barrier b1 sync
-varnish v1 -cliok "param.set timeout_idle 1ms"
+vinyl v1 -cliok "param.set timeout_idle 1ms"
 barrier b2 sync
 
 client c1 -wait

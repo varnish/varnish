@@ -1,17 +1,17 @@
-varnishtest "backend send timeouts"
+vtest "backend send timeouts"
 
 server s1 {
 	non_fatal
 	rxreq
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
 # Despite shared code, these parameters are only for client responses.
 # See 43bbe97b38a86d706c0d9f4838bbfbd305342775.
 
-varnish v1 -cliok "param.set idle_send_timeout 1"
-varnish v1 -cliok "param.set send_timeout 1"
+vinyl v1 -cliok "param.set idle_send_timeout 1"
+vinyl v1 -cliok "param.set send_timeout 1"
 
 client c1 {
 	txreq -method POST -hdr "Content-Length: 10"

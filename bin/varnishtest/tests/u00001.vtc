@@ -1,9 +1,9 @@
-varnishtest "trivial run of varnishadm in script mode"
+vtest "trivial run of varnishadm in script mode"
 
 feature cmd "command -v diff"
 feature cmd "python3 -c 'import json'"
 
-varnish v1 -vcl {backend be none;} -start
+vinyl v1 -vcl {backend be none;} -start
 
 shell {
 	cat >expected.txt <<-EOF

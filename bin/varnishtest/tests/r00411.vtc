@@ -1,4 +1,4 @@
-varnishtest "Test restart in vcl_deliver"
+vtest "Test restart in vcl_deliver"
 
 server s1 {
 	rxreq
@@ -10,7 +10,7 @@ server s1 {
 	txresp -status 200 -body "1"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_hit {
 		if (obj.http.X-Magic-Redirect == "1") {
 			set req.url = obj.http.Location;

@@ -1,4 +1,4 @@
-varnishtest "All white-space object, in multiple storage segments"
+vtest "All white-space object, in multiple storage segments"
 
 server s1 {
 	rxreq
@@ -8,17 +8,17 @@ server s1 {
 	chunkedlen 0
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
 } -start
 
-varnish v1 -cliok "debug.fragfetch 4"
+vinyl v1 -cliok "debug.fragfetch 4"
 
 client c1 {
 	txreq -url /foo
 	rxresp
 } -run
 
-varnish v1 -expect esi_errors == 0
+vinyl v1 -expect esi_errors == 0

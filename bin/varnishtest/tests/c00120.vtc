@@ -1,14 +1,14 @@
-varnishtest "bgfetch_no_thread"
+vtest "bgfetch_no_thread"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -cliok "param.set thread_pools 1"
-varnish v1 -cliok "param.set thread_pool_min 5"
-varnish v1 -cliok "param.set thread_pool_max 5"
-varnish v1 -vcl+backend {
+vinyl v1 -cliok "param.set thread_pools 1"
+vinyl v1 -cliok "param.set thread_pool_min 5"
+vinyl v1 -cliok "param.set thread_pool_max 5"
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1ms;
 		set beresp.grace = 1h;
@@ -35,4 +35,4 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -expect MAIN.bgfetch_no_thread == 1
+vinyl v1 -expect MAIN.bgfetch_no_thread == 1

@@ -1,4 +1,4 @@
-varnishtest "Transient-salvaged objects ttl should be shortened - #1140"
+vtest "Transient-salvaged objects ttl should be shortened - #1140"
 
 server s1 {
 	# This response should almost completely fill the storage
@@ -18,7 +18,7 @@ server s1 {
 	txresp -noserver -bodylen 1025
 } -start
 
-varnish v1 -arg "-p nuke_limit=0 -p shortlived=0" \
+vinyl v1 -arg "-p nuke_limit=0 -p shortlived=0" \
 	-arg "-sdefault,1m" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
@@ -36,7 +36,7 @@ client c1 {
 
 delay .1
 
-varnish v1 -expect SM?.s0.g_space < 1000
+vinyl v1 -expect SM?.s0.g_space < 1000
 
 client c1 {
 	txreq -url /url2

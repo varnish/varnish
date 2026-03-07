@@ -1,11 +1,11 @@
-varnishtest "vcl_backend_response abandon"
+vtest "vcl_backend_response abandon"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		return (abandon);
 	}

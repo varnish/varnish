@@ -1,8 +1,8 @@
-varnishtest "Disabled timeout in VCL"
+vtest "Disabled timeout in VCL"
 
-varnish v1 -cliok "param.set idle_send_timeout never"
+vinyl v1 -cliok "param.set idle_send_timeout never"
 
-varnish v1 -vcl {
+vinyl v1 -vcl {
 	backend be none;
 	sub vcl_recv {
 		return (synth(200));

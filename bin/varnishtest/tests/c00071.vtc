@@ -1,4 +1,4 @@
-varnishtest "Test actual client workspace overflow"
+vtest "Test actual client workspace overflow"
 
 server s1 {
 	rxreq
@@ -11,7 +11,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-p debug=+workspace" -vcl+backend {
+vinyl v1 -arg "-p debug=+workspace" -vcl+backend {
 	import vtc;
 	import std;
 	sub vcl_deliver {
@@ -42,7 +42,7 @@ client c1 {
 	expect resp.http.x-of == <undef>
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 logexpect l1 -v v1 -g vxid -q "vxid == 1006" {
 	expect * 1006	VCL_call	{^DELIVER$}
@@ -65,5 +65,5 @@ client c2 {
 
 logexpect l1 -wait
 
-varnish v1 -expect client_resp_500 == 2
-varnish v1 -expect ws_client_overflow == 2
+vinyl v1 -expect client_resp_500 == 2
+vinyl v1 -expect ws_client_overflow == 2

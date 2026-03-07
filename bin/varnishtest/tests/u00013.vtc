@@ -1,4 +1,4 @@
-varnishtest "varnishncsa outputs when UDS addresses are in use"
+vtest "varnishncsa outputs when UDS addresses are in use"
 
 # The %h formatter gets its value from ReqStart or BackendOpen,
 # which now may be a UDS address.
@@ -11,7 +11,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp
 } -start
 
-varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {} -start
+vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {} -start
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	txreq -proto HTTP/1.0

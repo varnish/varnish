@@ -1,11 +1,11 @@
-varnishtest	"trivial run of varnishhist in curses mode"
+vtest	"trivial run of varnishhist in curses mode"
 
 server s1 {
 	rxreq
 	txresp -bodylen 32
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 process p1 -dump {varnishhist -n ${v1_name}} -start
 process p2 -dump {varnishhist -n ${v1_name} -P b:BereqAcct::5:-1:1} -start
@@ -22,7 +22,7 @@ client c1 {
 	rxresp
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 process p1 -expect-text 22 0 {#}
 process p2 -expect-text 22 80 {#}
@@ -32,7 +32,7 @@ client c1 {
 	rxresp
 } -run
 
-varnish v1 -vsl_catchup
+vinyl v1 -vsl_catchup
 
 process p1 -expect-text 22 0 { |}
 

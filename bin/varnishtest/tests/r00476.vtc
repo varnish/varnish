@@ -1,4 +1,4 @@
-varnishtest "zero length ESI include segments with chunked encoding"
+vtest "zero length ESI include segments with chunked encoding"
 
 server s1 {
 	rxreq
@@ -15,7 +15,7 @@ server s1 {
 	txresp -body {<a>\0<esi:include src="/bar"/><b>c}
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

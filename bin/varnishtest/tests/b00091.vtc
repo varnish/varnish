@@ -1,4 +1,4 @@
-varnishtest "IPs/port in varnishadm backend.list -j"
+vtest "IPs/port in varnishadm backend.list -j"
 
 feature cmd "jq -V"
 
@@ -6,7 +6,7 @@ server s0 {
 } -start
 
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	backend s1 {
 		.host = "127.0.0.1";
 		.port = "2222";

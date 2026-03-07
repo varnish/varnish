@@ -1,4 +1,4 @@
-varnishtest "broken gunzip delivery"
+vtest "broken gunzip delivery"
 
 server s1 {
 	rxreq
@@ -21,7 +21,7 @@ server s1 {
 	txresp -bodylen 7
 } -start
 
-varnish v1 -vcl+backend {} -start
+vinyl v1 -vcl+backend {} -start
 
 client c1 {
 	txreq
@@ -34,10 +34,10 @@ client c1 {
 delay .2
 
 client c1 {
-	# Test varnishd is still running
+	# Test vinyld is still running
 	txreq -url /2
 	rxresp
 	expect resp.bodylen == 7
 } -run
 
-varnish v1 -expect fetch_failed == 1
+vinyl v1 -expect fetch_failed == 1

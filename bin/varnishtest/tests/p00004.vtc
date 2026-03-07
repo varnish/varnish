@@ -1,4 +1,4 @@
-varnishtest "Check object references"
+vtest "Check object references"
 
 feature persistent_storage
 
@@ -11,7 +11,7 @@ server s1 {
 	txresp -hdr "Bar: bar"
 } -start
 
-varnish v1 \
+vinyl v1 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
 	-arg "-pban_lurker_sleep=0" \
@@ -25,7 +25,7 @@ client c1 {
 	expect resp.http.foo == "foo"
 } -run
 
-varnish v1 -expect n_object == 1
+vinyl v1 -expect n_object == 1
 
 client c1 {
 	txreq -url "/bar"
@@ -35,14 +35,14 @@ client c1 {
 	expect resp.http.bar == "bar"
 } -run
 
-varnish v1 -expect n_object == 2
+vinyl v1 -expect n_object == 2
 
-varnish v1 -stop
-varnish v1 -start
-varnish v1 -cliok "debug.xid 2000"
+vinyl v1 -stop
+vinyl v1 -start
+vinyl v1 -cliok "debug.xid 2000"
 
-varnish v1 -expect n_vampireobject == 2
-varnish v1 -expect n_object == 0
+vinyl v1 -expect n_vampireobject == 2
+vinyl v1 -expect n_object == 0
 
 client c1 {
 	txreq -url "/foo"
@@ -52,8 +52,8 @@ client c1 {
 	expect resp.http.foo == "foo"
 } -run
 
-varnish v1 -expect n_vampireobject == 1
-varnish v1 -expect n_object == 1
+vinyl v1 -expect n_vampireobject == 1
+vinyl v1 -expect n_object == 1
 
 client c1 {
 	txreq -url "/bar"
@@ -63,5 +63,5 @@ client c1 {
 	expect resp.http.bar == "bar"
 } -run
 
-varnish v1 -expect n_object == 2
-varnish v1 -expect n_vampireobject == 0
+vinyl v1 -expect n_object == 2
+vinyl v1 -expect n_vampireobject == 0

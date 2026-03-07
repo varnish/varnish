@@ -1,9 +1,9 @@
-varnishtest "cli_limit *not* truncating full parameter listing by default - #1169"
+vtest "cli_limit *not* truncating full parameter listing by default - #1169"
 
 server s1 {
 	rxreq
 } -start
 
-varnish v1 -vcl+backend { }
+vinyl v1 -vcl+backend { }
 
-varnish v1 -cliok "param.show -l"
+vinyl v1 -cliok "param.show -l"

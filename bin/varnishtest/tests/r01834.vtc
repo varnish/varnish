@@ -1,4 +1,4 @@
-varnishtest "#1834 - Buffer overflow in backend workspace"
+vtest "#1834 - Buffer overflow in backend workspace"
 
 # This test case checks fetch side for buffer overflow when there is little
 # workspace left. If failing it would be because we tripped the canary
@@ -14,7 +14,7 @@ server s1 -repeat 40 {
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	import std;
 	import vtc;
 

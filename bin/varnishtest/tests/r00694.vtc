@@ -1,4 +1,4 @@
-varnishtest "Wrong calculation of last storage segment length"
+vtest "Wrong calculation of last storage segment length"
 
 server s1 {
 	rxreq
@@ -8,7 +8,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-varnish v1 -vcl+backend "" -start
+vinyl v1 -vcl+backend "" -start
 
 client c1 {
 	txreq -proto HTTP/1.0

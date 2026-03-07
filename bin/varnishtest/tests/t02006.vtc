@@ -1,4 +1,4 @@
-varnishtest "H2 POST w/ 100 Continue"
+vtest "H2 POST w/ 100 Continue"
 
 server s1 {
 	rxreq
@@ -8,8 +8,8 @@ server s1 {
 	txresp -hdr "Content-Type: text/plain" -body response
 } -start
 
-varnish v1 -vcl+backend {} -cliok "param.set feature +http2" -start
-varnish v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -vcl+backend {} -cliok "param.set feature +http2" -start
+vinyl v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	stream 1 {

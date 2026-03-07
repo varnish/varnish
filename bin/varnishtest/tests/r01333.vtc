@@ -1,4 +1,4 @@
-varnishtest "ESI:include with https"
+vtest "ESI:include with https"
 
 server s1 {
 	rxreq
@@ -25,7 +25,7 @@ server s1 {
 
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -37,7 +37,7 @@ client c1 {
 	expect resp.bodylen == 49
 } -run
 
-varnish v1 -cliok "param.set feature +esi_ignore_https"
+vinyl v1 -cliok "param.set feature +esi_ignore_https"
 
 client c1 {
 	txreq -url /foo

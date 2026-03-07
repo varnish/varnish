@@ -1,11 +1,11 @@
-varnishtest "test logexpect"
+vtest "test logexpect"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 } -start
 
 logexpect l1 -v v1 -g session {

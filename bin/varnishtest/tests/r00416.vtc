@@ -1,4 +1,4 @@
-varnishtest "Regression test for #416: a surplus of HTTP headers"
+vtest "Regression test for #416: a surplus of HTTP headers"
 
 server s1 {
 	rxreq
@@ -76,7 +76,7 @@ server s1 {
 		-body "foo"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}

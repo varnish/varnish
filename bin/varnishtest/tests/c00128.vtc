@@ -1,11 +1,11 @@
-varnishtest "Withdraw graced hit's busy objcore"
+vtest "Withdraw graced hit's busy objcore"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1ms;
 	}

@@ -1,4 +1,4 @@
-varnishtest "Hit-for-pass (mk II)"
+vtest "Hit-for-pass (mk II)"
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp -hdr "foo: 3"
 } -start
 
-varnish v1 -vcl+backend {
+vinyl v1 -vcl+backend {
 
 	sub vcl_miss {
 		set req.http.miss = true;
@@ -51,6 +51,6 @@ client c1 {
 
 logexpect l1 -wait
 
-varnish v1 -expect MAIN.cache_hitpass == 1
-varnish v1 -expect MAIN.cache_miss == 2
-varnish v1 -expect MAIN.cache_hitmiss == 0
+vinyl v1 -expect MAIN.cache_hitpass == 1
+vinyl v1 -expect MAIN.cache_miss == 2
+vinyl v1 -expect MAIN.cache_hitmiss == 0

@@ -1,21 +1,21 @@
-varnishtest "workspace overrun on h/2 delivery"
+vtest "workspace overrun on h/2 delivery"
 
 server s1 {
 	rxreq
 	txresp -hdrlen Foo 500
 } -start
 
-varnish v1 -vcl+backend  {
+vinyl v1 -vcl+backend  {
 	import vtc;
 	sub vcl_deliver {
 		vtc.workspace_alloc(client, -50);
 	}
 } -start
 
-varnish v1 -cliok "param.set feature +http2"
-varnish v1 -cliok "param.set debug +syncvsl"
-varnish v1 -cliok "param.set vsl_mask +H2TxHdr"
-varnish v1 -cliok "param.set vsl_mask +H2TxBody"
+vinyl v1 -cliok "param.set feature +http2"
+vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set vsl_mask +H2TxHdr"
+vinyl v1 -cliok "param.set vsl_mask +H2TxBody"
 
 
 client c1 {
@@ -28,5 +28,5 @@ client c1 {
 	} -run
 } -run
 
-varnish v1 -expect client_resp_500 == 1
-varnish v1 -expect ws_client_overflow == 1
+vinyl v1 -expect client_resp_500 == 1
+vinyl v1 -expect ws_client_overflow == 1
