@@ -2,7 +2,7 @@
 
 SUBDIRS = \
 	varnishadm \
-	varnishd \
+	vinyld \
 	varnishhist \
 	varnishlog \
 	varnishlog-json \

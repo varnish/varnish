@@ -36,7 +36,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "cache/cache_varnishd.h"
+#include "cache/cache_vinyld.h"
 #include "cache/cache_filter.h"
 
 #include "vsa.h"

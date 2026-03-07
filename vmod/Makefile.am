@@ -13,7 +13,7 @@ AM_LDFLAGS  = $(AM_LT_LDFLAGS)
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
-	-I$(top_srcdir)/bin/varnishd \
+	-I$(top_srcdir)/bin/vinyld \
 	-I$(top_builddir)/include
 
 #

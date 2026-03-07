@@ -11,7 +11,7 @@ dist_man_MANS = \
 	vsl.7 \
 	vsl-query.7 \
 	varnishadm.1 \
-	varnishd.1 \
+	vinyld.1 \
 	varnishhist.1 \
 	varnishlog.1 \
 	varnishncsa.1 \
@@ -51,7 +51,7 @@ varnish-counters.7: $(top_builddir)/doc/sphinx/reference/varnish-counters.rst \
 
 vcl.7: $(top_builddir)/doc/sphinx/reference/vcl.rst \
 	$(top_builddir)/doc/sphinx/reference/vcl_var.rst \
-	$(top_srcdir)/bin/varnishd/builtin.vcl
+	$(top_srcdir)/bin/vinyld/builtin.vcl
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vcl.rst $@
 
 vcl-backend.7: $(top_builddir)/doc/sphinx/reference/vcl-backend.rst
@@ -77,7 +77,7 @@ vsl-query.7: $(top_builddir)/doc/sphinx/reference/vsl-query.rst
 varnishadm.1: $(top_builddir)/doc/sphinx/reference/varnishadm.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishadm.rst $@
 
-varnishd.1: \
+vinyld.1: \
 	$(top_builddir)/doc/sphinx/reference/varnishd.rst \
 	$(top_builddir)/doc/sphinx/include/params.rst \
 	$(top_builddir)/doc/sphinx/include/options.rst
