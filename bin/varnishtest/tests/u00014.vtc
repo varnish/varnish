@@ -29,7 +29,7 @@ shell {
 	cat >ncsa.sh <<-EOF
 	#!/bin/sh
 
-	varnishncsa -d -n ${v1_name} -F '%s' "\$@" |
+	vinylncsa -d -n ${v1_name} -F '%s' "\$@" |
 	tr '\n' ' '
 	# '
 	EOF
@@ -42,13 +42,13 @@ shell -match "^500 503 $" {
 }
 
 shell -err -expect "Query expression error" {
-	varnishncsa -d -n ${v1_name} -q '
+	vinylncsa -d -n ${v1_name} -q '
 		# empty multiline query
 	'
 }
 
 shell -err -expect "Query expression error" {
-	varnishncsa -d -n ${v1_name} -q '
+	vinylncsa -d -n ${v1_name} -q '
 		* ~ "Incomplete quoted
 		string"
 	'
@@ -56,11 +56,11 @@ shell -err -expect "Query expression error" {
 
 shell -err -expect "Query expression error" {
 	echo '# empty query file' >empty.vslq
-	varnishncsa -d -n ${v1_name} -Q empty.vslq
+	vinylncsa -d -n ${v1_name} -Q empty.vslq
 }
 
 shell -err -expect "-Q missing.vslq: No such file or directory" {
-	varnishncsa -d -n ${v1_name} -Q missing.vslq
+	vinylncsa -d -n ${v1_name} -Q missing.vslq
 }
 
 shell -match "^500 $" {
@@ -155,7 +155,7 @@ shell -err -expect "Query expression error" {
 	string"
 	EOF
 
-	varnishncsa -d -n ${v1_name} -Q string_cont.vslq
+	vinylncsa -d -n ${v1_name} -Q string_cont.vslq
 }
 
 # Make v1 log a multiline VSL record and query it (hardly useful)

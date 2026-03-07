@@ -15,6 +15,6 @@ client c1 {
 delay 1
 
 shell -expect "foo qux" \
-	{varnishncsa -d -n ${v1_name} -F "%u %{Host}i"}
+	{vinylncsa -d -n ${v1_name} -F "%u %{Host}i"}
 shell -expect "GET http://qux/ HTTP/1.1" \
-	{varnishncsa -d -n ${v1_name} -F "%r"}
+	{vinylncsa -d -n ${v1_name} -F "%r"}

@@ -105,7 +105,7 @@ logexpect l4 -wait
 logexpect l5 -wait
 
 shell {
-	varnishncsa -n ${v1_name} -d \
+	vinylncsa -n ${v1_name} -d \
 		-F '%{Varnish:vxid}x %{Varnish:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -117,7 +117,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -b \
+	vinylncsa -n ${v1_name} -d -b \
 		-F '%{Varnish:vxid}x %{Varnish:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -129,7 +129,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -E \
+	vinylncsa -n ${v1_name} -d -E \
 		-F '%{Varnish:vxid}x %{Varnish:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -145,7 +145,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -b -E \
+	vinylncsa -n ${v1_name} -d -b -E \
 		-F '%{Varnish:vxid}x %{Varnish:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 

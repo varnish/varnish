@@ -64,7 +64,7 @@
 	    " receives a SIGHUP in daemon mode the file will be"	\
 	    " reopened allowing the old one to be rotated away. This"	\
 	    " option is required when running in daemon mode. If the"	\
-	    " filename is -, varnishncsa writes to the standard output"	\
+	    " filename is -, vinylncsa writes to the standard output"	\
 	    " and cannot work as a daemon."				\
 	)
 #define NCSA_OPT_b							\

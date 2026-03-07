@@ -108,14 +108,14 @@ include/counters.rst:
 	ln -s $(abs_top_builddir)/lib/libvsc/counters.rst $@
 BUILT_SOURCES += include/counters.rst
 
-include/varnishncsa_options.rst: $(top_builddir)/bin/varnishncsa/varnishncsa
-	$(top_builddir)/bin/varnishncsa/varnishncsa --options > ${@}_
+include/vinylncsa_options.rst: $(top_builddir)/bin/vinylncsa/vinylncsa
+	$(top_builddir)/bin/vinylncsa/vinylncsa --options > ${@}_
 	mv -f ${@}_ ${@}
-include/varnishncsa_synopsis.rst: $(top_builddir)/bin/varnishncsa/varnishncsa
-	$(top_builddir)/bin/varnishncsa/varnishncsa --synopsis > ${@}_
+include/vinylncsa_synopsis.rst: $(top_builddir)/bin/vinylncsa/vinylncsa
+	$(top_builddir)/bin/vinylncsa/vinylncsa --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/varnishncsa_options.rst \
-	include/varnishncsa_synopsis.rst
+BUILT_SOURCES += include/vinylncsa_options.rst \
+	include/vinylncsa_synopsis.rst
 
 include/vinyllog_options.rst: $(top_builddir)/bin/vinyllog/vinyllog
 	$(top_builddir)/bin/vinyllog/vinyllog --options > ${@}_

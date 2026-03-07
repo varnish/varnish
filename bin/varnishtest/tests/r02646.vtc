@@ -7,7 +7,7 @@ vinyl v1 -vcl {
 } -start
 
 process p1 {
-	exec varnishncsa -n ${v1_name} -P ${tmpdir}/ncsa.pid -w ${tmpdir}/ncsa.log
+	exec vinylncsa -n ${v1_name} -P ${tmpdir}/ncsa.pid -w ${tmpdir}/ncsa.log
 } -start
 
 delay 1

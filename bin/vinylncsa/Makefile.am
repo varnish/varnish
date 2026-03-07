@@ -4,12 +4,12 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include
 
-bin_PROGRAMS = varnishncsa
+bin_PROGRAMS = vinylncsa
 
-varnishncsa_SOURCES = \
-	varnishncsa.c \
-	varnishncsa_options.h
+vinylncsa_SOURCES = \
+	vinylncsa.c \
+	vinylncsa_options.h
 
-varnishncsa_LDADD = \
+vinylncsa_LDADD = \
 	$(top_builddir)/lib/libvarnishapi/libvarnishapi.la \
 	${RT_LIBS} ${LIBM}

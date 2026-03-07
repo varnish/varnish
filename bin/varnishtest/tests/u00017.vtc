@@ -1,4 +1,4 @@
-vtest "SLT_Debug can be printed by varnishncsa -j"
+vtest "SLT_Debug can be printed by vinylncsa -j"
 
 server s1 {
 	rxreq
@@ -23,9 +23,9 @@ client c1 {
 # Let's fist create a script to reduce in all the variants below.
 
 shell {
-	varnishncsa -d -n ${v1_name} -F '%{VSL:Debug}x' -j | grep "^cookie: nothing to parse\\\\u0000"
+	vinylncsa -d -n ${v1_name} -F '%{VSL:Debug}x' -j | grep "^cookie: nothing to parse\\\\u0000"
 }
 
 shell -err -expect "Tag Debug can contain control characters" {
-	varnishncsa -d -n ${v1_name} -F '%{VSL:Debug}x'
+	vinylncsa -d -n ${v1_name} -F '%{VSL:Debug}x'
 }

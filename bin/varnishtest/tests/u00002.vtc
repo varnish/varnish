@@ -1,4 +1,4 @@
-vtest "varnishncsa handling"
+vtest "vinylncsa handling"
 
 server s1 -repeat 4 {
 	rxreq
@@ -99,6 +99,6 @@ hit /hit
 pass /pass
 synth /synth
 EOF
-	varnishncsa -d -n ${v1_name} -F "%{Varnish:handling}x %U" >have
+	vinylncsa -d -n ${v1_name} -F "%{Varnish:handling}x %U" >have
 	diff -u expect have
 }

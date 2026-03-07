@@ -1,4 +1,4 @@
-vtest "varnishncsa -j json escaping"
+vtest "vinylncsa -j json escaping"
 
 feature cmd "python3 -c 'import json'"
 
@@ -22,35 +22,35 @@ delay 1
 
 # ASCII string with -j is valid JSON
 shell -match "^YES$" {
-	varnishncsa -n ${v1_name} -d -q 'ReqHeader:test eq "ascii"' -j \
+	vinylncsa -n ${v1_name} -d -q 'ReqHeader:test eq "ascii"' -j \
 		-F '{"xrid": "%{X-REQUEST-ID}i"}' |
 	python3 -c 'import sys, json; print(json.load(sys.stdin)["xrid"])'
 }
 
 # ∃ without -j is not valid JSON
 shell -err -expect "Invalid \\escape" {
-	varnishncsa -n ${v1_name} -d -q 'ReqHeader:test eq "unicode"' \
+	vinylncsa -n ${v1_name} -d -q 'ReqHeader:test eq "unicode"' \
 		-F '{"xrid": "%{X-REQUEST-ID}i"}' |
 	python3 -c 'import sys, json; print(json.load(sys.stdin)["xrid"])'
 }
 
 # ∃ with -j is valid JSON
 shell -match "^∃$" {
-	varnishncsa -n ${v1_name} -d -q 'ReqHeader:test eq "unicode"' -j \
+	vinylncsa -n ${v1_name} -d -q 'ReqHeader:test eq "unicode"' -j \
 		-F '{"xrid": "%{X-REQUEST-ID}i"}' |
 	python3 -c 'import sys, json; print(json.load(sys.stdin)["xrid"])'
 }
 
 # Empty strings are not replaced with "-"
 shell -match "" {
-	varnishncsa -n ${v1_name} -d -q 'ReqHeader:test eq "null"' -j \
+	vinylncsa -n ${v1_name} -d -q 'ReqHeader:test eq "null"' -j \
 		-F '{"xrid": "%{X-REQUEST-ID}i"}' |
 	python3 -c 'import sys, json; print(json.load(sys.stdin)["xrid"])'
 }
 
 # Empty VCL_Log entries are not replaced with "-"
 shell -match "" {
-	varnishncsa -n ${v1_name} -d -q 'ReqHeader:test eq "null"' -j \
-		-F '{"xrid": "%{VCL_Log:varnishncsa}x"}' |
+	vinylncsa -n ${v1_name} -d -q 'ReqHeader:test eq "null"' -j \
+		-F '{"xrid": "%{VCL_Log:vinylncsa}x"}' |
 	python3 -c 'import sys, json; print(json.load(sys.stdin)["xrid"])'
 }

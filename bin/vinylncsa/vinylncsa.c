@@ -34,7 +34,7 @@
  * Obtain log data from the shared memory log, order it by session ID, and
  * display it in Apache / NCSA combined log format.
  *
- * See doc/sphinx/reference/varnishncsa.rst for the supported format
+ * See doc/sphinx/reference/vinylncsa.rst for the supported format
  * specifiers.
  *
  */
@@ -54,7 +54,7 @@
 #include <math.h>
 
 #define VOPT_DEFINITION
-#define VOPT_INC "varnishncsa_options.h"
+#define VOPT_INC "vinylncsa_options.h"
 
 #include "vdef.h"
 

@@ -30,5 +30,5 @@ client c2 {
 logexpect l2 -wait
 
 shell -expect POST {
-	exec varnishncsa -d -n ${v1_name} -q 'Timestamp:Process[2] < 10.0'
+	exec vinylncsa -d -n ${v1_name} -q 'Timestamp:Process[2] < 10.0'
 }

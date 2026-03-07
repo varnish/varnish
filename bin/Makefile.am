@@ -6,7 +6,7 @@ SUBDIRS = \
 	vinylhist \
 	varnishlog-json \
 	vinyllog \
-	varnishncsa \
+	vinylncsa \
 	varnishstat \
 	varnishtop \
 	varnishtest

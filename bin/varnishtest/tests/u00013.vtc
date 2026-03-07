@@ -1,4 +1,4 @@
-vtest "varnishncsa outputs when UDS addresses are in use"
+vtest "vinylncsa outputs when UDS addresses are in use"
 
 # The %h formatter gets its value from ReqStart or BackendOpen,
 # which now may be a UDS address.
@@ -19,17 +19,17 @@ client c1 -connect "${tmpdir}/v1.sock" {
 } -run
 
 shell -expect "0.0.0.0" {
-	varnishncsa -n ${v1_name} -d -c -F "%h"
+	vinylncsa -n ${v1_name} -d -c -F "%h"
 }
 
 shell -expect "http://localhost/" {
-	varnishncsa -n ${v1_name} -d -c -F "%r"
+	vinylncsa -n ${v1_name} -d -c -F "%r"
 }
 
 shell -expect "0.0.0.0" {
-	varnishncsa -n ${v1_name} -d -b -F "%h"
+	vinylncsa -n ${v1_name} -d -b -F "%h"
 }
 
 shell -expect "http://0.0.0.0/" {
-	varnishncsa -n ${v1_name} -d -b -F "%r"
+	vinylncsa -n ${v1_name} -d -b -F "%r"
 }

@@ -933,7 +933,7 @@ AC_CONFIG_FILES([
     bin/varnishtop/Makefile
     bin/vinylhist/Makefile
     bin/varnishtest/Makefile
-    bin/varnishncsa/Makefile
+    bin/vinylncsa/Makefile
     contrib/Makefile
     doc/Makefile
     doc/graphviz/Makefile

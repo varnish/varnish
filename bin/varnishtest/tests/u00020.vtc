@@ -1,4 +1,4 @@
-vtest "new varnishncsa matching rules"
+vtest "new vinylncsa matching rules"
 
 # Test things we send to the backend
 
@@ -35,7 +35,7 @@ client c1 {
 } -run
 
 shell {
-	varnishncsa -n ${v1_name} -d -b -F '%H %{bereqhdr}i %{notsent}i %{unset}i %m %q %U %u' > ncsa_sb.txt
+	vinylncsa -n ${v1_name} -d -b -F '%H %{bereqhdr}i %{notsent}i %{unset}i %m %q %U %u' > ncsa_sb.txt
 
 	cat >expected_sb.txt <<-EOF
 	HTTP/1.1 vbf-modified - - HEAD ?q=vbfQuerry /vbf-url vbf
@@ -44,7 +44,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -b -F '%{notsent:first}i %{notsent:last}i %{unset:first}i %{unset:last}i' > ncsa_sb.txt
+	vinylncsa -n ${v1_name} -d -b -F '%{notsent:first}i %{notsent:last}i %{unset:first}i %{unset:last}i' > ncsa_sb.txt
 
 	cat >expected_sb.txt <<-EOF
 	notsent notsent client toolate
@@ -79,7 +79,7 @@ client c1 {
 
 
 shell {
-	varnishncsa -n ${v1_name} -d -b -F '%s %{beresp}o %{unset}o' > ncsa_rb.txt
+	vinylncsa -n ${v1_name} -d -b -F '%s %{beresp}o %{unset}o' > ncsa_rb.txt
 
 	cat >expected_rb.txt <<-EOF
 	202 origin origin
@@ -88,7 +88,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -b -F '%{beresp:first}o %{beresp:last}o %{unset:first}o %{unset:last}o' > ncsa_rb.txt
+	vinylncsa -n ${v1_name} -d -b -F '%{beresp:first}o %{beresp:last}o %{unset:first}o %{unset:last}o' > ncsa_rb.txt
 
 	cat >expected_rb.txt <<-EOF
 	origin vbr-updated origin origin
@@ -128,7 +128,7 @@ client c1 {
 } -run
 
 shell {
-	varnishncsa -n ${v1_name} -d -c -F '%s %{resp}o %{unset}o %{added}o' > ncsa_sc.txt
+	vinylncsa -n ${v1_name} -d -c -F '%s %{resp}o %{unset}o %{added}o' > ncsa_sc.txt
 
 	cat >expected_sc.txt <<-EOF
 	201 deliver-updated - deliver
@@ -137,7 +137,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -c -F '%{resp:first}o %{resp:last}o %{unset:first}o %{unset:last}o' > ncsa_sc.txt
+	vinylncsa -n ${v1_name} -d -c -F '%{resp:first}o %{resp:last}o %{unset:first}o %{unset:last}o' > ncsa_sc.txt
 
 	cat >expected_sc.txt <<-EOF
 	vbr-updated deliver-updated origin origin
@@ -187,7 +187,7 @@ client c1 {
 
 
 shell {
-	varnishncsa -n ${v1_name} -d -c -F '%H %{reqhdr}i %{notreceived}i %{unset}i %m %q %U %u' > ncsa_rc.txt
+	vinylncsa -n ${v1_name} -d -c -F '%H %{reqhdr}i %{notreceived}i %{unset}i %m %q %U %u' > ncsa_rc.txt
 
 	cat >expected_rc.txt <<-EOF
 	HTTP/1.1 client-header - client POST ?q=clientQuerry /client-url client
@@ -196,7 +196,7 @@ shell {
 }
 
 shell {
-	varnishncsa -n ${v1_name} -d -c -F '%{notreceived:first}i %{notreceived:last}i %{unset:first}i %{unset:last}i' > ncsa_rc.txt
+	vinylncsa -n ${v1_name} -d -c -F '%{notreceived:first}i %{notreceived:last}i %{unset:first}i %{unset:last}i' > ncsa_rc.txt
 
 	cat >expected_rc.txt <<-EOF
 	recv hash client hash
