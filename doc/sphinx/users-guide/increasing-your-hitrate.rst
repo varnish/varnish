@@ -202,13 +202,13 @@ copies it back to the request, deleting the original cookie header.
 
     sub vcl_recv {
         # save the original cookie header so we can mangle it
-        set req.http.X-Varnish-PHP_SID = req.http.Cookie;
+        set req.http.X-Vinyl-PHP_SID = req.http.Cookie;
         # using a capturing sub pattern, extract the continuous string of
         # alphanumerics that immediately follows "PHPSESSID="
-        set req.http.X-Varnish-PHP_SID =
-           regsuball(req.http.X-Varnish-PHP_SID, ";? ?PHPSESSID=([a-zA-Z0-9]+)( |;| ;).*","\1");
-        set req.http.Cookie = req.X-Varnish-PHP_SID;
-        unset req.X-Varnish-PHP_SID;
+        set req.http.X-Vinyl-PHP_SID =
+           regsuball(req.http.X-Vinyl-PHP_SID, ";? ?PHPSESSID=([a-zA-Z0-9]+)( |;| ;).*","\1");
+        set req.http.Cookie = req.X-Vinyl-PHP_SID;
+        unset req.X-Vinyl-PHP_SID;
     }
 
 There are other scary examples of what can be done in VCL in the

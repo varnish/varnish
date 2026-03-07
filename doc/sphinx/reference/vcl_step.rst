@@ -318,7 +318,7 @@ backend request as follows:
   ``bereq.http.If-Modified-Since`` from its ``Last-Modified`` header
   and/or set ``bereq.http.If-None-Match`` from its ``Etag`` header
 
-* Set ``bereq.http.X-Varnish`` to the current transaction id (`vxid`)
+* Set ``bereq.http.X-Vinyl`` to the current transaction id (`vxid`)
 
 These changes can be undone or modified in `vcl_backend_fetch` before
 the backend request is issued.

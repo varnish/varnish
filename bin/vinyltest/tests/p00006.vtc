@@ -22,13 +22,13 @@ client c1 {
 	txreq -url "/foo" -hdr "foo: 1" -hdr "bar: 2"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1001"
+	expect resp.http.X-Vinyl == "1001"
 	expect resp.http.foo == "foo1"
 
 	txreq -url "/foo" -hdr "foo: 2" -hdr "bar: 1"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1003"
+	expect resp.http.X-Vinyl == "1003"
 	expect resp.http.foo == "foo2"
 
 } -run
@@ -46,13 +46,13 @@ client c1 {
 	txreq -url "/foo" -hdr "foo: 1" -hdr "bar: 2"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "2001 1002"
+	expect resp.http.X-Vinyl == "2001 1002"
 	expect resp.http.foo == "foo1"
 
 	txreq -url "/foo" -hdr "foo: 2" -hdr "bar: 1"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "2002 1004"
+	expect resp.http.X-Vinyl == "2002 1004"
 	expect resp.http.foo == "foo2"
 
 } -run

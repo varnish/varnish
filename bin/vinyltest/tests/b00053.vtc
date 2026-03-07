@@ -35,7 +35,7 @@ vinyl v1 -expect client_req == 1
 vinyl v1 -expect cache_miss == 1
 vinyl v1 -expect s_sess == 1
 vinyl v1 -expect s_resp_bodybytes == 7
-vinyl v1 -expect s_resp_hdrbytes == 158
+vinyl v1 -expect s_resp_hdrbytes == 156
 
 # vinyltest "vtc v_* macros when the listen address is UDS" (a00019)
 

@@ -6,7 +6,7 @@ server s1 {
 	rxreq
 	txresp -body asdf
 	rxreq
-	expect req.http.X-Varnish == 1005
+	expect req.http.X-Vinyl == 1005
 	txresp -bodylen 1048000
 	rxreq
 	txresp -body ASDF

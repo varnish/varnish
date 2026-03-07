@@ -72,5 +72,5 @@ client c2 {
 	rxresp
 	expect resp.http.foo == "bar"
 	expect resp.status == 200
-	expect resp.http.x-varnish == "1004 1002"
+	expect resp.http.X-Vinyl == "1004 1002"
 } -run

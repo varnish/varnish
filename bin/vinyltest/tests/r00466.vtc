@@ -35,7 +35,7 @@ client c1 {
 	rxresp
 	expect resp.status == 206
 	expect resp.http.Content-Length == 2
-	expect resp.http.X-Varnish == "1001"
+	expect resp.http.X-Vinyl == "1001"
 } -run
 
 vinyl v1 -cliok "param.set http_range_support off"
@@ -45,5 +45,5 @@ client c2 {
 	txreq -url "/bar" -hdr "Range: 200-300"
 	rxresp
 	expect resp.status == 206
-	expect resp.http.X-Varnish == "1004"
+	expect resp.http.X-Vinyl == "1004"
 } -run

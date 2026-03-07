@@ -15,7 +15,7 @@ vinyl v1 -vcl+backend {
 		set bereq.http.host += "world";
 	}
 	sub vcl_backend_response {
-		set beresp.http.x-powered-by += bereq.http.x-varnish;
+		set beresp.http.x-powered-by += bereq.http.X-Vinyl;
 	}
 } -start
 

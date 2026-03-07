@@ -64,7 +64,7 @@ struct fetch_step {
 FETCH_STEPS
 #undef FETCH_STEP
 
-static hdr_t const H_X_Varnish = HDR("X-Varnish");
+static hdr_t const H_X_Vinyl = HDR("X-Vinyl");
 
 /*--------------------------------------------------------------------
  * Allocate an object, with fall-back to Transient.
@@ -400,9 +400,9 @@ vbf_stp_startfetch(struct worker *wrk, struct busyobj *bo)
 	bo->storage = bo->uncacheable ? stv_transient : STV_next();
 
 	if (bo->retries > 0)
-		http_Unset(bo->bereq, H_X_Varnish);
+		http_Unset(bo->bereq, H_X_Vinyl);
 
-	http_PrintfHeader(bo->bereq, "X-Varnish: %ju", VXID(bo->vsl->wid));
+	http_PrintfHeader(bo->bereq, "X-Vinyl: %ju", VXID(bo->vsl->wid));
 
 	if (bo->bereq_body == NULL && bo->req == NULL) {
 		if (http_method_among(bo->bereq->wkm, (WKM_GET | WKM_HEAD | WKM_DELETE |

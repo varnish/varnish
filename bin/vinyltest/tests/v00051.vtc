@@ -193,7 +193,7 @@ logexpect l1012 -v v1 -g vxid -q "vxid == 1012" {
 	expect 0 =	BereqHeader	{^User-Agent: c1}
 	expect 0 =	BereqHeader	{^X-Forwarded-For: }
 	expect 0 =	BereqHeader	{^Via: }
-	expect 0 =	BereqHeader	{^X-Varnish: 1011}
+	expect 0 =	BereqHeader	{^X-Vinyl: 1011}
 	expect 0 =	BereqHeader	{^Connection: close}
 	expect 0 =	BereqAcct	{^0 0 0 0 0 0}
 	expect 0 =	End

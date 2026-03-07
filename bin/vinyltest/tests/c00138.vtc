@@ -25,7 +25,7 @@ vinyl v1 -vcl+backend "" -start
 client c1 {
 	txreq
 	rxresp
-	expect resp.http.x-varnish == 1001
+	expect resp.http.X-Vinyl == 1001
 } -start
 
 barrier b1 sync
@@ -37,7 +37,7 @@ logexpect l1 -v v1 -q Debug -g raw {
 client c2 {
 	txreq -hdr "accept: nothing"
 	rxresp
-	expect resp.http.x-varnish == 1004
+	expect resp.http.X-Vinyl == 1004
 } -start
 
 logexpect l1 -wait -start
@@ -45,7 +45,7 @@ logexpect l1 -wait -start
 client c3 {
 	txreq
 	rxresp
-	expect resp.http.x-varnish == "1006 1002"
+	expect resp.http.X-Vinyl == "1006 1002"
 } -start
 
 logexpect l1 -wait

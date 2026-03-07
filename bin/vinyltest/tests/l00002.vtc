@@ -18,7 +18,7 @@ vinyl v1 -vcl+backend {
 		unset resp.http.date;
 		unset resp.http.age;
 		unset resp.http.via;
-		unset resp.http.x-varnish;
+		unset resp.http.X-Vinyl;
 	}
 } -start
 

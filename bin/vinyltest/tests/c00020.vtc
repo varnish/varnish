@@ -12,7 +12,7 @@ client c1 {
 	txreq -url "/"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1001"
+	expect resp.http.X-Vinyl == "1001"
 	expect resp.http.ID == "slash"
 } -run
 delay .1
@@ -21,7 +21,7 @@ client c2 {
 	txreq -url "/"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1004 1002"
+	expect resp.http.X-Vinyl == "1004 1002"
 	expect resp.http.ID == "slash"
 } -run
 delay .1
@@ -39,28 +39,28 @@ client c1 {
 	txreq -url "/foo"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1006"
+	expect resp.http.X-Vinyl == "1006"
 	expect resp.http.ID == "foo"
 	delay .1
 
 	txreq -url "/"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1008 1002"
+	expect resp.http.X-Vinyl == "1008 1002"
 	expect resp.http.ID == "slash"
 	delay .1
 
 	txreq -url "/bar"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1009"
+	expect resp.http.X-Vinyl == "1009"
 	expect resp.http.ID == "bar"
 	delay .1
 
 	txreq -url "/foo"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1011 1007"
+	expect resp.http.X-Vinyl == "1011 1007"
 	expect resp.http.ID == "foo"
 } -run
 

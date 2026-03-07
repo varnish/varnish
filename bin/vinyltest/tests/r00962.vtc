@@ -33,7 +33,7 @@ client c1 {
 	txreq -url "/"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1001"
+	expect resp.http.X-Vinyl == "1001"
 } -run
 
 vinyl v1 -cliok "storage.list"
@@ -58,7 +58,7 @@ client c1 -connect ${v2_sock} {
 	rxresp
 	expect resp.reason != "Persistent Object Not Found"
 	expect resp.status == 200
-	expect resp.http.X-Varnish == "1001 1002"
+	expect resp.http.X-Vinyl == "1001 1002"
 } -run
 
 # shell "rm -f /tmp/__v1/_.per"

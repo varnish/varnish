@@ -34,18 +34,18 @@
 #
 # There are two main patterns for overridable subroutines:
 #
-# 1. `vcl_builtin_*` subroutines: These wrap core Varnish logic. When you
+# 1. `vcl_builtin_*` subroutines: These wrap core Vinyl Cache logic. When you
 #    override these in user VCL, your code runs first, followed by the
 #    builtin VCL code (unless you `return()`). Note that calling
 #    `vcl_builtin_*` from your own `vcl_builtin_*` does not work (triggers
 #    recursion check).
 #
 # 2. `vcl_req_*`, `vcl_beresp_*`, etc. subroutines: These act as specific
-#    "hooks" within the default Varnish behavior. Overriding these allows
+#    "hooks" within the default Vinyl Cache behavior. Overriding these allows
 #    you to modify a narrow aspect of behavior without reimplementing the
 #    entire parent `vcl_builtin_*` logic.
 #
-# Consult the Varnish documentation for details on each subroutine and
+# Consult the Vinyl Cache documentation for details on each subroutine and
 # its intended use.
 
 vcl 4.0;
@@ -199,7 +199,7 @@ sub vcl_builtin_synth {
     <h3>Guru Meditation:</h3>
     <p>XID: "} + req.xid + {"</p>
     <hr>
-    <p>Varnish cache server</p>
+    <p>Vinyl Cache server</p>
   </body>
 </html>
 "};
@@ -330,7 +330,7 @@ sub vcl_builtin_backend_error {
     <h3>Guru Meditation:</h3>
     <p>XID: "} + bereq.xid + {"</p>
     <hr>
-    <p>Varnish cache server</p>
+    <p>Vinyl Cache server</p>
   </body>
 </html>
 "};

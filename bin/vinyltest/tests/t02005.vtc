@@ -71,5 +71,4 @@ client c2 {
 	stream 0 -wait
 } -run
 
-
 logexpect l1 -wait

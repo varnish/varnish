@@ -2,7 +2,7 @@ vtest "Count purges when there are many variants"
 
 server s1 -repeat 72 -keepalive {
 	rxreq
-	txresp -hdr "Vary: x-varnish"
+	txresp -hdr "Vary: X-Vinyl"
 } -start
 
 vinyl v1 -arg "-p workspace_thread=512" -vcl+backend {

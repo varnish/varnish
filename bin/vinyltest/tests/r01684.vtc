@@ -23,9 +23,9 @@ vinyl v1 -vcl+backend {
 # check log for the aborted POST
 logexpect l1 -v v1 -g request {
 	expect * *	Begin		"^bereq .* retry"
-	expect * =	BereqHeader	"^X-Varnish:"
-	expect * =	BereqUnset	"^X-Varnish:"
-	expect * =	BereqHeader	"^X-Varnish:"
+	expect * =	BereqHeader	"^X-Vinyl:"
+	expect * =	BereqUnset	"^X-Vinyl:"
+	expect * =	BereqHeader	"^X-Vinyl:"
 } -start
 
 vinyl v1 -cliok "param.set debug +syncvsl"

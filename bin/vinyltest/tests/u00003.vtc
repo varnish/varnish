@@ -164,7 +164,7 @@ shell -match {^\{\d{4}-\d{2}-\d{2}\}T\{\d{2}:\d{2}:\d{2}\} \{\{\d{4}-\d{2}-\d{2}
 process p1 -stop -screen-dump
 process p1 -expect-text 1 0 {/1?foo=bar HTTP/1.1" 200 100 "-" "-"}
 process p1 -expect-text 1 0 { - user [}
-process p1 -expect-text 2 0 {/1?foo=bar HTTP/1.1" 404 248 "-" "-"}
+process p1 -expect-text 2 0 {/1?foo=bar HTTP/1.1" 404 246 "-" "-"}
 process p1 -expect-text 3 0 {/2 HTTP/1.1" - - "-" "-"}
 
 process p2 {vinylncsa -t 5 -n nonexistent} -start

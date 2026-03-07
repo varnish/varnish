@@ -127,7 +127,7 @@ logexpect l1 -v v1 -g raw {
 	expect 0 1011	RespReason      {^Method Not Allowed$}
 	expect 0 1011	RespHeader      {^Date:}
 	expect 0 1011	RespHeader      {^Server: Varnish$}
-	expect 0 1011	RespHeader      {^X-Varnish: 1011$}
+	expect 0 1011	RespHeader      {^X-Vinyl: 1011$}
 	expect * 1011	Timestamp       {^Process:}
 
 } -start

@@ -32,7 +32,7 @@ client c1 {
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 12
-	expect resp.http.x-varnish == "1001"
+	expect resp.http.X-Vinyl == "1001"
 } -start
 
 barrier b1 sync
@@ -44,7 +44,7 @@ client c2 {
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 12
-	expect resp.http.x-varnish == "1004 1002"
+	expect resp.http.X-Vinyl == "1004 1002"
 } -run
 
 client c1 -wait

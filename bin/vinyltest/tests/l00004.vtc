@@ -17,7 +17,7 @@ vinyl v1 -vcl+backend {
 	sub vcl_pipe {
 		set bereq.http.test = "yes";
 		unset bereq.http.x-forwarded-for;
-		unset bereq.http.x-varnish;
+		unset bereq.http.X-Vinyl;
 		unset bereq.http.connection;
 	}
 } -start

@@ -128,8 +128,8 @@ client c1 {
 	txreq -url /top2 -hdr "fiddle: do_esi"
 	rxresp
 	expect resp.status == 503
-	expect resp.bodylen == 251
+	expect resp.bodylen == 249
 } -run
 
 vinyl v1 -expect esi_errors == 0
-vinyl v1 -expect MAIN.s_resp_bodybytes == 673
+vinyl v1 -expect MAIN.s_resp_bodybytes == 671

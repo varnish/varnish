@@ -17,7 +17,7 @@ vinyl v1 -vcl+backend {
 	}
 	sub vcl_backend_fetch {
 		unset bereq.http.x-forwarded-for;
-		unset bereq.http.x-varnish;
+		unset bereq.http.X-Vinyl;
 		set bereq.http.Host = "foo.bar";
 	}
 	sub vcl_backend_response {

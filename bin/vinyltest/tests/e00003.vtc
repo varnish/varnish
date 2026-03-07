@@ -50,7 +50,7 @@ vinyl v1 -vcl+backend {
 
 logexpect l1 -v v1 -g request {
 	expect 0 1001   Begin   "^req .* rxreq"
-	expect * =	ReqAcct	"^45 0 45 182 75 257$"
+	expect * =	ReqAcct	"^45 0 45 180 75 255$"
 	expect 0 =      End
 } -start
 
@@ -72,8 +72,8 @@ logexpect l4 -v v1 -g request {
 
 logexpect l5 -v v1 -g request {
 	expect * 1006   Begin   "^req .* rxreq"
-	# Header bytes is 5 larger than in l1 due to two item X-Varnish hdr
-	expect * =	ReqAcct	"^45 0 45 187 75 262$"
+	# Header bytes is 5 larger than in l1 due to two item X-Vinyl hdr
+	expect * =	ReqAcct	"^45 0 45 185 75 260$"
 	expect 0 =      End
 } -start
 
