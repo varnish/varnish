@@ -100,7 +100,7 @@ cli_write(int sock, const char *s)
 
 /*
  * This function establishes a connection to the specified ip and port and
- * sends a command to varnishd. If varnishd returns an OK status, the result
+ * sends a command to vinyld. If vinyld returns an OK status, the result
  * is printed and 0 returned. Else, an error message is printed and 1 is
  * returned
  */
@@ -233,7 +233,7 @@ send_line(char *l)
 		cli_write(line_sock, "\n");
 		if (*l)
 			add_history(l);
-		rl_callback_handler_install("varnish> ", send_line);
+		rl_callback_handler_install("vinyl> ", send_line);
 	} else {
 		RL_EXIT(0);
 	}
@@ -299,7 +299,7 @@ vinyladm_completion (const char *text, int start, int end)
 
 /*
  * No arguments given, simply pass bytes on stdin/stdout and CLI socket
- * Send a "banner" to varnish, to provoke a welcome message.
+ * Send a "banner" to vinyld, to provoke a welcome message.
  */
 static void v_noreturn_
 interactive(int sock)
@@ -309,7 +309,7 @@ interactive(int sock)
 	unsigned status;
 	line_sock = sock;
 	rl_already_prompted = 1;
-	rl_callback_handler_install("varnish> ", send_line);
+	rl_callback_handler_install("vinyl> ", send_line);
 	rl_attempted_completion_function = vinyladm_completion;
 
 	fds[0].fd = sock;
