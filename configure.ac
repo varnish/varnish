@@ -925,7 +925,7 @@ AC_CONFIG_COMMANDS([mkdir], [$MKDIR_P doc/sphinx/include])
 AC_CONFIG_FILES([
     Makefile
     bin/Makefile
-    bin/varnishadm/Makefile
+    bin/vinyladm/Makefile
     bin/vinyld/Makefile
     bin/varnishlog/Makefile
     bin/varnishlog-json/Makefile

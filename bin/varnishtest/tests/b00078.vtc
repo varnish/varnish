@@ -9,15 +9,15 @@ vinyl v1 -cliexpect "[+]syncvsl" "param.show deprecated_dummy"
 vinyl v1 -cliexpect "[+]syncvsl" "param.show -j deprecated_dummy"
 
 shell -err {
-	varnishadm -n ${v1_name} "param.show" | grep deprecated_dummy
+	vinyladm -n ${v1_name} "param.show" | grep deprecated_dummy
 }
 
 shell -err {
-	varnishadm -n ${v1_name} "param.show -l" | grep deprecated_dummy
+	vinyladm -n ${v1_name} "param.show -l" | grep deprecated_dummy
 }
 
 shell -err {
-	varnishadm -n ${v1_name} "param.show -j" | grep deprecated_dummy
+	vinyladm -n ${v1_name} "param.show -j" | grep deprecated_dummy
 }
 
 # temporary aliases

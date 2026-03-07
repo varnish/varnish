@@ -1,7 +1,7 @@
 #
 
 SUBDIRS = \
-	varnishadm \
+	vinyladm \
 	vinyld \
 	varnishhist \
 	varnishlog \

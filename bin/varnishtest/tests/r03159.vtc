@@ -16,8 +16,8 @@ process p1 -log {
 
 shell {
 	# wait for startup vcl.load to complete
-	varnishadm -n ${tmpdir}/t ping ||
-	varnishadm -n ${tmpdir}/t ping
+	vinyladm -n ${tmpdir}/t ping ||
+	vinyladm -n ${tmpdir}/t ping
 }
 
 process p1 -screen_dump
@@ -26,9 +26,9 @@ process p1 -expect-text 0 1 "(That was just a warning)"
 
 process p2 -log {
 	set -e
-	varnishadm -n ${tmpdir}/t "vcl.list"
-	varnishadm -n ${tmpdir}/t -t 20 "vcl.load unref ${tmpdir}/unref.vcl"
-	varnishadm -n ${tmpdir}/t "vcl.list"
+	vinyladm -n ${tmpdir}/t "vcl.list"
+	vinyladm -n ${tmpdir}/t -t 20 "vcl.load unref ${tmpdir}/unref.vcl"
+	vinyladm -n ${tmpdir}/t "vcl.list"
 } -run
 
 process p2 -screen_dump

@@ -1,4 +1,4 @@
-vtest	"trivial run of varnishadm in pass mode"
+vtest	"trivial run of vinyladm in pass mode"
 
 server s1 {
 	rxreq
@@ -14,7 +14,7 @@ client c1 {
 
 vinyl v1 -vsl_catchup
 
-process p1 -log {varnishadm -t 12 -p -n ${v1_name}} -start
+process p1 -log {vinyladm -t 12 -p -n ${v1_name}} -start
 
 # expect a full status line in pass mode (no banner)
 process p1 -write "ping\r"
@@ -29,11 +29,11 @@ process p1 -expect-text 0 0 "backend s1"
 
 process p1 -screen_dump -write "\x04" -wait
 
-process p1 -log {varnishadm -t foobar 2>&1} -expect-exit 2 -run
+process p1 -log {vinyladm -t foobar 2>&1} -expect-exit 2 -run
 process p1 -expect-text 0 0 "-t: Invalid argument:"
 
-process p1 -log {varnishadm -Q 2>&1} -expect-exit 1 -run
-process p1 -expect-text 0 0 "Usage: varnishadm"
+process p1 -log {vinyladm -Q 2>&1} -expect-exit 1 -run
+process p1 -expect-text 0 0 "Usage: vinyladm"
 
-process p2 -log {varnishadm -h 2>&1} -expect-exit 0 -run
-process p2 -expect-text 0 0 "Usage: varnishadm"
+process p2 -log {vinyladm -h 2>&1} -expect-exit 0 -run
+process p2 -expect-text 0 0 "Usage: vinyladm"

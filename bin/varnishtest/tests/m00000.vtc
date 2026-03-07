@@ -187,7 +187,7 @@ shell {
 vinyl v1 -clierr 300 "vcl.load f1 ${tmpdir}/f1"
 
 shell -exit 1 -expect {failing as requested} {
-	varnishadm -t 10 -n ${tmpdir}/v1 vcl.load f1 ${tmpdir}/f1
+	vinyladm -t 10 -n ${tmpdir}/v1 vcl.load f1 ${tmpdir}/f1
 }
 
 vinyl v1 -cliok "param.set vcc_feature +allow_inline_c"

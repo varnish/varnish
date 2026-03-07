@@ -13,7 +13,7 @@ vinyl v1 -cliexpect \
 	"Child failed on launch within startup_timeout=3.00s" \
 	"start"
 # v1 registers a panic on some systems, but not others
-shell {varnishadm -n ${v1_name} panic.clear || true }
+shell {vinyladm -n ${v1_name} panic.clear || true }
 vinyl v1 -wait
 
 

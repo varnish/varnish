@@ -10,7 +10,7 @@ dist_man_MANS = \
 	vcl-step.7 \
 	vsl.7 \
 	vsl-query.7 \
-	varnishadm.1 \
+	vinyladm.1 \
 	vinyld.1 \
 	varnishhist.1 \
 	varnishlog.1 \
@@ -74,7 +74,7 @@ vsl.7: $(top_builddir)/doc/sphinx/reference/vsl.rst \
 vsl-query.7: $(top_builddir)/doc/sphinx/reference/vsl-query.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vsl-query.rst $@
 
-varnishadm.1: $(top_builddir)/doc/sphinx/reference/varnishadm.rst
+vinyladm.1: $(top_builddir)/doc/sphinx/reference/varnishadm.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishadm.rst $@
 
 vinyld.1: \

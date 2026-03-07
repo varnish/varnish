@@ -14,5 +14,5 @@ shell -match {d=".+" D=".+hello.+" w="hello"} {
 }
 
 shell -expect "Value is: hello" {
-	exec varnishadm -n "$(cat v1/vcl_*/v1_name)" param.show cc_warnings
+	exec vinyladm -n "$(cat v1/vcl_*/v1_name)" param.show cc_warnings
 }

@@ -1,4 +1,4 @@
-vtest	"trivial run of varnishadm in curses mode"
+vtest	"trivial run of vinyladm in curses mode"
 
 server s1 {
 	rxreq
@@ -14,7 +14,7 @@ client c1 {
 
 vinyl v1 -vsl_catchup
 
-process p1 -log -winsz 25 120 {varnishadm -n ${v1_name}} -start
+process p1 -log -winsz 25 120 {vinyladm -n ${v1_name}} -start
 
 process p1 -expect-text 0 1 "Type 'quit' to close CLI session."
 

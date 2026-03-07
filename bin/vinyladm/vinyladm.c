@@ -286,7 +286,7 @@ command_generator (const char *text, int state)
 }
 
 static char **
-varnishadm_completion (const char *text, int start, int end)
+vinyladm_completion (const char *text, int start, int end)
 {
 	char **matches;
 	(void)end;
@@ -310,7 +310,7 @@ interactive(int sock)
 	line_sock = sock;
 	rl_already_prompted = 1;
 	rl_callback_handler_install("varnish> ", send_line);
-	rl_attempted_completion_function = varnishadm_completion;
+	rl_attempted_completion_function = vinyladm_completion;
 
 	fds[0].fd = sock;
 	fds[0].events = POLLIN;
@@ -388,7 +388,7 @@ static void v_noreturn_
 usage(int status)
 {
 	fprintf(stderr,
-	    "Usage: varnishadm [-h] [-n workdir] [-p] [-S secretfile] "
+	    "Usage: vinyladm [-h] [-n workdir] [-p] [-S secretfile] "
 	    "[-T [address]:port] [-t timeout] [command [...]]\n");
 	fprintf(stderr, "\t-n is mutually exclusive with -S and -T\n");
 	exit(status);
@@ -469,9 +469,9 @@ main(int argc, char * const *argv)
 	}
 	/*
 	 * By default linux::getopt(3) mangles the argv order, such that
-	 *	varnishadm -n bla param.set foo -bar
+	 *	vinyladm -n bla param.set foo -bar
 	 * gets interpreted as
-	 *	varnishadm -n bla -bar param.set foo
+	 *	vinyladm -n bla -bar param.set foo
 	 * The '+' stops that from happening
 	 * See #1496
 	 */

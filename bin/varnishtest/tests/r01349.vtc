@@ -1,4 +1,4 @@
-vtest "Exact matching for varnishadm backend.set_health"
+vtest "Exact matching for vinyladm backend.set_health"
 
 server s1 -repeat 2 {
 	rxreq

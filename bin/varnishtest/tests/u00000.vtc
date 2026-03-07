@@ -101,35 +101,35 @@ shell {
 }
 
 shell -expect {VCL compiled.} {
-	varnishadm -n ${tmpdir}/v1 vcl.load vcl1 ${tmpdir}/vcl
+	vinyladm -n ${tmpdir}/v1 vcl.load vcl1 ${tmpdir}/vcl
 }
 
 shell -expect {VCL 'vcl1' now active} {
-	varnishadm -n ${tmpdir}/v1 vcl.use vcl1
+	vinyladm -n ${tmpdir}/v1 vcl.use vcl1
 }
 
 shell -expect {active   auto   warm   -   vcl1} {
-	varnishadm -n ${tmpdir}/v1 vcl.list
+	vinyladm -n ${tmpdir}/v1 vcl.list
 }
 
-shell {varnishadm -n ${tmpdir}/v1 start}
+shell {vinyladm -n ${tmpdir}/v1 start}
 
-shell {varnishadm -n ${tmpdir}/v1 debug.listen_address}
+shell {vinyladm -n ${tmpdir}/v1 debug.listen_address}
 
 shell -exit 1 -expect "Command failed with error code 500" {
-	varnishadm -n ${tmpdir}/v1 quit
+	vinyladm -n ${tmpdir}/v1 quit
 }
 
 shell -exit 1 -expect "Command failed with error code 102" {
-	varnishadm -n ${tmpdir}/v1 debug.panic.master -j
+	vinyladm -n ${tmpdir}/v1 debug.panic.master -j
 }
 
 shell -exit 1 -expect "Command failed with error code 101" {
-	varnishadm -n ${tmpdir}/v1 123
+	vinyladm -n ${tmpdir}/v1 123
 }
 
-shell "varnishadm -n ${tmpdir}/v1 param.set cli_limit 128"
-shell -expect "[response was truncated]" "varnishadm -n ${tmpdir}/v1 help"
+shell "vinyladm -n ${tmpdir}/v1 param.set cli_limit 128"
+shell -expect "[response was truncated]" "vinyladm -n ${tmpdir}/v1 help"
 
 process p1 -expect-exit 64 -stop -wait
 
