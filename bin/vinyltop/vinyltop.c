@@ -45,7 +45,7 @@
 #include <unistd.h>
 
 #define VOPT_DEFINITION
-#define VOPT_INC "varnishtop_options.h"
+#define VOPT_INC "vinyltop_options.h"
 
 #include "vdef.h"
 

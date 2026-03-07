@@ -8,5 +8,5 @@ SUBDIRS = \
 	vinyllog \
 	vinylncsa \
 	vinylstat \
-	varnishtop \
+	vinyltop \
 	varnishtest

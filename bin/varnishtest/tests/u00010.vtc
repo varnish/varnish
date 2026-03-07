@@ -1,4 +1,4 @@
-vtest	"trivial run of varnishtop in curses mode"
+vtest	"trivial run of vinyltop in curses mode"
 
 server s1 {
 	rxreq
@@ -7,9 +7,9 @@ server s1 {
 
 vinyl v1 -vcl+backend {} -start
 
-process p1 -dump {varnishtop -n ${v1_name}} -start
-process p2 -dump {varnishtop -n ${v1_name}} -start
-process p3 -dump {varnishtop -n ${v1_name}} -start
+process p1 -dump {vinyltop -n ${v1_name}} -start
+process p2 -dump {vinyltop -n ${v1_name}} -start
+process p3 -dump {vinyltop -n ${v1_name}} -start
 
 process p1 -expect-text 1 1 {list length}
 

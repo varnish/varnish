@@ -1,4 +1,4 @@
-vtest "varnishtop coverage"
+vtest "vinyltop coverage"
 
 server s1 {
 	rxreq
@@ -12,35 +12,35 @@ client c1 {
 	rxresp
 } -run
 
-shell -expect "fetch" "varnishtop -n ${v1_name} -1"
-shell -expect "fetch" {VARNISH_DEFAULT_N="${v1_name}" varnishtop  -1}
+shell -expect "fetch" "vinyltop -n ${v1_name} -1"
+shell -expect "fetch" {VARNISH_DEFAULT_N="${v1_name}" vinyltop  -1}
 
-process p1 "varnishtop -n ${v1_name} -d" -start
+process p1 "vinyltop -n ${v1_name} -d" -start
 delay 1
 process p1 -screen_dump -expect-text 0 0 fetch
 process p1 -write q -wait
 
 # without -f
 shell -match "1\\.00 RespHeader Date: [^\\n]+\\n" {
-	varnishtop -n ${v1_name} -1 -i RespHeader
+	vinyltop -n ${v1_name} -1 -i RespHeader
 }
 
 # with -f
 shell -match "1\\.00 RespHeader Date\\n" {
-	varnishtop -n ${v1_name} -1 -f -i RespHeader
+	vinyltop -n ${v1_name} -1 -f -i RespHeader
 }
 
-shell -match "Usage: .*varnishtop <options>" \
-	"varnishtop -h"
+shell -match "Usage: .*vinyltop <options>" \
+	"vinyltop -h"
 
-shell -err -match "Usage: .*varnishtop <options>" \
-	"varnishtop -K"
+shell -err -match "Usage: .*vinyltop <options>" \
+	"vinyltop -K"
 
 shell -expect "Copyright (c) 2006 Verdens Gang AS" \
-	"varnishtop -V"
+	"vinyltop -V"
 
-shell -err -match "Usage: .*varnishtop <options>" \
-	"varnishtop extra"
+shell -err -match "Usage: .*vinyltop <options>" \
+	"vinyltop extra"
 
 shell -err -match "is not a number" \
-	"varnishtop -p 60 -p 12ABC"
+	"vinyltop -p 60 -p 12ABC"

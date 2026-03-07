@@ -18,7 +18,7 @@ dist_man_MANS = \
 	vinylstat.1 \
 	varnishtest.1 \
 	vtc.7 \
-	varnishtop.1 \
+	vinyltop.1 \
 	vmod_cookie.3 \
 	vmod_directors.3 \
 	vmod_purge.3 \
@@ -108,10 +108,10 @@ vtc.7: $(top_builddir)/doc/sphinx/reference/vtc.rst \
 	$(top_builddir)/doc/sphinx/include/vtc-syntax.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vtc.rst $@
 
-varnishtop.1: \
+vinyltop.1: \
 	$(top_builddir)/doc/sphinx/reference/varnishtop.rst \
-	$(top_builddir)/doc/sphinx/include/varnishtop_options.rst \
-	$(top_builddir)/doc/sphinx/include/varnishtop_synopsis.rst
+	$(top_builddir)/doc/sphinx/include/vinyltop_options.rst \
+	$(top_builddir)/doc/sphinx/include/vinyltop_synopsis.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishtop.rst $@
 
 vinylhist.1: \
