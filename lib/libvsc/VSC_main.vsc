@@ -7,12 +7,12 @@
 	This is *NOT* a RST file but the syntax has been chosen so
 	that it may become an RST file at some later date.
 
-.. varnish_vsc_begin::	main
+.. vinyl_vsc_begin::	main
 	:oneliner:	Main counters
 	:order:		10
 	:sumfunction:	wrk_wrk wrk pool
 
-.. varnish_vsc:: summs
+.. vinyl_vsc:: summs
 	:level:	debug
 	:group: wrk
 	:oneliner:	stat summ operations
@@ -20,19 +20,19 @@
 	Number of times per-thread statistics were summed into the
 	global counters.
 
-.. varnish_vsc:: uptime
+.. vinyl_vsc:: uptime
 	:oneliner:	Child process uptime
 	:format:	duration
 
 	How long the child process has been running.
 
-.. varnish_vsc:: sess_conn
+.. vinyl_vsc:: sess_conn
 	:group: wrk
 	:oneliner:	Sessions accepted
 
 	Count of sessions successfully accepted
 
-.. varnish_vsc:: sess_fail
+.. vinyl_vsc:: sess_fail
 	:group: wrk
 	:oneliner:	Session accept failures
 
@@ -41,81 +41,81 @@
 	This counter is the sum of the sess_fail_* counters, which
 	give more detailed information.
 
-.. varnish_vsc:: sess_fail_econnaborted
+.. vinyl_vsc:: sess_fail_econnaborted
 	:group: wrk
 	:oneliner:	Session accept failures: connection aborted
 
 	Detailed reason for sess_fail: Connection aborted by the
 	client, usually harmless.
 
-.. varnish_vsc:: sess_fail_eintr
+.. vinyl_vsc:: sess_fail_eintr
 	:group: wrk
 	:oneliner:	Session accept failures: interrupted system call
 
 	Detailed reason for sess_fail: The accept() call was
 	interrupted, usually harmless
 
-.. varnish_vsc:: sess_fail_emfile
+.. vinyl_vsc:: sess_fail_emfile
 	:group: wrk
 	:oneliner:	Session accept failures: too many open files
 
 	Detailed reason for sess_fail: No file descriptor was
 	available. Consider raising RLIMIT_NOFILE (see ulimit -n).
 
-.. varnish_vsc:: sess_fail_ebadf
+.. vinyl_vsc:: sess_fail_ebadf
 	:group: wrk
 	:oneliner:	Session accept failures: bad file descriptor
 
 	Detailed reason for sess_fail: The listen socket file
 	descriptor was invalid. Should never happen.
 
-.. varnish_vsc:: sess_fail_enomem
+.. vinyl_vsc:: sess_fail_enomem
 	:group: wrk
 	:oneliner:	Session accept failures: not enough memory
 
 	Detailed reason for sess_fail: Most likely insufficient
 	socket buffer memory. Should never happen
 
-.. varnish_vsc:: sess_fail_other
+.. vinyl_vsc:: sess_fail_other
 	:group: wrk
 	:oneliner:	Session accept failures: other
 
 	Detailed reason for sess_fail: neither of the above, see
 	SessError log (vinyllog -g raw -i SessError).
 
-.. varnish_vsc:: client_req_400
+.. vinyl_vsc:: client_req_400
 	:group: wrk
 	:oneliner:	Client requests received, subject to 400 errors
 
 	400 means we couldn't make sense of the request, it was malformed
 	in some drastic way.
 
-.. varnish_vsc:: client_req_417
+.. vinyl_vsc:: client_req_417
 	:group: wrk
 	:oneliner:	Client requests received, subject to 417 errors
 
 	417 means that something went wrong with an Expect: header.
 
-.. varnish_vsc:: client_req
+.. vinyl_vsc:: client_req
 	:group: wrk
 	:oneliner:	Good client requests received
 
 	The count of parseable client requests seen.
 
-.. varnish_vsc:: esi_req
+.. vinyl_vsc:: esi_req
 	:group: wrk
 	:oneliner:	ESI subrequests
 
 	Number of ESI subrequests made.
 
-.. varnish_vsc:: cache_hit
+.. vinyl_vsc:: cache_hit
 	:group: wrk
 	:oneliner:	Cache hits
 
 	Count of cache hits.  A cache hit indicates that an object has been
 	delivered to a client without fetching it from a backend server.
 
-.. varnish_vsc:: cache_hit_grace
+.. vinyl_vsc:: cache_hit_grace
 	:group: wrk
 	:oneliner:	Cache grace hits
 
@@ -123,7 +123,7 @@
 	hit where the object is expired. Note that such hits are also
 	included in the cache_hit counter.
 
-.. varnish_vsc:: cache_hitpass
+.. vinyl_vsc:: cache_hitpass
 	:group: wrk
 	:oneliner:	Cache hits for pass.
 
@@ -132,7 +132,7 @@
 	been cached in it self. This counts how many times the cached
 	decision is being used.
 
-.. varnish_vsc:: cache_hitmiss
+.. vinyl_vsc:: cache_hitmiss
 	:group: wrk
 	:oneliner:	Cache hits for miss.
 
@@ -141,50 +141,50 @@
 	and this decision has been cached. This counts how many times the
 	cached decision is being used.
 
-.. varnish_vsc:: cache_miss
+.. vinyl_vsc:: cache_miss
 	:group: wrk
 	:oneliner:	Cache misses
 
 	Count of misses. A cache miss indicates the object was fetched from
 	the backend before delivering it to the client.
 
-.. varnish_vsc:: beresp_uncacheable
+.. vinyl_vsc:: beresp_uncacheable
    :group: wrk
    :oneliner: Uncacheable backend responses
 
    Count of backend responses considered uncacheable.
 
-.. varnish_vsc:: beresp_shortlived
+.. vinyl_vsc:: beresp_shortlived
    :group: wrk
    :oneliner: Shortlived objects
 
    Count of objects created with ttl+grace+keep shorter than the 'shortlived'
    runtime parameter.
 
-.. varnish_vsc:: backend_conn
+.. vinyl_vsc:: backend_conn
 	:oneliner:	Backend conn. success
 
 	How many backend connections have successfully been established.
 
-.. varnish_vsc:: backend_unhealthy
+.. vinyl_vsc:: backend_unhealthy
 	:oneliner:	Backend conn. not attempted
 
 
-.. varnish_vsc:: backend_busy
+.. vinyl_vsc:: backend_busy
 	:oneliner:	Backend conn. too many
 
 
-.. varnish_vsc:: backend_fail
+.. vinyl_vsc:: backend_fail
 	:oneliner:	Backend conn. failures
 
 
-.. varnish_vsc:: backend_reuse
+.. vinyl_vsc:: backend_reuse
 	:oneliner:	Backend conn. reuses
 
 	Count of backend connection reuses. This counter is increased
 	whenever we reuse a recycled connection.
 
-.. varnish_vsc:: backend_recycle
+.. vinyl_vsc:: backend_recycle
 	:oneliner:	Backend conn. recycles
 
 	Count of backend connection recycles. This counter is increased
@@ -192,10 +192,10 @@
 	pool of connections. It has not yet been used, but it might be,
 	unless the backend closes it.
 
-.. varnish_vsc:: backend_retry
+.. vinyl_vsc:: backend_retry
 	:oneliner:	Backend conn. retry
 
-.. varnish_vsc:: backend_wait
+.. vinyl_vsc:: backend_wait
 	:oneliner:	Backend conn. waited in queue for a connection
 
 	Count of backend requests that waited in a backend_wait queue for
@@ -203,7 +203,7 @@
 	is defined by the backend wait_limit property.  The wait queue is
 	only used when max_connections to the backend are in use.
 
-.. varnish_vsc:: backend_wait_fail
+.. vinyl_vsc:: backend_wait_fail
 	:oneliner:	Backend conn. waited in queue and did not get a connection
 
 	Count of backend requests that waited in a backend_wait queue for
@@ -211,156 +211,156 @@
 	The maximum time to wait in the queue is defined by the backend
 	wait_timeout property.
 
-.. varnish_vsc:: fetch_head
+.. vinyl_vsc:: fetch_head
 	:group: wrk
 	:oneliner:	Fetch no body (HEAD)
 
 	beresp with no body because the request is HEAD.
 
-.. varnish_vsc:: fetch_length
+.. vinyl_vsc:: fetch_length
 	:group: wrk
 	:oneliner:	Fetch with Length
 
 	beresp.body with Content-Length.
 
-.. varnish_vsc:: fetch_chunked
+.. vinyl_vsc:: fetch_chunked
 	:group: wrk
 	:oneliner:	Fetch chunked
 
 	beresp.body with Chunked.
 
-.. varnish_vsc:: fetch_eof
+.. vinyl_vsc:: fetch_eof
 	:group: wrk
 	:oneliner:	Fetch EOF
 
 	beresp.body with EOF.
 
-.. varnish_vsc:: fetch_bad
+.. vinyl_vsc:: fetch_bad
 	:group: wrk
 	:oneliner:	Fetch bad T-E
 
 	beresp.body length/fetch could not be determined.
 
-.. varnish_vsc:: fetch_none
+.. vinyl_vsc:: fetch_none
 	:group: wrk
 	:oneliner:	Fetch no body
 
 	beresp.body empty
 
-.. varnish_vsc:: fetch_1xx
+.. vinyl_vsc:: fetch_1xx
 	:group: wrk
 	:oneliner:	Fetch no body (1xx)
 
 	beresp with no body because of 1XX response.
 
-.. varnish_vsc:: fetch_204
+.. vinyl_vsc:: fetch_204
 	:group: wrk
 	:oneliner:	Fetch no body (204)
 
 	beresp with no body because of 204 response.
 
-.. varnish_vsc:: fetch_304
+.. vinyl_vsc:: fetch_304
 	:group: wrk
 	:oneliner:	Fetch no body (304)
 
 	beresp with no body because of 304 response.
 
-.. varnish_vsc:: fetch_failed
+.. vinyl_vsc:: fetch_failed
 	:group: wrk
 	:oneliner:	Fetch failed (all causes)
 
 	beresp fetch failed.
 
-.. varnish_vsc:: bgfetch_no_thread
+.. vinyl_vsc:: bgfetch_no_thread
 	:group: wrk
 	:oneliner:	Background fetch failed (no thread)
 
 	A bgfetch triggered by a grace hit failed, no thread available.
 
-.. varnish_vsc:: pools
+.. vinyl_vsc:: pools
 	:type:	gauge
 	:oneliner:	Number of thread pools
 
 	Number of thread pools. See also parameter thread_pools. NB: Presently
 	pools cannot be removed once created.
 
-.. varnish_vsc:: threads
+.. vinyl_vsc:: threads
 	:type:	gauge
 	:oneliner:	Total number of threads
 
 	Number of threads in all pools. See also parameters thread_pools,
 	thread_pool_min and thread_pool_max.
 
-.. varnish_vsc:: threads_limited
+.. vinyl_vsc:: threads_limited
 	:oneliner:	Threads hit max
 
 	Number of times more threads were needed, but limit was reached in
 	a thread pool. See also parameter thread_pool_max.
 
-.. varnish_vsc:: threads_created
+.. vinyl_vsc:: threads_created
 	:oneliner:	Threads created
 
 	Total number of threads created in all pools.
 
-.. varnish_vsc:: threads_destroyed
+.. vinyl_vsc:: threads_destroyed
 	:oneliner:	Threads destroyed
 
 	Total number of threads destroyed in all pools.
 
-.. varnish_vsc:: threads_failed
+.. vinyl_vsc:: threads_failed
 	:oneliner:	Thread creation failed
 
 	Number of times creating a thread failed. See VSL::Debug for
 	diagnostics. See also parameter thread_fail_delay.
 
-.. varnish_vsc:: thread_queue_len
+.. vinyl_vsc:: thread_queue_len
 	:type:	gauge
 	:oneliner:	Length of session queue
 
 	Length of session queue waiting for threads. NB: Only updates once
 	per second. See also parameter thread_queue_limit.
 
-.. varnish_vsc:: busy_sleep
+.. vinyl_vsc:: busy_sleep
 	:group: wrk
 	:oneliner:	Number of requests sent to sleep on busy objhdr
 
 	Number of requests sent to sleep without a worker thread because
 	they found a busy object.
 
-.. varnish_vsc:: busy_wakeup
+.. vinyl_vsc:: busy_wakeup
 	:group: wrk
 	:oneliner:	Number of requests woken after sleep on busy objhdr
 
 	Number of requests taken off the busy object sleep list and rescheduled.
 
-.. varnish_vsc:: busy_killed
+.. vinyl_vsc:: busy_killed
 	:oneliner:	Number of requests killed after sleep on busy objhdr
 
 	Number of requests killed from the busy object sleep list due to
 	lack of resources.
 
-.. varnish_vsc:: sess_queued
+.. vinyl_vsc:: sess_queued
 	:group: pool
 	:oneliner:	Sessions queued for thread
 
 	Number of times session was queued waiting for a thread. See also
 	parameter thread_queue_limit.
 
-.. varnish_vsc:: sess_dropped
+.. vinyl_vsc:: sess_dropped
 	:group: pool
 	:oneliner:	Sessions dropped for thread
 
 	Number of times an HTTP/1 session was dropped because the queue was
 	too long already. See also parameter thread_queue_limit.
 
-.. varnish_vsc:: req_dropped
+.. vinyl_vsc:: req_dropped
 	:group: pool
 	:oneliner:	Requests dropped
 
 	Number of times an HTTP/2 stream was refused because the queue was
 	too long already. See also parameter thread_queue_limit.
 
-.. varnish_vsc:: req_reset
+.. vinyl_vsc:: req_reset
 	:group: wrk
 	:oneliner:	Requests reset
 
@@ -369,7 +369,7 @@
 	reset by an RST_STREAM frame from the client, or a stream or
 	connection error occurred.
 
-.. varnish_vsc:: n_object
+.. vinyl_vsc:: n_object
 	:type:	gauge
 	:group: wrk
 	:oneliner:	object structs made
@@ -377,7 +377,7 @@
 	Approximate number of HTTP objects (headers + body, if present) in
 	the cache.
 
-.. varnish_vsc:: n_vampireobject
+.. vinyl_vsc:: n_vampireobject
 	:type:	gauge
 	:level:	diag
 	:group: wrk
@@ -385,7 +385,7 @@
 
 	Number of unresurrected objects
 
-.. varnish_vsc:: n_objectcore
+.. vinyl_vsc:: n_objectcore
 	:type:	gauge
 	:group: wrk
 	:oneliner:	objectcore structs made
@@ -394,63 +394,63 @@
 	object needs an objectcore, extra objectcores are for hit-for-miss,
 	hit-for-pass and busy objects.
 
-.. varnish_vsc:: n_objecthead
+.. vinyl_vsc:: n_objecthead
 	:type:	gauge
 	:group: wrk
 	:oneliner:	objecthead structs made
 
 	Approximate number of different hash entries in the cache.
 
-.. varnish_vsc:: n_backend
+.. vinyl_vsc:: n_backend
 	:type:	gauge
 	:oneliner:	Number of backends
 
 	Number of backends known to us.
 
-.. varnish_vsc:: n_expired
+.. vinyl_vsc:: n_expired
 	:oneliner:	Number of expired objects
 
 	Number of objects that expired from cache because of old age.
 
-.. varnish_vsc:: n_superseded
+.. vinyl_vsc:: n_superseded
 	:level:	diag
 	:oneliner:	Number of superseded objects
 
 	Number of times an object was superseded by a new one.
 
-.. varnish_vsc:: n_lru_nuked
+.. vinyl_vsc:: n_lru_nuked
 	:oneliner:	Number of LRU nuked objects
 
 	How many objects have been forcefully evicted from storage to make
 	room for a new object.
 
-.. varnish_vsc:: n_lru_moved
+.. vinyl_vsc:: n_lru_moved
 	:level:	diag
 	:oneliner:	Number of LRU moved objects
 
 	Number of move operations done on the LRU list.
 
-.. varnish_vsc:: n_lru_limited
+.. vinyl_vsc:: n_lru_limited
 	:oneliner:	Reached nuke_limit
 
 	Number of times more storage space were needed, but limit was reached in
 	a nuke_limit. See also parameter nuke_limit.
 
-.. varnish_vsc:: losthdr
+.. vinyl_vsc:: losthdr
 	:oneliner:	HTTP header overflows
 
 
-.. varnish_vsc:: s_sess
+.. vinyl_vsc:: s_sess
 	:group: wrk
 	:oneliner:	Total sessions seen
 
 
-.. varnish_vsc:: n_pipe
+.. vinyl_vsc:: n_pipe
 	:type:	gauge
 	:oneliner:	Number of ongoing pipe sessions
 
 
-.. varnish_vsc:: pipe_limited
+.. vinyl_vsc:: pipe_limited
 	:group: wrk
 	:oneliner:	Pipes hit pipe_sess_max
 
@@ -458,82 +458,82 @@
 	also parameter pipe_sess_max.
 
 
-.. varnish_vsc:: s_pipe
+.. vinyl_vsc:: s_pipe
 	:group: wrk
 	:oneliner:	Total pipe sessions seen
 
 
-.. varnish_vsc:: s_pass
+.. vinyl_vsc:: s_pass
 	:group: wrk
 	:oneliner:	Total pass-ed requests seen
 
 
-.. varnish_vsc:: s_fetch
+.. vinyl_vsc:: s_fetch
 	:group: wrk
 	:oneliner:	Total backend fetches initiated
 
 	Total backend fetches initiated, including background fetches.
 
-.. varnish_vsc:: s_bgfetch
+.. vinyl_vsc:: s_bgfetch
 	:group: wrk
 	:oneliner:	Total backend background fetches initiated
 
 
-.. varnish_vsc:: s_synth
+.. vinyl_vsc:: s_synth
 	:group: wrk
 	:oneliner:	Total synthetic responses made
 
 
-.. varnish_vsc:: s_req_hdrbytes
+.. vinyl_vsc:: s_req_hdrbytes
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Request header bytes
 
 	Total request header bytes received
 
-.. varnish_vsc:: s_req_bodybytes
+.. vinyl_vsc:: s_req_bodybytes
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Request body bytes
 
 	Total request body bytes received
 
-.. varnish_vsc:: s_resp_hdrbytes
+.. vinyl_vsc:: s_resp_hdrbytes
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Response header bytes
 
 	Total response header bytes transmitted
 
-.. varnish_vsc:: s_resp_bodybytes
+.. vinyl_vsc:: s_resp_bodybytes
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Response body bytes
 
 	Total response body bytes transmitted
 
-.. varnish_vsc:: s_pipe_hdrbytes
+.. vinyl_vsc:: s_pipe_hdrbytes
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Pipe request header bytes
 
 	Total request bytes received for piped sessions
 
-.. varnish_vsc:: s_pipe_in
+.. vinyl_vsc:: s_pipe_in
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Piped bytes from client
 
 	Total number of bytes forwarded from clients in pipe sessions
 
-.. varnish_vsc:: s_pipe_out
+.. vinyl_vsc:: s_pipe_out
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Piped bytes to client
 
 	Total number of bytes forwarded to clients in pipe sessions
 
-.. varnish_vsc:: transit_stored
+.. vinyl_vsc:: transit_stored
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Stored uncacheable body bytes
@@ -543,7 +543,7 @@
 	are stored for a single transaction, this includes uncacheable backend
 	responses, synthetic responses and client requests.
 
-.. varnish_vsc:: transit_buffered
+.. vinyl_vsc:: transit_buffered
 	:format:	bytes
 	:group:		wrk
 	:oneliner:	Buffered uncacheable response body bytes
@@ -553,76 +553,76 @@
 	the 'transit_buffer' parameter, or the 'beresp.transit_buffer' VCL
 	variable.
 
-.. varnish_vsc:: sess_closed
+.. vinyl_vsc:: sess_closed
 	:group: wrk
 	:oneliner:	Session Closed
 
-.. varnish_vsc:: sess_closed_err
+.. vinyl_vsc:: sess_closed_err
 	:oneliner:	Session Closed with error
 
 	Total number of sessions closed with errors. See sc_* diag counters
 	for detailed breakdown
 
-.. varnish_vsc:: sess_readahead
+.. vinyl_vsc:: sess_readahead
 	:group: wrk
 	:oneliner:	Session Read Ahead
 
-.. varnish_vsc:: sess_herd
+.. vinyl_vsc:: sess_herd
 	:level:	diag
 	:group: wrk
 	:oneliner:	Session herd
 
 	Number of times the timeout_linger triggered
 
-.. varnish_vsc:: sc_rem_close
+.. vinyl_vsc:: sc_rem_close
 	:level:	diag
 	:oneliner:	Session OK  REM_CLOSE
 
 	Number of session closes with REM_CLOSE (Client Closed)
 
-.. varnish_vsc:: sc_req_close
+.. vinyl_vsc:: sc_req_close
 	:level:	diag
 	:oneliner:	Session OK  REQ_CLOSE
 
 	Number of session closes with REQ_CLOSE (Client requested close)
 
-.. varnish_vsc:: sc_req_http10
+.. vinyl_vsc:: sc_req_http10
 	:level:	diag
 	:oneliner:	Session Err REQ_HTTP10
 
 	Number of session closes with Error REQ_HTTP10 (Proto < HTTP/1.1)
 
-.. varnish_vsc:: sc_rx_bad
+.. vinyl_vsc:: sc_rx_bad
 	:level:	diag
 	:oneliner:	Session Err RX_BAD
 
 	Number of session closes with Error RX_BAD (Received bad req/resp)
 
-.. varnish_vsc:: sc_rx_body
+.. vinyl_vsc:: sc_rx_body
 	:level:	diag
 	:oneliner:	Session Err RX_BODY
 
 	Number of session closes with Error RX_BODY (Failure receiving req.body)
 
-.. varnish_vsc:: sc_rx_junk
+.. vinyl_vsc:: sc_rx_junk
 	:level:	diag
 	:oneliner:	Session Err RX_JUNK
 
 	Number of session closes with Error RX_JUNK (Received junk data)
 
-.. varnish_vsc:: sc_rx_overflow
+.. vinyl_vsc:: sc_rx_overflow
 	:level:	diag
 	:oneliner:	Session Err RX_OVERFLOW
 
 	Number of session closes with Error RX_OVERFLOW (Received buffer overflow)
 
-.. varnish_vsc:: sc_rx_timeout
+.. vinyl_vsc:: sc_rx_timeout
 	:level:	diag
 	:oneliner:	Session Err RX_TIMEOUT
 
 	Number of session closes with Error RX_TIMEOUT (Receive timeout)
 
-.. varnish_vsc:: sc_rx_close_idle
+.. vinyl_vsc:: sc_rx_close_idle
 	:level:	diag
 	:oneliner:	Session Err RX_CLOSE_IDLE
 
@@ -630,61 +630,61 @@
 	timeout_idle has been exceeded while waiting for a
 	client request.
 
-.. varnish_vsc:: sc_tx_pipe
+.. vinyl_vsc:: sc_tx_pipe
 	:level:	diag
 	:oneliner:	Session OK  TX_PIPE
 
 	Number of session closes with TX_PIPE (Piped transaction)
 
-.. varnish_vsc:: sc_tx_error
+.. vinyl_vsc:: sc_tx_error
 	:level:	diag
 	:oneliner:	Session Err TX_ERROR
 
 	Number of session closes with Error TX_ERROR (Error transaction)
 
-.. varnish_vsc:: sc_tx_eof
+.. vinyl_vsc:: sc_tx_eof
 	:level:	diag
 	:oneliner:	Session OK  TX_EOF
 
 	Number of session closes with TX_EOF (EOF transmission)
 
-.. varnish_vsc:: sc_resp_close
+.. vinyl_vsc:: sc_resp_close
 	:level:	diag
 	:oneliner:	Session OK  RESP_CLOSE
 
 	Number of session closes with RESP_CLOSE (Backend/VCL requested close)
 
-.. varnish_vsc:: sc_overload
+.. vinyl_vsc:: sc_overload
 	:level:	diag
 	:oneliner:	Session Err OVERLOAD
 
 	Number of session closes with Error OVERLOAD (Out of some resource)
 
-.. varnish_vsc:: sc_pipe_overflow
+.. vinyl_vsc:: sc_pipe_overflow
 	:level:	diag
 	:oneliner:	Session Err PIPE_OVERFLOW
 
 	Number of session closes with Error PIPE_OVERFLOW (Session pipe overflow)
 
-.. varnish_vsc:: sc_range_short
+.. vinyl_vsc:: sc_range_short
 	:level:	diag
 	:oneliner:	Session Err RANGE_SHORT
 
 	Number of session closes with Error RANGE_SHORT (Insufficient data for range)
 
-.. varnish_vsc:: sc_req_http20
+.. vinyl_vsc:: sc_req_http20
 	:level:	diag
 	:oneliner:	Session Err REQ_HTTP20
 
 	Number of session closes with Error REQ_HTTP20 (HTTP2 not accepted)
 
-.. varnish_vsc:: sc_vcl_failure
+.. vinyl_vsc:: sc_vcl_failure
 	:level:	diag
 	:oneliner:	Session Err VCL_FAILURE
 
 	Number of session closes with Error VCL_FAILURE (VCL failure)
 
-.. varnish_vsc:: sc_rapid_reset
+.. vinyl_vsc:: sc_rapid_reset
        :level: diag
        :oneliner:      Session Err RAPID_RESET
 
@@ -692,7 +692,7 @@
        configured limits for the number of permitted rapid stream
        resets.
 
-.. varnish_vsc:: sc_bankrupt
+.. vinyl_vsc:: sc_bankrupt
 	:level: diag
 	:oneliner:      Session Err BANKRUPT
 
@@ -700,7 +700,7 @@
 	were waiting for their windows to be credited when h2_window_timeout
 	triggered.
 
-.. varnish_vsc:: client_resp_500
+.. vinyl_vsc:: client_resp_500
 	:level: diag
 	:group: wrk
 	:oneliner:	Delivery failed due to insufficient workspace.
@@ -708,37 +708,37 @@
 	Number of times we failed a response due to running out of
 	workspace memory during delivery.
 
-.. varnish_vsc:: ws_backend_overflow
+.. vinyl_vsc:: ws_backend_overflow
 	:group: wrk
 	:oneliner: workspace_backend overflows
 
 	Number of times we ran out of space in workspace_backend.
 
-.. varnish_vsc:: ws_client_overflow
+.. vinyl_vsc:: ws_client_overflow
 	:group: wrk
 	:oneliner: workspace_client overflows
 
 	Number of times we ran out of space in workspace_client.
 
-.. varnish_vsc:: ws_thread_overflow
+.. vinyl_vsc:: ws_thread_overflow
 	:group: wrk
 	:oneliner: workspace_thread overflows
 
 	Number of times we ran out of space in workspace_thread.
 
-.. varnish_vsc:: ws_session_overflow
+.. vinyl_vsc:: ws_session_overflow
 	:oneliner: workspace_session overflows
 
 	Number of times we ran out of space in workspace_session.
 
-.. varnish_vsc:: shm_records
+.. vinyl_vsc:: shm_records
 	:level:	diag
 	:oneliner:	SHM records
 
 	Number of log records written to the shared memory log.
 
 
-.. varnish_vsc:: shm_writes
+.. vinyl_vsc:: shm_writes
 	:level:	diag
 	:oneliner:	SHM writes
 
@@ -746,21 +746,21 @@
 	write may batch multiple records for buffered tasks.
 
 
-.. varnish_vsc:: shm_flushes
+.. vinyl_vsc:: shm_flushes
 	:level:	diag
 	:oneliner:	SHM flushes due to overflow
 
 	Number of writes performed before the end of a buffered task
 	because adding a record to a batch would exceed vsl_buffer.
 
-.. varnish_vsc:: shm_cont
+.. vinyl_vsc:: shm_cont
 	:level:	diag
 	:oneliner:	SHM lock contention
 
 	Number of times a write had to wait for the lock.
 
 
-.. varnish_vsc:: shm_cycles
+.. vinyl_vsc:: shm_cycles
 	:level:	diag
 	:oneliner:	SHM cycles through VSL space
 
@@ -768,7 +768,7 @@
 	of the shared memory log, cycling back to the beginning.
 
 
-.. varnish_vsc:: shm_bytes
+.. vinyl_vsc:: shm_bytes
 	:level:	diag
 	:format: bytes
 	:oneliner:	SHM bytes
@@ -776,34 +776,34 @@
 	Number of bytes written to the shared memory log.
 
 
-.. varnish_vsc:: backend_req
+.. vinyl_vsc:: backend_req
 	:oneliner:	Backend requests made
 
 
-.. varnish_vsc:: n_vcl
+.. vinyl_vsc:: n_vcl
 	:type:	gauge
 	:oneliner:	Number of loaded VCLs in total
 
 
-.. varnish_vsc:: n_vcl_avail
+.. vinyl_vsc:: n_vcl_avail
 	:type:	gauge
 	:level:	diag
 	:oneliner:	Number of VCLs available
 
 
-.. varnish_vsc:: n_vcl_discard
+.. vinyl_vsc:: n_vcl_discard
 	:type:	gauge
 	:level:	diag
 	:oneliner:	Number of discarded VCLs
 
 
-.. varnish_vsc:: vcl_fail
+.. vinyl_vsc:: vcl_fail
 	:group: wrk
 	:oneliner:	VCL failures
 
 	Count of failures which prevented VCL from completing.
 
-.. varnish_vsc:: bans
+.. vinyl_vsc:: bans
 	:type:	gauge
 	:group: ban_mtx
 	:oneliner:	Count of bans
@@ -811,7 +811,7 @@
 	Number of all bans in system, including bans superseded by newer
 	bans and bans already checked by the ban-lurker.
 
-.. varnish_vsc:: bans_completed
+.. vinyl_vsc:: bans_completed
 	:type:	gauge
 	:level:	diag
 	:group: ban_mtx
@@ -820,7 +820,7 @@
 	Number of bans which are no longer active, either because they got
 	checked by the ban-lurker or superseded by newer identical bans.
 
-.. varnish_vsc:: bans_obj
+.. vinyl_vsc:: bans_obj
 	:type:	gauge
 	:level:	diag
 	:group: ban_mtx
@@ -829,7 +829,7 @@
 	Number of bans which use obj.* variables.  These bans can possibly
 	be washed by the ban-lurker.
 
-.. varnish_vsc:: bans_req
+.. vinyl_vsc:: bans_req
 	:type:	gauge
 	:level:	diag
 	:group: ban_mtx
@@ -838,21 +838,21 @@
 	Number of bans which use req.* variables.  These bans cannot be
 	washed by the ban-lurker.
 
-.. varnish_vsc:: bans_added
+.. vinyl_vsc:: bans_added
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Bans added
 
 	Counter of bans added to ban list.
 
-.. varnish_vsc:: bans_deleted
+.. vinyl_vsc:: bans_deleted
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Bans deleted
 
 	Counter of bans deleted from ban list.
 
-.. varnish_vsc:: bans_tested
+.. vinyl_vsc:: bans_tested
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Bans tested against objects (lookup)
@@ -860,14 +860,14 @@
 	Count of how many bans and objects have been tested against each
 	other during hash lookup.
 
-.. varnish_vsc:: bans_obj_killed
+.. vinyl_vsc:: bans_obj_killed
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Objects killed by bans (lookup)
 
 	Number of objects killed by bans during object lookup.
 
-.. varnish_vsc:: bans_lurker_tested
+.. vinyl_vsc:: bans_lurker_tested
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Bans tested against objects (lurker)
@@ -875,7 +875,7 @@
 	Count of how many bans and objects have been tested against each
 	other by the ban-lurker.
 
-.. varnish_vsc:: bans_tests_tested
+.. vinyl_vsc:: bans_tests_tested
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Ban tests tested against objects (lookup)
@@ -884,7 +884,7 @@
 	other during lookup. 'ban req.url == foo && req.http.host == bar'
 	counts as one in 'bans_tested' and as two in 'bans_tests_tested'
 
-.. varnish_vsc:: bans_lurker_tests_tested
+.. vinyl_vsc:: bans_lurker_tests_tested
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Ban tests tested against objects (lurker)
@@ -893,14 +893,14 @@
 	other by the ban-lurker. 'ban req.url == foo && req.http.host ==
 	bar' counts as one in 'bans_tested' and as two in 'bans_tests_tested'
 
-.. varnish_vsc:: bans_lurker_obj_killed
+.. vinyl_vsc:: bans_lurker_obj_killed
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Objects killed by bans (lurker)
 
 	Number of objects killed by the ban-lurker.
 
-.. varnish_vsc:: bans_lurker_obj_killed_cutoff
+.. vinyl_vsc:: bans_lurker_obj_killed_cutoff
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Objects killed by bans for cutoff (lurker)
@@ -908,21 +908,21 @@
 	Number of objects killed by the ban-lurker to keep the number of
 	bans below ban_cutoff.
 
-.. varnish_vsc:: bans_dups
+.. vinyl_vsc:: bans_dups
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Bans superseded by other bans
 
 	Count of bans replaced by later identical bans.
 
-.. varnish_vsc:: bans_lurker_contention
+.. vinyl_vsc:: bans_lurker_contention
 	:level:	diag
 	:group: ban_mtx
 	:oneliner:	Lurker gave way for lookup
 
 	Number of times the ban-lurker had to wait for lookups.
 
-.. varnish_vsc:: bans_persisted_bytes
+.. vinyl_vsc:: bans_persisted_bytes
 	:type:	gauge
 	:format:	bytes
 	:level:	diag
@@ -931,7 +931,7 @@
 
 	Number of bytes used by the persisted ban lists.
 
-.. varnish_vsc:: bans_persisted_fragmentation
+.. vinyl_vsc:: bans_persisted_fragmentation
 	:type:	gauge
 	:format:	bytes
 	:level:	diag
@@ -941,66 +941,66 @@
 	Number of extra bytes accumulated through dropped and completed
 	bans in the persistent ban lists.
 
-.. varnish_vsc:: n_purges
+.. vinyl_vsc:: n_purges
 	:oneliner:	Number of purge operations executed
 
 
-.. varnish_vsc:: n_obj_purged
+.. vinyl_vsc:: n_obj_purged
 	:oneliner:	Number of purged objects
 
 
-.. varnish_vsc:: exp_mailed
+.. vinyl_vsc:: exp_mailed
 	:level:	diag
 	:oneliner:	Number of objects mailed to expiry thread
 
 	Number of objects mailed to expiry thread for handling.
 
-.. varnish_vsc:: exp_received
+.. vinyl_vsc:: exp_received
 	:level:	diag
 	:oneliner:	Number of objects received by expiry thread
 
 	Number of objects received by expiry thread for handling.
 
-.. varnish_vsc:: hcb_nolock
+.. vinyl_vsc:: hcb_nolock
 	:group: wrk
 	:level:	debug
 	:oneliner:	HCB Lookups without lock
 
 
-.. varnish_vsc:: hcb_lock
+.. vinyl_vsc:: hcb_lock
 	:level:	debug
 	:oneliner:	HCB Lookups with lock
 
 
-.. varnish_vsc:: hcb_insert
+.. vinyl_vsc:: hcb_insert
 	:level:	debug
 	:oneliner:	HCB Inserts
 
 
-.. varnish_vsc:: esi_errors
+.. vinyl_vsc:: esi_errors
 	:level:	diag
 	:oneliner:	ESI parse errors (unlock)
 
 
-.. varnish_vsc:: esi_warnings
+.. vinyl_vsc:: esi_warnings
 	:level:	diag
 	:oneliner:	ESI parse warnings (unlock)
 
 
-.. varnish_vsc:: vmods
+.. vinyl_vsc:: vmods
 	:type:	gauge
 	:oneliner:	Loaded VMODs
 
 
-.. varnish_vsc:: n_gzip
+.. vinyl_vsc:: n_gzip
 	:oneliner:	Gzip operations
 
 
-.. varnish_vsc:: n_gunzip
+.. vinyl_vsc:: n_gunzip
 	:oneliner:	Gunzip operations
 
 
-.. varnish_vsc:: n_test_gunzip
+.. vinyl_vsc:: n_test_gunzip
 	:oneliner:	Test gunzip operations
 
 	Those operations occur when Varnish receives a compressed object
@@ -1008,7 +1008,7 @@
 	inserted in storage.
 
 
-.. varnish_vsc:: http1_iovs_flush
+.. vinyl_vsc:: http1_iovs_flush
 	:oneliner:	Premature iovec flushes
 
 	Number of additional writes performed on HTTP1 connections
@@ -1018,4 +1018,4 @@
 	defined by the amount of free workspace for backend
 	connections.
 
-.. varnish_vsc_end::	main
+.. vinyl_vsc_end::	main

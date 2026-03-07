@@ -883,19 +883,19 @@ The .vsc file looks like this:
 
 .. code-block:: none
 
-	.. varnish_vsc_begin:: xkey
+	.. vinyl_vsc_begin:: xkey
 		:oneliner:	xkey Counters
 		:order:		70
 
 		Metrics from vmod_xkey
 
-	.. varnish_vsc:: g_keys
+	.. vinyl_vsc:: g_keys
 		:type:		gauge
 		:oneliner:	Number of surrogate keys
 
 		Number of surrogate keys in use. Increases after a request that includes a new key in the xkey header. Decreases when a key is purged or when all cache objects associated with a key expire.
 
-	.. varnish_vsc_end:: xkey
+	.. vinyl_vsc_end:: xkey
 
 Counters can have the following parameters:
 

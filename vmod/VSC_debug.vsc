@@ -4,17 +4,17 @@
 	See LICENSE file for full text of license
 
 #
-.. varnish_vsc_begin::	debug
+.. vinyl_vsc_begin::	debug
 	:oneliner:	Example Counters
 	:order:		70
 
 	Test counters from vmod_debug
 
-.. varnish_vsc:: count
+.. vinyl_vsc:: count
 	:type:		counter
 	:level:		debug
 	:oneliner:	arbitrary counter
 
 	Just counting something
 
-.. varnish_vsc_end::	debug
+.. vinyl_vsc_end::	debug

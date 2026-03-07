@@ -43,7 +43,7 @@ import sys
 import collections
 import codecs
 
-# Parameters of 'varnish_vsc_begin', first element is default
+# Parameters of 'vinyl_vsc_begin', first element is default
 TYPES = ["counter", "gauge", "bitmap"]
 CTYPES = ["uint64_t"]
 LEVELS = ["info", "diag", "debug"]
@@ -79,11 +79,11 @@ class CounterSet(object):
 
         In the `.vsc` file a CounterSet is everything between a
 
-            .. varnish_vsc_begin::
+            .. vinyl_vsc_begin::
 
         and the subsequent
 
-            .. varnish_vsc_end::
+            .. vinyl_vsc_end::
     '''
 
     def __init__(self, name, m):
@@ -374,7 +374,7 @@ class OurDirective(object):
 class RstVscDirectiveBegin(OurDirective):
 
     '''
-        `varnish_vsc_begin` directive
+        `vinyl_vsc_begin` directive
     '''
 
     def __init__(self, s, vsc_set, fo):
@@ -392,7 +392,7 @@ class RstVscDirectiveBegin(OurDirective):
 class RstVscDirective(OurDirective):
 
     '''
-        `varnish_vsc` directive - one counter
+        `vinyl_vsc` directive - one counter
     '''
 
     def __init__(self, s, vsc_set, fo):
@@ -427,7 +427,7 @@ class RstVscDirective(OurDirective):
 class RstVscDirectiveEnd(OurDirective):
 
     '''
-        `varnish_vsc_end` directive
+        `vinyl_vsc_end` directive
     '''
 
     def __init__(self, s, vsc_set, fo):
@@ -473,9 +473,9 @@ def mainfunc(argv):
     for i in scs[1:]:
         j = i.split(None, 1)
         f = {
-            "varnish_vsc_begin::":  RstVscDirectiveBegin,
-            "varnish_vsc::":        RstVscDirective,
-            "varnish_vsc_end::":    RstVscDirectiveEnd,
+            "vinyl_vsc_begin::":  RstVscDirectiveBegin,
+            "vinyl_vsc::":        RstVscDirective,
+            "vinyl_vsc_end::":    RstVscDirectiveEnd,
         }.get(j[0])
         if f is not None:
             f(i, vscset, rstfile)

@@ -2,18 +2,18 @@
 	This is *NOT* a RST file but the syntax has been chosen so
 	that it may become an RST file at some later date.
 
-.. varnish_vsc_begin::	waiter
+.. vinyl_vsc_begin::	waiter
 	:oneliner:	Waiter counters
 	:order:		80
 
-.. varnish_vsc:: conns
+.. vinyl_vsc:: conns
 	:type:	gauge
 	:level:	debug
 	:oneliner:	Number of idle connections
 
 	Number of idle connections being waited over.
 
-.. varnish_vsc:: remclose
+.. vinyl_vsc:: remclose
 	:type:	counter
 	:level:	debug
 	:oneliner:	Number of idle connections closed by peer
@@ -21,7 +21,7 @@
 	Number of idle connections that experienced closure by peer while being
 	waited for.
 
-.. varnish_vsc:: timeout
+.. vinyl_vsc:: timeout
 	:type:	counter
 	:level:	debug
 	:oneliner:	Number of idle connections timeout
@@ -29,7 +29,7 @@
 	Number of idle connections that experienced a timeout event while being
 	waited for.
 
-.. varnish_vsc:: action
+.. vinyl_vsc:: action
 	:type:	counter
 	:level:	debug
 	:oneliner:	Number of idle connections read events
@@ -37,4 +37,4 @@
 	Number of idle connections that experienced a read event while being
 	waited for.
 
-.. varnish_vsc_end::	waiter
+.. vinyl_vsc_end::	waiter
