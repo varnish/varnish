@@ -184,7 +184,7 @@ VTCSYN_SRC = \
 	$(vtest2_src)/vtc_process.c \
 	$(vtest2_src)/vtc_syslog.c \
 	$(vtest2_src)/vtc_tunnel.c \
-	$(vtest2_src)/vtc_varnish.c \
+	$(top_srcdir)/bin/varnishtest/vtc_vinyl.c \
 	$(vtest2_src)/vtc_vsm.c
 include/vtc-syntax.rst: $(srcdir)/vtc-syntax.py $(VTCSYN_SRC)
 	$(AM_V_GEN) $(PYTHON) $(srcdir)/vtc-syntax.py $(VTCSYN_SRC) > ${@}_
