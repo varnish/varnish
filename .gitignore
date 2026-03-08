@@ -38,14 +38,14 @@ _*
 /m4/lt~obsolete.m4
 /missing
 /stamp-h1
-/varnishapi.pc
-/varnishapi-uninstalled.pc
+/vinylapi.pc
+/vinylapi-uninstalled.pc
 TAGS
 tags
 cscope.*out
 .dirstamp
 
-# Default vcl made from bin/varnishd/default.vcl
+# Default vcl made from bin/vinyld/default.vcl
 /bin/vinyld/builtin_vcl.c
 /etc/builtin.vcl
 
