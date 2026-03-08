@@ -30,7 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * Log tailer for Varnish
+ * Log tailer for Vinyl Cache
  */
 
 #include "config.h"

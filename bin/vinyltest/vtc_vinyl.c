@@ -57,7 +57,7 @@
 
 struct vinyl {
 	unsigned		magic;
-#define VARNISH_MAGIC		0x208cd8e3
+#define VINYL_MAGIC		0x208cd8e4
 	char			*me;
 	char			*name;
 	struct vtclog		*vl;
@@ -232,7 +232,7 @@ wait_running(const struct vinyl *v)
 }
 
 /**********************************************************************
- * Varnishlog gatherer thread
+ * Vinyllog gatherer thread
  */
 
 static void *
@@ -249,7 +249,7 @@ vinyllog_thread(void *priv)
 	int type, i, opt;
 	struct vsb *vsb = NULL;
 
-	CAST_OBJ_NOTNULL(v, priv, VARNISH_MAGIC);
+	CAST_OBJ_NOTNULL(v, priv, VINYL_MAGIC);
 
 	vsl = VSL_New();
 	AN(vsl);
@@ -347,7 +347,7 @@ vinyl_new(const char *name)
 	struct vsb *vsb;
 	char buf[1024];
 
-	ALLOC_OBJ(v, VARNISH_MAGIC);
+	ALLOC_OBJ(v, VINYL_MAGIC);
 	AN(v);
 	REPLACE(v->name, name);
 
@@ -381,7 +381,7 @@ static void
 vinyl_delete(struct vinyl *v)
 {
 
-	CHECK_OBJ_NOTNULL(v, VARNISH_MAGIC);
+	CHECK_OBJ_NOTNULL(v, VINYL_MAGIC);
 	vtc_logclose(v->vl);
 	free(v->name);
 	free(v->jail);
@@ -406,7 +406,7 @@ vinyl_delete(struct vinyl *v)
 }
 
 /**********************************************************************
- * Varnish listener
+ * Vinyl listener
  */
 
 static void *
@@ -414,12 +414,12 @@ vinyl_thread(void *priv)
 {
 	struct vinyl *v;
 
-	CAST_OBJ_NOTNULL(v, priv, VARNISH_MAGIC);
+	CAST_OBJ_NOTNULL(v, priv, VINYL_MAGIC);
 	return (vtc_record(v->vl, v->fds[0], NULL));
 }
 
 /**********************************************************************
- * Launch a Varnish
+ * Launch a Vinyl
  */
 
 static void
@@ -584,9 +584,9 @@ vinyl_launch(struct vinyl *v)
 	PTOK(pthread_create(&v->tp_vsl, NULL, vinyllog_thread, v));
 }
 
-#define VARNISH_LAUNCH(v)				\
+#define VINYL_LAUNCH(v)				\
 	do {						\
-		CHECK_OBJ_NOTNULL(v, VARNISH_MAGIC);	\
+		CHECK_OBJ_NOTNULL(v, VINYL_MAGIC);	\
 		if (v->cli_fd < 0)			\
 			vinyl_launch(v);		\
 		if (vtc_error)				\
@@ -594,7 +594,7 @@ vinyl_launch(struct vinyl *v)
 	} while (0)
 
 /**********************************************************************
- * Start a Varnish
+ * Start a Vinyl
  */
 
 static void
@@ -663,7 +663,7 @@ vinyl_start(struct vinyl *v)
 	enum VCLI_status_e u;
 	char *resp = NULL;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	vtc_log(v->vl, 2, "Start");
 	u = vinyl_ask_cli(v, "start", &resp);
 	if (vtc_error)
@@ -695,14 +695,14 @@ vinyl_start(struct vinyl *v)
 }
 
 /**********************************************************************
- * Stop a Varnish
+ * Stop a Vinyl
  */
 
 static void
 vinyl_stop(struct vinyl *v)
 {
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	vtc_log(v->vl, 2, "Stop");
 	(void)vinyl_ask_cli(v, "stop", NULL);
 	wait_stopped(v);
@@ -737,7 +737,7 @@ vinyl_cleanup(struct vinyl *v)
 }
 
 /**********************************************************************
- * Wait for a Varnish
+ * Wait for a Vinyl
  */
 
 static void
@@ -775,7 +775,7 @@ vinyl_cli_json(struct vinyl *v, const char *cli)
 	const char *errptr;
 	struct vjsn *vj;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	u = vinyl_ask_cli(v, cli, &resp);
 	vtc_log(v->vl, 2, "CLI %03u <%s>", u, cli);
 	if (u != CLIS_OK)
@@ -802,7 +802,7 @@ vinyl_cli(struct vinyl *v, const char *cli, unsigned exp, const char *re,
 	char *resp = NULL, errbuf[VRE_ERROR_LEN];
 	int err, erroff;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	if (re != NULL) {
 		vre = VRE_compile(re, 0, &err, &erroff, 1);
 		if (vre == NULL) {
@@ -847,7 +847,7 @@ vinyl_vcl(struct vinyl *v, const char *vcl, int fail, char **resp)
 	struct vsb *vsb;
 	enum VCLI_status_e u;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	vsb = VSB_new_auto();
 	AN(vsb);
 
@@ -883,7 +883,7 @@ vinyl_vclbackend(struct vinyl *v, const char *vcl)
 	struct vsb *vsb, *vsb2;
 	enum VCLI_status_e u;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	vsb = VSB_new_auto();
 	AN(vsb);
 
@@ -953,7 +953,7 @@ vinyl_vsc(struct vinyl *v, const char *arg)
 {
 	struct dump_priv dp;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	memset(&dp, 0, sizeof dp);
 	dp.v = v;
 	dp.arg = arg;
@@ -1027,7 +1027,7 @@ vinyl_expect(struct vinyl *v, char * const *av)
 	uintmax_t u;
 	char *l, *p;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	ZERO_OBJ(&sp, sizeof sp);
 	l = av[0];
 	not = (*l == '!');
@@ -1096,7 +1096,7 @@ vsl_catchup(struct vinyl *v)
 {
 	int vsl_idle;
 
-	VARNISH_LAUNCH(v);
+	VINYL_LAUNCH(v);
 	vsl_idle = v->vsl_idle;
 	while (!vtc_error && vsl_idle == v->vsl_idle)
 		VTIM_sleep(0.1);
@@ -1106,7 +1106,7 @@ vsl_catchup(struct vinyl *v)
  *
  * Define and interact with vinyl instances.
  *
- * To define a Varnish server, you'll use this syntax::
+ * To define a ``vinyld``, you'll use this syntax::
  *
  *	vinyl vNAME [-arg STRING] [-vcl STRING] [-vcl+backend STRING]
  *		[-errvcl STRING STRING] [-jail STRING] [-proto PROXY]
@@ -1124,7 +1124,7 @@ vsl_catchup(struct vinyl *v)
  * Arguments:
  *
  * vNAME
- *	   Identify the Varnish server with a string, it must starts with 'v'.
+ *	   Identify the ``vinyld`` server with a string, it must starts with 'v'.
  *
  * \-arg STRING
  *         Pass an argument to vinyld, for example "-h simple_list".
@@ -1137,7 +1137,7 @@ vsl_catchup(struct vinyl *v)
  *         using the ``-D`` option for vinyltest.
  *
  * \-vcl STRING
- *         Specify the VCL to load on this Varnish instance. You'll probably
+ *         Specify the VCL to load on this ``vinyld`` instance. You'll probably
  *         want to use multi-lines strings for this ({...}).
  *
  * \-vcl+backend STRING
@@ -1145,17 +1145,17 @@ vsl_catchup(struct vinyl *v)
  *         known backends (ie. already defined).
  *
  * \-errvcl STRING1 STRING2
- *         Load STRING2 as VCL, expecting it to fail, and Varnish to send an
+ *         Load STRING2 as VCL, expecting it to fail, and ``vinyld`` to send an
  *         error string matching STRING1
  *
  * \-jail STRING
  *         Look at ``man vinyld`` (-j) for more information.
  *
  * \-proto PROXY
- *         Have Varnish use the proxy protocol. Note that PROXY here is the
+ *         Have ``vinyld`` use the proxy protocol. Note that PROXY here is the
  *         actual string.
  *
- * You can decide to start the Varnish instance and/or wait for several events::
+ * You can decide to start the ``vinyld`` instance and/or wait for several events::
  *
  *         vinyl vNAME [-start] [-wait] [-wait-running] [-wait-stopped]
  *
@@ -1178,19 +1178,19 @@ vsl_catchup(struct vinyl *v)
  *         Wait for that instance to terminate.
  *
  * \-wait-running
- *         Wait for the Varnish child process to be started.
+ *         Wait for the ``vinyld`` child process to be started.
  *
  * \-wait-stopped
- *         Wait for the Varnish child process to stop.
+ *         Wait for the ``vinyld`` child process to stop.
  *
  * \-cleanup
- *         Once Varnish is stopped, clean everything after it. This is only used
+ *         Once ``vinyld`` is stopped, clean everything after it. This is only used
  *         in very few tests and you should never need it.
  *
  * \-expectexit NUMBER
  *         Expect vinyld to exit(3) with this value
  *
- * Once Varnish is started, you can talk to it (as you would through
+ * Once ``vinyld`` is started, you can talk to it (as you would through
  * ``vinyladm``) with these additional switches::
  *
  *         vinyl vNAME [-cli STRING] [-cliok STRING] [-clierr STRING]
@@ -1417,15 +1417,5 @@ cmd_vinyl(CMD_ARGS)
 		vinyl_fatal(v, "Unknown %s argument: %s", me, *av);
 	}
 }
-
-#ifdef VTEST_WITH_VTC_VARNISH
-
-void
-cmd_varnish(CMD_ARGS)
-{
-	cmd_vinyl(av, priv, vl);
-}
-
-#endif
 
 #endif /* VTEST_WITH_VTC_VINYL */

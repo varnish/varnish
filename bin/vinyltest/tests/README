@@ -1,5 +1,5 @@
-Test-scripts for varnishtest
-============================
+Test-scripts for vinyltest
+==========================
 
 Naming scheme
 -------------
@@ -13,7 +13,7 @@ Naming scheme
 
 		[id]%05d.vtc
 
-	id ~ ^a		--> varnishtest(1) tests
+	id ~ ^a		--> vinyltest(1) tests
 	id ~ ^a02	--> HTTP2
 	id ~ ^b		--> Basic functionality tests
 	id ~ ^c		--> Complex functionality tests

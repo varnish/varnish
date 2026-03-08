@@ -18,14 +18,14 @@ shell -err -expect {Error: Could not open pid-file} {
 	vinyld -P /dev/tty -b None -a :0
 }
 
-shell -err -expect {Error: Varnishd is already running} {
+shell -err -expect {Error: vinyld is already running} {
 	vinyld -P ${v1_name}/vinyld.pid -b None -a :0
 }
 
-shell -err -expect {Error: Varnishd is already running} {
+shell -err -expect {Error: vinyld is already running} {
 	vinyld -b None -a:0 -n ${tmpdir}/v1 -F
 }
 
-shell -err -expect {Error: Varnishd is already running} {
-	VARNISH_DEFAULT_N="${tmpdir}/v1" vinyld -b None -a:0 -F
+shell -err -expect {Error: vinyld is already running} {
+	VINYL_DEFAULT_N="${tmpdir}/v1" vinyld -b None -a:0 -F
 }

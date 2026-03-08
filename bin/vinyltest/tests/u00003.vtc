@@ -118,10 +118,10 @@ shell -err -match "Usage: .*vinylncsa <options>" \
 shell -match {^${localhost} 100
 ${localhost} 0$} \
 	{vinylncsa -n ${v1_name} -b -d -F "%{Host}i %b"}
-# -b with VARNISH_DEFAULT_N
+# -b with VINYL_DEFAULT_N
 shell -match {^${localhost} 100
 ${localhost} 0$} \
-	{VARNISH_DEFAULT_N="${v1_name}" vinylncsa -b -d -F "%{Host}i %b"}
+	{VINYL_DEFAULT_N="${v1_name}" vinylncsa -b -d -F "%{Host}i %b"}
 # -c
 shell -match {^${localhost} 100
 ${localhost} \d+

@@ -156,7 +156,7 @@ usage(void)
 	printf(FMT, "-M address:port", "Reverse CLI destination");
 	printf(FMT, "", "Can be specified multiple times.");
 	printf(FMT, "-P file", "PID file");
-	printf(FMT, "-i identity", "Identity of varnish instance");
+	printf(FMT, "-i identity", "Identity of Vinyl Cache instance");
 	printf(FMT, "-I clifile", "Initialization CLI commands");
 	printf(FMT, "-E extension", "Load extension");
 
@@ -610,7 +610,7 @@ create_pid_file(pid_t *ppid, const char *fmt, ...)
 	pfh = VPF_Open(VSB_data(vsb), 0644, ppid);
 	if (pfh == NULL && errno == EEXIST)
 		ARGV_ERR(
-		    "Varnishd is already running (pid=%jd) (pidfile=%s)\n",
+		    "vinyld is already running (pid=%jd) (pidfile=%s)\n",
 		    (intmax_t)*ppid, VSB_data(vsb));
 	if (pfh == NULL)
 		ARGV_ERR("Could not open pid-file (%s): %s\n",
@@ -632,7 +632,7 @@ main(int argc, char * const *argv)
 	const char *i_arg = NULL;
 	const char *j_arg = NULL;
 	const char *h_arg = "critbit";
-	const char *n_arg = getenv("VARNISH_DEFAULT_N");
+	const char *n_arg = getenv("VINYL_DEFAULT_N");
 	const char *S_arg = NULL;
 	const char *s_arg = "default,100m";
 	const char *W_arg = NULL;

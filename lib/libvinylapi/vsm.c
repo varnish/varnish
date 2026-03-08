@@ -795,7 +795,7 @@ VSM_Attach(struct vsm *vd, int progress)
 		t0 = VTIM_mono() + vd->patience;
 
 	if (vd->wdname == NULL) {
-		def = getenv("VARNISH_DEFAULT_N");
+		def = getenv("VINYL_DEFAULT_N");
 		if (def == NULL)
 			def = ""; /* Use default (hostname) */
 		i = VSM_Arg(vd, 'n', def);

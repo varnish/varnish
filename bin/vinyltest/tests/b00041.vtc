@@ -94,4 +94,4 @@ shell -expect {Tested} \
 
 shell "vinyladm -n ${v1_name} help > /dev/null"
 
-shell {VARNISH_DEFAULT_N="${v1_name}" vinyladm help > /dev/null}
+shell {VINYL_DEFAULT_N="${v1_name}" vinyladm help > /dev/null}

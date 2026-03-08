@@ -127,19 +127,19 @@
 	:group: wrk
 	:oneliner:	Cache hits for pass.
 
-	Count of hits for pass. A cache hit for pass indicates that Varnish
-	is going to pass the request to the backend and this decision has
-	been cached in it self. This counts how many times the cached
-	decision is being used.
+	Count of hits for pass. A cache hit for pass indicates that
+	Vinyl Cache is going to pass the request to the backend and
+	this decision has been cached in it self. This counts how
+	many times the cached decision is being used.
 
 .. vinyl_vsc:: cache_hitmiss
 	:group: wrk
 	:oneliner:	Cache hits for miss.
 
-	Count of hits for miss. A cache hit for miss indicates that Varnish
-	is going to proceed as for a cache miss without request coalescing,
-	and this decision has been cached. This counts how many times the
-	cached decision is being used.
+	Count of hits for miss. A cache hit for miss indicates that
+	Vinyl Cache is going to proceed as for a cache miss without
+	request coalescing, and this decision has been cached. This
+	counts how many times the cached decision is being used.
 
 .. vinyl_vsc:: cache_miss
 	:group: wrk
@@ -1003,9 +1003,9 @@
 .. vinyl_vsc:: n_test_gunzip
 	:oneliner:	Test gunzip operations
 
-	Those operations occur when Varnish receives a compressed object
-	from a backend. They are done to verify the gzip stream while it's
-	inserted in storage.
+	Those operations occur when Vinyl Cache receives a compressed
+	object from a backend. They are done to verify the gzip
+	stream while it's inserted in storage.
 
 
 .. vinyl_vsc:: http1_iovs_flush

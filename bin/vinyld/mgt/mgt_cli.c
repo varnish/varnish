@@ -81,7 +81,7 @@ mcf_banner(struct cli *cli, const char *const *av, void *priv)
 	(void)av;
 	(void)priv;
 	VCLI_Out(cli, "-----------------------------\n");
-	VCLI_Out(cli, "Varnish Cache CLI 1.0\n");
+	VCLI_Out(cli, "Vinyl Cache CLI 1.0\n");
 	VCLI_Out(cli, "-----------------------------\n");
 	VCLI_Out(cli, "%s\n", VSB_data(vident) + 1);
 	VCLI_Out(cli, "%s\n", VCS_String("V"));

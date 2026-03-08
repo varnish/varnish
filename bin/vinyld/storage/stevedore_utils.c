@@ -99,7 +99,7 @@ STV_GetFile(const char *fn, int *fdp, const char **fnp, const char *ctx)
 		    ctx, fn);
 
 	if (S_ISDIR(st.st_mode)) {
-		bprintf(buf, "%s/varnish.XXXXXX", fn);
+		bprintf(buf, "%s/vinyl.XXXXXX", fn);
 		fd = mkstemp(buf);
 		if (fd < 0)
 			ARGV_ERR("(%s) \"%s\" mkstemp(%s) failed (%s)\n",

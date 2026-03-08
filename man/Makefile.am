@@ -1,8 +1,8 @@
 #
 
 dist_man_MANS = \
-	varnish-cli.7 \
-	varnish-counters.7 \
+	vinyl-cli.7 \
+	vinyl-counters.7 \
 	vcl.7 \
 	vcl-backend.7 \
 	vcl-probe.7 \
@@ -16,7 +16,7 @@ dist_man_MANS = \
 	vinyllog.1 \
 	vinylncsa.1 \
 	vinylstat.1 \
-	varnishtest.1 \
+	vinyltest.1 \
 	vtc.7 \
 	vinyltop.1 \
 	vmod_cookie.3 \
@@ -41,11 +41,11 @@ BUILD_MAN = $(AM_V_GEN) $(RST2MAN) $(RST2ANY_FLAGS)
 #     to $(srcdir) are created for sphinx builds that don't support
 #     VPATH.
 
-varnish-cli.7: $(top_builddir)/doc/sphinx/reference/varnish-cli.rst \
+vinyl-cli.7: $(top_builddir)/doc/sphinx/reference/varnish-cli.rst \
 	$(top_builddir)/doc/sphinx/include/cli.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnish-cli.rst $@
 
-varnish-counters.7: $(top_builddir)/doc/sphinx/reference/varnish-counters.rst \
+vinyl-counters.7: $(top_builddir)/doc/sphinx/reference/varnish-counters.rst \
 	$(top_builddir)/doc/sphinx/include/counters.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnish-counters.rst $@
 
@@ -101,7 +101,7 @@ vinylstat.1: $(top_builddir)/doc/sphinx/reference/varnishstat.rst \
 	$(top_builddir)/doc/sphinx/include/vinylstat_bindings.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishstat.rst $@
 
-varnishtest.1: $(top_builddir)/doc/sphinx/reference/varnishtest.rst
+vinyltest.1: $(top_builddir)/doc/sphinx/reference/varnishtest.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishtest.rst $@
 
 vtc.7: $(top_builddir)/doc/sphinx/reference/vtc.rst \

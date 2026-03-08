@@ -239,7 +239,7 @@ do_list_cb(void *priv, const struct VSC_point * const pt)
 static void
 list_fields(struct vsm *vsm, struct vsc *vsc)
 {
-	printf("Varnishstat -f option fields:\n");
+	printf("Vinylstat -f option fields:\n");
 	printf("Field name                     Description\n");
 	printf("----------                     -----------\n");
 
