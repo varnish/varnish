@@ -86,7 +86,7 @@ enum e_frag {
 	F_O,			/* %O Bytes sent */
 	F_tstart,		/* Time start */
 	F_tend,			/* Time end */
-	F_ttfb,			/* %{Varnish:time_firstbyte}x */
+	F_ttfb,			/* %{Vinyl:time_firstbyte}x */
 	F_host,			/* Host header */
 	F_auth,			/* Authorization header */
 	F__MAX,
@@ -674,23 +674,23 @@ parse_x_format(char *buf)
 	long lval;
 	int slt;
 
-	if (!strcmp(buf, "Varnish:time_firstbyte")) {
+	if (!strcmp(buf, "Vinyl:time_firstbyte")) {
 		addf_fragment(&CTX.frag[F_ttfb], CTX.missing_int);
 		return;
 	}
-	if (!strcmp(buf, "Varnish:hitmiss")) {
+	if (!strcmp(buf, "Vinyl:hitmiss")) {
 		addf_strptr(&CTX.hitmiss);
 		return;
 	}
-	if (!strcmp(buf, "Varnish:handling")) {
+	if (!strcmp(buf, "Vinyl:handling")) {
 		addf_strptr(&CTX.handling);
 		return;
 	}
-	if (!strcmp(buf, "Varnish:side")) {
+	if (!strcmp(buf, "Vinyl:side")) {
 		addf_strptr(&CTX.side);
 		return;
 	}
-	if (!strcmp(buf, "Varnish:vxid")) {
+	if (!strcmp(buf, "Vinyl:vxid")) {
 		addf_int64(&CTX.vxid);
 		return;
 	}
@@ -743,7 +743,7 @@ parse_x_format(char *buf)
 		addf_vsl((enum VSL_tag_e)slt, lval, r);
 		return;
 	}
-	if (!strcmp(buf, "Varnish:default_format")) {
+	if (!strcmp(buf, "Vinyl:default_format")) {
 		parse_format(FORMAT);
 		return;
 	}

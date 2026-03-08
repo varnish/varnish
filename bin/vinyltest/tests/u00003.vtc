@@ -143,9 +143,9 @@ shell -match {^100 \d+ HTTP/1.1 (?:\d+.\d+.\d+.\d+|[a-f0-9:]+) \d+ - - GET 0 \d+
 shell -match {^\d+.\d{6} miss miss c 1001 quuz
 \d+.\d{6} miss synth c 1003\s
 \d+.\d{6} miss pipe c 1005\s$} \
-	{vinylncsa -n ${v1_name} -d -F "%{Varnish:time_firstbyte}x \
-%{Varnish:hitmiss}x %{Varnish:handling}x %{Varnish:side}x \
-%{Varnish:vxid}x %{VCL_Log:quux}x"}
+	{vinylncsa -n ${v1_name} -d -F "%{Vinyl:time_firstbyte}x \
+%{Vinyl:hitmiss}x %{Vinyl:handling}x %{Vinyl:side}x \
+%{Vinyl:vxid}x %{VCL_Log:quux}x"}
 
 # %{VSL:..}x
 shell -match {^req (\d+) rxreq \1 \d{10}\.\d{6} (\d+\.\d{6}) \d+\.\d{6} \2 - -
@@ -192,7 +192,7 @@ shell {
 		vinylncsa -n ${v1_name} -d -k 1 -F "%{User-Agent}i"
 	) >def_then_ua.txt
 	vinylncsa -n ${v1_name} -d -k 1 >def_with_ua.txt \
-		-F "%{Varnish:default_format}x\n%{User-Agent}i"
+		-F "%{Vinyl:default_format}x\n%{User-Agent}i"
 	diff -u def_then_ua.txt def_with_ua.txt
 }
 
