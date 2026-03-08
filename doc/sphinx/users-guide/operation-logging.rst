@@ -79,4 +79,4 @@ want to know are:
 
 .. XXX:Maybe a couple of sample commands here? benc
 
-For more information on this topic please see :ref:`varnishlog(1)`.
+For more information on this topic please see :ref:`vinyllog(1)`.

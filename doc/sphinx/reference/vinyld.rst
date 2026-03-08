@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishd(1):
+.. _vinyld(1):
 
 ========
 varnishd
@@ -540,7 +540,7 @@ Management Interface
 If the -T option was specified, `varnishd` will offer a command-line
 management interface on the specified address and port.  The
 recommended way of connecting to the command-line management interface
-is through :ref:`varnishadm(1)`.
+is through :ref:`vinyladm(1)`.
 
 The commands available are documented in :ref:`varnish-cli(7)`.
 
@@ -580,7 +580,7 @@ RUN TIME PARAMETERS
 ===================
 
 Runtime parameters can either be set during startup with the ``-p`` command
-line option for ``varnishd(1)`` or through the CLI using the ``param.set`` or
+line option for ``vinyld(1)`` or through the CLI using the ``param.set`` or
 ``param.reset`` commands. They can be locked during startup with the ``-r``
 command line option.
 
@@ -714,11 +714,11 @@ The `varnishd` master process may also OR its exit code
 SEE ALSO
 ========
 
-* :ref:`varnishlog(1)`
-* :ref:`varnishhist(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
-* :ref:`varnishtop(1)`
+* :ref:`vinyllog(1)`
+* :ref:`vinylhist(1)`
+* :ref:`vinylncsa(1)`
+* :ref:`vinylstat(1)`
+* :ref:`vinyltop(1)`
 * :ref:`varnish-cli(7)`
 * :ref:`vcl(7)`
 

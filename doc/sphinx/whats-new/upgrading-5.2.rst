@@ -102,7 +102,7 @@ If the ``-i`` option is not set in the invocation of ``varnishd``,
 then ``server.identity`` is set to the host name (as returned by
 ``gethostname(3)``). Previously, ``server.identity`` defaulted to the
 value of the ``-n`` option (or the default instance name if ``-n`` was
-not set). See :ref:`varnishd(1)`.
+not set). See :ref:`vinyld(1)`.
 
 ``bereq.is_bgfetch``
 --------------------
@@ -143,7 +143,7 @@ ban expression is attempted against an unset field, see
 Other changes
 =============
 
-* ``varnishd(1)``:
+* ``vinyld(1)``:
 
   * The total size of the shared memory space for logs and counters
     no longer needs to be configured explicitly and therefore the
@@ -165,7 +165,7 @@ Other changes
 
   * The ``-f`` option for a VCL source file now honors the
     ``vcl_path`` parameter if a relative file name is used, see
-    :ref:`varnishd(1)` and :ref:`ref_param_vcl_path`.
+    :ref:`vinyld(1)` and :ref:`ref_param_vcl_path`.
 
   * The ``-a`` option can now take a name, for example ``-a
     admin=127.0.0.1:88`` to identify an address used for
@@ -174,17 +174,17 @@ Other changes
     and so forth). Endpoint names appear in the log output, as noted
     below, and may become accessible in VCL in the future.
 
-* ``varnishstat(1)``:
+* ``vinylstat(1)``:
 
   * In curses mode, the top two lines showing uptimes for the
     management and child processes show the text ``Not Running`` if
     one or both of the processes are down.
 
   * The interpretation of multiple ``-f`` options in the command line
-    has changed slightly, see :ref:`varnishstat(1)`.
+    has changed slightly, see :ref:`vinylstat(1)`.
 
   * The ``type`` and ``ident`` fields have been removed from the XML
-    and JSON output formats, see :ref:`varnishstat(1)`.
+    and JSON output formats, see :ref:`vinylstat(1)`.
 
   * The ``MAIN.s_req`` statistic has been removed, as it was identical
     to ``MAIN.client_req``.
@@ -194,7 +194,7 @@ Other changes
     the internal queue is full. See :ref:`varnish-counters(7)` and
     :ref:`ref_param_thread_queue_limit`.
 
-* ``varnishlog(1)``:
+* ``vinyllog(1)``:
 
   * The ``Hit``, ``HitMiss`` and ``HitPass`` log records grew an
     additional field with the remaining TTL of the object at the time
@@ -220,7 +220,7 @@ Other changes
     changed to include the VCL configuration name. See :ref:`vsl(7)`
     and :ref:`ref_param_vsl_mask`.
 
-* ``varnishtest(1)`` and ``vtc(7)``:
+* ``vinyltest(1)`` and ``vtc(7)``:
 
   * When varnishtest is invoked with ``-L`` or ``-l``, Varnish
     instances started by a test do not clean up their copies of VMOD
@@ -230,14 +230,14 @@ Other changes
   * Added the feature switch ``ignore_unknown_macro`` for test cases,
     see :ref:`vtc(7)`.
 
-* ``varnishncsa(1)``
+* ``vinylncsa(1)``
 
   * Field specifiers (such as the 1 in ``Hit[1]``) are now limited to
-    to 255, see :ref:`varnishncsa(1)`.
+    to 255, see :ref:`vinylncsa(1)`.
 
 * The ``-N`` command-line option, which was previously available for
-  ``varnishlog(1)``, ``varnishstat(1)``, ``varnishncsa(1)`` and
-  ``varnishhist(1)``, is not compatible with the changed internal
+  ``vinyllog(1)``, ``vinylstat(1)``, ``vinylncsa(1)`` and
+  ``vinylhist(1)``, is not compatible with the changed internal
   logging API, and has been retired.
 
 * Changes for developers:

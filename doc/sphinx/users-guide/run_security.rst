@@ -52,7 +52,7 @@ CLI interface access
 
 The command line interface can be accessed in three ways.
 
-:ref:`varnishd(1)` can be told to listen and offer CLI connections on
+:ref:`vinyld(1)` can be told to listen and offer CLI connections on
 a TCP socket. You can bind the socket to pretty much anything the
 kernel will accept::
 
@@ -62,7 +62,7 @@ kernel will accept::
 	-T '[fe80::1]:8082'
 
 The default is ``-T localhost:0`` which will pick a random port
-number, which :ref:`varnishadm(1)` can learn from the shared memory.
+number, which :ref:`vinyladm(1)` can learn from the shared memory.
 
 By using a ``localhost`` address, you restrict CLI access to the local
 machine.
@@ -80,11 +80,11 @@ and give remote users access via a secure connection to the local
 machine, using ssh/VPN or similar.
 
 If you use `ssh(1)` you can restrict which commands each user can
-execute to just :ref:`varnishadm(1)`, or even use a wrapper scripts
-around :ref:`varnishadm(1)` to allow specific CLI commands.
+execute to just :ref:`vinyladm(1)`, or even use a wrapper scripts
+around :ref:`vinyladm(1)` to allow specific CLI commands.
 
-It is also possible to configure :ref:`varnishd(1)` for "reverse
-mode", using the ``-M`` argument.  In that case :ref:`varnishd(1)`
+It is also possible to configure :ref:`vinyld(1)` for "reverse
+mode", using the ``-M`` argument.  In that case :ref:`vinyld(1)`
 will attempt to open a TCP connection to the specified address, and
 initiate a CLI connection to your central Varnish management facility.
 
@@ -108,13 +108,13 @@ By default the CLI interface is protected with a simple, yet powerful
 
 The way ``-S``\ /PSK works is really simple: During startup a file is
 created with a random content and the file is only accessible to the
-user who started :ref:`varnishd(1)` (or the superuser).
+user who started :ref:`vinyld(1)` (or the superuser).
 
 To authenticate and use a CLI connection, you need to know the
 contents of that file, in order to answer the cryptographic challenge
-:ref:`varnishd(1)` issues, see :ref:`ref_psk_auth`.
+:ref:`vinyld(1)` issues, see :ref:`ref_psk_auth`.
 
-:ref:`varnishadm(1)` uses all of this to restrict access, it will only
+:ref:`vinyladm(1)` uses all of this to restrict access, it will only
 function, provided it can read the secret file.
 
 If you want to allow other users, local or remote, to be able to
@@ -125,17 +125,17 @@ A good way to create the secret file is::
 
 	dd if=/dev/random of=/etc/varnish_secret count=1
 
-When you start :ref:`varnishd(1)`, you specify the filename with '-S',
-and it goes without saying that the :ref:`varnishd(1)` master process
+When you start :ref:`vinyld(1)`, you specify the filename with '-S',
+and it goes without saying that the :ref:`vinyld(1)` master process
 needs to be able to read the file too.
 
 You can change the contents of the secret file while
-:ref:`varnishd(1)` runs, it is read every time a CLI connection is
+:ref:`vinyld(1)` runs, it is read every time a CLI connection is
 authenticated.
 
-On the local system, :ref:`varnishadm(1)` can retrieve the filename
+On the local system, :ref:`vinyladm(1)` can retrieve the filename
 from shared memory, but on remote systems, you need to give
-:ref:`varnishadm(1)` a copy of the secret file, with the -S argument.
+:ref:`vinyladm(1)` a copy of the secret file, with the -S argument.
 
 If you want to disable ``-S``\ /PSK authentication, use an ``-S none``
 argument to varnishd::
@@ -186,7 +186,7 @@ and operating system, it will not protect your HTTP service.
 
 We do not currently have a way to restrict specific CLI commands to
 specific CLI connections. One way to get such an effect is to "wrap"
-all CLI access in pre-approved scripts which use :ref:`varnishadm(1)`
+all CLI access in pre-approved scripts which use :ref:`vinyladm(1)`
 to submit the sanitized CLI commands, and restrict a remote user to
 only those scripts, for instance using sshd(8)'s configuration.
 
@@ -200,9 +200,9 @@ Both of these mechanisms allow execution of arbitrary code and will
 thus allow a person to get access to the machine, with the
 privileges of the child process.
 
-If :ref:`varnishd(1)` is started as root/superuser, we sandbox the
+If :ref:`vinyld(1)` is started as root/superuser, we sandbox the
 child process, using whatever facilities are available on the
-operating system, but if :ref:`varnishd(1)` is not started as
+operating system, but if :ref:`vinyld(1)` is not started as
 root/superuser, this is not possible. No, don't ask me why you have to
 be superuser to lower the privilege of a child process...
 

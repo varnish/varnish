@@ -16,7 +16,7 @@ be smart and do the sensible thing.
 
 If you don't want Varnish tampering with the encoding you can disable
 compression all together by setting the parameter `http_gzip_support` to
-false. Please see man :ref:`varnishd(1)` for details.
+false. Please see man :ref:`vinyld(1)` for details.
 
 Default behaviour
 ~~~~~~~~~~~~~~~~~

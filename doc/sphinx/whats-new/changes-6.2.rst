@@ -126,7 +126,7 @@ The function :ref:`directors.lookup()` has been added to
 :ref:`vmod_directors(3)`, only for use in ``vcl_init`` or
 ``vcl_fini``.
 
-varnishlog(1), varnishncsa(1) and vsl(7)
+vinyllog(1), vinylncsa(1) and vsl(7)
 ========================================
 
 The performance of bundled log readers, including ``varnishlog`` and
@@ -140,13 +140,13 @@ the shared memory mapping.
 option for rate-limiting, to limit the number of log transactions read
 per unit time.  This can make it less likely for log reads to fall
 behind and fail with overrun errors under heavy loads. See
-:ref:`varnishlog(1)` and :ref:`varnishncsa(1)` for details.
+:ref:`vinyllog(1)` and :ref:`vinylncsa(1)` for details.
 
 Timing information is now uniformly reported in the log with
 microsecond precision.  This affects the tags ``ExpKill`` and
 ``ExpRearm`` (previously with nanosecond precision).
 
-varnishadm(1) and varnish-cli(7)
+vinyladm(1) and varnish-cli(7)
 ================================
 
 The output formats of the ``vcl.list`` and ``backend.list`` commands
@@ -173,7 +173,7 @@ the following commands (see :ref:`varnish-cli(7)`):
 The ``-j`` option was already available for ``backend.list``, ``ping``
 and ``help`` in previous versions.
 
-For automated parsing of CLI responses (:ref:`varnishadm(1)` output),
+For automated parsing of CLI responses (:ref:`vinyladm(1)` output),
 we recommend the use of JSON format.
 
 ``param.reset <param>``
@@ -204,20 +204,20 @@ whose keep parameter is greater than 3 hours, use this expression::
 
 See :ref:`vcl(7)` and :ref:`users-guide-purging` for details.
 
-varnishstat(1) and varnish-counters(7)
+vinylstat(1) and varnish-counters(7)
 ======================================
 
 Added the ``ws_*_overflow`` and ``client_resp_500`` counters to better
 diagnose workspace overflow issues, see :ref:`varnish-counters(7)`.
 
-In curses mode, :ref:`varnishstat(1)` now allows use of the ``+`` and
+In curses mode, :ref:`vinylstat(1)` now allows use of the ``+`` and
 ``-`` keys to increase or decrease the refresh rate of the curses
 window.
 
 varnishtest
 ===========
 
-When :ref:`varnishtest(1)` is invoked with either of the ``-L`` or
+When :ref:`vinyltest(1)` is invoked with either of the ``-L`` or
 ``-l`` options to retain the temporary directory after tests, the
 ``vcl_keep`` flag for the :ref:`ref_param_debug` parameter is switched
 on (see `Parameters`_ above). This means that C sources and shared
@@ -225,10 +225,10 @@ objects generated from VCL can also be inspected after a test. By
 default, the temporary directory is deleted after each test.
 
 Since around the time of the last release, we have begun the project
-`VTest`_, which is adapted from :ref:`varnishtest(1)`, but is made
+`VTest`_, which is adapted from :ref:`vinyltest(1)`, but is made
 available as a stand-alone program useful for testing various HTTP
 clients, servers and proxies (not just Varnish). But for the time
-being, we still use :ref:`varnishtest(1)` for our own testing.
+being, we still use :ref:`vinyltest(1)` for our own testing.
 
 .. _VTest: https://github.com/vtest/VTest
 

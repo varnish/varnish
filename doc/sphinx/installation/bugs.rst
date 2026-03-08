@@ -97,7 +97,7 @@ general forms:
 ..  (TODO: in the ws-size note above, mention which params to tweak)
 
 In your syslog it may all be joined into one single line, but if you
-can reproduce the crash, do so while running :ref:`varnishd(1)` manually:
+can reproduce the crash, do so while running :ref:`vinyld(1)` manually:
 
 	``varnishd -d <your other arguments> |& tee /tmp/_catch_bug``
 
@@ -132,8 +132,8 @@ If one or more threads are spinning, use ``strace`` or ``ktrace`` or ``truss``
 the Varnish process issues. Be aware that this may generate a lot
 of very repetitive data, usually one second worth of data is more than enough.
 
-Also, run :ref:`varnishlog(1)` for a second, and collect the output
-for us, and if :ref:`varnishstat(1)` shows any activity, capture that
+Also, run :ref:`vinyllog(1)` for a second, and collect the output
+for us, and if :ref:`vinylstat(1)` shows any activity, capture that
 also.
 
 When you have done this, kill the Varnish *child* process, and let
@@ -147,7 +147,7 @@ Varnish does something wrong
 ============================
 
 These are the easy bugs: usually all we need from you is the relevant
-transactions recorded with :ref:`varnishlog(1)` and your explanation
+transactions recorded with :ref:`vinyllog(1)` and your explanation
 of what is wrong about what Varnish does.
 
 Be aware, that often Varnish does exactly what you asked it to, rather

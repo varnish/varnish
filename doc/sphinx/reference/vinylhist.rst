@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishhist(1):
+.. _vinylhist(1):
 
 ===========
 varnishhist
@@ -26,7 +26,7 @@ varnishhist |synopsis|
 DESCRIPTION
 ===========
 
-The varnishhist utility reads varnishd(1) shared memory logs and
+The varnishhist utility reads vinyld(1) shared memory logs and
 presents a continuously updated histogram showing the distribution
 of the last N requests by their processing.  The value of N and the
 vertical scale are displayed in the top left corner.  The horizontal
@@ -40,11 +40,11 @@ The following options are available:
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
-* :ref:`varnishlog(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
-* :ref:`varnishtop(1)`
+* :ref:`vinyld(1)`
+* :ref:`vinyllog(1)`
+* :ref:`vinylncsa(1)`
+* :ref:`vinylstat(1)`
+* :ref:`vinyltop(1)`
 * :ref:`vsl(7)`
 
 HISTORY

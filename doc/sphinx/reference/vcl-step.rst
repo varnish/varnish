@@ -139,7 +139,7 @@ Common actions for the backend side
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`
 
 COPYRIGHT

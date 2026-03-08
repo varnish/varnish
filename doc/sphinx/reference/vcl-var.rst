@@ -162,7 +162,7 @@ set to that value if non-negative or 0 otherwise.
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`
 
 HISTORY

@@ -41,13 +41,13 @@ BUILD_MAN = $(AM_V_GEN) $(RST2MAN) $(RST2ANY_FLAGS)
 #     to $(srcdir) are created for sphinx builds that don't support
 #     VPATH.
 
-vinyl-cli.7: $(top_builddir)/doc/sphinx/reference/varnish-cli.rst \
+vinyl-cli.7: $(top_builddir)/doc/sphinx/reference/vinyl-cli.rst \
 	$(top_builddir)/doc/sphinx/include/cli.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnish-cli.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyl-cli.rst $@
 
-vinyl-counters.7: $(top_builddir)/doc/sphinx/reference/varnish-counters.rst \
+vinyl-counters.7: $(top_builddir)/doc/sphinx/reference/vinyl-counters.rst \
 	$(top_builddir)/doc/sphinx/include/counters.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnish-counters.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyl-counters.rst $@
 
 vcl.7: $(top_builddir)/doc/sphinx/reference/vcl.rst \
 	$(top_builddir)/doc/sphinx/reference/vcl_var.rst \
@@ -74,51 +74,51 @@ vsl.7: $(top_builddir)/doc/sphinx/reference/vsl.rst \
 vsl-query.7: $(top_builddir)/doc/sphinx/reference/vsl-query.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vsl-query.rst $@
 
-vinyladm.1: $(top_builddir)/doc/sphinx/reference/varnishadm.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishadm.rst $@
+vinyladm.1: $(top_builddir)/doc/sphinx/reference/vinyladm.rst
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyladm.rst $@
 
 vinyld.1: \
-	$(top_builddir)/doc/sphinx/reference/varnishd.rst \
+	$(top_builddir)/doc/sphinx/reference/vinyld.rst \
 	$(top_builddir)/doc/sphinx/include/params.rst \
 	$(top_builddir)/doc/sphinx/include/options.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishd.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyld.rst $@
 
 vinylncsa.1: \
-	$(top_builddir)/doc/sphinx/reference/varnishncsa.rst \
+	$(top_builddir)/doc/sphinx/reference/vinylncsa.rst \
 	$(top_builddir)/doc/sphinx/include/vinylncsa_options.rst \
 	$(top_builddir)/doc/sphinx/include/vinylncsa_synopsis.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishncsa.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinylncsa.rst $@
 
 vinyllog.1: \
-	$(top_builddir)/doc/sphinx/reference/varnishlog.rst \
+	$(top_builddir)/doc/sphinx/reference/vinyllog.rst \
 	$(top_builddir)/doc/sphinx/include/vinyllog_options.rst \
 	$(top_builddir)/doc/sphinx/include/vinyllog_synopsis.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishlog.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyllog.rst $@
 
-vinylstat.1: $(top_builddir)/doc/sphinx/reference/varnishstat.rst \
+vinylstat.1: $(top_builddir)/doc/sphinx/reference/vinylstat.rst \
 	$(top_builddir)/doc/sphinx/include/vinylstat_options.rst \
 	$(top_builddir)/doc/sphinx/include/vinylstat_synopsis.rst \
 	$(top_builddir)/doc/sphinx/include/vinylstat_bindings.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishstat.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinylstat.rst $@
 
-vinyltest.1: $(top_builddir)/doc/sphinx/reference/varnishtest.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishtest.rst $@
+vinyltest.1: $(top_builddir)/doc/sphinx/reference/vinyltest.rst
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyltest.rst $@
 
 vtc.7: $(top_builddir)/doc/sphinx/reference/vtc.rst \
 	$(top_builddir)/doc/sphinx/include/vtc-syntax.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vtc.rst $@
 
 vinyltop.1: \
-	$(top_builddir)/doc/sphinx/reference/varnishtop.rst \
+	$(top_builddir)/doc/sphinx/reference/vinyltop.rst \
 	$(top_builddir)/doc/sphinx/include/vinyltop_options.rst \
 	$(top_builddir)/doc/sphinx/include/vinyltop_synopsis.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishtop.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinyltop.rst $@
 
 vinylhist.1: \
-	$(top_builddir)/doc/sphinx/reference/varnishhist.rst \
+	$(top_builddir)/doc/sphinx/reference/vinylhist.rst \
 	$(top_builddir)/doc/sphinx/include/vinylhist_options.rst \
 	$(top_builddir)/doc/sphinx/include/vinylhist_synopsis.rst
-	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishhist.rst $@
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/vinylhist.rst $@
 
 vmod_cookie.3: $(top_builddir)/vmod/vmod_cookie.man.rst
 	$(BUILD_MAN) $? $@

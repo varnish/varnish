@@ -130,7 +130,7 @@ This document has been written by Guillaume Quintard.
 SEE ALSO
 ========
 
-* :ref:`varnishtest(1)`
+* :ref:`vinyltest(1)`
 * :ref:`vmod_vtc(3)`
 
 COPYRIGHT

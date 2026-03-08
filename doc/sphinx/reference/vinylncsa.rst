@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishncsa(1):
+.. _vinylncsa(1):
 
 ===========
 varnishncsa
@@ -26,7 +26,7 @@ varnishncsa |synopsis|
 DESCRIPTION
 ===========
 
-The varnishncsa utility reads varnishd(1) shared memory logs and
+The varnishncsa utility reads vinyld(1) shared memory logs and
 presents them in the Apache / NCSA "combined" log format.
 
 Each log line produced is based on a single Request type transaction
@@ -296,9 +296,9 @@ times in VCL:
 SEE ALSO
 ========
 
-:ref:`varnishd(1)`
-:ref:`varnishlog(1)`
-:ref:`varnishstat(1)`
+:ref:`vinyld(1)`
+:ref:`vinyllog(1)`
+:ref:`vinylstat(1)`
 :ref:`vsl-query(7)`
 :ref:`vsl(7)`
 

@@ -515,7 +515,7 @@ req.trace
 	request, see :ref:`vsl(7)`.
 
 	Defaults to the setting of the ``feature trace`` parameter,
-	see :ref:`varnishd(1)`. Does not get reset by a rollback.
+	see :ref:`vinyld(1)`. Does not get reset by a rollback.
 
 
 .. _req.transport:
@@ -705,7 +705,7 @@ bereq.between_bytes_timeout
 
 	Default: ``.between_bytes_timeout`` attribute from the
 	:ref:`backend_definition`, which defaults to the
-	``between_bytes_timeout`` parameter, see :ref:`varnishd(1)`.
+	``between_bytes_timeout`` parameter, see :ref:`vinyld(1)`.
 
 	The time in seconds to wait between each received byte from the
 	backend.  Not available in pipe mode.
@@ -737,7 +737,7 @@ bereq.connect_timeout
 
 	Default: ``.connect_timeout`` attribute from the
 	:ref:`backend_definition`, which defaults to the
-	``connect_timeout`` parameter, see :ref:`varnishd(1)`.
+	``connect_timeout`` parameter, see :ref:`vinyld(1)`.
 
 	The time in seconds to wait for a backend connection to be
 	established.
@@ -771,7 +771,7 @@ bereq.first_byte_timeout
 
 	Default: ``.first_byte_timeout`` attribute from the
 	:ref:`backend_definition`, which defaults to the
-	``first_byte_timeout`` parameter, see :ref:`varnishd(1)`.
+	``first_byte_timeout`` parameter, see :ref:`vinyld(1)`.
 
 	The time in seconds to wait getting the first byte back
 	from the backend.  Not available in pipe mode.
@@ -943,7 +943,7 @@ bereq.task_deadline
 	Unsettable from: vcl_pipe
 
 	Deadline for pipe sessions, defaults ``0s``, which falls back to the
-	``pipe_task_deadline`` parameter, see :ref:`varnishd(1)`
+	``pipe_task_deadline`` parameter, see :ref:`vinyld(1)`
 
 
 .. _bereq.time:
@@ -1409,12 +1409,12 @@ beresp.transit_buffer
 
 	Writable from: vcl_backend_response
 
-	Default: ``transit_buffer`` parameter, see :ref:`varnishd(1)`.
+	Default: ``transit_buffer`` parameter, see :ref:`vinyld(1)`.
 
 	The maximum number of bytes the client can be ahead of the
 	backend during a streaming pass if ``beresp`` is
 	uncacheable. See also ``transit_buffer`` parameter
-	documentation in :ref:`varnishd(1)`.
+	documentation in :ref:`vinyld(1)`.
 
 
 .. _beresp.ttl:
@@ -2048,7 +2048,7 @@ sess.idle_send_timeout
 
 	Send timeout for individual pieces of data on client
 	connections, defaults to the ``idle_send_timeout`` parameter,
-	see :ref:`varnishd(1)`
+	see :ref:`vinyld(1)`
 
 
 .. _sess.send_timeout:
@@ -2064,7 +2064,7 @@ sess.send_timeout
 	Unsettable from: client
 
 	Total timeout for ordinary HTTP1 responses, defaults to the
-	``send_timeout`` parameter, see :ref:`varnishd(1)`
+	``send_timeout`` parameter, see :ref:`vinyld(1)`
 
 
 .. _sess.timeout_idle:
@@ -2080,7 +2080,7 @@ sess.timeout_idle
 	Unsettable from: client
 
 	Idle timeout for this session, defaults to the
-	``timeout_idle`` parameter, see :ref:`varnishd(1)`
+	``timeout_idle`` parameter, see :ref:`vinyld(1)`
 
 
 .. _sess.timeout_linger:
@@ -2096,7 +2096,7 @@ sess.timeout_linger
 	Unsettable from: client
 
 	Linger timeout for this session, defaults to the
-	``timeout_linger`` parameter, see :ref:`varnishd(1)`
+	``timeout_linger`` parameter, see :ref:`vinyld(1)`
 
 
 .. _sess.xid:

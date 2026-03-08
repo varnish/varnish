@@ -427,7 +427,7 @@ need to increase the varnishd parameter ``thread_pool_stack``.
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`
 * :ref:`vsl(7)`
 * :ref:`vmod_std(3)`

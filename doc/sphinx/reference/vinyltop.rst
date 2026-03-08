@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishtop(1):
+.. _vinyltop(1):
 
 ==========
 varnishtop
@@ -26,7 +26,7 @@ varnishtop |synopsis|
 DESCRIPTION
 ===========
 
-The varnishtop utility reads :ref:`varnishd(1)` shared memory logs and
+The varnishtop utility reads :ref:`vinyld(1)` shared memory logs and
 presents a continuously updated list of the most commonly occurring
 log entries.  With suitable filtering using the ``-I``, ``-i``, ``-X``
 and ``-x`` options, it can be used to display a ranking of requested
@@ -53,11 +53,11 @@ commonly used user agents::
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
-* :ref:`varnishhist(1)`
-* :ref:`varnishlog(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
+* :ref:`vinyld(1)`
+* :ref:`vinylhist(1)`
+* :ref:`vinyllog(1)`
+* :ref:`vinylncsa(1)`
+* :ref:`vinylstat(1)`
 
 HISTORY
 =======

@@ -105,7 +105,7 @@ vsl-query(7)
 ============
 
 The syntax for VSL queries, mainly available via the ``-q`` option with
-:ref:`varnishlog(1)` and similar tools, has slightly changed. Previously
+:ref:`vinyllog(1)` and similar tools, has slightly changed. Previously
 and end of line in a query would be treated as a simple token separator
 so in a script you could for example write this::
 
@@ -166,7 +166,7 @@ This way when you later revisit a complex query, comments may help you
 maintain an understanding of each individual query. This can become even
 more convenient when the query is stored in a file.
 
-varnishlog(1), varnishncsa(1) and others
+vinyllog(1), vinylncsa(1) and others
 ========================================
 
 Our collection of log-processing tools gained the ability to specify
@@ -178,18 +178,18 @@ A new ``-Q`` option allows you to read the query from a file instead. It
 can also be used multiple times and adds up to any ``-q`` option specified.
 
 Similar to ``-c`` or ``-b`` for client or backend transactions,
-``varnishncsa(1)`` can take a ``-E`` option to include ESI transactions.
+``vinylncsa(1)`` can take a ``-E`` option to include ESI transactions.
 
 ``BackendStart`` log records are no longer used, but newer versions of log
 utilities should still recognize deprecated records. It remains possible
-to read logs written to a file with an older version of ``varnishlog(1)``,
+to read logs written to a file with an older version of ``vinyllog(1)``,
 and that backward compatibility officially goes as far as Varnish 6.0.0
 even though it *may* be possible to read logs saved from older releases.
 
 ``Debug`` records are no longer logged by default and can be removed from
 the :ref:`ref_param_vsl_mask` parameter to appear in the logs. Since such
 records are not meant for production they are only automatically enabled
-by ``varnishtest(1)``.
+by ``vinyltest(1)``.
 
 varnishstat
 ===========

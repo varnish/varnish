@@ -21,7 +21,7 @@ OVERVIEW
 ========
 
 This document describes the format and content of all the Varnish shared memory
-logging tags. These tags are used by the varnishlog(1), varnishtop(1), etc.
+logging tags. These tags are used by the vinyllog(1), vinyltop(1), etc.
 logging tools supplied with Varnish.
 
 VSL tags
@@ -177,10 +177,10 @@ Martin Blix Grydeland.
 SEE ALSO
 ========
 
-* :ref:`varnishhist(1)`
-* :ref:`varnishlog(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishtop(1)`
+* :ref:`vinylhist(1)`
+* :ref:`vinyllog(1)`
+* :ref:`vinylncsa(1)`
+* :ref:`vinyltop(1)`
 
 COPYRIGHT
 =========

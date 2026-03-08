@@ -44,7 +44,7 @@ of documentation:
 * set link targets on the top of documents ending up in man-pages
   following the manpage naming scheme, e.g.::
 
-    .. _varnishd(1):
+    .. _vinyld(1):
 
 * set link targets for important paragraphs following the scheme
   ref-`doc`-`section`, for instance::

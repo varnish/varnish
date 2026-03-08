@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishadm(1):
+.. _vinyladm(1):
 
 ==========
 varnishadm
@@ -29,7 +29,7 @@ The `varnishadm` utility establishes a CLI connection to varnishd either
 using -n *workdir* or using the -T and -S arguments. If -n *workdir* is
 given, the location of the secret file and the address:port are looked
 up in shared memory. If neither is given, `varnishadm` uses the -n
-defaults documented for :ref:`varnishd(1)`.
+defaults documented for :ref:`vinyld(1)`.
 
 If a command is given, the command and arguments are sent over the CLI
 connection and the result returned on stdout.
@@ -46,7 +46,7 @@ OPTIONS
 -n workdir
 
     Specify the varnish working directory of the instance to attach
-    to. See :ref:`varnishd(1)` ``-n`` option documentation for
+    to. See :ref:`vinyld(1)` ``-n`` option documentation for
     additional information and defaults.
 
 -p
@@ -68,7 +68,7 @@ OPTIONS
 
 The syntax and operation of the actual CLI interface is described in
 the :ref:`varnish-cli(7)` manual page. Parameters are described in
-:ref:`varnishd(1)` manual page.
+:ref:`vinyld(1)` manual page.
 
 Additionally, a summary of commands can be obtained by issuing the
 *help* command, and a summary of parameters can be obtained by issuing
@@ -92,7 +92,7 @@ Some ways you can use varnishadm::
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`varnish-cli(7)`
 
 AUTHORS

@@ -100,7 +100,7 @@ The ``-j`` option for JSON output has been added to a number of
 commands, see :ref:`whatsnew_changes_cli_json` in
 :ref:`whatsnew_changes_2019_03` and :ref:`varnish-cli(7)`. We
 recommend the use of JSON format for automated parsing of CLI
-responses (:ref:`varnishadm(1)` output).
+responses (:ref:`vinyladm(1)` output).
 
 .. _whatsnew_upgrading_backend_list_2019_03:
 

@@ -22,7 +22,7 @@ Varnish setup.
 
 Note that you need a tool to see the HTTP headers that fly between
 Varnish and the backend. On the Varnish server, the easiest way to do
-this is to use :ref:`varnishlog(1)` and :ref:`varnishtop(1)` but
+this is to use :ref:`vinyllog(1)` and :ref:`vinyltop(1)` but
 sometimes a client-side tool makes sense. Here are the ones we
 commonly use.
 
@@ -32,18 +32,18 @@ Tool: varnishtop
 You can use varnishtop to identify what URLs are hitting the backend
 the most. ``varnishtop -i BereqURL`` is an essential command, showing
 you the top requests Varnish is sending to the backend. You can see some
-other examples of :ref:`varnishtop(1)` usage in :ref:`users-guide-statistics`.
+other examples of :ref:`vinyltop(1)` usage in :ref:`users-guide-statistics`.
 
 
 Tool: varnishlog
 ~~~~~~~~~~~~~~~~
 
 When you have identified an URL which is frequently sent to the
-backend you can use :ref:`varnishlog(1)` to have a look at the
+backend you can use :ref:`vinyllog(1)` to have a look at the
 request.  ``varnishlog -q 'ReqURL ~ "^/foo/bar"'`` will show you the
 requests coming from the client matching `/foo/bar`.
 
-For more information on how :ref:`varnishlog(1)` works please see
+For more information on how :ref:`vinyllog(1)` works please see
 :ref:`users-guide-logging` or the man page.
 
 
@@ -245,7 +245,7 @@ Age
 ~~~
 
 Varnish adds an 'Age' header to indicate how long the object has been
-kept inside Varnish. You can grep out 'Age' from :ref:`varnishlog(1)`
+kept inside Varnish. You can grep out 'Age' from :ref:`vinyllog(1)`
 with ``varnishlog -I RespHeader:^Age``.
 
 Pragma

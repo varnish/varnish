@@ -115,7 +115,7 @@ Changes to parameters
 Other changes
 =============
 
-* ``varnishstat(1)`` -f option accepts a ``glob(7)`` pattern.
+* ``vinylstat(1)`` -f option accepts a ``glob(7)`` pattern.
 
 * Cache-Control and Expires headers for uncacheable requests (i.e. passes)
   will not be parsed.  As a result, the RFC variant of the TTL VSL tag

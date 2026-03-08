@@ -104,7 +104,7 @@ These attributes control how patient `varnishd` is during backend fetches::
     .first_byte_timeout = 20s;
     .between_bytes_timeout = 10s;
 
-The default values comes parameters with the same names, see :ref:`varnishd(1)`.
+The default values comes parameters with the same names, see :ref:`vinyld(1)`.
 
 Attribute ``.max_connections``
 ------------------------------
@@ -123,7 +123,7 @@ Maximum  number  of  transactions that can queue waiting for a backend connectio
 Note that this feature must be used with caution, as it can cause threads to pile up and
 increase response times.
 
-Defaults to the :ref:`varnishd(1)` `backend_wait_limit` parameter.
+Defaults to the :ref:`vinyld(1)` `backend_wait_limit` parameter.
 
 Attribute ``.wait_timeout``
 ------------------------------
@@ -135,7 +135,7 @@ this is the time that the transaction will wait before giving up::
 
 It is strongly advised to never set this higher than a couple of seconds.
 
-Defaults to the :ref:`varnishd(1)` `backend_wait_timeout` parameter.
+Defaults to the :ref:`vinyld(1)` `backend_wait_timeout` parameter.
 
 Attribute ``.proxy_header``
 ---------------------------
@@ -236,7 +236,7 @@ Please see :ref:`vcl-probe(7)`.
 SEE ALSO
 --------
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`
 * :ref:`vcl-probe(7)`
 * :ref:`vmod_directors(3)`

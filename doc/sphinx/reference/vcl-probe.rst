@@ -182,7 +182,7 @@ likely still be unhealthy when the backend request happens.
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`
 * :ref:`vcl-backend(7)`
 * :ref:`vmod_directors(3)`

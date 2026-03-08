@@ -67,7 +67,7 @@ All the timeout parameters that can be disabled accept the "never" value:
 - ``send_timeout``
 - ``startup_timeout``
 
-The :ref:`varnishd(1)` manual advertises the ``timeout`` flag for these
+The :ref:`vinyld(1)` manual advertises the ``timeout`` flag for these
 parameters.
 
 The following parameters address the HTTP/2 Rapid Reset attach:

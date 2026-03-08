@@ -32,7 +32,7 @@ configuration
 parameters
      You can inspect and change the various parameters Varnish has
      available through the CLI. The individual parameters are
-     documented in the varnishd(1) man page.
+     documented in the vinyld(1) man page.
 
 bans
      Bans are filters that are applied to keep Varnish from serving
@@ -45,11 +45,11 @@ process management
      CLI. You can also retrieve the latest stack trace if the child
      process has crashed.
 
-If you invoke varnishd(1) with -T, -M or -d the CLI will be
+If you invoke vinyld(1) with -T, -M or -d the CLI will be
 available. In debug mode (-d) the CLI will be in the foreground, with
 -T you can connect to it with varnishadm or telnet and with -M
 varnishd will connect back to a listening service *pushing* the CLI to
-that service. Please see :ref:`varnishd(1)` for details.
+that service. Please see :ref:`vinyld(1)` for details.
 
 .. _ref_syntax:
 
@@ -356,7 +356,7 @@ Poul-Henning Kamp.
 SEE ALSO
 ========
 
-* :ref:`varnishadm(1)`
-* :ref:`varnishd(1)`
+* :ref:`vinyladm(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`
 * For API use of the CLI: The Reference Manual.

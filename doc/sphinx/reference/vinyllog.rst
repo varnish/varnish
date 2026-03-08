@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishlog(1):
+.. _vinyllog(1):
 
 ==========
 varnishlog
@@ -44,11 +44,11 @@ SIGNALS
 
 SEE ALSO
 ========
-* :ref:`varnishd(1)`
-* :ref:`varnishhist(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
-* :ref:`varnishtop(1)`
+* :ref:`vinyld(1)`
+* :ref:`vinylhist(1)`
+* :ref:`vinylncsa(1)`
+* :ref:`vinylstat(1)`
+* :ref:`vinyltop(1)`
 * :ref:`vsl(7)`
 * :ref:`vsl-query(7)`
 

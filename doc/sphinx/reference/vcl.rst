@@ -567,7 +567,7 @@ For examples, please see the online documentation.
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl-backend(7)`
 * :ref:`vcl-probe(7)`
 * :ref:`vcl-step(7)`

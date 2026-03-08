@@ -45,7 +45,7 @@ There are new and improved VMODs:
 
 * :ref:`vmod_unix(3)` -- Unix Domain Socket information
 
-* :ref:`vmod_vtc(3)` -- Utility functions for writing :ref:`varnishtest(1)` cases.
+* :ref:`vmod_vtc(3)` -- Utility functions for writing :ref:`vinyltest(1)` cases.
 
 The ``umem`` stevedore has been brought back on Solaris
 and it is the default storage method there now.

@@ -712,7 +712,7 @@ relevant properties like ``beresp.status``, ``beresp.http.Date``,
 SEE ALSO
 ========
 
-* :ref:`varnishd(1)`
+* :ref:`vinyld(1)`
 * :ref:`vsl(7)`
 * `fnmatch(3)`
 * `strftime(3)`

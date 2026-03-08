@@ -868,13 +868,13 @@ Varnish Cache 7.5.0 (2024-03-18)
   quoted arguments like ``"help"`` were rejected.
 
 * The ``vcl_req_reset`` feature (controllable through the ``feature``
-  parameter, see `varnishd(1)`) has been added and enabled by default
+  parameter, see `vinyld(1)`) has been added and enabled by default
   to terminate client side VCL processing early when the client is
   gone.
 
   *req_reset* events trigger a VCL failure and are reported to
   `vsl(7)` as ``Timestamp: Reset`` and accounted to ``main.req_reset``
-  in `vsc` as visible through ``varnishstat(1)``.
+  in `vsc` as visible through ``vinylstat(1)``.
 
   In particular, this feature is used to reduce resource consumption
   of HTTP/2 "rapid reset" attacks (see below).
@@ -915,7 +915,7 @@ Varnish Cache 7.5.0 (2024-03-18)
   * Sessions closed due to rapid reset rate limiting are reported as
     ``SessClose RAPID_RESET`` in `vsl(7)` and accounted to
     ``main.sc_rapid_reset`` in `vsc` as visible through
-    ``varnishstat(1)``.
+    ``vinylstat(1)``.
 
 * The ``cli_limit`` parameter default has been increased from 48KB to
   64KB.

@@ -166,6 +166,6 @@ secret file, and the challenge string.
 See also:
 ---------
 
-* :ref:`varnishadm(1)`
-* :ref:`varnishd(1)`
+* :ref:`vinyladm(1)`
+* :ref:`vinyld(1)`
 * :ref:`vcl(7)`

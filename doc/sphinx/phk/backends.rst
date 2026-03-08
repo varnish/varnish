@@ -92,7 +92,7 @@ is a wildcard-ish scheme, where you can write things like::
 (Input very much welcome)
 
 The final question is if we use shortcut notation for output from
-:ref:`varnishd(1)`, and the answer is no, because we do not want the
+:ref:`vinyld(1)`, and the answer is no, because we do not want the
 stats-counters to change name because we load another VCL and suddenly
 need disambiguation.
 

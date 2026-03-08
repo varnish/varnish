@@ -71,7 +71,7 @@
 #define VUT_OPT_n							\
 	VOPT("n:", "[-n <workdir>]", "varnish working directory",	\
 	     "Specify the varnish working directory of the instance "	\
-	     "to attach to. See :ref:`varnishd(1)` ``-n`` option "	\
+	     "to attach to. See :ref:`vinyld(1)` ``-n`` option "	\
 	     "documentation for additional information and defaults."	\
 	)
 

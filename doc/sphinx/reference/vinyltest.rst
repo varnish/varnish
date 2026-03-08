@@ -5,7 +5,7 @@
 
 .. role:: ref(emphasis)
 
-.. _varnishtest(1):
+.. _vinyltest(1):
 
 ===========
 varnishtest
@@ -180,11 +180,11 @@ SEE ALSO
 ========
 
 * varnishtest source code repository with tests
-* :ref:`varnishhist(1)`
-* :ref:`varnishlog(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
-* :ref:`varnishtop(1)`
+* :ref:`vinylhist(1)`
+* :ref:`vinyllog(1)`
+* :ref:`vinylncsa(1)`
+* :ref:`vinylstat(1)`
+* :ref:`vinyltop(1)`
 * :ref:`vcl(7)`
 * :ref:`vtc(7)`
 * :ref:`vmod_vtc(3)`

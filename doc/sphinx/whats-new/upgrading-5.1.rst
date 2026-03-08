@@ -19,7 +19,7 @@ together. This has served mainly to clarify the use of options for
 testing purposes, for example using ``varnishd -C`` to check a VCL
 source for syntactic correctness. We have also added some new options.
 
-The details are given in :ref:`varnishd(1)`, but here's a summary:
+The details are given in :ref:`vinyld(1)`, but here's a summary:
 
 * Added ``-I clifile`` to run CLI commands at startup, before the
   worker process starts. See :ref:`whatsnew_clifile`.
@@ -246,7 +246,7 @@ Other changes
 
 * The storage backend type umem, long in disuse, has been retired.
 
-* ``varnishstat(1)``:
+* ``vinylstat(1)``:
 
   * Added the ``cache_hitmiss`` stat to count hits on hit-for-miss
     objects.
@@ -267,7 +267,7 @@ Other changes
     number of objects killed by the ban lurker to keep the number of
     bans below ``ban_cutoff``.
 
-* ``varnishlog(1)``:
+* ``vinyllog(1)``:
 
   * Hits on hit-for-miss and hit-for-pass objects are logged with
     the ``HitMiss`` and ``HitPass`` tags, respectively. In each case,
@@ -281,16 +281,16 @@ Other changes
     for queries that search for transaction IDs in the log. See
     :ref:`vsl-query(7)`.
 
-* ``varnishncsa(1)``:
+* ``vinylncsa(1)``:
 
   * Clarified the meaning of the ``%r`` formatter, see NOTES in
-    :ref:`varnishncsa(1)`.
+    :ref:`vinylncsa(1)`.
 
   * Clarified the meaning of the ``%{X}i`` and ``%{X}o`` formatters
     when the header X appears more than once (the last occurrence is
     is used).
 
-* ``varnishtest(1)``:
+* ``vinyltest(1)``:
 
   * Added the ``setenv`` and ``write_body`` commands, see :ref:`vtc(7)`.
 

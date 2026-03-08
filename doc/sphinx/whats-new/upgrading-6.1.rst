@@ -159,7 +159,7 @@ is loaded, see the documentation.
 Other changes
 =============
 
-* ``varnishd(1)``:
+* ``vinyld(1)``:
 
   * Some VCL compile-time error messages have been improved, for
     example when a symbol is not found or arguments to VMOD calls are
@@ -179,7 +179,7 @@ Other changes
     ``.proxy_header=2`` (for PROXYv2) for a UDS backend with a probe,
     then ``PROXY LOCAL`` is sent for the probe request.
 
-* ``varnishlog(1)`` and ``vsl(7)``:
+* ``vinyllog(1)`` and ``vsl(7)``:
 
   * The contents of ``FetchError`` log entries have been improved to
     give better human-readable diagnostics for certain classes of
@@ -206,7 +206,7 @@ Other changes
     filters applied to a response body (see ``beresp.filters``
     discussed above).
 
-* ``varnishadm(1)`` and ``varnish-cli(7)``
+* ``vinyladm(1)`` and ``varnish-cli(7)``
 
   * For a number of CLI commands, you can now use the ``-j`` argument
     to get a JSON response, which may help in automation. These include:
@@ -226,7 +226,7 @@ Other changes
     option for verbose output, in which detailed health states for
     each backend/director are displayed.
 
-* ``varnishstat(1)`` and ``varnish-counters(7)``:
+* ``vinylstat(1)`` and ``varnish-counters(7)``:
 
   * We have added a number of counters to the ``VBE.*`` group to help
     better diagnose error conditions with backends:
@@ -287,7 +287,7 @@ Other changes
   * Ban statistics are now reported more accurately (they had been
     subject to inconsistencies due to race conditions).
 
-* ``varnishtest(1)`` and ``vtc(7)``:
+* ``vinyltest(1)`` and ``vtc(7)``:
 
   * ``varnishtest`` and the ``vtc`` test script language now support
     testing for haproxy as well as Varnish. The ``haproxy`` directive
@@ -311,14 +311,14 @@ Other changes
   * Added the ``-need-bytes`` argument for the ``process`` command,
     see :ref:`vtc(7)`.
 
-* ``varnishhist(1)``:
+* ``vinylhist(1)``:
 
   * The ``-P min:max`` command-line parameters are now optional,
-    see :ref:`varnishhist(1)`.
+    see :ref:`vinylhist(1)`.
 
 * For all of the utilities that access the Varnish log --
-  ``varnishlog(1)``, ``varnishncsa(1)``, ``varnishtop(1)`` and
-  ``varnishhist(1)`` -- it was already possible to set multiple ``-I``
+  ``vinyllog(1)``, ``vinylncsa(1)``, ``vinyltop(1)`` and
+  ``vinylhist(1)`` -- it was already possible to set multiple ``-I``
   and ``-X`` command-line arguments.  It is now properly documented
   that you can use multiple include and exclude filters that apply
   regular expressions to selected log records.
