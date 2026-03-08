@@ -368,7 +368,7 @@ VMOD/VCL interface
 
   See `VMOD - Varnish Modules`_ in the Reference Manual.
 
-.. _VMOD - Varnish Modules: https://varnish-cache.org/docs/trunk/reference/vmod.html
+.. _VMOD - Varnish Modules: https://vinyl-cache.org/docs/trunk/reference/vmod.html
 
   VMOD functions can also return the ``VCL_SUB`` data type for calls
   from VCL as in ``call vmod.returning_sub();``.

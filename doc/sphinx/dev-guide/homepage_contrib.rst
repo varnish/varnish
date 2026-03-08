@@ -5,11 +5,11 @@
 
 .. _homepage_contrib:
 
-How to contribute content to varnish-cache.org
-==============================================
+How to contribute content to vinyl-cache.org
+============================================
 
 This is where we walk you through the mechanics of adding content to
-varnish-cache.org (see phk's note :ref:`homepage_dogfood` for an
+vinyl-cache.org (see phk's note :ref:`homepage_dogfood` for an
 insight into the innards of site).
 
 Git Repository
@@ -28,7 +28,7 @@ Sphinx and RST
 The web site sources are written in `RST
 <http://docutils.sourceforge.net/rst.html>`_ -- reStructuredText, the
 documentation format originally conceived for Python (and also used in
-the Varnish distribution, as well as for formatting VMOD
+the Vinly Cache distribution, as well as for formatting VMOD
 docs). `Sphinx <http://www.sphinx-doc.org/>`_ is used to render web
 pages from the RST sources.
 

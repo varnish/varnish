@@ -3,8 +3,8 @@
 	SPDX-License-Identifier: BSD-2-Clause
 	See LICENSE file for full text of license
 
-THINGS TO CONSIDER WHEN WRITING VARNISH RST DOCUMENTATION
-=========================================================
+THINGS TO CONSIDER WHEN WRITING VINYL CACHE RST DOCUMENTATION
+=============================================================
 
 Inline Markup
 -------------
@@ -20,7 +20,7 @@ not follow the style:
 
 .. _Reference: http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#character-level-inline-markup
 
-  * exception: Links to manpages outside varnish as `man(section)`
+  * exception: Links to manpages outside vinyl as `man(section)`
 
 * use code blocks for::
 
@@ -77,7 +77,7 @@ While RST supports a great deal of flexibility for adornments of
 titles and section headers, we should adhere to a consistent style to
 avoid breaking the document structure unintentionally.
 
-Within the Varnish-Cache project, we should use these characters:
+Within the Vinyl-Cache project, we should use these characters:
 
 * Over and underline ``=`` for document titles
 
@@ -100,7 +100,7 @@ This README was initially started by Nils Goroll.
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Varnish
+This document is licensed under the same licence as Vinyl Cache
 itself. See LICENCE for details.
 
 * Copyright 2015,2016,2019,2024 UPLEX - Nils Goroll

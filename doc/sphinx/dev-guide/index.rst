@@ -5,11 +5,11 @@
 
 .. _dev-guide-index:
 
-The Varnish Developers Guide
-============================
+The Vinyl cache Developers Guide
+================================
 
 This is the deliberately short and to the point list of things
-Varnish Developers should know.
+Vinyl Cache Developers should know.
 
 Behaviour
 ---------
@@ -53,7 +53,7 @@ Bugs, issues, feature requests & VIPs
 
 Bugs, issues and feature requests start out as github issues.
 
-Monday at 15:00-16:00 (EU time) we "bug-wash" on IRC (#varnish-hacking
+Monday at 15:00-16:00 (EU time) we "bug-wash" on IRC (#vinyl-hacking
 on irc.linpro.no) to decide who and how issues are dealt with.
 
 Issues we cannot do anything about are closed.
@@ -61,7 +61,7 @@ Issues we cannot do anything about are closed.
 If feature-requests make sense, they get moved to a wiki/VIP page until
 somebody implements them.
 
-Varnishtest cases for bugs is the norm, not the exception.
+Vinyltest cases for bugs is the norm, not the exception.
 
 Architectural stuff
 -------------------
@@ -92,11 +92,11 @@ Various policies
 .. toctree::
 	:maxdepth: 1
 
-	Varnish Cache organization and day-to-day operation <https://varnish-cache.org/organization/index.html>
+	Vinyl Cache organization and day-to-day operation <https://vinyl-cache.org/organization/index.html>
 	policy_vmods
 
-The varnish-cache.org homepage
-------------------------------
+The vinyl-cache.org homepage
+----------------------------
 
 .. toctree::
 	:maxdepth: 1

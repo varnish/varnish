@@ -52,7 +52,7 @@ To illustrate, ``e1xam_p-le`` is a valid identifier, ``1try`` and
 Character Sets
 --------------
 
-.. _VMODs: https://varnish-cache.org/docs/trunk/reference/vmod.html
+.. _VMODs: https://vinyl-cache.org/docs/trunk/reference/vmod.html
 
 While identifiers can only consist of this subset of ASCII, **strings** can
 contain any bytes except *NUL* (zero, 0), which marks the end of the string. The

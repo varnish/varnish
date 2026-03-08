@@ -16,7 +16,7 @@ Getting hold of the source
 --------------------------
 
 Download the appropriate release tarball, which you can find on
-https://varnish-cache.org/releases/ .
+https://vinyl-cache.org/releases/ .
 
 Alternatively, if you want to hack on Varnish, you should clone our
 git repository by doing.

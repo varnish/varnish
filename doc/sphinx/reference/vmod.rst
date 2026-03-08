@@ -5,9 +5,9 @@
 
 .. _ref-vmod:
 
-%%%%%%%%%%%%%%%%%%%%%%
-VMOD - Varnish Modules
-%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+VMOD - Vinyl Cache Modules
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 For all you can do in VCL, there are things you cannot do.
 Look an IP number up in a database file for instance.
@@ -26,7 +26,7 @@ For instance::
 		set resp.http.foo = std.toupper(req.url);
 	}
 
-The "std" vmod is one you get with Varnish, it will always be there
+The "std" vmod is one you get with Vinyl Cache, it will always be there
 and we will put "boutique" functions in it, such as the "toupper"
 function shown above.  The full contents of the "std" module is
 documented in vmod_std(3).
@@ -34,16 +34,16 @@ documented in vmod_std(3).
 This part of the manual is about how you go about writing your own
 VMOD, how the language interface between C and VCC works, where you
 can find contributed VMODs etc. This explanation will use the "std"
-VMOD as example, having a Varnish source tree handy may be a good
+VMOD as example, having a Vinyl Cache source tree handy may be a good
 idea.
 
 VMOD Directory
 ==============
 
 The VMOD directory is an up-to-date compilation of maintained
-extensions written for Varnish Cache:
+extensions written for Vinyl Cache:
 
-    https://www.varnish-cache.org/vmods
+    https://www.vinyl-cache.org/vmods
 
 Getting started writing VMODs
 =============================
@@ -73,7 +73,7 @@ The std VMODs vmod.vcc file looks somewhat like this::
 
 	$ABI strict
 	$Version my.version
-	$Module std 3 "Varnish Standard Module"
+	$Module std 3 "Vinyl Standard Module"
 	$Event event_function
 	$Function STRING toupper(STRANDS s)
 	$Function STRING tolower(STRANDS s)
@@ -81,11 +81,11 @@ The std VMODs vmod.vcc file looks somewhat like this::
 
 The ``$ABI`` line is optional.  Possible values are ``strict``
 (default) and ``vrt``.  It allows to specify that a vmod is integrating
-with the blessed ``vrt`` interface provided by ``varnishd`` or go
+with the blessed ``vrt`` interface provided by ``vinyld`` or go
 deeper in the stack.
 
-As a rule of thumb you, if the VMOD uses more than the VRT (Varnish
-RunTime), in which case it needs to be built for the exact Varnish
+As a rule of thumb you, if the VMOD uses more than the VRT (Vinyl
+RunTime), in which case it needs to be built for the exact Vinyl Cache
 version, use ``strict``.  If it complies to the VRT and only needs
 to be rebuilt when breaking changes are introduced to the VRT API,
 use ``vrt``.
@@ -220,7 +220,7 @@ the ``<vclname>:<cname>`` syntax. See :ref:`ref-vmod-symbols` for details.
 Objects and methods
 -------------------
 
-Varnish also supports a simple object model for vmods. Objects and
+Vinyl Cache also supports a simple object model for vmods. Objects and
 methods are declared in the vcc file as::
 
 	$Object class(...)
@@ -249,14 +249,14 @@ meaning of such a method is up to the vmod author::
 	$Method .foo(...)
 
 Object instances are represented as pointers to vmod-implemented C
-structs. Varnish only provides space to store the address of object
+structs. Vinyl Cache only provides space to store the address of object
 instances and ensures that the right object address gets passed to C
 functions implementing methods.
 
 	* Objects' scope and lifetime are the vcl
 
 	* Objects can only be created in ``vcl_init {}`` and have
-	  their destructors called by varnish after ``vcl_fini {}``
+	  their destructors called by Vinyl Cache after ``vcl_fini {}``
 	  has completed.
 
 vmod authors are advised to understand the prototypes in the
@@ -283,7 +283,7 @@ vmod authors are advised to understand the prototypes in the
 	* Methods gain the pointer to the object as an argument after
 	   the ``VRT_CTX``.
 
-As varnish is in no way involved in managing object instances other
+As Vinyl Cache is in no way involved in managing object instances other
 than passing their addresses, vmods need to implement all aspects of
 managing instances, in particular their memory management. As the
 lifetime of object instances is the vcl, they will usually be
@@ -827,11 +827,11 @@ structure like a ``PRIV_VCL`` or a VMOD object to keep track of the reference
 and later release it. You also have to provide a description, it will be printed
 to the user if they try to warm up a cooling VCL::
 
-	$ varnishadm vcl.list
+	$ vinyladm vcl.list
 	available  auto/cooling       0 vcl1
 	active     auto/warm          0 vcl2
 
-	$ varnishadm vcl.state vcl1 warm
+	$ vinyladm vcl.state vcl1 warm
 	Command failed with error code 300
 	Failed <vcl.state vcl1 auto>
 	Message:
@@ -840,13 +840,13 @@ to the user if they try to warm up a cooling VCL::
 
 In the case where properly releasing resources may take some time, you can
 opt for an asynchronous worker, either by spawning a thread and tracking it, or
-by using Varnish's worker pools.
+by using Vinyl Cache's worker pools.
 
 
 When to lock, and when not to lock
 ==================================
 
-Varnish is heavily multithreaded, so by default VMODs must implement
+Vinyl Cache is heavily multithreaded, so by default VMODs must implement
 their own locking to protect shared resources.
 
 When a VCL is loaded or unloaded, the event and priv->free are
@@ -865,10 +865,10 @@ Statistics Counters
 ===================
 
 Starting in Varnish 6.0, VMODs can define their own counters that appear
-in *varnishstat*.
+in *vinylstat*.
 
 If you're using autotools, see the ``VINYL_COUNTERS`` macro in
-varnish.m4 for documentation on getting your build set up.
+vinyl.m4 for documentation on getting your build set up.
 
 Counters are defined in a .vsc file. The ``VINYL_COUNTERS`` macro
 calls *vsctool.py* to turn a *foo.vsc* file into *VSC_foo.c* and
@@ -908,7 +908,7 @@ ctype
 	only be ``uint64_t`` and does not need to be specified.
 
 level
-	The verbosity level of this counter. *varnishstat* will only
+	The verbosity level of this counter. *vinylstat* will only
 	show counters with a higher verbosity level than the one
 	currently configured. Can be one of ``info``, ``diag``, or
 	``debug``.
@@ -935,8 +935,8 @@ your counters.
 Temporary Files
 ===============
 
-``varnishd`` creates a directory named ``worker_tmpdir`` under the
-varnish working directory (see ``varnishd -n`` argument) for
+``vinyld`` creates a directory named ``worker_tmpdir`` under the
+Vinyl Cache working directory (see ``vinyld -n`` argument) for
 read/write access by the worker process.
 
 From the perspective of VMODs, the relative path is always
@@ -946,7 +946,7 @@ This directory is intended (though not limited) to provide a place for
 VMODs to create temporary files using ``mkstemp()`` and related libc
 functions. VMODs are responsible for cleaning up files which are no
 longer required, and they will ultimately be removed when the
-``varnishd`` worker process restarts. There is no isolation between
+``vinyld`` worker process restarts. There is no isolation between
 VMODs (as is the case anyway).
 
 A simple example for how to use it::
@@ -1043,7 +1043,7 @@ Retrieving version information using the CLI
 The ``debug.vmod`` CLI command outputs the version information, for example
 (edited for readability, the original output is on a single line)::
 
-        $ varnishadm debug.vmod
+        $ vinyladm debug.vmod
             1 dynamic (path=".../vmods/libvmod_dynamic.so",
                        version="libvmod-dynamic trunk",
                        vcs="1e4179430404aaf170530af7514fbecb1f38f8af")

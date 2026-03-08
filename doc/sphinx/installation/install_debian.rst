@@ -13,7 +13,7 @@ From package
 
 Type::
 
-	sudo apt-get install varnish
+	sudo apt-get install vinyl
 
 
 Official packages of 6
