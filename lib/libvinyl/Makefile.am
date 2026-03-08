@@ -11,7 +11,7 @@ AM_LDFLAGS  = $(AM_LT_LDFLAGS)
 noinst_LTLIBRARIES = libvinyl.la
 
 libvinyl_la_CFLAGS = \
-	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"' \
+	-DVINYL_STATE_DIR='"${VINYL_STATE_DIR}"' \
 	$(AM_CFLAGS)
 
 libvinyl_la_SOURCES = \

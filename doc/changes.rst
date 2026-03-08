@@ -332,7 +332,7 @@ Varnish-Cache 7.7 (2025-03-17)
 * Pressing the ``0`` key in ``varnishstat`` interactive (curses) mode now resets
   averages.
 
-* ``varnishtest`` has been changed to always set a ``VARNISH_DEFAULT_N``
+* ``varnishtest`` has been changed to always set a ``VINYL_DEFAULT_N``
   environment variable to ensure that ``varnish`` invoked from ``varnishtest``
   always has a valid workdir.
 
@@ -694,7 +694,7 @@ Varnish Cache 7.6.0 (2024-09-13)
   VMODs for temporary files. The `VMOD developer documentation`_ has
   details.
 
-* The environment variable ``VARNISH_DEFAULT_N`` now provides the
+* The environment variable ``VINYL_DEFAULT_N`` now provides the
   default "varnish name" / "workdir" as otherwise specified by he
   ``-n`` argument to ``varnishd`` and ``varnish*`` utilities except
   ``varnishtest``.
@@ -2385,7 +2385,7 @@ Varnish Cache 6.5.0 (2020-09-15)
 
 * Fixed the backend probe ``.timeout`` handling for "dripping" responses (3402_)
 
-* New ``VARNISH_VMODS_GENERATED()`` macro in ``varnish.m4``.
+* New ``VINYL_VMODS_GENERATED()`` macro in ``varnish.m4``.
 
 * Prevent pooling of a ``Connection: close`` backend response.
 

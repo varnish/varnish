@@ -44,9 +44,9 @@
 # any time. Public macros starting with VARNISH_ are documented and will
 # maintain backwards compatibility with older versions of Varnish Cache.
 
-# _VARNISH_CHECK_LIB(LIB, FUNC)
+# _VINYL_CHECK_LIB(LIB, FUNC)
 # -----------------------------
-AC_DEFUN([_VARNISH_CHECK_LIB], [
+AC_DEFUN([_VINYL_CHECK_LIB], [
 	save_LIBS="${LIBS}"
 	LIBS=""
 	AC_CHECK_LIB([$1], [$2])
@@ -54,9 +54,9 @@ AC_DEFUN([_VARNISH_CHECK_LIB], [
 	LIBS="${save_LIBS}"
 ])
 
-# _VARNISH_SEARCH_LIBS(VAR, FUNC, LIBS)
+# _VINYL_SEARCH_LIBS(VAR, FUNC, LIBS)
 # -------------------------------------
-AC_DEFUN([_VARNISH_SEARCH_LIBS], [
+AC_DEFUN([_VINYL_SEARCH_LIBS], [
 	save_LIBS="${LIBS}"
 	LIBS=""
 	AC_SEARCH_LIBS([$2], [$3])
@@ -64,37 +64,37 @@ AC_DEFUN([_VARNISH_SEARCH_LIBS], [
 	LIBS="${save_LIBS}"
 ])
 
-# _VARNISH_PKG_CONFIG
+# _VINYL_PKG_CONFIG
 # --------------------
-AC_DEFUN([_VARNISH_PKG_CONFIG], [
+AC_DEFUN([_VINYL_PKG_CONFIG], [
 	PKG_PROG_PKG_CONFIG([0.21])
 
-	PKG_CHECK_MODULES([VARNISHAPI], [varnishapi])
-	AC_SUBST([VARNISH_VERSION], [$($PKG_CONFIG --modversion varnishapi)])
+	PKG_CHECK_MODULES([VINYLAPI], [varnishapi])
+	AC_SUBST([VINYL_VERSION], [$($PKG_CONFIG --modversion varnishapi)])
 
-	PKG_CHECK_VAR([VARNISHAPI_PREFIX], [varnishapi], [prefix])
-	PKG_CHECK_VAR([VARNISHAPI_DATAROOTDIR], [varnishapi], [datarootdir])
-	PKG_CHECK_VAR([VARNISHAPI_LIBDIR], [varnishapi], [libdir])
-	PKG_CHECK_VAR([VARNISHAPI_BINDIR], [varnishapi], [bindir])
-	PKG_CHECK_VAR([VARNISHAPI_SBINDIR], [varnishapi], [sbindir])
-	PKG_CHECK_VAR([VARNISHAPI_VCLDIR], [varnishapi], [vcldir])
-	PKG_CHECK_VAR([VARNISHAPI_VMODDIR], [varnishapi], [vmoddir])
+	PKG_CHECK_VAR([VINYLAPI_PREFIX], [varnishapi], [prefix])
+	PKG_CHECK_VAR([VINYLAPI_DATAROOTDIR], [varnishapi], [datarootdir])
+	PKG_CHECK_VAR([VINYLAPI_LIBDIR], [varnishapi], [libdir])
+	PKG_CHECK_VAR([VINYLAPI_BINDIR], [varnishapi], [bindir])
+	PKG_CHECK_VAR([VINYLAPI_SBINDIR], [varnishapi], [sbindir])
+	PKG_CHECK_VAR([VINYLAPI_VCLDIR], [varnishapi], [vcldir])
+	PKG_CHECK_VAR([VINYLAPI_VMODDIR], [varnishapi], [vmoddir])
 
 	PKG_CHECK_VAR([VMODTOOL], [varnishapi], [vmodtool])
 	PKG_CHECK_VAR([VSCTOOL], [varnishapi], [vsctool])
 
-	AC_SUBST([VARNISH_LIBRARY_PATH],
-		[$VARNISHAPI_LIBDIR:$VARNISHAPI_LIBDIR/varnish])
+	AC_SUBST([VINYL_LIBRARY_PATH],
+		[$VINYLAPI_LIBDIR:$VINYLAPI_LIBDIR/varnish])
 
-	AC_SUBST([VARNISH_TEST_PATH],
-		[$VARNISHAPI_SBINDIR:$VARNISHAPI_BINDIR:$PATH])
+	AC_SUBST([VINYL_TEST_PATH],
+		[$VINYLAPI_SBINDIR:$VINYLAPI_BINDIR:$PATH])
 
 	dnl Inherit Varnish's prefix if undefined
 	dnl Also the libdir for multi-lib systems
 	if test "$prefix" = NONE
 	then
-		ac_default_prefix=$VARNISHAPI_PREFIX
-		libdir=$VARNISHAPI_LIBDIR
+		ac_default_prefix=$VINYLAPI_PREFIX
+		libdir=$VINYLAPI_LIBDIR
 	fi
 
 	dnl Define the VCL directory for automake
@@ -106,14 +106,14 @@ AC_DEFUN([_VARNISH_PKG_CONFIG], [
 	AC_SUBST([pkgvcldir], [\${vcldir}/\${PACKAGE}])
 ])
 
-# _VARNISH_CHECK_DEVEL
+# _VINYL_CHECK_DEVEL
 # --------------------
-AC_DEFUN([_VARNISH_CHECK_DEVEL], [
+AC_DEFUN([_VINYL_CHECK_DEVEL], [
 
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
+	AC_REQUIRE([_VINYL_PKG_CONFIG])
 
 	[_orig_cppflags=$CPPFLAGS]
-	[CPPFLAGS=$VARNISHAPI_CFLAGS]
+	[CPPFLAGS=$VINYLAPI_CFLAGS]
 
 	AC_CHECK_HEADERS([vsha256.h cache/cache.h], [],
 		[AC_MSG_ERROR([Missing Varnish development files.])])
@@ -121,9 +121,9 @@ AC_DEFUN([_VARNISH_CHECK_DEVEL], [
 	[CPPFLAGS=$_orig_cppflags]
 ])
 
-# _VARNISH_CHECK_PYTHON
+# _VINYL_CHECK_PYTHON
 # ---------------------
-AC_DEFUN([_VARNISH_CHECK_PYTHON], [
+AC_DEFUN([_VINYL_CHECK_PYTHON], [
 	m4_define_default([_AM_PYTHON_INTERPRETER_LIST],
 		[python3 python3.10 python3.9 python3.8 python3.7 python3.6 dnl
 		python3.5 python3.4 python])
@@ -133,28 +133,28 @@ AC_DEFUN([_VARNISH_CHECK_PYTHON], [
 
 ])
 
-# _VARNISH_VMOD_LDFLAGS
+# _VINYL_VMOD_LDFLAGS
 # ---------------------
-AC_DEFUN([_VARNISH_VMOD_LDFLAGS], [
+AC_DEFUN([_VINYL_VMOD_LDFLAGS], [
 
 	AC_SUBST([VMOD_LDFLAGS],
 		"-module -export-dynamic -avoid-version -shared")
 
 ])
 
-# _VARNISH_VMOD_CONFIG
+# _VINYL_VMOD_CONFIG
 # --------------------
-AC_DEFUN([_VARNISH_VMOD_CONFIG], [
+AC_DEFUN([_VINYL_VMOD_CONFIG], [
 	dnl Check the VMOD toolchain
 	AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 	AC_REQUIRE([AC_LANG_C])
 	AC_REQUIRE([AC_PROG_CC])
 	AC_REQUIRE([AC_PROG_CC_C99])
 
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
-	AC_REQUIRE([_VARNISH_CHECK_DEVEL])
-	AC_REQUIRE([_VARNISH_CHECK_PYTHON])
-	AC_REQUIRE([_VARNISH_VMOD_LDFLAGS])
+	AC_REQUIRE([_VINYL_PKG_CONFIG])
+	AC_REQUIRE([_VINYL_CHECK_DEVEL])
+	AC_REQUIRE([_VINYL_CHECK_PYTHON])
+	AC_REQUIRE([_VINYL_VMOD_LDFLAGS])
 
 	AC_REQUIRE([AC_PROG_CPP])
 	AC_REQUIRE([AC_PROG_CPP_WERROR])
@@ -164,10 +164,10 @@ AC_DEFUN([_VARNISH_VMOD_CONFIG], [
 	])
 
 	dnl Expose the location of the std and directors VMODs
-	AC_SUBST([VARNISHAPI_VMODDIR])
+	AC_SUBST([VINYLAPI_VMODDIR])
 
 	dnl Expose Varnish's aclocal directory to automake
-	AC_SUBST([VARNISHAPI_DATAROOTDIR])
+	AC_SUBST([VINYLAPI_DATAROOTDIR])
 
 	dnl Define the VMOD directory for libtool
 	vmoddir=$($PKG_CONFIG --define-variable=libdir=$libdir \
@@ -185,14 +185,14 @@ AC_DEFUN([_VARNISH_VMOD_CONFIG], [
 	AC_SUBST([AM_V_VMODTOOL])
 
 	dnl Substitute an alias for compatibility reasons
-	AC_SUBST([VMOD_TEST_PATH], [$VARNISH_TEST_PATH])
+	AC_SUBST([VMOD_TEST_PATH], [$VINYL_TEST_PATH])
 ])
 
-# _VARNISH_VMOD(NAME, MODE)
+# _VINYL_VMOD(NAME, MODE)
 # -------------------------
-AC_DEFUN([_VARNISH_VMOD], [
+AC_DEFUN([_VINYL_VMOD], [
 
-	AC_REQUIRE([_VARNISH_VMOD_CONFIG])
+	AC_REQUIRE([_VINYL_VMOD_CONFIG])
 
 	VMOD_FILE="\$(abs_builddir)/.libs/libvmod_$1.so"
 	AC_SUBST(m4_toupper(VMOD_$1_FILE), [$VMOD_FILE])
@@ -238,7 +238,7 @@ clean-vmod-$1:
 	m4_popdef([VCC_SRC])dnl
 ])
 
-# VARNISH_VMODS(NAMES)
+# VINYL_VMODS(NAMES)
 # --------------------
 # Since: Varnish 4.1.4
 #
@@ -250,15 +250,15 @@ clean-vmod-$1:
 # to build the modules:
 #
 # - VMOD_LDFLAGS (the recommended flags to link VMODs)
-# - VMOD_TEST_PATH (an alias for VARNISH_TEST_PATH)
+# - VMOD_TEST_PATH (an alias for VINYL_TEST_PATH)
 # - VMODTOOL (to generate a VMOD's interface)
 # - vmoddir (the install prefix for VMODs)
 # - vmod_*_vcldir (the install prefix for the VMODs VCL files)
 #
 # Configuring your VMOD build with libtool can be as simple as:
 #
-#     AM_CFLAGS = $(VARNISHAPI_CFLAGS)
-#     AM_LDFLAGS = $(VARNISHAPI_LIBS) $(VMOD_LDFLAGS)
+#     AM_CFLAGS = $(VINYLAPI_CFLAGS)
+#     AM_LDFLAGS = $(VINYLAPI_LIBS) $(VMOD_LDFLAGS)
 #
 #     vmod_LTLIBRARIES = libvmod_foo.la
 #
@@ -270,7 +270,7 @@ clean-vmod-$1:
 #
 # For example, if you define the following in configure.ac:
 #
-#     VARNISH_VMODS([foo bar])
+#     VINYL_VMODS([foo bar])
 #
 # Two build rules will be available for use in Makefile.am for vmod-foo
 # and vmod-bar:
@@ -305,14 +305,14 @@ clean-vmod-$1:
 #
 # Two notable variables are exposed from Varnish's pkg-config:
 #
-# - VARNISHAPI_VMODDIR (locate vmod-std and vmod-directors in your tests)
-# - VARNISHAPI_DATAROOTDIR (for when aclocal is called from a Makefile)
+# - VINYLAPI_VMODDIR (locate vmod-std and vmod-directors in your tests)
+# - VINYLAPI_DATAROOTDIR (for when aclocal is called from a Makefile)
 #
 # For example in your root Makefile.am:
 #
-#     ACLOCAL_AMFLAGS = -I m4 -I ${VARNISHAPI_DATAROOTDIR}/aclocal
+#     ACLOCAL_AMFLAGS = -I m4 -I ${VINYLAPI_DATAROOTDIR}/aclocal
 #
-# The VARNISH_VERSION variable will be set even if the VARNISH_PREREQ macro
+# The VINYL_VERSION variable will be set even if the VINYL_PREREQ macro
 # wasn't called. Although many things are set up to facilitate out-of-tree
 # VMOD maintenance, initialization of autoconf, automake and libtool is
 # still the maintainer's responsibility. It cannot be avoided.
@@ -322,8 +322,8 @@ clean-vmod-$1:
 # is a minimal setup:
 #
 #     AM_TESTS_ENVIRONMENT = \
-#         PATH="$(VARNISH_TEST_PATH):$(PATH)" \
-#         LD_LIBRARY_PATH="$(VARNISH_LIBRARY_PATH)"
+#         PATH="$(VINYL_TEST_PATH):$(PATH)" \
+#         LD_LIBRARY_PATH="$(VINYL_LIBRARY_PATH)"
 #     TEST_EXTENSIONS = .vtc
 #     VTC_LOG_COMPILER = varnishtest -v
 #     AM_VTC_LOG_FLAGS = -Dvmod_foo="$(VMOD_FOO)" -Dvmod_bar="$(VMOD_BAR)"
@@ -374,39 +374,39 @@ clean-vmod-$1:
 #
 # Now, you can focus on writing this VMOD of yours.
 #
-AC_DEFUN([VARNISH_VMODS], [
+AC_DEFUN([VINYL_VMODS], [
 	m4_foreach([_vmod_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_VMOD(_vmod_name, [static])])
+		[_VINYL_VMOD(_vmod_name, [static])])
 ])
 
-# VARNISH_VMODS_GENERATED(NAMES)
+# VINYL_VMODS_GENERATED(NAMES)
 # ------------------------------
 # Since: Varnish 6.5.0
 #
 # Varnish 6.5 adds the possibility to transparently work with a generated VCC
 # file. The VCC file would then be created in the build directory, which is
-# incompatible with how the VARNISH_VMODS macro operates.
+# incompatible with how the VINYL_VMODS macro operates.
 #
 # If that VCC file only needs to be generated once and is distributed, builds
 # from the dist archive will have the VCC file in the source directory.
 #
 # With Varnish's ability to run VMODTOOL in a VPATH build both scenarios are
-# taken care of. This macro works otherwise exactly like VARNISH_VMODS.
+# taken care of. This macro works otherwise exactly like VINYL_VMODS.
 #
-AC_DEFUN([VARNISH_VMODS_GENERATED], [
+AC_DEFUN([VINYL_VMODS_GENERATED], [
 	m4_foreach([_vmod_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_VMOD(_vmod_name, [generated])])
+		[_VINYL_VMOD(_vmod_name, [generated])])
 ])
 
-# _VARNISH_VSC_CONFIG
+# _VINYL_VSC_CONFIG
 # --------------------
-AC_DEFUN([_VARNISH_VSC_CONFIG], [
+AC_DEFUN([_VINYL_VSC_CONFIG], [
 
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
-	AC_REQUIRE([_VARNISH_CHECK_DEVEL])
-	AC_REQUIRE([_VARNISH_CHECK_PYTHON])
+	AC_REQUIRE([_VINYL_PKG_CONFIG])
+	AC_REQUIRE([_VINYL_CHECK_DEVEL])
+	AC_REQUIRE([_VINYL_CHECK_PYTHON])
 
 	dnl Define an automake silent execution for vmodtool
 	[am__v_VSCTOOL_0='@echo "  VSCTOOL " $''@;']
@@ -419,11 +419,11 @@ AC_DEFUN([_VARNISH_VSC_CONFIG], [
 	AC_SUBST([AM_V_VSCTOOL])
 ])
 
-# _VARNISH_COUNTER(NAME)
+# _VINYL_COUNTER(NAME)
 # ----------------------
-AC_DEFUN([_VARNISH_COUNTER], [
+AC_DEFUN([_VINYL_COUNTER], [
 
-	AC_REQUIRE([_VARNISH_VSC_CONFIG])
+	AC_REQUIRE([_VINYL_VSC_CONFIG])
 
 	VSC_RULES="
 
@@ -449,7 +449,7 @@ clean-vsc-$1:
 	AM_SUBST_NOTMAKE(m4_toupper(BUILD_VSC_$1))
 ])
 
-# VARNISH_COUNTERS(NAMES)
+# VINYL_COUNTERS(NAMES)
 # -----------------------
 # Since: Varnish 6.0.0
 #
@@ -458,7 +458,7 @@ clean-vsc-$1:
 # to declare sets of counters, but does not associate them automatically
 # with their respective VMODs:
 #
-#     VARNISH_COUNTERS([foo bar])
+#     VINYL_COUNTERS([foo bar])
 #
 # Two build rules will be available for use in Makefile.am for the counters
 # foo and bar:
@@ -495,15 +495,15 @@ clean-vsc-$1:
 #
 # That should be all you need to do to start implementing custom counters.
 #
-AC_DEFUN([VARNISH_COUNTERS], [
+AC_DEFUN([VINYL_COUNTERS], [
 	m4_foreach([_vsc_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_COUNTER(_vsc_name)])
+		[_VINYL_COUNTER(_vsc_name)])
 ])
 
-# _VARNISH_UTILITY(NAME)
+# _VINYL_UTILITY(NAME)
 # ----------------------
-AC_DEFUN([_VARNISH_UTILITY], [
+AC_DEFUN([_VINYL_UTILITY], [
 
 	VUT_RULES="
 
@@ -529,7 +529,7 @@ clean-vut-$1:
 
 ])
 
-# VARNISH_UTILITIES(NAMES)
+# VINYL_UTILITIES(NAMES)
 # ------------------------
 # Since: Varnish 5.2.0
 #
@@ -544,7 +544,7 @@ clean-vut-$1:
 #
 # For example, if you define the following in configure.ac:
 #
-#     VARNISH_UTILITIES([foo bar])
+#     VINYL_UTILITIES([foo bar])
 #
 # Two build rules will be available for use in Makefile.am for the programs
 # foo and bar:
@@ -612,21 +612,21 @@ clean-vut-$1:
 # when the source directory is different from the build directory. It is the
 # maintainer's responsibility to build the actual manuals.
 #
-AC_DEFUN([VARNISH_UTILITIES], [
+AC_DEFUN([VINYL_UTILITIES], [
 	m4_foreach([_vut_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_UTILITY(_vut_name)])
+		[_VINYL_UTILITY(_vut_name)])
 ])
 
-# VARNISH_PREREQ(MINIMUM-VERSION, [MAXIMUM-VERSION])
+# VINYL_PREREQ(MINIMUM-VERSION, [MAXIMUM-VERSION])
 # --------------------------------------------------
 # Since: Varnish 4.1.4
 #
 # Since Varnish 5.1.0:
-# - VARNISH_TEST_PATH added
-# - VARNISH_LIBRARY_PATH added
-# - VARNISHAPI_LIBDIR added
-# - VARNISHAPI_VCLDIR added
+# - VINYL_TEST_PATH added
+# - VINYL_LIBRARY_PATH added
+# - VINYLAPI_LIBDIR added
+# - VINYLAPI_VCLDIR added
 # - vcldir added
 # - pkgvcldir added
 #
@@ -640,22 +640,22 @@ AC_DEFUN([VARNISH_UTILITIES], [
 # Once the requirements are met, the following variables can be used in
 # Makefiles:
 #
-# - VARNISH_TEST_PATH (for the test suite environment)
-# - VARNISH_LIBRARY_PATH (for both public and private libraries)
-# - VARNISH_VERSION (also available in autoconf)
+# - VINYL_TEST_PATH (for the test suite environment)
+# - VINYL_LIBRARY_PATH (for both public and private libraries)
+# - VINYL_VERSION (also available in autoconf)
 #
 # The following variables are available in autoconf, read from the varnish
 # pkg-config:
 #
-# - VARNISHAPI_CFLAGS
-# - VARNISHAPI_LIBS
-# - VARNISHAPI_PREFIX
-# - VARNISHAPI_DATAROOTDIR
-# - VARNISHAPI_LIBDIR
-# - VARNISHAPI_BINDIR
-# - VARNISHAPI_SBINDIR
-# - VARNISHAPI_VCLDIR
-# - VARNISHAPI_VMODDIR
+# - VINYLAPI_CFLAGS
+# - VINYLAPI_LIBS
+# - VINYLAPI_PREFIX
+# - VINYLAPI_DATAROOTDIR
+# - VINYLAPI_LIBDIR
+# - VINYLAPI_BINDIR
+# - VINYLAPI_SBINDIR
+# - VINYLAPI_VCLDIR
+# - VINYLAPI_VMODDIR
 # - VMODTOOL
 # - VSCTOOL
 #
@@ -672,17 +672,17 @@ AC_DEFUN([VARNISH_UTILITIES], [
 # This provides a namespace facility for installed VCL files needing including
 # other VCL files, which can be overridden if the package name is not desired.
 #
-AC_DEFUN([VARNISH_PREREQ], [
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
+AC_DEFUN([VINYL_PREREQ], [
+	AC_REQUIRE([_VINYL_PKG_CONFIG])
 	AC_MSG_CHECKING([for Varnish])
-	AC_MSG_RESULT([$VARNISH_VERSION])
+	AC_MSG_RESULT([$VINYL_VERSION])
 
-	AS_VERSION_COMPARE([$VARNISH_VERSION], [$1], [
+	AS_VERSION_COMPARE([$VINYL_VERSION], [$1], [
 		AC_MSG_ERROR([Varnish version $1 or higher is required.])
 	])
 
 	test $# -gt 1 &&
-	AS_VERSION_COMPARE([$2], [$VARNISH_VERSION], [
+	AS_VERSION_COMPARE([$2], [$VINYL_VERSION], [
 		AC_MSG_ERROR([Varnish version below $2 is required.])
 	])
 ])

@@ -169,7 +169,7 @@ Build System
 ~~~~~~~~~~~~
 
 VMOD authors who would like to generate VCC files can now use the
-``VARNISH_VMODS_GENERATED()`` macro from ``varnish.m4`` for autotools
+``VINYL_VMODS_GENERATED()`` macro from ``varnish.m4`` for autotools
 builds.
 
 .. _whatsnew_changes_6.5_workspace:

@@ -28,7 +28,7 @@
  * SUCH DAMAGE.
  */
 
-LIBVARNISHAPI_3.0 {	/* 2021-09-15 release */
+LIBVINYLAPI_3.0 {	/* 2021-09-15 release */
     global:
 	# vas.c
 		VAS_errtxt;
@@ -163,7 +163,7 @@ LIBVARNISHAPI_3.0 {	/* 2021-09-15 release */
 	*;
 };
 
-LIBVARNISHAPI_3.1 {	/* 2023-09-15 release */
+LIBVINYLAPI_3.1 {	/* 2023-09-15 release */
     global:
 	# venc.c
 		VENC_Encode_Base64;

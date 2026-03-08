@@ -8,9 +8,9 @@ FLOPS='
 	-I../../lib/libvgz
 	-I../../lib/libvsc
 	-DNOT_IN_A_VMOD
-	-DVARNISH_STATE_DIR="foo"
-	-DVARNISH_VMOD_DIR="foo"
-	-DVARNISH_VCL_DIR="foo"
+	-DVINYL_STATE_DIR="foo"
+	-DVINYL_VMOD_DIR="foo"
+	-DVINYL_VCL_DIR="foo"
 	-DWITH_PERSISTENT_STORAGE
 	acceptor/*.c
 	cache/*.c

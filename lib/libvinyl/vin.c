@@ -42,7 +42,7 @@
 #include "vin.h"
 #include "vsb.h"
 
-#define VARNISH_DEFAULT_REL_NAME "varnishd"
+#define VINYL_DEFAULT_REL_NAME "varnishd"
 
 char *
 VIN_n_Arg(const char *n_arg)
@@ -53,12 +53,12 @@ VIN_n_Arg(const char *n_arg)
 	vsb = VSB_new_auto();
 	AN(vsb);
 	if (n_arg == NULL || n_arg[0] == '\0') {
-		VSB_cat(vsb, VARNISH_STATE_DIR);
-		VSB_cat(vsb, "/" VARNISH_DEFAULT_REL_NAME);
+		VSB_cat(vsb, VINYL_STATE_DIR);
+		VSB_cat(vsb, "/" VINYL_DEFAULT_REL_NAME);
 	} else if (n_arg[0] == '/') {
 		VSB_cat(vsb, n_arg);
 	} else {
-		VSB_cat(vsb, VARNISH_STATE_DIR);
+		VSB_cat(vsb, VINYL_STATE_DIR);
 		VSB_cat(vsb, "/");
 		VSB_cat(vsb, n_arg);
 	}
@@ -75,9 +75,9 @@ VIN_DumpDefaults(void)
 	printf("  The default is taken from the ``VINYL_DEFAULT_N`` "
 	       "environment variable.\n\n");
 	printf("  Relative paths will be appended to ``%s``.\n\n",
-	       VARNISH_STATE_DIR);
+	       VINYL_STATE_DIR);
 	printf("  If neither ``VINYL_DEFAULT_N`` nor ``-n`` are "
 	       "present, the value is ``%s``.\n\n",
-	       VARNISH_STATE_DIR "/" VARNISH_DEFAULT_REL_NAME);
+	       VINYL_STATE_DIR "/" VINYL_DEFAULT_REL_NAME);
 	printf("  Note: These defaults may be distribution specific.\n\n");
 }

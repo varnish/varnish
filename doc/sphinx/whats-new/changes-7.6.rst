@@ -16,7 +16,7 @@ merged, may be found in the `change log`_.
 Changes applying to most varnish-cache programs
 ===============================================
 
-The environment variable ``VARNISH_DEFAULT_N`` now provides the default "varnish
+The environment variable ``VINYL_DEFAULT_N`` now provides the default "varnish
 name" / "workdir" as otherwise specified by he ``-n`` argument to ``varnishd``
 and ``varnish*`` utilities except ``varnishtest``.
 

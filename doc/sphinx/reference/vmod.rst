@@ -867,10 +867,10 @@ Statistics Counters
 Starting in Varnish 6.0, VMODs can define their own counters that appear
 in *varnishstat*.
 
-If you're using autotools, see the ``VARNISH_COUNTERS`` macro in
+If you're using autotools, see the ``VINYL_COUNTERS`` macro in
 varnish.m4 for documentation on getting your build set up.
 
-Counters are defined in a .vsc file. The ``VARNISH_COUNTERS`` macro
+Counters are defined in a .vsc file. The ``VINYL_COUNTERS`` macro
 calls *vsctool.py* to turn a *foo.vsc* file into *VSC_foo.c* and
 *VSC_foo.h* files, just like *vmodtool.py* turns *foo.vcc* into
 *vcc_foo_if.c* and *vcc_foo_if.h* files. Similarly to the VCC files, the

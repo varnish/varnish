@@ -74,7 +74,7 @@ The counters are described in a ``.vsc`` file which is
 processed with a new python script which does a lot of
 magic etc.  There is a tiny example in ``vmod_debug`` in
 the source tree.  If you're using autotools, a new
-``VARNISH_COUNTERS`` macro helps you set everything up,
+``VINYL_COUNTERS`` macro helps you set everything up,
 and is documented in ``varnish.m4``.
 
 This took a major retooling of the stats counters in general, and

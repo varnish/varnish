@@ -35,7 +35,7 @@ libvinylapi_la_SOURCES += daemon.c
 endif
 
 libvinylapi_la_CFLAGS = \
-	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"'
+	-DVINYL_STATE_DIR='"${VINYL_STATE_DIR}"'
 
 libvinylapi_la_LIBADD = \
 	$(top_builddir)/lib/libvinyl/libvinyl.la \
@@ -77,7 +77,7 @@ vxp_test_SOURCES = \
 	$(libvinylapi_la_SOURCES) \
 	vxp_test.c
 vxp_test_CFLAGS = \
-	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"' \
+	-DVINYL_STATE_DIR='"${VINYL_STATE_DIR}"' \
 	-DVXP_DEBUG
 vxp_test_LDADD = \
 	$(top_builddir)/lib/libvinyl/libvinyl.la \

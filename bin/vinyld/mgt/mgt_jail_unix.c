@@ -56,8 +56,8 @@ static const char *vju_wrkuser;
 static gid_t vju_cc_gid;
 static int vju_cc_gid_set;
 
-#ifndef VARNISH_USER
-#define VARNISH_USER "varnish"
+#ifndef VINYL_USER
+#define VINYL_USER "varnish"
 #endif
 
 #ifndef VCACHE_USER
@@ -130,7 +130,7 @@ vju_init(char **args)
 		/* Autoconfig */
 		if (geteuid() != 0)
 			return (1);
-		if (vju_getuid(VARNISH_USER))
+		if (vju_getuid(VINYL_USER))
 			return (1);
 	} else {
 
@@ -160,8 +160,8 @@ vju_init(char **args)
 			    *args);
 		}
 
-		if (vju_user == NULL && vju_getuid(VARNISH_USER))
-			JERR("user", VARNISH_USER);
+		if (vju_user == NULL && vju_getuid(VINYL_USER))
+			JERR("user", VINYL_USER);
 	}
 
 	AN(vju_user);

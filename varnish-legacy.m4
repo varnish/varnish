@@ -52,13 +52,13 @@ AS_VAR_IF([$1], [""], [$5], [$4])dnl
 ])
 ])
 
-# VARNISH_VMOD_INCLUDE_DIR([])
+# VINYL_VMOD_INCLUDE_DIR([])
 # ----------------------------
 
-AC_DEFUN([VARNISH_VMOD_INCLUDES],
+AC_DEFUN([VINYL_VMOD_INCLUDES],
 [
 m4_pattern_forbid([^_?VARNISH[A-Z_]+$])
-m4_pattern_allow([^VARNISH_VMOD(_INCLUDE_DIR|TOOL)$])
+m4_pattern_allow([^VINYL_VMOD(_INCLUDE_DIR|TOOL)$])
 # Check for pkg-config
 PKG_CHECK_EXISTS([varnishapi],[],[
 	if test -z "$PKG_CONFIG"; then
@@ -77,42 +77,42 @@ variable if you installed software in a non-standard prefix.])
 	fi
 ])
 
-VARNISH_PKG_GET_VAR([VAPI_INCLUDE_DIR], [pkgincludedir])
+VINYL_PKG_GET_VAR([VAPI_INCLUDE_DIR], [pkgincludedir])
 _CPPFLAGS="$CPPFLAGS"
 VMOD_INCLUDES="-I$VAPI_INCLUDE_DIR"
 CPPFLAGS="$VMOD_INCLUDES $CPPFLAGS"
 AC_CHECK_HEADERS([vsha256.h cache/cache.h])
 CPPFLAGS="$_CPPFLAGS"
 AC_SUBST([VMOD_INCLUDES])
-])# VARNISH_VMOD_INCLUDE_DIR
+])# VINYL_VMOD_INCLUDE_DIR
 
-# VARNISH_VMOD_DIR([])
+# VINYL_VMOD_DIR([])
 # --------------------
 
-AC_DEFUN([VARNISH_VMOD_DIR],
+AC_DEFUN([VINYL_VMOD_DIR],
 [
-VARNISH_PKG_GET_VAR([VMOD_DIR], [vmoddir])
+VINYL_PKG_GET_VAR([VMOD_DIR], [vmoddir])
 AC_SUBST([VMOD_DIR])
 ])
 
-# VARNISH_VMODTOOL([])
+# VINYL_VMODTOOL([])
 # --------------------
 
-AC_DEFUN([VARNISH_VMODTOOL],
+AC_DEFUN([VINYL_VMODTOOL],
 [
 AC_CHECK_PROGS(PYTHON, [python3.10 python3.9 python3.8 python3.7 python3.6 dnl
  python3.5 python3.4 python3 python, "no"])
 if test "x$PYTHON" = "xno"; then
   AC_MSG_ERROR([Python >= 3.4 is needed to build, please install python.])
 fi
-VARNISH_PKG_GET_VAR([VMODTOOL], [vmodtool])
+VINYL_PKG_GET_VAR([VMODTOOL], [vmodtool])
 AC_SUBST([VMODTOOL])
 ])
 
-# VARNISH_PKG_GET_VAR([VARIABLE, PC_VAR_NAME])
+# VINYL_PKG_GET_VAR([VARIABLE, PC_VAR_NAME])
 # -------------------------------
 
-AC_DEFUN([VARNISH_PKG_GET_VAR],
+AC_DEFUN([VINYL_PKG_GET_VAR],
 [
 # Uses internal function for now..
 pkg_failed=no

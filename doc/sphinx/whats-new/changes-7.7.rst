@@ -202,7 +202,7 @@ varnishtest
 ``varnishtest`` can now send arbitrary http/2 settings frames and arbitrary
 PROXY2 tlvs.
 
-``varnishtest`` has been changed to always set a ``VARNISH_DEFAULT_N``
+``varnishtest`` has been changed to always set a ``VINYL_DEFAULT_N``
 environment variable to ensure that ``varnish`` invoked from ``varnishtest``
 always has a valid workdir.
 

@@ -91,16 +91,16 @@ AM_MISSING_PROG([DOT], [dot])
 AC_CHECK_PROGS([DOT], [dot])
 
 # Define VMOD flags
-_VARNISH_VMOD_LDFLAGS
+_VINYL_VMOD_LDFLAGS
 
 # Check for python.
-_VARNISH_CHECK_PYTHON
+_VINYL_CHECK_PYTHON
 
 # Check for libraries.
-_VARNISH_SEARCH_LIBS(pthread, pthread_create, [thr pthread c_r])
-_VARNISH_CHECK_LIB(dl, dlopen)
-_VARNISH_CHECK_LIB(socket, socket)
-_VARNISH_CHECK_LIB(nsl, getaddrinfo)
+_VINYL_SEARCH_LIBS(pthread, pthread_create, [thr pthread c_r])
+_VINYL_CHECK_LIB(dl, dlopen)
+_VINYL_CHECK_LIB(socket, socket)
+_VINYL_CHECK_LIB(nsl, getaddrinfo)
 
 AC_SUBST(NET_LIBS, "${SOCKET_LIBS} ${NSL_LIBS}")
 
@@ -650,11 +650,11 @@ fi
 
 # Run-time directory
 if test "${localstatedir}" = '${prefix}/var' ; then
-   VARNISH_STATE_DIR='/var/run'
+   VINYL_STATE_DIR='/var/run'
 else
-   VARNISH_STATE_DIR='${localstatedir}/varnish'
+   VINYL_STATE_DIR='${localstatedir}/varnish'
 fi
-AC_SUBST(VARNISH_STATE_DIR)
+AC_SUBST(VINYL_STATE_DIR)
 
 # Default configuration directory.
 pkgsysconfdir='${sysconfdir}/varnish'

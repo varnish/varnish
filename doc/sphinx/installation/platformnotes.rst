@@ -23,7 +23,7 @@ as the *workdir*.
 To ensure ``tmpfs`` is used, check the following:
 
 Determine the *workdir*. If you use a specific ``-n`` option to ``varnishd`` or
-set the ``VARNISH_DEFAULT_N`` variable, it is that value. Otherwise run
+set the ``VINYL_DEFAULT_N`` variable, it is that value. Otherwise run
 ``varnishd -x options``, which outputs the *workdir* default.
 
 Run ``df *workdir*``. If it reports ``tmpfs`` as the file system in the first
