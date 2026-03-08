@@ -3,17 +3,20 @@ exec_prefix=@exec_prefix@
 bindir=@bindir@
 sbindir=@sbindir@
 libdir=@libdir@
+sysconfdir=@sysconfdir@
+pkgsysconfdir=@pkgsysconfdir@
 includedir=@includedir@
 pkgincludedir=${includedir}/@PACKAGE@
 datarootdir=@datarootdir@
 datadir=@datadir@
 pkgdatadir=${datadir}/@PACKAGE@
+vcldir=${pkgdatadir}/vcl
 vmoddir=${libdir}/@PACKAGE@/vmods
-builddir=@abs_top_builddir@
-srcdir=@abs_top_srcdir@
+vmodtool=${pkgdatadir}/vmodtool.py
+vsctool=${pkgdatadir}/vsctool.py
 
-Name: VarnishAPI
-Description: Varnish API
+Name: VinylAPI
+Description: Vinyl Cache API
 Version: @PACKAGE_VERSION@
-Cflags: -I${includedir}/@PACKAGE@
-Libs: -L${libdir} -lvarnishapi
+Cflags: -I${pkgincludedir}
+Libs: -L${libdir} -lvinylapi

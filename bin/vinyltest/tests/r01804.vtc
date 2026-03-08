@@ -1,4 +1,4 @@
-vtest "#1804: varnishapi transaction grouping fails for PROXY"
+vtest "#1804: vinylapi transaction grouping fails for PROXY"
 
 server s1 {
 	rxreq

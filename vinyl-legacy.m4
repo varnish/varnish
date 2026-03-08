@@ -60,7 +60,7 @@ AC_DEFUN([VINYL_VMOD_INCLUDES],
 m4_pattern_forbid([^_?VARNISH[A-Z_]+$])
 m4_pattern_allow([^VINYL_VMOD(_INCLUDE_DIR|TOOL)$])
 # Check for pkg-config
-PKG_CHECK_EXISTS([varnishapi],[],[
+PKG_CHECK_EXISTS([vinylapi],[],[
 	if test -z "$PKG_CONFIG"; then
 		AC_MSG_FAILURE(
 [The pkg-config script could not be found or is too old.  Make sure it
@@ -70,7 +70,7 @@ path to pkg-config.
 To get pkg-config, see <http://www.freedesktop.org/wiki/Software/pkg-config/>.])
 	else
 		AC_MSG_FAILURE(
-[pkg-config was unable to locate the varnishapi configuration data.
+[pkg-config was unable to locate the vinylapi configuration data.
 
 Please check config.log or adjust the PKG_CONFIG_PATH environment
 variable if you installed software in a non-standard prefix.])
@@ -116,7 +116,7 @@ AC_DEFUN([VINYL_PKG_GET_VAR],
 [
 # Uses internal function for now..
 pkg_failed=no
-_PKG_CONFIG([$1], [variable=][$2], [varnishapi])
+_PKG_CONFIG([$1], [variable=][$2], [vinylapi])
 if test "$pkg_failed" = "yes"; then
    AC_MSG_FAILURE([$2][ not defined, too old Varnish?])
 fi

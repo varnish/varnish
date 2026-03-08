@@ -69,19 +69,19 @@ AC_DEFUN([_VINYL_SEARCH_LIBS], [
 AC_DEFUN([_VINYL_PKG_CONFIG], [
 	PKG_PROG_PKG_CONFIG([0.21])
 
-	PKG_CHECK_MODULES([VINYLAPI], [varnishapi])
-	AC_SUBST([VINYL_VERSION], [$($PKG_CONFIG --modversion varnishapi)])
+	PKG_CHECK_MODULES([VINYLAPI], [vinylapi])
+	AC_SUBST([VINYL_VERSION], [$($PKG_CONFIG --modversion vinylapi)])
 
-	PKG_CHECK_VAR([VINYLAPI_PREFIX], [varnishapi], [prefix])
-	PKG_CHECK_VAR([VINYLAPI_DATAROOTDIR], [varnishapi], [datarootdir])
-	PKG_CHECK_VAR([VINYLAPI_LIBDIR], [varnishapi], [libdir])
-	PKG_CHECK_VAR([VINYLAPI_BINDIR], [varnishapi], [bindir])
-	PKG_CHECK_VAR([VINYLAPI_SBINDIR], [varnishapi], [sbindir])
-	PKG_CHECK_VAR([VINYLAPI_VCLDIR], [varnishapi], [vcldir])
-	PKG_CHECK_VAR([VINYLAPI_VMODDIR], [varnishapi], [vmoddir])
+	PKG_CHECK_VAR([VINYLAPI_PREFIX], [vinylapi], [prefix])
+	PKG_CHECK_VAR([VINYLAPI_DATAROOTDIR], [vinylapi], [datarootdir])
+	PKG_CHECK_VAR([VINYLAPI_LIBDIR], [vinylapi], [libdir])
+	PKG_CHECK_VAR([VINYLAPI_BINDIR], [vinylapi], [bindir])
+	PKG_CHECK_VAR([VINYLAPI_SBINDIR], [vinylapi], [sbindir])
+	PKG_CHECK_VAR([VINYLAPI_VCLDIR], [vinylapi], [vcldir])
+	PKG_CHECK_VAR([VINYLAPI_VMODDIR], [vinylapi], [vmoddir])
 
-	PKG_CHECK_VAR([VMODTOOL], [varnishapi], [vmodtool])
-	PKG_CHECK_VAR([VSCTOOL], [varnishapi], [vsctool])
+	PKG_CHECK_VAR([VMODTOOL], [vinylapi], [vmodtool])
+	PKG_CHECK_VAR([VSCTOOL], [vinylapi], [vsctool])
 
 	AC_SUBST([VINYL_LIBRARY_PATH],
 		[$VINYLAPI_LIBDIR:$VINYLAPI_LIBDIR/varnish])
@@ -99,7 +99,7 @@ AC_DEFUN([_VINYL_PKG_CONFIG], [
 
 	dnl Define the VCL directory for automake
 	vcldir=$($PKG_CONFIG --define-variable=datadir=$datadir \
-		--variable=vcldir varnishapi)
+		--variable=vcldir vinylapi)
 	AC_SUBST([vcldir])
 
 	dnl Define the VCL directory for this package
@@ -171,7 +171,7 @@ AC_DEFUN([_VINYL_VMOD_CONFIG], [
 
 	dnl Define the VMOD directory for libtool
 	vmoddir=$($PKG_CONFIG --define-variable=libdir=$libdir \
-		--variable=vmoddir varnishapi)
+		--variable=vmoddir vinylapi)
 	AC_SUBST([vmoddir])
 
 	dnl Define an automake silent execution for vmodtool

@@ -948,8 +948,8 @@ AC_CONFIG_FILES([
     lib/libvcc/Makefile
     lib/libvgz/Makefile
     man/Makefile
-    varnishapi.pc
-    varnishapi-uninstalled.pc
+    vinylapi.pc
+    vinylapi-uninstalled.pc
     vmod/Makefile
 ])
 
