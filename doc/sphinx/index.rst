@@ -4,49 +4,49 @@
 	See LICENSE file for full text of license
 
 
-Varnish Documentation
-=====================
+Vinyl Cache Documentation
+=========================
 
-Varnish Cache is a web application accelerator also known as a caching HTTP
+Vinyl Cache is a web application accelerator also known as a caching HTTP
 reverse proxy. You install it in front of any server that speaks HTTP and
-configure it to cache the contents. Varnish Cache is really, really fast. It
+configure it to cache the contents. Vinyl Cache is really, really fast. It
 typically speeds up delivery with a factor of 300 - 1000x, depending on your
 architecture.
 
-To get started with Varnish-Cache we recommend that you read the installation
-guide :ref:`install-index`. Once you have Varnish up and running we recommend
+To get started with Vinyl Cache we recommend that you read the installation
+guide :ref:`install-index`. Once you have Vinyl Cache up and running we recommend
 that you go through our tutorial - :ref:`tutorial-index`, and finally the
 :ref:`users-guide-index`.
 
-If you need to find out how to use a specific Varnish tool, the
+If you need to find out how to use a specific Vinyl Cache tool, the
 :ref:`reference-index` contains detailed documentation over the tools. Changes
 from previous versions are located in the :ref:`whats-new-index` chapter. In
 closing, we have :ref:`phk`, a collection of blog posts from Poul-Henning Kamp
-related to Varnish and HTTP.
+related to Vinyl Cache and HTTP.
 
 
 Conventions used in this manual include:
 
-  ``service varnish restart``
+  ``service vinyl restart``
     A command you can run, or a shortkey you can press. Used either in the
     terminal or after starting one of the tools.
 
   `/usr/local/`, `vinyladm`, `sess_timeout`
-    A utility, Varnish configurable parameter or path.
+    A utility, Vinyl configurable parameter or path.
 
   https://www.vinyl-cache.org/
     A hyperlink.
 
 Longer listings like example command output and VCL look like this::
 
-    $ /opt/varnish/sbin/varnishd -V
+    $ /opt/vinyl/sbin/vinyld -V
     varnishd (varnish-8.0.0 revision 1234567)
     Copyright (c) 2006 Verdens Gang AS
     Copyright (c) 2006-2025 Varnish Software
 
 
 .. For maintainers:
-.. * always write Varnish with a capital V: Varnish, Varnish Cache.
+.. * always write Vinyl Cache with a capital V&C: Vinyl Cache.
 .. * Write Varnish tools as their executable name: `vinyld`, `vinyladm`.
 .. * if part of a command actually runable by the reader, use double backticks:
 ..   ``varnishd -f foo.c``

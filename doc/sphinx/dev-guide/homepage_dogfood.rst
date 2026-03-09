@@ -11,7 +11,7 @@ How our website works
 The principle of eating your own dogfood is important for software
 quality, that is how you experience what your users are dealing with,
 and I am not the least ashamed to admit that several obvious improvements
-have happened to Varnish as a result of running the project webserver.
+have happened to Vinyl Cache as a result of running the project webserver.
 
 But it is also important to externalize what you learn doing so, and
 therefore I thought I would document here how the projects new "internal
@@ -40,7 +40,7 @@ So, dogfood:  Obviously FreeBSD.
 
 Apart from the obvious reason that I wrote a lot of FreeBSD and
 can get world-class support by bugging my buddies about it, there
-are two equally serious reasons for the Varnish Project to run on
+are two equally serious reasons for the Vinyl Cache Project to run on
 FreeBSD:  Dogfood and jails.
 
 Vinyl Cache is not "software for Linux", it is software for any
@@ -60,7 +60,7 @@ We currently have three jails:
 
 * Hitch - runs the `Hitch SSL proxy <https://hitch-tls.org/>`_
 
-* Varnish - <a href="rimshot.mp3">You guessed it</a>
+* Vinyl Cache - <a href="rimshot.mp3">You guessed it</a>
 
 * Tools - backend webserver, currently `ACME Labs' thttpd <http://acme.com/software/thttpd/>`_
 
@@ -86,7 +86,7 @@ is, unabridged::
 	# Configure the host
 	sh build_host.sh |& tee _.bh
 	# Build the jails
-	foreach i (Tools Hitch Varnish)
+	foreach i (Tools Hitch Vinyl)
 		(cd $i ; sh build* |& tee _.bj)
 	end
 
@@ -150,7 +150,7 @@ Once it was as I wanted it, I pushed the changes the live machine and then::
 	git pull
 	cd Tools
 	sh build_j_tools.sh |& tee _.bj
-	vinyladm vcl.load foobar varnish-live.vcl
+	vinyladm vcl.load foobar vinyl-live.vcl
 	vinyladm vcl.use foobar
 
 For a few minutes our website was a bit slower (because of the

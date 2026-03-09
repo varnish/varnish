@@ -69,8 +69,8 @@
 	)
 
 #define VUT_OPT_n							\
-	VOPT("n:", "[-n <workdir>]", "varnish working directory",	\
-	     "Specify the varnish working directory of the instance "	\
+	VOPT("n:", "[-n <workdir>]", "vinyl working directory",	\
+	     "Specify the vinyl working directory of the instance "	\
 	     "to attach to. See :ref:`vinyld(1)` ``-n`` option "	\
 	     "documentation for additional information and defaults."	\
 	)
@@ -106,6 +106,6 @@
 	    " attempted only once and will fail immediately if"		\
 	    " unsuccessful. If set to \"off\", the connection will not"	\
 	    " fail, allowing the utility to start and wait"		\
-	    " indefinitely for the Varnish instance to appear. "	\
+	    " indefinitely for the `vinyld` instance to appear. "	\
 	    " Defaults to 5 seconds."					\
 	)
