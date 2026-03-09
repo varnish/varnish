@@ -7,13 +7,13 @@
 
 .. _vinylhist(1):
 
-===========
-varnishhist
-===========
+=========
+vinylhist
+=========
 
--------------------------
-Varnish request histogram
--------------------------
+-----------------------------
+Vinyl Cache request histogram
+-----------------------------
 
 :Manual section: 1
 
@@ -21,12 +21,12 @@ SYNOPSIS
 ========
 
 .. include:: ../include/vinylhist_synopsis.rst
-varnishhist |synopsis|
+vinylhist |synopsis|
 
 DESCRIPTION
 ===========
 
-The varnishhist utility reads vinyld(1) shared memory logs and
+The vinylhist utility reads vinyld(1) shared memory logs and
 presents a continuously updated histogram showing the distribution
 of the last N requests by their processing.  The value of N and the
 vertical scale are displayed in the top left corner.  The horizontal
@@ -49,8 +49,8 @@ SEE ALSO
 
 HISTORY
 =======
-The varnishhist utility was developed by Poul-Henning Kamp in cooperation with
-Verdens Gang AS and Varnish Software AS. This manual page was written by
+The vinylhist utility was developed by Poul-Henning Kamp in cooperation with
+Verdens Gang AS and Redpill-Linpro. This manual page was written by
 Dag-Erling Smørgrav.
 
 COPYRIGHT

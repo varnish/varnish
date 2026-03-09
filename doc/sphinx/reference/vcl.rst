@@ -22,7 +22,7 @@ DESCRIPTION
 
 The VCL language is a small domain-specific language designed to be
 used to describe request handling and document caching policies for
-Varnish Cache.
+Vinyl Cache.
 
 When a new configuration is loaded, the varnishd management process
 translates the VCL code to C and compiles it to a shared object which
@@ -441,7 +441,7 @@ Symbol references
 
 Some VCL symbols are subject to reference counting, and would trigger a vcl
 compiler error if they were declared but not used. One way to turn these errors
-into warnings is to add ``-p vcc_feature=-err_unref`` to your ``varnishd``
+into warnings is to add ``-p vcc_feature=-err_unref`` to your ``vinyld``
 command line. This will disable the error globally for all symbols in every VCL
 that is compiled.
 

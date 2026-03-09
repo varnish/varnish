@@ -57,7 +57,7 @@ of the following keywords:
   |  The ``vcl(label)`` return is only valid while the ``req.restarts``
   |  count is zero and if used from the active vcl.
   |
-  |  See the :ref:`ref_cli_vcl_label` command in :ref:`varnish-cli(7)`.
+  |  See the :ref:`ref_cli_vcl_label` command in :ref:`vinyl-cli(7)`.
 
 .. _vcl_pipe:
 

@@ -15,7 +15,7 @@ The Varnish CLI has a few bells&whistles when used as an API.
 
 First: `vcli.h` contains magic numbers.
 
-Second: If you use `varnishadm` to connect to `varnishd` for
+Second: If you use `vinyladm` to connect to `vinyld` for
 API purposes, use the `-p` argument to get "pass" mode.
 
 In "pass" mode, or with direct CLI connections (more below), the
@@ -37,29 +37,29 @@ the CLI protocol, for more, see the `vcli.h` include file.
 Local and remote CLI connections
 --------------------------------
 
-The ``varnishd`` process receives the CLI commands via TCP connections
+The ``vinyld`` process receives the CLI commands via TCP connections
 which require PSK authentication (see below), but which provide no secrecy.
 
 "No secrecy" means that if you configure these TCP connections to run
 across a network, anybody who can sniff packets can see your CLI
-commands.  If you need secrecy, use ``ssh`` to run ``varnishadm`` or
+commands.  If you need secrecy, use ``ssh`` to run ``vinyladm`` or
 to tunnel the TCP connection.
 
-By default `varnishd` binds to ``localhost`` and ask the kernel to
+By default `vinyld` binds to ``localhost`` and ask the kernel to
 assign a random port number.  The resulting listen address is
-stored in the shared memory, where the ``varnishadm`` program finds it.
+stored in the shared memory, where the ``vinyladm`` program finds it.
 
-You can configure ``varnishd`` to listen to a specific address with
+You can configure ``vinyld`` to listen to a specific address with
 the ``-T`` argument, this will also be written to shared memory, so
-``varnishadm`` keeps working::
+``vinyladm`` keeps working::
 
 	# Bind to internal network
 	varnishd -T 192.168.10.21:3245
 
-You can also configure ``varnishd`` to actively open a TCP connection
+You can also configure ``vinyld`` to actively open a TCP connection
 to another "controller" program, with the ``-M`` argument.
 
-Finally, when run in "debug mode" with the ``-d`` argument, ``varnishd``
+Finally, when run in "debug mode" with the ``-d`` argument, ``vinyld``
 will stay in the foreground and turn stdin/stdout into a CLI connection.
 
 .. _ref_psk_auth:
@@ -67,19 +67,19 @@ will stay in the foreground and turn stdin/stdout into a CLI connection.
 Authentication CLI connections
 ------------------------------
 
-CLI connections to `varnishd` are authenticated with a "pre-shared-key"
+CLI connections to `vinyld` are authenticated with a "pre-shared-key"
 authentication scheme, where the other end must prove they know
-*the contents of* the secret file ``varnishd`` uses.
+*the contents of* the secret file ``vinyld`` uses.
 
 They do not have to read the precise same file on that specific
 computer, they could read an entirely different file on a different
 computer or fetch the secret from a server.
 
 The name of the file can be configured with the ``-S`` option, and
-``varnishd`` records the name in shared memory, so ``varnishadm``
+``vinyld`` records the name in shared memory, so ``vinyladm``
 can find it.
 
-As a bare minimum ``varnishd`` needs to be able to read the file,
+As a bare minimum ``vinyld`` needs to be able to read the file,
 but other than that, it can be restricted any way you want.
 
 Since it is not the file, but only the content of it that matter,
@@ -87,7 +87,7 @@ you can make the file unreadable by everybody, and instead place
 a copy of the file in the home directories of the authorized users.
 
 The file is read only at the moment when the `auth` CLI command is
-issued and the contents is not cached in `varnishd`, so you can
+issued and the contents is not cached in `vinyld`, so you can
 change it as often as you want.
 
 An authenticated session looks like this:
@@ -107,7 +107,7 @@ An authenticated session looks like this:
    auth 455ce847f0073c7ab3b1465f74507b75d3dc064c1e7de3b71e00de9092fdc89a
    200 279
    -----------------------------
-   Varnish Cache CLI 1.0
+   Vinyl Cache CLI 1.0
    -----------------------------
    FreeBSD,13.0-CURRENT,amd64,-jnone,-sdefault,-sdefault,-hcritbit
    varnish-trunk revision 89a558e56390d425c52732a6c94087eec9083115

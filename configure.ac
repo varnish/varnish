@@ -60,7 +60,7 @@ AC_ARG_WITH([rst2man],
     [no])])
 if test "x$RST2MAN" = "xno"; then
   AC_MSG_ERROR(
-    [rst2man is needed to build Varnish, please install python3-docutils.])
+    [rst2man is needed to build Vinyl Cache, please install python3-docutils.])
 fi
 
 AC_ARG_WITH([sphinx-build],
@@ -71,7 +71,7 @@ AC_ARG_WITH([sphinx-build],
     [no])])
 if test "x$SPHINX" = "xno"; then
   AC_MSG_ERROR(
-    [sphinx-build is needed to build Varnish, please install python3-sphinx.])
+    [sphinx-build is needed to build Vinyl Cache, please install python3-sphinx.])
 fi
 
 AC_ARG_WITH([rst2html],
@@ -523,14 +523,14 @@ AC_CHECK_DECL([SO_ACCEPTFILTER],
 
 AC_CHECK_DECL([SO_RCVTIMEO],
     [],
-    AC_MSG_ERROR([SO_RCVTIMEO is needed to build Varnish.]), [
+    AC_MSG_ERROR([SO_RCVTIMEO is needed to build Vinyl Cache.]), [
         #include <sys/types.h>
         #include <sys/socket.h>
     ])
 
 AC_CHECK_DECL([SO_SNDTIMEO],
     [],
-    AC_MSG_ERROR([SO_SNDTIMEO is needed to build Varnish.]), [
+    AC_MSG_ERROR([SO_SNDTIMEO is needed to build Vinyl Cache.]), [
         #include <sys/types.h>
         #include <sys/socket.h>
     ])
@@ -652,12 +652,12 @@ fi
 if test "${localstatedir}" = '${prefix}/var' ; then
    VINYL_STATE_DIR='/var/run'
 else
-   VINYL_STATE_DIR='${localstatedir}/varnish'
+   VINYL_STATE_DIR='${localstatedir}/vinyl'
 fi
 AC_SUBST(VINYL_STATE_DIR)
 
 # Default configuration directory.
-pkgsysconfdir='${sysconfdir}/varnish'
+pkgsysconfdir='${sysconfdir}/vinyl'
 AC_SUBST(pkgsysconfdir)
 
 # VMOD variables
@@ -906,7 +906,7 @@ AM_SUBST_NOTMAKE(VMOD_TESTS)
 
 AC_ARG_WITH([contrib],
 	[AS_HELP_STRING([--with-contrib],
-		[Build Varnish with external contributions.])])
+		[Build Vinyl Cache with external contributions.])])
 
 AM_CONDITIONAL([WITH_CONTRIB], [test "$with_contrib" = yes])
 CONTRIB_TESTS="$(cd $srcdir/contrib && echo tests/*.vtc)"
@@ -915,7 +915,7 @@ AM_SUBST_NOTMAKE(CONTRIB_TESTS)
 
 AM_COND_IF([WITH_CONTRIB], [
 	AC_DEFINE([WITH_CONTRIB], [1],
-		[Define to 1 when Varnish is built with contributions.])
+		[Define to 1 when Vinyl Cache is built with contributions.])
 ])
 
 # Make sure this include dir exists

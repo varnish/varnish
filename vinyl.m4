@@ -30,19 +30,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# varnish.m4 - Macros to build against Varnish.         -*- Autoconf -*-
-# serial 12 (varnish-7.5.0)
+# vinyl.m4 - Macros to build against Vinyl Cache.         -*- Autoconf -*-
+# serial 12 (vinyl-7.5.0)
 #
 # This collection of macros helps create VMODs or tools interacting with
-# Varnish Cache using the GNU build system (autotools). In order to work
+# Vinyl Cache using the GNU build system (autotools). In order to work
 # from a source checkout, recommended versions of autotools are 2.68 for
 # autoconf, 1.12 for automake and 2.2.6 for libtool. For pkg-config, at
 # least version 0.21 is required ; it should be available even on old
 # platforms. Only pkg-config is needed when building from a dist archive.
 #
 # Macros whose name start with an underscore are private and may change at
-# any time. Public macros starting with VARNISH_ are documented and will
-# maintain backwards compatibility with older versions of Varnish Cache.
+# any time. Public macros starting with VINYL_ are documented and will
+# maintain backwards compatibility with older versions of Vinyl Cache.
 
 # _VINYL_CHECK_LIB(LIB, FUNC)
 # -----------------------------
@@ -84,12 +84,12 @@ AC_DEFUN([_VINYL_PKG_CONFIG], [
 	PKG_CHECK_VAR([VSCTOOL], [vinylapi], [vsctool])
 
 	AC_SUBST([VINYL_LIBRARY_PATH],
-		[$VINYLAPI_LIBDIR:$VINYLAPI_LIBDIR/varnish])
+		[$VINYLAPI_LIBDIR:$VINYLAPI_LIBDIR/vinyl])
 
 	AC_SUBST([VINYL_TEST_PATH],
 		[$VINYLAPI_SBINDIR:$VINYLAPI_BINDIR:$PATH])
 
-	dnl Inherit Varnish's prefix if undefined
+	dnl Inherit Vinyl Cache's prefix if undefined
 	dnl Also the libdir for multi-lib systems
 	if test "$prefix" = NONE
 	then
@@ -116,7 +116,7 @@ AC_DEFUN([_VINYL_CHECK_DEVEL], [
 	[CPPFLAGS=$VINYLAPI_CFLAGS]
 
 	AC_CHECK_HEADERS([vsha256.h cache/cache.h], [],
-		[AC_MSG_ERROR([Missing Varnish development files.])])
+		[AC_MSG_ERROR([Missing Vinyl Cache development files.])])
 
 	[CPPFLAGS=$_orig_cppflags]
 ])
@@ -166,7 +166,7 @@ AC_DEFUN([_VINYL_VMOD_CONFIG], [
 	dnl Expose the location of the std and directors VMODs
 	AC_SUBST([VINYLAPI_VMODDIR])
 
-	dnl Expose Varnish's aclocal directory to automake
+	dnl Expose Vinyl Cache's aclocal directory to automake
 	AC_SUBST([VINYLAPI_DATAROOTDIR])
 
 	dnl Define the VMOD directory for libtool
@@ -303,7 +303,7 @@ clean-vmod-$1:
 # skip man page generation as it is often the case from a dist archive
 # (usually /bin/true when the manual is distributed).
 #
-# Two notable variables are exposed from Varnish's pkg-config:
+# Two notable variables are exposed from Vinyl Cache's pkg-config:
 #
 # - VINYLAPI_VMODDIR (locate vmod-std and vmod-directors in your tests)
 # - VINYLAPI_DATAROOTDIR (for when aclocal is called from a Makefile)
@@ -317,7 +317,7 @@ clean-vmod-$1:
 # VMOD maintenance, initialization of autoconf, automake and libtool is
 # still the maintainer's responsibility. It cannot be avoided.
 #
-# Once your VMOD is built, you can use varnishtest to run test cases. For
+# Once your VMOD is built, you can use vinyltest to run test cases. For
 # that you can rely on automake's default test driver, and all you need
 # is a minimal setup:
 #
@@ -325,19 +325,19 @@ clean-vmod-$1:
 #         PATH="$(VINYL_TEST_PATH):$(PATH)" \
 #         LD_LIBRARY_PATH="$(VINYL_LIBRARY_PATH)"
 #     TEST_EXTENSIONS = .vtc
-#     VTC_LOG_COMPILER = varnishtest -v
+#     VTC_LOG_COMPILER = vinyltest -v
 #     AM_VTC_LOG_FLAGS = -Dvmod_foo="$(VMOD_FOO)" -Dvmod_bar="$(VMOD_BAR)"
 #
 # Setting up the different paths is mostly relevant when you aren't building
-# against the system installation of Varnish. In the case of the PATH, you
+# against the system installation of Vinyl Cache. In the case of the PATH, you
 # may also need to preserve the original PATH if you run commands outside of
-# the Varnish distribution in your test cases (as shown above).
+# the Vinyl Cache distribution in your test cases (as shown above).
 #
 # The $(VMOD_*) variables contain a proper import statement if the relevant
 # VMOD was built in the same directory as the test runner. With the example
 # above you could import VMODs this way in a test case:
 #
-#     varnish v1 -vcl+backend {
+#     vinyl v1 -vcl+backend {
 #         import std;
 #         import ${vmod_bar};
 #
@@ -362,7 +362,7 @@ clean-vmod-$1:
 #     vmod_foo_vcl_DATA = some_addition.vcl
 #
 # This way the end-user's VCL only needs few lines of code to start using both
-# VMODs and VCLs assuming Varnish's default vmod_path and vcl_path were not
+# VMODs and VCLs assuming Vinyl Cache's default vmod_path and vcl_path were not
 # changed:
 #
 #     vcl 4.0;
@@ -391,7 +391,7 @@ AC_DEFUN([VINYL_VMODS], [
 # If that VCC file only needs to be generated once and is distributed, builds
 # from the dist archive will have the VCC file in the source directory.
 #
-# With Varnish's ability to run VMODTOOL in a VPATH build both scenarios are
+# With Vinyl Cache's ability to run VMODTOOL in a VPATH build both scenarios are
 # taken care of. This macro works otherwise exactly like VINYL_VMODS.
 #
 AC_DEFUN([VINYL_VMODS_GENERATED], [
@@ -453,7 +453,7 @@ clean-vsc-$1:
 # -----------------------
 # Since: Varnish 6.0.0
 #
-# In order to manipulate custom counters that tools like varnishstat can
+# In order to manipulate custom counters that tools like vinylstat can
 # report, it is possible to do that via a VMOD. This macro allows you
 # to declare sets of counters, but does not associate them automatically
 # with their respective VMODs:
@@ -534,9 +534,9 @@ clean-vut-$1:
 # Since: Varnish 5.2.0
 #
 # To write programs that consume the VSM, and in particular the VSL, it is
-# possible since Varnish 5.2.0 to use the VUT (Varnish UTility) API already
-# used by varnishlog, varnishstat and the other utilities from the standard
-# Varnish distribution.
+# possible since Varnish 5.2.0 to use the VUT (Vinyl UTility) API already
+# used by vinyllog, vinylstat and the other utilities from the standard
+# Vinyl Cache distribution.
 #
 # This API can optionally be used to generate part of the manual: the synopsis
 # and the list of options. The generated RST files can then be included from
@@ -633,7 +633,7 @@ AC_DEFUN([VINYL_UTILITIES], [
 # Since Varnish 5.2.0:
 # - VSCTOOL added
 #
-# Verify that the version of Varnish Cache found by pkg-config is at least
+# Verify that the version of Vinyl Cache found by pkg-config is at least
 # MINIMUM-VERSION. If MAXIMUM-VERSION is specified, verify that the version
 # is strictly below MAXIMUM-VERSION.
 #
@@ -644,8 +644,8 @@ AC_DEFUN([VINYL_UTILITIES], [
 # - VINYL_LIBRARY_PATH (for both public and private libraries)
 # - VINYL_VERSION (also available in autoconf)
 #
-# The following variables are available in autoconf, read from the varnish
-# pkg-config:
+# The following variables are available in autoconf, read from the
+# Vinyl Cache pkg-config:
 #
 # - VINYLAPI_CFLAGS
 # - VINYLAPI_LIBS
@@ -664,8 +664,8 @@ AC_DEFUN([VINYL_UTILITIES], [
 # - vcldir
 # - pkgvcldir
 #
-# The vcldir is where Varnish will by default look up VCL files using relative
-# paths not found in its sysconfdir (by default /etc/varnish). The pkgvcldir on
+# The vcldir is where Vinyl Cache will by default look up VCL files using relative
+# paths not found in its sysconfdir (by default /etc/vinyl). The pkgvcldir on
 # the other hand is a recommended location for your package's VCL files, it
 # defaults to "${vcldir}/${PACKAGE}".
 #
@@ -674,15 +674,15 @@ AC_DEFUN([VINYL_UTILITIES], [
 #
 AC_DEFUN([VINYL_PREREQ], [
 	AC_REQUIRE([_VINYL_PKG_CONFIG])
-	AC_MSG_CHECKING([for Varnish])
+	AC_MSG_CHECKING([for Vinyl Cache])
 	AC_MSG_RESULT([$VINYL_VERSION])
 
 	AS_VERSION_COMPARE([$VINYL_VERSION], [$1], [
-		AC_MSG_ERROR([Varnish version $1 or higher is required.])
+		AC_MSG_ERROR([Vinyl Cache version $1 or higher is required.])
 	])
 
 	test $# -gt 1 &&
 	AS_VERSION_COMPARE([$2], [$VINYL_VERSION], [
-		AC_MSG_ERROR([Varnish version below $2 is required.])
+		AC_MSG_ERROR([Vinyl Cache version below $2 is required.])
 	])
 ])

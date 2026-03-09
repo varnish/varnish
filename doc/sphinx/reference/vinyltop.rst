@@ -7,13 +7,13 @@
 
 .. _vinyltop(1):
 
-==========
-varnishtop
-==========
+========
+vinyltop
+========
 
--------------------------
-Varnish log entry ranking
--------------------------
+------------------------------------
+Vinyl Cache log entry real-time view
+------------------------------------
 
 :Manual section: 1
 
@@ -21,12 +21,12 @@ SYNOPSIS
 ========
 
 .. include:: ../include/vinyltop_synopsis.rst
-varnishtop |synopsis|
+vinyltop |synopsis|
 
 DESCRIPTION
 ===========
 
-The varnishtop utility reads :ref:`vinyld(1)` shared memory logs and
+The `vinyltop` utility reads :ref:`vinyld(1)` shared memory logs and
 presents a continuously updated list of the most commonly occurring
 log entries.  With suitable filtering using the ``-I``, ``-i``, ``-X``
 and ``-x`` options, it can be used to display a ranking of requested
@@ -43,12 +43,12 @@ EXAMPLES
 The following example displays a continuously updated list of the most
 frequently requested URLs::
 
-  varnishtop -i ReqURL
+  vinyltop -i ReqURL
 
 The following example displays a continuously updated list of the most
 commonly used user agents::
 
-  varnishtop -C -I ReqHeader:User-Agent
+  vinyltop -C -I ReqHeader:User-Agent
 
 SEE ALSO
 ========
@@ -62,8 +62,8 @@ SEE ALSO
 HISTORY
 =======
 
-The varnishtop utility was originally developed by Poul-Henning Kamp
-in cooperation with Verdens Gang AS and Varnish Software AS, and later
+The `vinyltop` utility was originally developed by Poul-Henning Kamp
+in cooperation with Verdens Gang AS and Redpill-Linpro, and later
 substantially rewritten by Dag-Erling Smørgrav.  This manual page was
 written by Dag-Erling Smørgrav, and later updated by Martin Blix
 Grydeland.

@@ -98,7 +98,7 @@ A host header to add to probes and regular backend requests if they have no such
 Timeout Attributes
 ------------------
 
-These attributes control how patient `varnishd` is during backend fetches::
+These attributes control how patient `vinyld` is during backend fetches::
 
     .connect_timeout = 1.4s;
     .first_byte_timeout = 20s;

@@ -55,7 +55,7 @@ Malloc is a virtual memory based storage backend. Each object will be allocated
 using whatever ``malloc()`` implementation is in effect. If configured, virtual
 memory might get paged in and out to swap space by the operating system.
 
-The size parameter specifies the maximum *net* amount of memory `varnishd` will
+The size parameter specifies the maximum *net* amount of memory `vinyld` will
 allocate.  The size is assumed to be in bytes, unless followed by one of the
 following suffixes:
 
@@ -74,8 +74,8 @@ the total size of headers), segmented body data and metadata for the storage
 engine itself.
 
 This *net* amount of memory is the sum of all allocation sizes from the
-perspective of `varnishd`, but for the actual *gross* amount, two additional
-factors need to be considered: `varnishd` also requires memory outside the
+perspective of `vinyld`, but for the actual *gross* amount, two additional
+factors need to be considered: `vinyld` also requires memory outside the
 storage engine in the order of 1KB per object. And, more importantly, due to
 fragmentation, the amount of memory actually used by the malloc implementation
 might be substantially higher by a factor of typically **two to four times**.
@@ -115,7 +115,7 @@ is output::
 to indicate that `libumem`_ will not only be used for storage. Likely
 reasons for this to be the case are:
 
-* some library ``varnishd`` is linked against was linked against
+* some library ``vinyld`` is linked against was linked against
   `libumem`_ (most likely ``libpcre2-8``, check with ``ldd``)
 
 * ``LD_PRELOAD_64=/usr/lib/amd64/libumem.so.1``,
@@ -154,7 +154,7 @@ for this limit like control groups (Linux) or resource controls
 .. XXX idk about the BSD and macOS abstractions -- slink
 
 The 'path' parameter specifies either the path to the backing file or
-the path to a directory in which `varnishd` will create the backing file.
+the path to a directory in which `vinyld` will create the backing file.
 
 The size parameter specifies the size of the backing file. The size
 is assumed to be in bytes, unless followed by one of the following
@@ -175,7 +175,7 @@ existing file it is an error to not specify the size.
 If the backing file already exists, it will be truncated or expanded
 to the specified size.
 
-Note that if `varnishd` has to create or expand the file, it will not
+Note that if `vinyld` has to create or expand the file, it will not
 pre-allocate the added space, leading to fragmentation, which may
 adversely impact performance on rotating hard drives.  Pre-creating
 the storage file using `dd(1)` will reduce fragmentation to a minimum.
@@ -193,7 +193,7 @@ have many small objects.
 File performance is typically limited to the write speed of the
 device, and depending on use, the seek time.
 
-The 'advice' parameter tells the kernel how `varnishd` expects to
+The 'advice' parameter tells the kernel how `vinyld` expects to
 use this mapped region so that the kernel can choose the appropriate
 read-ahead and caching techniques.  Possible values are ``normal``,
 ``random`` and ``sequential``, corresponding to MADV_NORMAL, MADV_RANDOM

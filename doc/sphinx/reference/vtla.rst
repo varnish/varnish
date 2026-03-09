@@ -119,7 +119,7 @@ VTLA
 
 VUG
     Varnish User Group meeting -- Half-yearly event where the users and
-    developers of Varnish Cache gather to share experiences and plan
+    developers of Vinyl Cache gather to share experiences and plan
     future development.
 
 VUT

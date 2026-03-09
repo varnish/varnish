@@ -48,7 +48,7 @@ Applying changes to the default service is best done by creating a new file
   ExecStart=/usr/sbin/varnishd -a :80 -T localhost:6082 -f /etc/varnish/default.vcl -S /etc/varnish/secret -s default,256m
 
 This will override the ExecStart part of the default configuration shipped
-with Varnish Cache.
+with Vinyl Cache.
 
 Run ``systemctl daemon-reload`` to make sure systemd picks up the new
 configuration before restarting Varnish.

@@ -26,21 +26,21 @@ this is to use :ref:`vinyllog(1)` and :ref:`vinyltop(1)` but
 sometimes a client-side tool makes sense. Here are the ones we
 commonly use.
 
-Tool: varnishtop
+Tool: vinyltop
 ~~~~~~~~~~~~~~~~
 
-You can use varnishtop to identify what URLs are hitting the backend
-the most. ``varnishtop -i BereqURL`` is an essential command, showing
+You can use vinyltop to identify what URLs are hitting the backend
+the most. ``vinyltop -i BereqURL`` is an essential command, showing
 you the top requests Varnish is sending to the backend. You can see some
 other examples of :ref:`vinyltop(1)` usage in :ref:`users-guide-statistics`.
 
 
-Tool: varnishlog
+Tool: vinyllog
 ~~~~~~~~~~~~~~~~
 
 When you have identified an URL which is frequently sent to the
 backend you can use :ref:`vinyllog(1)` to have a look at the
-request.  ``varnishlog -q 'ReqURL ~ "^/foo/bar"'`` will show you the
+request.  ``vinyllog -q 'ReqURL ~ "^/foo/bar"'`` will show you the
 requests coming from the client matching `/foo/bar`.
 
 For more information on how :ref:`vinyllog(1)` works please see
@@ -212,7 +212,7 @@ copies it back to the request, deleting the original cookie header.
     }
 
 There are other scary examples of what can be done in VCL in the
-Varnish Cache Wiki.
+Vinyl Cache Wiki.
 
 .. XXX:Missing link here.
 
@@ -246,7 +246,7 @@ Age
 
 Varnish adds an 'Age' header to indicate how long the object has been
 kept inside Varnish. You can grep out 'Age' from :ref:`vinyllog(1)`
-with ``varnishlog -I RespHeader:^Age``.
+with ``vinyllog -I RespHeader:^Age``.
 
 Pragma
 ~~~~~~

@@ -47,19 +47,19 @@ Varnish Glossary
 	a browser, but do not forget to think about spiders, robots
 	script-kiddies and criminals.
 
-   varnishstat
+   vinylstat
 	Program which presents varnish statistics counters.
 
-   varnishlog
+   vinyllog
 	Program which presents varnish transaction log in native format.
 
-   varnishtop
+   vinyltop
 	Program which gives real-time "top-X" list view of transaction log.
 
-   varnishncsa
+   vinylncsa
 	Program which presents varnish transaction log in "NCSA" format.
 
-   varnishhist
+   vinylhist
 	Eye-candy program showing response time histogram in 1980s
 	ASCII-art style.
 

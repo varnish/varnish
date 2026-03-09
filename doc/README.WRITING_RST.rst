@@ -49,7 +49,7 @@ of documentation:
 * set link targets for important paragraphs following the scheme
   ref-`doc`-`section`, for instance::
 
-    .. _ref-varnishd-opt_T:
+    .. _ref-vinyld-opt_T:
 
   These can be referenced from other documents making up the html
   documentation, but not from stand-alone documents (like man-pages).

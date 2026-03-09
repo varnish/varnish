@@ -43,7 +43,7 @@ can get world-class support by bugging my buddies about it, there
 are two equally serious reasons for the Varnish Project to run on
 FreeBSD:  Dogfood and jails.
 
-Varnish Cache is not "software for Linux", it is software for any
+Vinyl Cache is not "software for Linux", it is software for any
 competent UNIX-like operating system, and FreeBSD is our primary
 "keep us honest about this" platform.
 
@@ -144,14 +144,14 @@ the kinks on one of my test-machines.
 
 Once it was as I wanted it, I pushed the changes the live machine and then::
 
-	varnishadm vcl.use backup
+	vinyladm vcl.use backup
 	# The 'backup' VCL does a "pass" of all traffic to my server
 	cd Admin
 	git pull
 	cd Tools
 	sh build_j_tools.sh |& tee _.bj
-	varnishadm vcl.load foobar varnish-live.vcl
-	varnishadm vcl.use foobar
+	vinyladm vcl.load foobar varnish-live.vcl
+	vinyladm vcl.use foobar
 
 For a few minutes our website was a bit slower (because of the
 extra Paris-Denmark hop), but there was never any interruption.

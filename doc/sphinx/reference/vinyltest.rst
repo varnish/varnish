@@ -7,30 +7,30 @@
 
 .. _vinyltest(1):
 
-===========
-varnishtest
-===========
+=========
+vinyltest
+=========
 
-------------------------
-Test program for Varnish
-------------------------
+----------------------------
+Test program for Vinyl Cache
+----------------------------
 
 :Manual section: 1
 
 SYNOPSIS
 ========
 
-varnishtest [-hikLlqv] [-b size] [-D name=val] [-j jobs] [-n iter] [-t duration] file [file ...]
+vinyltest [-hikLlqv] [-b size] [-D name=val] [-j jobs] [-n iter] [-t duration] file [file ...]
 
 DESCRIPTION
 ===========
 
-The varnishtest program is a script driven program used to test the
-Varnish Cache.
+The `vinyltest` program is a script driven program used to test the
+Vinyl Cache.
 
-The varnishtest program, when started and given one or more script
+The `vinyltest` program, when started and given one or more script
 files, can create a number of threads representing backends, some
-threads representing clients, and a varnishd process. This is then used to
+threads representing clients, and a `vinyld` process. This is then used to
 simulate a transaction to provoke a specific behavior.
 
 The following options are available:
@@ -41,7 +41,7 @@ The following options are available:
 
 -h               Show help
 
--i               Set PATH and vmod_path to find varnish binaries in build tree
+-i               Set PATH and vmod_path to find Vinyl Cache binaries in build tree
 
 -j jobs          Run this many tests in parallel
 
@@ -53,7 +53,7 @@ The following options are available:
 
 -n iterations    Run tests this many times
 
--p name=val      Pass parameters to all varnishd command lines
+-p name=val      Pass parameters to all `vinyld` command lines
 
 -q               Quiet mode: report only failures
 
@@ -64,20 +64,20 @@ The following options are available:
 file             File to use as a script
 
 
-If `TMPDIR` is set in the environment, varnishtest creates temporary
+If `TMPDIR` is set in the environment, `vinyltest` creates temporary
 `vtc.*` directories for each test in `$TMPDIR`, otherwise in `/tmp`.
 
 SCRIPTS
 =======
 
 The vtc syntax is documented at length in :ref:`vtc(7)`. Should you want more
-examples than the one below, you can have a look at the Varnish source code
-repository, under `bin/varnishtest/tests/`, where all the regression tests for
-Varnish are kept.
+examples than the one below, you can have a look at the Vinyl Cache source code
+repository, under `bin/vinyltest/tests/`, where all the regression tests for
+Vinyl Cache are kept.
 
 An example::
 
-        varnishtest "#1029"
+        vinyltest "#1029"
 
         server s1 {
                 rxreq
@@ -90,7 +90,7 @@ An example::
 
         } -start
 
-        varnish v1 -vcl+backend {
+        vinyl v1 -vcl+backend {
                 sub vcl_backend_response {
                         set beresp.do_esi = true;
                         if (bereq.url == "/foo") {
@@ -113,7 +113,7 @@ An example::
         } -run
 
 When run, the above script will simulate a server (s1) that expects
-two different requests. It will start a Varnish server (v1) and add the
+two different requests. It will start a `vinyld` (v1) and add the
 backend definition to the VCL specified (-vcl+backend). Finally it starts
 the c1-client, which is a single client sending two requests.
 
@@ -121,17 +121,17 @@ TESTING A BUILD TREE
 ====================
 
 Whether you are building a VMOD or trying to use one that you freshly
-built, you can tell ``varnishtest`` to pass a *vmod_path* to ``varnishd``
-instances started using the ``varnish -start`` command in your test case::
+built, you can tell ``vinyltest`` to pass a *vmod_path* to ``vinyld``
+instances started using the ``vinyl -start`` command in your test case::
 
-    varnishtest -p vmod_path=... /path/to/*.vtc
+    vinyltest -p vmod_path=... /path/to/*.vtc
 
 This way you can use the same test cases on both installed and built
 VMODs::
 
     server s1 {...} -start
 
-    varnish v1 -vcl+backend {
+    vinyl v1 -vcl+backend {
         import wossname;
 
         ...
@@ -144,42 +144,42 @@ allowing you to run a build matrix without changing the test suite. You
 can achieve the same with macros, but then they need to be defined on
 each run.
 
-You can see the actual ``varnishd`` command lines in test outputs,
+You can see the actual ``vinyld`` command lines in test outputs,
 they look roughly like this::
 
-    exec varnishd [varnishtest -p params] [testing params] [vtc -arg params]
+    exec vinyld [vinyltest -p params] [testing params] [vtc -arg params]
 
-Parameters you define with ``varnishtest -p`` may be overridden by
-parameters needed by ``varnishtest`` to run properly, and they may in
+Parameters you define with ``vinyltest -p`` may be overridden by
+parameters needed by ``vinyltest`` to run properly, and they may in
 turn be overridden by parameters set in test scripts.
 
-There's also a special mode in which ``varnishtest`` builds itself a
-PATH and a *vmod_path* in order to find Varnish binaries (programs and
-VMODs) in the build tree surrounding the ``varnishtest`` binary. This
-is meant for testing of Varnish under development and will disregard
+There's also a special mode in which ``vinyltest`` builds itself a
+PATH and a *vmod_path* in order to find Vinyl Cache binaries (programs and
+VMODs) in the build tree surrounding the ``vinyltest`` binary. This
+is meant for testing of Vinyl Cache under development and will disregard
 your *vmod_path* if you set one.
 
-If you need to test your VMOD against a Varnish build tree, you must
+If you need to test your VMOD against a Vinyl Cache build tree, you must
 install it first, in a temp directory for instance. With information
 provided by the installation's *pkg-config(1)* you can build a proper
-PATH in order to access Varnish programs, and a *vmod_path* to access
+PATH in order to access Vinyl programs, and a *vmod_path* to access
 both your VMOD and the built-in VMODs::
 
     export PKG_CONFIG_PATH=/path/to/install/lib/pkgconfig
 
-    BINDIR="$(pkg-config --variable=bindir varnishapi)"
-    SBINDIR="$(pkg-config --variable=sbindir varnishapi)"
+    BINDIR="$(pkg-config --variable=bindir vinylapi)"
+    SBINDIR="$(pkg-config --variable=sbindir vinylapi)"
     PATH="SBINDIR:BINDIR:$PATH"
 
-    VMODDIR="$(pkg-config --variable=vmoddir varnishapi)"
+    VMODDIR="$(pkg-config --variable=vmoddir vinylapi)"
     VMOD_PATH="/path/to/your/vmod/build/dir:$VMODDIR"
 
-    varnishtest -p vmod_path="$VMOD_PATH" ...
+    vinyltest -p vmod_path="$VMOD_PATH" ...
 
 SEE ALSO
 ========
 
-* varnishtest source code repository with tests
+* vinyltest source code repository with tests
 * :ref:`vinylhist(1)`
 * :ref:`vinyllog(1)`
 * :ref:`vinylncsa(1)`
@@ -192,8 +192,8 @@ SEE ALSO
 HISTORY
 =======
 
-The varnishtest program was developed by Poul-Henning Kamp
-<phk@phk.freebsd.dk> in cooperation with Varnish Software AS.  This manual
+The vinyltest program was developed by Poul-Henning Kamp
+<phk@phk.freebsd.dk> in cooperation with Redpill-Linpro.  This manual
 page was originally written by Stig Sandbeck Mathisen <ssm@linpro.no>
 and updated by Kristian Lyngstøl <kristian@varnish-cache.org>.
 
@@ -201,7 +201,7 @@ and updated by Kristian Lyngstøl <kristian@varnish-cache.org>.
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Varnish
+This document is licensed under the same licence as Vinyl Cache
 itself. See LICENCE for details.
 
 * Copyright (c) 2007-2016 Varnish Software AS

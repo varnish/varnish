@@ -7,13 +7,13 @@
 
 .. _vinyllog(1):
 
-==========
-varnishlog
-==========
+========
+vinyllog
+========
 
---------------------
-Display Varnish logs
---------------------
+------------------------
+Display Vinyl Cache logs
+------------------------
 
 :Manual section: 1
 
@@ -21,7 +21,7 @@ SYNOPSIS
 ========
 
 .. include:: ../include/vinyllog_synopsis.rst
-varnishlog |synopsis|
+vinyllog |synopsis|
 
 OPTIONS
 =======
@@ -55,9 +55,9 @@ SEE ALSO
 HISTORY
 =======
 
-The varnishlog utility was developed by Poul-Henning Kamp
+The vinyllog utility was developed by Poul-Henning Kamp
 <phk@phk.freebsd.dk> in cooperation with Verdens Gang AS and
-Varnish Software AS. This manual page was initially written by Dag-Erling
+Redpill-Linpro. This manual page was initially written by Dag-Erling
 Smørgrav, and later updated by Per Buer and Martin Blix Grydeland.
 
 

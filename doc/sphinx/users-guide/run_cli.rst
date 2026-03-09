@@ -8,28 +8,28 @@
 CLI - bossing Varnish around
 ============================
 
-Once ``varnishd`` is started, you can control it using the ``varnishadm``
+Once ``vinyld`` is started, you can control it using the ``vinyladm``
 program and the command line interface::
 
-	varnishadm help
+	vinyladm help
 
-If you want to run ``varnishadm`` from a remote system, we recommend
-you use ``ssh`` into the system where ``varnishd`` runs. (But see also:
+If you want to run ``vinyladm`` from a remote system, we recommend
+you use ``ssh`` into the system where ``vinyld`` runs. (But see also:
 :ref:`Local and remote CLI connections <ref_remote_cli>`)
 
-You can SSH into the ``varnishd`` computer and run ``varnishadm``::
+You can SSH into the ``vinyld`` computer and run ``vinyladm``::
 
-	ssh $hostname varnishadm help
+	ssh $hostname vinyladm help
 
-If you give no command arguments, ``varnishadm`` runs in interactive mode
+If you give no command arguments, ``vinyladm`` runs in interactive mode
 with command-completion, command-history and other comforts:
 
 .. code-block:: text
 
-    critter phk> ./varnishadm
+    critter phk> ./vinyladm
     200
     -----------------------------
-    Varnish Cache CLI 1.0
+    Vinyl Cache CLI 1.0
     -----------------------------
     FreeBSD,13.0-CURRENT,amd64,-jnone,-sdefault,-sdefault,-hcritbit
     varnish-trunk revision 2bd5d2adfc407216ebaa653fae882d3c8d47f5e1
@@ -48,7 +48,7 @@ prevented the execution of the command.
 (If you get 201, it means that the output was truncated,
 See the :ref:`ref_param_cli_limit` parameter.)
 
-When commands are given as arguments to ``varnishadm``, a status
+When commands are given as arguments to ``vinyladm``, a status
 different than 200 or 201 will cause it to exit with status 1
 and print the status code on standard error.
 
@@ -182,7 +182,7 @@ and::
 
 	varnish> start
 
-If you start ``varnishd`` with the '-d' (debugging) argument, you will
+If you start ``vinyld`` with the '-d' (debugging) argument, you will
 always need to start the child process explicitly.
 
 Should the child process die, the master process will automatically

@@ -13,8 +13,8 @@ Varnish comes with a couple of nifty and very useful statistics generating tools
 
 .. XXX:Heavy rewrite above. benc
 
-varnishtop
-~~~~~~~~~~
+vinyltop
+~~~~~~~~
 
 The :ref:`vinyltop(1)` utility reads the shared memory logs and presents a
 continuously updated list of the most commonly occurring log entries.
@@ -23,13 +23,13 @@ With suitable filtering using the -I, -i, -X and -x options, it can be
 used to display a ranking of requested documents, clients, user
 agents, or any other information which is recorded in the log.
 
-``varnishtop -i ReqURL`` will show you what URLs are being asked for by
-the client. ``varnishtop -i BereqURL`` will show you what your backend
-is being asked the most. ``varnishtop -I ReqHeader:Accept-Encoding`` will
+``vinyltop -i ReqURL`` will show you what URLs are being asked for by
+the client. ``vinyltop -i BereqURL`` will show you what your backend
+is being asked the most. ``vinyltop -I ReqHeader:Accept-Encoding`` will
 show the most popular Accept-Encoding header the client are sending you.
 
-varnishhist
-~~~~~~~~~~~
+vinylhist
+~~~~~~~~~
 
 The :ref:`vinylhist(1)` utility reads :ref:`vinyld(1)` shared
 memory logs and presents a continuously updated histogram showing the
@@ -38,8 +38,8 @@ The value of N and the vertical scale are displayed in the top left
 corner.  The horizontal scale is logarithmic.  Hits are marked with a
 pipe character ("|"), and misses are marked with a hash character ("#").
 
-varnishstat
-~~~~~~~~~~~
+vinylstat
+~~~~~~~~~
 
 Varnish has lots of counters. We count misses, hits, information about
 the storage, threads created, deleted objects. Just about

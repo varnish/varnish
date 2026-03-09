@@ -15,9 +15,9 @@ versions are available.
 
 We therefore recommend that you install the latest version directly from our repository, as described above.
 
-Varnish Cache is packaged in RPMs for easy installation and upgrade on Red Hat
-systems. The Varnish Cache project maintains official packages for the current
-Enterprise Linux versions. Varnish Cache 6.x series are supported on el7 and el8.
+Vinyl Cache is packaged in RPMs for easy installation and upgrade on Red Hat
+systems. The Vinyl Cache project maintains official packages for the current
+Enterprise Linux versions. Vinyl Cache 6.x series are supported on el7 and el8.
 
 We try to keep the latest version available as prebuilt RPMs (el7 and el8)
 on `packagecloud.io/varnishcache <https://packagecloud.io/varnishcache/>`_.
@@ -30,15 +30,15 @@ is to disable the module before installing::
 Official packages of 6
 ----------------------
 
-Starting from Varnish Cache 5.0, we've simplified our packaging down to two:
+Starting from Vinyl Cache 5.0, we've simplified our packaging down to two:
 the main package and a development package.
 
-The official Varnish Cache repository is now hosted at Packagecloud.io.
+The official Vinyl Cache repository is now hosted at Packagecloud.io.
 Note that while Packagecloud.io provides Bash Script installs, we recommend
 using the manual installation procedures.
 
 Instructions for installing the official repository which contains the newest
-Varnish Cache 6 release are available at:
+Vinyl Cache 6 release are available at:
 
 * https://packagecloud.io/varnishcache/varnish60lts/install#manual-rpm
 
@@ -49,10 +49,10 @@ Read more about this on `Release 6.0.2 </releases/rel6.0.2>`_.
 External packaging
 ------------------
 
-Varnish Cache is also distributed in third party package repositories.
+Vinyl Cache is also distributed in third party package repositories.
 
 .. _`Fedora EPEL`: https://fedoraproject.org/wiki/EPEL
 
-* `Fedora EPEL`_ does community packaging of Varnish Cache.
+* `Fedora EPEL`_ does community packaging of Vinyl Cache.
 
-* RedHat has packaged versions of Varnish Cache available since Software Collections 2.1. Announcement on <http://developers.redhat.com/blog/2015/11/17/software-collections-2-1-generally-available/>.
+* RedHat has packaged versions of Vinyl Cache available since Software Collections 2.1. Announcement on <http://developers.redhat.com/blog/2015/11/17/software-collections-2-1-generally-available/>.

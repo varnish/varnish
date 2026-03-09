@@ -322,6 +322,6 @@ Installing
 
 And finally, the true test of a brave heart: ``sudo make install``
 
-Varnish will now be installed in ``/usr/local``. The ``varnishd`` binary is in
+Varnish will now be installed in ``/usr/local``. The ``vinyld`` binary is in
 `/usr/local/sbin/varnishd`. To make sure that the necessary links and caches
 of the most recent shared libraries are found, run ``sudo ldconfig``.

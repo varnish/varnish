@@ -31,7 +31,7 @@ Conventions used in this manual include:
     A command you can run, or a shortkey you can press. Used either in the
     terminal or after starting one of the tools.
 
-  `/usr/local/`, `varnishadm`, `sess_timeout`
+  `/usr/local/`, `vinyladm`, `sess_timeout`
     A utility, Varnish configurable parameter or path.
 
   https://www.vinyl-cache.org/
@@ -47,7 +47,7 @@ Longer listings like example command output and VCL look like this::
 
 .. For maintainers:
 .. * always write Varnish with a capital V: Varnish, Varnish Cache.
-.. * Write Varnish tools as their executable name: `varnishd`, `varnishadm`.
+.. * Write Varnish tools as their executable name: `vinyld`, `vinyladm`.
 .. * if part of a command actually runable by the reader, use double backticks:
 ..   ``varnishd -f foo.c``
 .. * wrap lines at 80 characters, ident with 4 spaces. No tabs, please.

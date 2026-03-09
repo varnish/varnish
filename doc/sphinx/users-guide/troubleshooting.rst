@@ -37,7 +37,7 @@ on its port.::
     Platform: Linux,2.6.32-21-generic,i686,-smalloc,-hcritbit
     200 193
     -----------------------------
-    Varnish Cache CLI.
+    Vinyl Cache CLI.
     -----------------------------
     Type 'help' for command list.
     Type 'quit' to close CLI session.
@@ -185,13 +185,13 @@ data it might be hard to track the entries down. You can set
 :ref:`vinyllog(1)` to log all your 503 errors by issuing the
 following command::
 
-   $ varnishlog -q 'RespStatus == 503' -g request
+   $ vinyllog -q 'RespStatus == 503' -g request
 
 If the error happened just a short time ago the transaction might
 still be in the shared memory log segment. To get :ref:`vinyllog(1)`
 to process the whole shared memory log just add the '-d' parameter::
 
-   $ varnishlog -d -q 'RespStatus == 503' -g request
+   $ vinyllog -d -q 'RespStatus == 503' -g request
 
 Please see the :ref:`vsl-query(7)` and :ref:`vinyllog(1)` man pages
 for elaborations on further filtering capabilities and explanation of

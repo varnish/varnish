@@ -8,7 +8,7 @@
 Who is ... ?
 ============
 
-Not quite `Twurp's Peerage <https://wiki.lspace.org/mediawiki/Twurp%27s_Peerage>`_ but a Who's Who of the Varnish Cache project.
+Not quite `Twurp's Peerage <https://wiki.lspace.org/mediawiki/Twurp%27s_Peerage>`_ but a Who's Who of the Vinyl Cache project.
 
 Anders Berg
 ~~~~~~~~~~~
@@ -131,13 +131,13 @@ Martin was the first full-time member of the C-team at Varnish Software.
 He is the main responsible for the amazing revamp of the logging
 facilities and utilities in the 4.0 cycle and later the storage
 rework. Besides that he fixes lots of bugs, knows varnishtest better
-than most, writes vmods and is the Varnish Cache Plus architect.
+than most, writes vmods and is the Vinyl Cache Plus architect.
 
 Lasse Karstensen
 ~~~~~~~~~~~~~~~~
 
 Lasse is the current release manager and stable version maintainer of
-Varnish Cache. When not doing that, he maintains build infrastructure
+Vinyl Cache. When not doing that, he maintains build infrastructure
 and runs the Varnish Software C developer team in Oslo.
 
 Geoff Simmons

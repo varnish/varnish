@@ -156,6 +156,6 @@ have tripped up everybody else, take a moment to read through your
 VCL and see if it really does what you think it does.
 
 You can also try setting the ``vsl_mask=+VCL_trace`` parameter (or use
-``varnishadm param.set vsl_mask +VCL_trace`` on a running instance),
+``vinyladm param.set vsl_mask +VCL_trace`` on a running instance),
 that will generate log records with like and character number for each
 statement executed in your VCL program.

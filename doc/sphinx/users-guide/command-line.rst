@@ -75,4 +75,4 @@ Optional arguments
 ^^^^^^^^^^^^^^^^^^
 
 For a complete list of the command line arguments please see
-:ref:`vinyld(1) options <ref-varnishd-options>`.
+:ref:`vinyld(1) options <ref-vinyld-options>`.

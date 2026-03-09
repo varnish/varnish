@@ -7,7 +7,7 @@
 Peculiarities
 -------------
 
-There are a couple of things that are different with Varnish Cache, as
+There are a couple of things that are different with Vinyl Cache, as
 opposed to other programs. One thing you've already seen - VCL. In this section we provide a very quick tour of other peculiarities you need to know about to get the most out of Varnish.
 
 Configuration
@@ -24,10 +24,10 @@ settings on or off, you write polices on how the incoming traffic should be
 handled.
 
 
-varnishadm
+vinyladm
 ~~~~~~~~~~
 
-Varnish Cache has an admin console. You can connect it through the
+Vinyl Cache has an admin console. You can connect it through the
 :ref:`vinyladm(1)` command. In order to connect the user needs to be
 able to read `/etc/varnish/secret` in order to authenticate.
 
@@ -40,7 +40,7 @@ what it does.
 
 .. XXX:sample of the command here. benc
 
-varnishlog
+vinyllog
 ~~~~~~~~~~
 
 Varnish does not log to disk. Instead it logs to a chunk of memory. It
