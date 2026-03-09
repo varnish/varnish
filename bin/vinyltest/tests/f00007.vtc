@@ -1,5 +1,7 @@
 vtest "H/2 content length smuggling attack"
 
+barrier b1 cond 2
+
 server s1 {
 	rxreqhdrs
 	expect_close
@@ -12,6 +14,7 @@ server s2 {
 
 server s3 {
 	rxreq
+	barrier b1 sync
 	expect_close
 } -start
 
@@ -38,6 +41,7 @@ vinyl v1 -vcl+backend {
 
 vinyl v1 -cliok "param.set feature +http2"
 vinyl v1 -cliok "param.set debug +syncvsl"
+vinyl v1 -cliok "param.set timeout_idle 10"
 
 client c1 {
 	stream 1 {
@@ -62,8 +66,7 @@ client c3 {
 	stream 1 {
 		txreq -req POST -url /3 -hdr "content-length" "1" -nostrend
 		txdata -data "A" -nostrend
-		rxwinup
-		delay 0.5
+		barrier b1 sync
 		txdata -data "GET /FAIL HTTP/1.1\r\n\r\n"
 		rxrst
 		expect rst.err == PROTOCOL_ERROR
