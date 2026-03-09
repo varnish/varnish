@@ -1,13 +1,13 @@
 vtest "debug storage"
 
 shell -err -expect {Error: Only one -sdebug instance supported} \
-	"vinyld -b none -a ${tmpdir}/vtc.sock -sdebug -sdebug"
+	"vinyld -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v1 -sdebug -sdebug"
 
 shell -err -expect {Error: -sdebug conflicting options} \
-	"vinyld -b none -a ${tmpdir}/vtc.sock -sdebug,lessspace,maxspace=1KB"
+	"vinyld -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v1 -sdebug,lessspace,maxspace=1KB" 
 
 shell -err -expect {Error: Unknown BYTES} \
-	"vinyld -b none -a ${tmpdir}/vtc.sock -sdebug,maxspace=1DJT"
+	"vinyld -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v1 -sdebug,maxspace=1DJT"
 
 # lessspace is implicitly tested in b00017.vtc
 

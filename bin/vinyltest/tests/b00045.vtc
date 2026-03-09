@@ -15,11 +15,11 @@ client c1 {
 delay .2
 
 shell -err -expect {Error: Could not open pid-file} {
-	vinyld -P /dev/tty -b None -a :0
+	vinyld -P /dev/tty -b None -a :0 -n ${tmpdir}/v1
 }
 
 shell -err -expect {Error: vinyld is already running} {
-	vinyld -P ${v1_name}/vinyld.pid -b None -a :0
+	vinyld -P ${v1_name}/vinyld.pid -b None -a :0 -n ${tmpdir}/v1
 }
 
 shell -err -expect {Error: vinyld is already running} {
