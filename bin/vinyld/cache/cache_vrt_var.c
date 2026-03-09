@@ -460,39 +460,6 @@ VRT_l_beresp_storage(VRT_CTX, VCL_STEVEDORE stv)
 
 #include "storage/storage.h"
 
-VCL_STRING
-VRT_r_beresp_storage_hint(VRT_CTX)
-{
-	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
-	CHECK_OBJ_NOTNULL(ctx->bo, BUSYOBJ_MAGIC);
-	if (ctx->bo->storage == NULL)
-		return (NULL);
-	CHECK_OBJ_NOTNULL(ctx->bo->storage, STEVEDORE_MAGIC);
-	return (ctx->bo->storage->vclname);
-}
-
-VCL_VOID
-VRT_l_beresp_storage_hint(VRT_CTX, const char *str, VCL_STRANDS s)
-{
-	const char *p;
-	VCL_STEVEDORE stv;
-
-	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
-	CHECK_OBJ_NOTNULL(ctx->bo, BUSYOBJ_MAGIC);
-
-	p = VRT_StrandsWS(ctx->ws, str, s);
-
-	if (p == NULL) {
-		VSLb(ctx->vsl, SLT_LostHeader, "storage_hint");
-		WS_MarkOverflow(ctx->ws);
-		return;
-	}
-
-	stv = VRT_stevedore(p);
-	if (stv != NULL)
-		ctx->bo->storage = stv;
-}
-
 /*--------------------------------------------------------------------*/
 
 #define VRT_OC_VAR_R(obj, which, which_magic, field)		\
