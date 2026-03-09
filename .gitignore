@@ -146,6 +146,9 @@ cscope.*out
 /cov-int
 /myproject.tgz
 
+# Source artifact
+/vinyl-cache-trunk.tar.gz
+
 # Witness droppings
 witness.dot
 witness.svg
