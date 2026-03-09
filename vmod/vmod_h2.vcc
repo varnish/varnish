@@ -34,7 +34,7 @@ DESCRIPTION
 ===========
 
 This VMOD contains functions to control the HTTP2 transport built into
-Varnish-Cache.
+Vinyl Cache.
 
 $Function BOOL is()
 $Restrict client

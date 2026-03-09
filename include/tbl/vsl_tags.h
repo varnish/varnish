@@ -53,7 +53,7 @@
  * kept for now for VSL binary compatibility
  */
 #define NOSUP_NOTICE \
-    "NOTE: This tag is currently not in use in the Varnish log.\n" \
+    "NOTE: This tag is currently not in use in the Vinyl Cache log.\n" \
     "It is mentioned here to document legacy versions of the log,\n" \
     "or reserved for possible use in future versions.\n\n"
 
@@ -71,7 +71,7 @@ SLTM(Error, 0, "Error messages",
 )
 
 SLTM(CLI, 0, "CLI communication",
-	"CLI communication between varnishd master and child process.\n\n"
+	"CLI communication between vinyld master and child process.\n\n"
 )
 
 /*---------------------------------------------------------------------*/
@@ -559,8 +559,8 @@ SLTM(Storage, 0, "Where object is stored",
 )
 
 SLTM(Timestamp, 0, "Timing information",
-	"Contains timing information for the Varnish worker threads.\n\n"
-	"Time stamps are issued by Varnish on certain events,"
+	"Contains timing information for the vinyld worker threads.\n\n"
+	"Time stamps are issued by vinyld on certain events,"
 	" and show the absolute time of the event, the time spent since the"
 	" start of the work unit, and the time spent since the last timestamp"
 	" was logged. See the TIMESTAMPS section below for information about"

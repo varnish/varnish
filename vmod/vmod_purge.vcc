@@ -28,7 +28,7 @@
 # SUCH DAMAGE.
 
 $ABI strict
-$Module purge 3 "Varnish Purge Module"
+$Module purge 3 "Vinyl Cache Purge Module"
 
 DESCRIPTION
 ===========

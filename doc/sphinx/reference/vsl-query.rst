@@ -11,17 +11,17 @@
 vsl-query
 =========
 
------------------------------
-Varnish VSL Query Expressions
------------------------------
+---------------------------------
+Vinyl Cache VSL Query Expressions
+---------------------------------
 
 :Manual section: 7
 
 OVERVIEW
 ========
 
-The Varnish VSL Query Expressions extracts transactions from the
-Varnish shared memory log, and perform queries on the transactions
+The Vinyl Cache VSL Query Expressions extracts transactions from the
+Vinyl Cache shared memory log, and perform queries on the transactions
 before reporting matches.
 
 A transaction is a set of log lines that belongs together, e.g. a
@@ -101,11 +101,11 @@ MEMORY USAGE
 The API will use pointers to shared memory log data as long as
 possible to keep memory usage at a minimum. But as the shared memory
 log is a ring buffer, data will get overwritten eventually, so the API
-creates local copies of referenced log data when varnishd comes close
+creates local copies of referenced log data when `vinyld` comes close
 to overwriting still unreported content.
 
 This process avoids loss of log data in many scenarios, but it is not
-failsafe: Overruns where varnishd "overtakes" the log reader process
+failsafe: Overruns where `vinyld` "overtakes" the log reader process
 in the ring buffer can still happen when API clients cannot keep up
 reading and/or copying, for instance due to output blocking.
 
@@ -143,7 +143,7 @@ them.
 
 For example this list of queries::
 
-  # catch varnish errors
+  # catch `vinyld` errors
   *Error
 
   # catch backend errors
@@ -343,7 +343,7 @@ by others.
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Varnish
+This document is licensed under the same licence as Vinyl Cache
 itself. See LICENCE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

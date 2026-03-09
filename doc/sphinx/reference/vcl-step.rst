@@ -145,7 +145,7 @@ SEE ALSO
 COPYRIGHT
 =========
 
-This document is licensed under the same license as Varnish
+This document is licensed under the same license as Vinyl Cache
 itself. See LICENSE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

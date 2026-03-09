@@ -52,7 +52,7 @@ HTTP response status
 
 A HTTP status code has 3 digits XYZ where X must be between 1 and 5 included.
 Since it is not uncommon to see HTTP clients or servers relying
-on non-standard or even invalid status codes, Varnish can work
+on non-standard or even invalid status codes, Vinyl Cache can work
 with any status between 100 and 999.
 
 Within VCL code it is even possible to use status codes in the form
@@ -90,7 +90,7 @@ status message.
 304 handling
 ~~~~~~~~~~~~
 
-For a 304 response, Varnish core code amends ``beresp`` before calling
+For a 304 response, `vinyld` core code amends ``beresp`` before calling
 `vcl_backend_response`:
 
 * If the gzip status changed, ``Content-Encoding`` is unset and any
@@ -176,7 +176,7 @@ Kristian Lyngstøl, Lasse Karstensen and others.
 COPYRIGHT
 =========
 
-This document is licensed under the same license as Varnish
+This document is licensed under the same license as Vinyl Cache
 itself. See LICENSE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

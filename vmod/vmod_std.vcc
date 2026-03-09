@@ -28,17 +28,17 @@
 # SUCH DAMAGE.
 
 $ABI strict
-$Module std 3 "Varnish Standard Module"
+$Module std 3 "Vinyl Cache Standard Module"
 
 DESCRIPTION
 ===========
 
 .. note: not using :ref:`vmod_std(3)` because it expands to "VMOD
-   std - Varnish Standard Module" and here just the plan vmod name
+   std - Vinyl Cache Standard Module" and here just the plan vmod name
    makes more sense.
 
 *vmod_std* contains basic functions which are part and parcel of
-Varnish, but which for reasons of architecture fit better in a VMOD.
+Vinyl Cache, but which for reasons of architecture fit better in a VMOD.
 
 Numeric functions
 =================
@@ -47,7 +47,7 @@ $Function REAL random(REAL lo, REAL hi)
 
 Returns a random real number between *lo* and *hi*.
 
-This function uses the "testable" random generator in varnishd which
+This function uses the "testable" random generator in `vinyld` which
 enables deterministic tests to be run (See ``debug.srandom`` CLI
 command).  This function should not be used for cryptographic
 applications.
@@ -226,7 +226,7 @@ Returns ``true`` if path or the file pointed to by path exists,
 Example::
 
 	if (std.file_exists("/etc/return_503")) {
-		return (synth(503, "Varnish is in maintenance"));
+		return (synth(503, "Vinyl Cache is in maintenance"));
 	}
 
 
@@ -483,7 +483,7 @@ $Function VOID timestamp(STRING s)
 Introduces a timestamp in the log with the current time, using the
 string *s* as the label. This is useful to time the execution of lengthy
 VCL subroutines, and makes the timestamps inserted automatically by
-Varnish more accurate.
+Vinyl Cache more accurate.
 
 Example::
 
@@ -525,10 +525,10 @@ $Restrict vcl_recv
 
 $Function VOID late_100_continue(BOOL late)
 
-Controls when varnish reacts to an ``Expect: 100-continue`` client
+Controls when `vinyld` reacts to an ``Expect: 100-continue`` client
 request header.
 
-Varnish always generates a ``100 Continue`` response if requested by
+Vinyl Cache always generates a ``100 Continue`` response if requested by
 the client trough the ``Expect: 100-continue`` header when waiting for
 request body data.
 
@@ -652,7 +652,7 @@ The format of *STRING* is::
     Either a literal string or a regular expression. Note that
     *<arg>* does not use any of the string delimiters like ``"`` or
     ``{"``\ *...*\ ``"}`` or ``"""``\ *...*\ ``"""`` used elsewhere
-    in varnish. To match against strings containing whitespace,
+    in Vinyl Cache. To match against strings containing whitespace,
     regular expressions containing ``\s`` can be used.
 
   * for duration fields:

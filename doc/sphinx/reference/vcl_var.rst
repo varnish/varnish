@@ -12,21 +12,21 @@ local, server, remote and client
 --------------------------------
 
 These variables describe the network connection between the
-client and varnishd.
+client and `vinyld`.
 
 Without PROXY protocol::
 
 	     client    server
 	     remote    local
 	       v          v
-	CLIENT ------------ VARNISHD
+	CLIENT ------------ VINYLD
 
 
 With PROXY protocol::
 
 	     client    server   remote     local
 	       v          v       v          v
-	CLIENT ------------ PROXY ------------ VARNISHD
+	CLIENT ------------ PROXY ------------ VINYLD
 
 
 .. _client.identity:
@@ -83,7 +83,7 @@ server.identity
 
 	The identity of the server, as set by the ``-i`` parameter.
 
-	If an ``-i`` parameter is not passed to varnishd, the return
+	If an ``-i`` parameter is not passed to `vinyld`, the return
 	value from `gethostname(3)` system function will be used.
 
 
@@ -246,7 +246,7 @@ req.filters
 
 	Writable from: vcl_recv
 
-	List of Varnish Fetch Processor (VFP) filters the req.body
+	List of Vinyl Fetch Processor (VFP) filters the req.body
 	will be pulled through. The order left to right signifies
 	processing from client to cache, iow the leftmost filter is
 	run first on the body as received from the client after
@@ -919,7 +919,7 @@ bereq.retry_connect
 	Writable from: backend
 
 	Default: ``true``.
-	Controls whether Varnish will make a second attempt to connect to the
+	Controls whether `vinyld` will make a second attempt to connect to the
 	backend if a first connection reuse attempt failed. Setting to ``false``
 	means that no retries will be made. However, setting this to ``true``
 	does not guarantee that a retry will always be attempted, as there are
@@ -1161,7 +1161,7 @@ beresp.do_stream
 	Default: ``true``.
 
 	Deliver the object to the client while fetching the whole
-	object into varnish.
+	object into `vinyld`.
 
 	For uncacheable objects, storage for parts of the body which
 	have been sent to the client may get freed early, depending
@@ -1181,7 +1181,7 @@ beresp.filters
 
 	Writable from: vcl_backend_response
 
-	List of Varnish Fetch Processor (VFP) filters the beresp.body
+	List of Vinyl Fetch Processor (VFP) filters the beresp.body
 	will be pulled through. The order left to right signifies
 	processing from backend to cache, iow the leftmost filter is
 	run first on the body as received from the backend after
@@ -1191,7 +1191,7 @@ beresp.filters
 	being handed to the client side, where it may get processed
 	again by resp.filters.
 
-	The following VFP filters exist in varnish-cache:
+	The following VFP filters exist in Vinyl Cache:
 
 	* ``gzip``: compress a body using gzip
 
@@ -1367,7 +1367,7 @@ beresp.storage
 
 
 	The storage backend to use to save this object. If
-	none is set, Varnish will pick a storage backend in a
+	none is set, `vinyld` will pick a storage backend in a
 	round-robin fashion, or the `Transient` backend if
 	the object is short-lived.
 
@@ -1845,7 +1845,7 @@ resp.do_esi	``VCL >= 4.1``
 
 	This can be used to selectively disable ESI processing, even
 	though ESI parsing happened during fetch (see beresp.do_esi).
-	This is useful when Varnish caches peer with each other.
+	This is useful when Vinyl Caches peer with each other.
 
 	It is a VCL error to use resp.do_esi after setting resp.filters.
 
@@ -1863,7 +1863,7 @@ resp.filters
 	List of VDP filters the resp.body will be pushed through.
 
 	Before resp.filters is set, the value read will be the default
-	filter list as determined by varnish based on resp.do_esi and
+	filter list as determined by `vinyld` based on resp.do_esi and
 	request headers.
 
 	After resp.filters is set, changing any of the conditions
@@ -2028,7 +2028,7 @@ now
 sess
 ----
 
-A session corresponds to the "conversation" that Varnish has with a
+A session corresponds to the "conversation" that `vinyld` has with a
 single client connection, over which one or more request/response
 transactions may take place. It may comprise the traffic over an
 HTTP/1 keep-alive connection, or the multiplexed traffic over an

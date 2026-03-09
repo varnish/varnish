@@ -11,9 +11,9 @@
 VCL
 ===
 
-------------------------------
-Varnish Configuration Language
-------------------------------
+----------------------------
+Vinyl Configuration Language
+----------------------------
 
 :Manual section: 7
 
@@ -24,17 +24,13 @@ The VCL language is a small domain-specific language designed to be
 used to describe request handling and document caching policies for
 Vinyl Cache.
 
-When a new configuration is loaded, the varnishd management process
+When a new configuration is loaded, the `vinyld` management process
 translates the VCL code to C and compiles it to a shared object which
 is then loaded into the server process.
 
 This document focuses on the syntax of the VCL language. For a full
 description of syntax and semantics, with ample examples, please see
-the online documentation at https://www.varnish-cache.org/docs/ .
-
-Starting with Varnish 4.0, each VCL file must start by declaring its
-version with ``vcl`` *<major>.<minor>*\ ``;`` marker at the top of
-the file.  See more about this under Versioning below.
+the online documentation at https://www.vinyl-cache.org/docs/ .
 
 .. _Identifiers:
 
@@ -56,7 +52,7 @@ Character Sets
 
 While identifiers can only consist of this subset of ASCII, **strings** can
 contain any bytes except *NUL* (zero, 0), which marks the end of the string. The
-Varnish Configuration Language itself is not concerned with the character
+Vinyl Configuration Language itself is not concerned with the character
 encoding of strings. VCL code handling strings in different character sets needs
 to track encodings itself. `VMODs`_ exist to help with such tasks (e.g.
 ``iconv``).
@@ -250,7 +246,7 @@ with their value rounded to 3 decimal places, e.g. ``3.142``.
 Regular Expressions
 -------------------
 
-Varnish uses Perl-compatible regular expressions (PCRE). For a
+Vinyl Cache uses Perl-compatible regular expressions (PCRE). For a
 complete description please see the pcre(3) man page.
 
 To send flags to the PCRE engine, such as to do case-insensitive matching, add
@@ -279,7 +275,7 @@ The included file can be specified as follows:
 Optionally, the ``include`` keyword can take a ``+glob`` flag to include all
 files matching a glob pattern::
 
-    include +glob "/etc/varnish/example.org/*.vcl";
+    include +glob "/etc/vinyl/example.org/*.vcl";
 
 Note that the ``+glob`` option can only be used with absolute paths and
 relative paths starting with './', which means that ``+glob`` includes cannot
@@ -288,7 +284,7 @@ be searched in ``vcl_path`` directories.
 Import statement
 ----------------
 
-The ``import`` statement is used to load Varnish Modules (VMODs.)
+The ``import`` statement is used to load Vinyl Modules (VMODs.)
 
 Example::
 
@@ -333,7 +329,7 @@ control list which can later be used to match client addresses::
         ! "192.0.2.23"; # except for the dial-in router
     }
 
-If an ACL entry specifies a host name which Varnish is unable to
+If an ACL entry specifies a host name which `vinyld` is unable to
 resolve, it will match any address it is compared to. Consequently,
 if it is preceded by a negation mark, it will reject any address it is
 compared to, which may not be what you intended. If the entry is
@@ -484,7 +480,7 @@ Multiple subroutines
 If multiple subroutines with the name of one of the built-in ones are defined,
 they are concatenated in the order in which they appear in the source.
 
-The built-in VCL distributed with Varnish will be implicitly concatenated
+The built-in VCL distributed with Vinyl Cach will be implicitly concatenated
 when the VCL is compiled.
 
 Functions
@@ -556,7 +552,7 @@ not have surprises in the future.  The syntax version set in an
 included file only applies to that file and any files it includes -
 unless these set their own VCL syntax version.
 
-The version of Varnish this file belongs to supports syntax 4.0 and 4.1.
+The version of Vinyl Cache this file belongs to supports syntax 4.0 and 4.1.
 
 
 EXAMPLES
@@ -586,7 +582,7 @@ Kristian Lyngstøl, Lasse Karstensen and others.
 COPYRIGHT
 =========
 
-This document is licensed under the same license as Varnish
+This document is licensed under the same license as Vinyl Cache
 itself. See LICENSE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

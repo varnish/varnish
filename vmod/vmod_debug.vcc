@@ -37,7 +37,7 @@ DESCRIPTION
 ===========
 
 This vmod is used to develop, test and debug the various aspects
-of VMOD handling in Varnish.
+of VMOD handling in Vinyl Cache.
 
 
 $Event event_function

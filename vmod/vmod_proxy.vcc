@@ -28,7 +28,7 @@
 # SUCH DAMAGE.
 
 $ABI strict
-$Module proxy 3 "Varnish Module to extract TLV attributes from PROXYv2"
+$Module proxy 3 "Vinyl Cache Module to extract TLV attributes from PROXYv2"
 
 DESCRIPTION
 ===========

@@ -1,15 +1,15 @@
 #-
-# This document is licensed under the same conditions as Varnish itself.
+# This document is licensed under the same conditions as Vinyl Cache itself.
 # See LICENSE for details.
 #
 # SPDX-License-Identifier: BSD-2-Clause
 
-$Module cookie 3 "Varnish Cookie Module"
+$Module cookie 3 "Vinyl Cache Cookie Module"
 
 DESCRIPTION
 ===========
 
-Handle HTTP cookies more easily in Varnish VCL.
+Handle HTTP cookies more easily in Vinyl Cache VCL.
 
 Parses a cookie header into an internal data store, where per-cookie
 get/set/delete functions are available. A keep() function removes all

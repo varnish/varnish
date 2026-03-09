@@ -38,7 +38,7 @@ with command-completion, command-history and other comforts:
     Type 'quit' to close CLI session.
     Type 'start' to launch worker process.
 
-    varnish>
+    vinyl>
 
 The CLI always returns a three digit status code to tell how things went.
 
@@ -75,7 +75,7 @@ all new requests start out.
 
 To load new VCL program::
 
-	varnish> vcl.load some_name some_filename
+	vinyl> vcl.load some_name some_filename
 
 Loading will read the VCL program from the file, and compile it. If
 the compilation fails, you will get an error messages:
@@ -93,12 +93,12 @@ the compilation fails, you will get an error messages:
 If compilation succeeds, the VCL program is loaded, and you can
 now make it the active VCL, whenever you feel like it::
 
-	varnish> vcl.use some_name
+	vinyl> vcl.use some_name
 
 If you find out that was a really bad idea, you can switch back
 to the previous VCL program again::
 
-	varnish> vcl.use old_name
+	vinyl> vcl.use old_name
 
 The switch is instantaneous, all new requests will start using the
 VCL you activated right away. The requests currently being processed complete
@@ -123,7 +123,7 @@ Varnish to stop serving the old logo out of the cache:
 
 .. code-block:: text
 
-	varnish> ban req.url ~ "logo.*[.]png"
+	vinyl> ban req.url ~ "logo.*[.]png"
 
 should do that, and yes, that is a regular expression.
 
@@ -134,7 +134,7 @@ cache is unaffected.
 Even when you want to throw out *all* the cached content, banning is
 both faster and less disruptive that a restart::
 
-	varnish> ban obj.http.date ~ .*
+	vinyl> ban obj.http.date ~ .*
 
 .. In addition to handling such special occasions, banning can be used
 .. in many creative ways to keep the cache up to date, more about
@@ -150,14 +150,14 @@ from the CLI:
 
 .. code-block:: text
 
-	varnish> param.show prefer_ipv6
+	vinyl> param.show prefer_ipv6
 	200
 	prefer_ipv6         off [bool]
                             Default is off
                             Prefer IPv6 address when connecting to backends
                             which have both IPv4 and IPv6 addresses.
 
-	varnish> param.set prefer_ipv6 true
+	vinyl> param.set prefer_ipv6 true
 	200
 
 In general it is not a good idea to modify parameters unless you
@@ -176,11 +176,11 @@ Starting and stopping the worker process
 In general you should just leave the worker process running, but
 if you need to stop and/or start it, the obvious commands work::
 
-	varnish> stop
+	vinyl> stop
 
 and::
 
-	varnish> start
+	vinyl> start
 
 If you start ``vinyld`` with the '-d' (debugging) argument, you will
 always need to start the child process explicitly.

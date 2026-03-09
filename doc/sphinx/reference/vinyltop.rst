@@ -72,7 +72,7 @@ Grydeland.
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Varnish
+This document is licensed under the same licence as Vinyl Cache
 itself. See LICENCE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

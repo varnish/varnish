@@ -40,16 +40,16 @@ Conventions used in this manual include:
 Longer listings like example command output and VCL look like this::
 
     $ /opt/vinyl/sbin/vinyld -V
-    varnishd (varnish-8.0.0 revision 1234567)
+    vinyld (vinyl-8.0.0 revision 1234567)
     Copyright (c) 2006 Verdens Gang AS
     Copyright (c) 2006-2025 Varnish Software
 
 
 .. For maintainers:
 .. * always write Vinyl Cache with a capital V&C: Vinyl Cache.
-.. * Write Varnish tools as their executable name: `vinyld`, `vinyladm`.
+.. * Write Vinyl tools as their executable name: `vinyld`, `vinyladm`.
 .. * if part of a command actually runable by the reader, use double backticks:
-..   ``varnishd -f foo.c``
+..   ``vinyld -f foo.c``
 .. * wrap lines at 80 characters, ident with 4 spaces. No tabs, please.
 .. We use the following header indicators
 .. For titles:

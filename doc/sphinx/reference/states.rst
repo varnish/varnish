@@ -5,17 +5,17 @@
 
 .. _reference-states:
 
-=========================
-Varnish Processing States
-=========================
+=============================
+Vinyl Cache Processing States
+=============================
 
 ------------
 Introduction
 ------------
 
-Varnish processing of client and backend requests is implemented as
+Vinyl Cache processing of client and backend requests is implemented as
 state machines. Whenever a state is entered, a C function is called,
-which in turn calls the appropriate Varnish core code functions to
+which in turn calls the appropriate Vinyl Cache core code functions to
 process the request or response at this stage. For most states, core
 code also calls into a state-specific function compiled from VCL, a
 VCL subroutine (see :ref:`vcl_steps`).

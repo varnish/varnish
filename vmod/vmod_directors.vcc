@@ -1,5 +1,5 @@
 #-
-# This document is licensed under the same licence as Varnish
+# This document is licensed under the same licence as Vinyl Cache
 # itself. See LICENCE for details.
 #
 # SPDX-License-Identifier: BSD-2-Clause
@@ -37,29 +37,21 @@
 # SUCH DAMAGE.
 
 $ABI strict
-$Module directors 3 "Varnish Directors Module"
+$Module directors 3 "Vinyl Cache Directors Module"
 
 DESCRIPTION
 ===========
 
-*vmod_directors* enables backend load balancing in Varnish.
+*vmod_directors* enables backend load balancing in Vinyl Cache.
 
 The module implements load balancing techniques, and also serves as an
 example on how one could extend the load balancing capabilities of
-Varnish.
+Vinyl Cache.
 
 To enable load balancing you must import this vmod (directors).
 
 Then you define your backends. Once you have the backends declared you
-can add them to a director. This happens in executed VCL code. If you
-want to emulate the previous behavior of Varnish 3.0 you can just
-initialize the directors in ``vcl_init{}``, like this::
-
-    sub vcl_init {
-	new vdir = directors.round_robin();
-	vdir.add_backend(backend1);
-	vdir.add_backend(backend2);
-    }
+can add them to a director. This happens in executed VCL code.
 
 As you can see there is nothing keeping you from manipulating the
 directors elsewhere in VCL. So, you could have VCL code that would add
@@ -152,7 +144,7 @@ Create a random backend director.
 The random director distributes load over the backends using a
 weighted random probability distribution.
 
-The "testable" random generator in varnishd is used, which enables
+The "testable" random generator in `vinyld` is used, which enables
 deterministic tests to be run (See: ``d00004.vtc``).
 
 Example::
@@ -257,10 +249,10 @@ Sharding
 ````````
 
 This basic technique allows for numerous applications like optimizing
-backend server cache efficiency, Varnish clustering or persisting
+backend server cache efficiency, Vinyl Cache clustering or persisting
 sessions to servers without keeping any state, and, in particular,
 without the need to synchronize state between nodes of a cluster of
-Varnish servers:
+Vinyl Cache servers:
 
 * Many applications use caches for data objects, so, in a cluster of
   application servers, requesting similar objects from the same server
@@ -270,7 +262,7 @@ Varnish servers:
   been shown to drastically improve the efficiency of many content
   management systems.
 
-* As special case of the previous example, in clusters of Varnish
+* As special case of the previous example, in clusters of Vinyl Cache
   servers without additional request distribution logic, each cache
   will need store all hot objects, so the effective cache size is
   approximately the smallest cache size of any server in the cluster.
@@ -286,11 +278,11 @@ Varnish servers:
   such that all requests sharing a certain criterion (such as an IP
   address or session ID) get forwarded to the same backend server.
 
-When used with clusters of varnish servers, the shard director will,
+When used with clusters of Vinyl Cache servers, the shard director will,
 if otherwise configured equally, make the same decision on all
 servers. In other words, requests sharing a common criterion used as
 the shard key will be balanced onto the same backend server(s) no
-matter which Varnish server handles the request.
+matter which Vinyl Cache server handles the request.
 
 The drawbacks are:
 
@@ -457,7 +449,7 @@ is _not_ the order given when backends are added.
   * ``HASH``:
 
     * when called in backend context and in ``vcl_pipe {}``: Use the
-      varnish hash value as set by ``vcl_hash{}``
+      vinyl hash value as set by ``vcl_hash{}``
 
     * when called in client context other than ``vcl_pipe {}``: hash
       ``req.url``

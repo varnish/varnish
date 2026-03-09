@@ -132,7 +132,7 @@ In the CLI, a good backend health status looks like this:
 
 .. code-block:: text
 
-    varnish> backend.list -p boot.backend
+    vinyl> backend.list -p boot.backend
     Backend name    Admin    Probe    Health     Last change
     boot.backend    probe    5/5      healthy    Wed, 13 Jan 2021 10:31:50 GMT
      Current states  good:  5 threshold:  4 window:  5
@@ -199,7 +199,7 @@ Kristian Lyngstøl, Lasse Karstensen and others.
 COPYRIGHT
 =========
 
-This document is licensed under the same license as Varnish
+This document is licensed under the same license as Vinyl Cache
 itself. See LICENSE for details.
 
 * Copyright (c) 2006 Verdens Gang AS
