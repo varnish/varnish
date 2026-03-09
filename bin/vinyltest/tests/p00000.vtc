@@ -3,7 +3,7 @@ vtest "Test Basic persistence"
 feature persistent_storage
 
 process p1 -dump {
-	vinyld -spersistent -b ${localhost} -a :0 -d 2>&1
+	vinyld -spersistent -b ${localhost} -n${tmpdir}/v1 -a :0 -d 2>&1
 } -start -expect-exit 1
 
 process p1 -expect-text 0 0 {to launch}
