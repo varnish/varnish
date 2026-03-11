@@ -6,7 +6,7 @@ server s1 {
 	txresp -body "foobar"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.http.bar ~ "$") {
 			set beresp.http.foo = regsub(beresp.http.bar, "$", "XXX");

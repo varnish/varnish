@@ -122,7 +122,7 @@
  *	struct vrt_backend.backend_wait_timeout added
  *	struct vrt_backend.backend_wait_limit  added
  * 19.1 (2024-05-27)
- *	[cache_vinyld.h] ObjWaitExtend() gained statep argument
+ *	[cache_varnishd.h] ObjWaitExtend() gained statep argument
  * 19.0 (2024-03-18)
  *	[cache.h] (struct req).filter_list renamed to vdp_filter_list
  *	order of vcl/vmod and director COLD events reversed to directors first

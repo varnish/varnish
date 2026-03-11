@@ -1,7 +1,7 @@
 vtest "VCL: test backend probe syntax"
 
 # Check status definition
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -11,7 +11,7 @@ vinyl v1 -vcl {
 }
 
 # Check url definition
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -21,7 +21,7 @@ vinyl v1 -vcl {
 }
 
 # Check request definition
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -33,7 +33,7 @@ vinyl v1 -vcl {
 }
 
 # Check expect_close definition
-vinyl v1 -errvcl {Expected "true" or "false"} {
+varnish v1 -errvcl {Expected "true" or "false"} {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -43,7 +43,7 @@ vinyl v1 -errvcl {Expected "true" or "false"} {
 	}
 }
 
-vinyl v1 -errvcl {Expected "true" or "false"} {
+varnish v1 -errvcl {Expected "true" or "false"} {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -54,7 +54,7 @@ vinyl v1 -errvcl {Expected "true" or "false"} {
 }
 
 # Check redefinition
-vinyl v1 -errvcl {Probe request redefinition at:} {
+varnish v1 -errvcl {Probe request redefinition at:} {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -67,7 +67,7 @@ vinyl v1 -errvcl {Probe request redefinition at:} {
 }
 
 # Check redefinition the other way
-vinyl v1 -errvcl {Probe request redefinition at:} {
+varnish v1 -errvcl {Probe request redefinition at:} {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -79,7 +79,7 @@ vinyl v1 -errvcl {Probe request redefinition at:} {
 	}
 }
 
-vinyl v1 -errvcl {Expected CNUM got '"120s"'} {
+varnish v1 -errvcl {Expected CNUM got '"120s"'} {
 	backend default {
 		.host = "${localhost}";
 		.probe = {

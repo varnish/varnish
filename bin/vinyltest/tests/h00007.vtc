@@ -12,7 +12,7 @@ server s1 {
     shutdown
 } -start
 
-vinyl v1 -proto "PROXY" -vcl+backend {} -start
+varnish v1 -proto "PROXY" -vcl+backend {} -start
 
 haproxy h1 -D -conf {
     defaults
@@ -26,7 +26,7 @@ haproxy h1 -D -conf {
 	server v1 ${v1_sock} send-proxy-v2
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	acl localhost -fold {
@@ -60,6 +60,6 @@ client c1 -connect ${h1_fe1_sock} {
     expect resp.body == "s1 >>> Hello world!"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 haproxy h1 -wait

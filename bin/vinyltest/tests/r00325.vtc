@@ -9,7 +9,7 @@ server s1 {
 	send "FOO\r\n"
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	txreq -url /bar

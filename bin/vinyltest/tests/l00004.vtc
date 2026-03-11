@@ -7,7 +7,7 @@ server s1 {
 	txresp -nodate -body "fdsa"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		# make PipeAcct deterministic
 		unset req.http.via;
@@ -17,7 +17,7 @@ vinyl v1 -vcl+backend {
 	sub vcl_pipe {
 		set bereq.http.test = "yes";
 		unset bereq.http.x-forwarded-for;
-		unset bereq.http.X-Vinyl;
+		unset bereq.http.X-Varnish;
 		unset bereq.http.connection;
 	}
 } -start
@@ -65,6 +65,6 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect s_pipe_hdrbytes == 65
-vinyl v1 -expect s_pipe_in == 4
-vinyl v1 -expect s_pipe_out == 54
+varnish v1 -expect s_pipe_hdrbytes == 65
+varnish v1 -expect s_pipe_in == 4
+varnish v1 -expect s_pipe_out == 54

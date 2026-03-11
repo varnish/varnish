@@ -38,7 +38,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv { if (req.http.purge == "yes") { return(purge); } }
 	sub vcl_purge {
 		if (req.http.restart == "yes") {
@@ -53,28 +53,28 @@ client c1 {
 	txreq -url "/1" -hdr "foo: foo1"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == 1001
+	expect resp.http.X-Varnish == 1001
 	expect resp.bodylen == 1
 	delay .1
 
 	txreq -url "/1" -hdr "Foo: foo2"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == 1003
+	expect resp.http.X-Varnish == 1003
 	expect resp.bodylen == 2
 	delay .1
 
 	txreq -url "/1" -hdr "foo: foo1"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1005 1002"
+	expect resp.http.X-Varnish == "1005 1002"
 	expect resp.bodylen == 1
 	delay .1
 
 	txreq -url "/1" -hdr "Foo: foo2"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1006 1004"
+	expect resp.http.X-Varnish == "1006 1004"
 	expect resp.bodylen == 2
 	delay .1
 

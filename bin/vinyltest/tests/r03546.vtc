@@ -1,6 +1,6 @@
 vtest "Synth resp.reason race"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default none;
 
 	sub vcl_backend_error {

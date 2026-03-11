@@ -18,7 +18,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import directors;
 
@@ -47,7 +47,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "backend.set_health s1 sick"
+varnish v1 -cliok "backend.set_health s1 sick"
 
 client c1 {
 	txreq
@@ -55,7 +55,7 @@ client c1 {
 	expect resp.body == "ieQu2qua"
 } -run
 
-vinyl v1 -cliok "backend.set_health s2 sick"
+varnish v1 -cliok "backend.set_health s2 sick"
 
 client c1 {
 	txreq

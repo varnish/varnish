@@ -1,6 +1,6 @@
 vtest "Non-symbolic HTTP headers names"
 
-vinyl v1 -errvcl "Invalid character '\\n' in header name" {
+varnish v1 -errvcl "Invalid character '\\n' in header name" {
 	backend be none;
 	sub vcl_recv {
 		set req.http.{"line
@@ -8,21 +8,21 @@ break"} = "invalid";
 	}
 }
 
-vinyl v1 -errvcl "Expected '=' got '.'" {
+varnish v1 -errvcl "Expected '=' got '.'" {
 	backend be none;
 	sub vcl_recv {
 		set req."http".wrong-quote = "invalid";
 	}
 }
 
-vinyl v1 -syntax 4.0 -errvcl "Quoted headers are available for VCL >= 4.1" {
+varnish v1 -syntax 4.0 -errvcl "Quoted headers are available for VCL >= 4.1" {
 	backend be none;
 	sub vcl_recv {
 		set req.http."quoted" = "invalid";
 	}
 }
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 	backend be none;
 	sub vcl_recv {

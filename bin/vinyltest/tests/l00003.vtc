@@ -15,9 +15,9 @@ server s1 {
 } -start
 
 # give enough stack to 32bit systems
-vinyl v1 -cliok "param.set thread_pool_stack 128k"
+varnish v1 -cliok "param.set thread_pool_stack 128k"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url != "/2") {
 			set beresp.do_esi = true;
@@ -27,7 +27,7 @@ vinyl v1 -vcl+backend {
 		unset resp.http.date;
 		unset resp.http.age;
 		unset resp.http.via;
-		unset resp.http.X-Vinyl;
+		unset resp.http.X-Varnish;
 	}
 } -start
 
@@ -90,7 +90,7 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect s_req_hdrbytes == 45
-vinyl v1 -expect s_req_bodybytes == 0
-vinyl v1 -expect s_resp_hdrbytes == 105
-vinyl v1 -expect s_resp_bodybytes == 15
+varnish v1 -expect s_req_hdrbytes == 45
+varnish v1 -expect s_req_bodybytes == 0
+varnish v1 -expect s_resp_hdrbytes == 105
+varnish v1 -expect s_resp_bodybytes == 15

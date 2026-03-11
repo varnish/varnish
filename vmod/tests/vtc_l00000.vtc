@@ -1,6 +1,6 @@
 vtest "Test vtc.vsl()"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import vtc;
 
 	backend proforma none;
@@ -39,7 +39,7 @@ vinyl v1 -vcl {
 **** v1    vsl|       1001 RespReason      c OK
 **** v1    vsl|       1001 RespHeader      c Date: Thu, 27 Jan 2022 12:06:00 GMT
 **** v1    vsl|       1001 RespHeader      c Server: Varnish
-**** v1    vsl|       1001 RespHeader      c X-Vinyl: 1001
+**** v1    vsl|       1001 RespHeader      c X-Varnish: 1001
 **** v1    vsl|       1001 VCL_call        c SYNTH
 **** v1    vsl|       1001 RespHeader      c Match: true
 **** v1    vsl|       1001 RespHeader      c Match-Nopathname: true

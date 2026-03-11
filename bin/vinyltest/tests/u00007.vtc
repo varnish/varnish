@@ -1,43 +1,43 @@
-vtest "vinylhist coverage"
+vtest "varnishhist coverage"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-shell -match "Usage: .*vinylhist <options>" \
-	"vinylhist -h"
+shell -match "Usage: .*varnishhist <options>" \
+	"varnishhist -h"
 shell -expect "Copyright (c) 2006 Verdens Gang AS" \
-	"vinylhist -V"
-shell -err -match "Usage: .*vinylhist <options>" \
-	"vinylhist -K"
-shell -err -match "Usage: .*vinylhist <options>" \
-	"vinylhist extra"
+	"varnishhist -V"
+shell -err -match "Usage: .*varnishhist <options>" \
+	"varnishhist -K"
+shell -err -match "Usage: .*varnishhist <options>" \
+	"varnishhist extra"
 shell -err -expect "-p: invalid '0'" \
-	"vinylhist -p 0"
+	"varnishhist -p 0"
 shell -err -expect "-B: being able to bend time does not mean we can stop it" \
-	"vinylhist -p 2.0 -B 0"
+	"varnishhist -p 2.0 -B 0"
 shell -err -expect "-B: being able to bend time does not mean we can make it go backwards" \
-	"vinylhist -B -1"
+	"varnishhist -B -1"
 shell -err -expect "Invalid grouping mode: raw" \
-	"vinylhist -g raw"
+	"varnishhist -g raw"
 shell -err -expect "-P: No such profile 'foo'" \
-	"vinylhist -P foo"
+	"varnishhist -P foo"
 shell -err -expect "-P: 'Timestamp:' is not a valid profile name or definition" \
-	"vinylhist -P Timestamp::"
+	"varnishhist -P Timestamp::"
 shell -err -expect "-P: 'b:' is not a valid profile name or definition" \
-	"vinylhist -P b:"
+	"varnishhist -P b:"
 shell -err -expect "-P: 'foo:' is not a valid tag name" \
-	"vinylhist -P foo:"
+	"varnishhist -P foo:"
 shell -err -expect "-P: 'b:Debug:' is an unsafe or binary record" \
-	"vinylhist -P b:Debug:"
+	"varnishhist -P b:Debug:"
 shell -err -expect "-P: 'b:BereqAcct:x' is not a valid profile name or definition" \
-	"vinylhist -P b:BereqAcct:x"
+	"varnishhist -P b:BereqAcct:x"
 shell -err -expect "-P: 'b:BereqAcct:x' is not a valid profile name or definition" \
-	"vinylhist -P b:BereqAcct:x:"
+	"varnishhist -P b:BereqAcct:x:"
 shell -err -expect "-P: 'b:BereqAcct:' is not a valid profile name or definition" \
-	"vinylhist -P b:BereqAcct::5:1:a"
+	"varnishhist -P b:BereqAcct::5:1:a"
 shell -err -expect "-p: invalid '0'" \
-	"vinylhist -P b:BereqAcct::5 -p 0"
+	"varnishhist -P b:BereqAcct::5 -p 0"

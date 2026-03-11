@@ -7,7 +7,7 @@ server s1 {
 	send "Baba\n"
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";

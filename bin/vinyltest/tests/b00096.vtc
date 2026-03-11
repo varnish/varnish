@@ -18,7 +18,7 @@ server s2 {
 	txresp -status 304
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {

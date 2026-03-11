@@ -44,12 +44,12 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-vinyl v1 -cliok "param.set ban_lurker_age 0"
-vinyl v1 -cliok "param.set ban_lurker_sleep 0"
-vinyl v1 -cliok "param.set debug +lurker"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set ban_lurker_age 0"
+varnish v1 -cliok "param.set ban_lurker_sleep 0"
+varnish v1 -cliok "param.set debug +lurker"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 
 client c1 {
@@ -62,7 +62,7 @@ client c1 {
 	expect resp.http.foo == bar2
 } -run
 
-vinyl v1 -cliok "ban obj.http.foo == bar1"
+varnish v1 -cliok "ban obj.http.foo == bar1"
 
 client c1 {
 	txreq -url /3
@@ -70,7 +70,7 @@ client c1 {
 	expect resp.http.foo == bar3
 } -run
 
-vinyl v1 -cliok "ban obj.http.foo == bar2 && obj.http.foo != foof"
+varnish v1 -cliok "ban obj.http.foo == bar2 && obj.http.foo != foof"
 
 client c1 {
 	txreq -url /4
@@ -78,7 +78,7 @@ client c1 {
 	expect resp.http.foo == bar4
 } -run
 
-vinyl v1 -cliok "ban req.http.kill == yes"
+varnish v1 -cliok "ban req.http.kill == yes"
 
 client c1 {
 	txreq -url /5
@@ -86,7 +86,7 @@ client c1 {
 	expect resp.http.foo == bar5
 } -run
 
-vinyl v1 -cliok "ban obj.http.foo == bar5"
+varnish v1 -cliok "ban obj.http.foo == bar5"
 
 client c1 {
 	txreq -url /6
@@ -94,7 +94,7 @@ client c1 {
 	expect resp.http.foo == bar6
 } -run
 
-vinyl v1 -cliok "ban obj.http.foo == bar6"
+varnish v1 -cliok "ban obj.http.foo == bar6"
 
 client c1 {
 	txreq -url /7
@@ -105,46 +105,46 @@ client c1 {
 # Get the VSL out of the way
 delay 1
 
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -expect bans == 6
-vinyl v1 -expect bans_completed == 1
-vinyl v1 -expect bans_req == 1
-vinyl v1 -expect bans_obj == 4
-vinyl v1 -expect bans_added == 6
-vinyl v1 -expect bans_deleted == 0
-vinyl v1 -expect bans_tested == 0
-vinyl v1 -expect bans_tests_tested == 0
-vinyl v1 -expect bans_obj_killed == 0
-vinyl v1 -expect bans_lurker_tested == 0
-vinyl v1 -expect bans_lurker_tests_tested == 0
-vinyl v1 -expect bans_lurker_obj_killed == 0
-vinyl v1 -expect bans_dups == 0
+varnish v1 -expect bans == 6
+varnish v1 -expect bans_completed == 1
+varnish v1 -expect bans_req == 1
+varnish v1 -expect bans_obj == 4
+varnish v1 -expect bans_added == 6
+varnish v1 -expect bans_deleted == 0
+varnish v1 -expect bans_tested == 0
+varnish v1 -expect bans_tests_tested == 0
+varnish v1 -expect bans_obj_killed == 0
+varnish v1 -expect bans_lurker_tested == 0
+varnish v1 -expect bans_lurker_tests_tested == 0
+varnish v1 -expect bans_lurker_obj_killed == 0
+varnish v1 -expect bans_dups == 0
 
 
-vinyl v1 -cliok "param.set ban_lurker_sleep .01"
-
-delay 1
-
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "param.set ban_lurker_sleep .01"
 
 delay 1
 
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -expect bans == 4
-vinyl v1 -expect bans_completed == 3
-vinyl v1 -expect bans_req == 1
-vinyl v1 -expect bans_obj == 3
-vinyl v1 -expect bans_added == 6
-vinyl v1 -expect bans_deleted == 2
-vinyl v1 -expect bans_tested == 0
-vinyl v1 -expect bans_tests_tested == 0
-vinyl v1 -expect bans_obj_killed == 0
-vinyl v1 -expect bans_lurker_tested == 10
-vinyl v1 -expect bans_lurker_tests_tested == 11
-vinyl v1 -expect bans_lurker_obj_killed == 4
-vinyl v1 -expect bans_dups == 0
+delay 1
+
+varnish v1 -cliok "ban.list"
+
+varnish v1 -expect bans == 4
+varnish v1 -expect bans_completed == 3
+varnish v1 -expect bans_req == 1
+varnish v1 -expect bans_obj == 3
+varnish v1 -expect bans_added == 6
+varnish v1 -expect bans_deleted == 2
+varnish v1 -expect bans_tested == 0
+varnish v1 -expect bans_tests_tested == 0
+varnish v1 -expect bans_obj_killed == 0
+varnish v1 -expect bans_lurker_tested == 10
+varnish v1 -expect bans_lurker_tests_tested == 11
+varnish v1 -expect bans_lurker_obj_killed == 4
+varnish v1 -expect bans_dups == 0
 
 client c1 {
 	txreq -url /3
@@ -155,21 +155,21 @@ client c1 {
 # Give lurker time to trim tail
 delay 1
 
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -expect bans == 4
-vinyl v1 -expect bans_completed == 3
-vinyl v1 -expect bans_req == 1
-vinyl v1 -expect bans_obj == 3
-vinyl v1 -expect bans_added == 6
-vinyl v1 -expect bans_deleted == 2
-vinyl v1 -expect bans_tested == 1
-vinyl v1 -expect bans_tests_tested == 1
-vinyl v1 -expect bans_obj_killed == 0
-vinyl v1 -expect bans_lurker_tested == 10
-vinyl v1 -expect bans_lurker_tests_tested == 11
-vinyl v1 -expect bans_lurker_obj_killed == 4
-vinyl v1 -expect bans_dups == 0
+varnish v1 -expect bans == 4
+varnish v1 -expect bans_completed == 3
+varnish v1 -expect bans_req == 1
+varnish v1 -expect bans_obj == 3
+varnish v1 -expect bans_added == 6
+varnish v1 -expect bans_deleted == 2
+varnish v1 -expect bans_tested == 1
+varnish v1 -expect bans_tests_tested == 1
+varnish v1 -expect bans_obj_killed == 0
+varnish v1 -expect bans_lurker_tested == 10
+varnish v1 -expect bans_lurker_tests_tested == 11
+varnish v1 -expect bans_lurker_obj_killed == 4
+varnish v1 -expect bans_dups == 0
 
 client c1 {
 	txreq -url /4 -hdr "kill: yes"
@@ -180,87 +180,87 @@ client c1 {
 # Give lurker time to trim tail
 delay 1
 
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -expect bans == 1
-vinyl v1 -expect bans_completed == 1
-vinyl v1 -expect bans_req == 0
-vinyl v1 -expect bans_obj == 1
-vinyl v1 -expect bans_added == 6
-vinyl v1 -expect bans_deleted == 5
-vinyl v1 -expect bans_tested == 2
-vinyl v1 -expect bans_tests_tested == 2
-vinyl v1 -expect bans_obj_killed == 1
-vinyl v1 -expect bans_lurker_tested == 10
-vinyl v1 -expect bans_lurker_tests_tested == 11
-vinyl v1 -expect bans_lurker_obj_killed == 4
-vinyl v1 -expect bans_dups == 0
+varnish v1 -expect bans == 1
+varnish v1 -expect bans_completed == 1
+varnish v1 -expect bans_req == 0
+varnish v1 -expect bans_obj == 1
+varnish v1 -expect bans_added == 6
+varnish v1 -expect bans_deleted == 5
+varnish v1 -expect bans_tested == 2
+varnish v1 -expect bans_tests_tested == 2
+varnish v1 -expect bans_obj_killed == 1
+varnish v1 -expect bans_lurker_tested == 10
+varnish v1 -expect bans_lurker_tests_tested == 11
+varnish v1 -expect bans_lurker_obj_killed == 4
+varnish v1 -expect bans_dups == 0
 
-vinyl v1 -expect n_object == 3
+varnish v1 -expect n_object == 3
 
 # adding more bans than the cutoff purges all untested objects
 # (here: all objects)
 
-vinyl v1 -cliok "param.set ban_lurker_age 2"
-vinyl v1 -cliok "param.set ban_cutoff 4"
+varnish v1 -cliok "param.set ban_lurker_age 2"
+varnish v1 -cliok "param.set ban_cutoff 4"
 
-vinyl v1 -cliok "ban.list"
-vinyl v1 -cliok "ban obj.http.nomatch == 1"
-vinyl v1 -cliok "ban obj.http.nomatch == 2"
-vinyl v1 -cliok "ban obj.http.nomatch == 3"
-vinyl v1 -cliok "ban obj.http.nomatch == 4"
-vinyl v1 -cliok "ban obj.http.nomatch == 5"
-vinyl v1 -cliok "ban.list"
-vinyl v1 -cliok "param.set ban_lurker_age .1"
+varnish v1 -cliok "ban.list"
+varnish v1 -cliok "ban obj.http.nomatch == 1"
+varnish v1 -cliok "ban obj.http.nomatch == 2"
+varnish v1 -cliok "ban obj.http.nomatch == 3"
+varnish v1 -cliok "ban obj.http.nomatch == 4"
+varnish v1 -cliok "ban obj.http.nomatch == 5"
+varnish v1 -cliok "ban.list"
+varnish v1 -cliok "param.set ban_lurker_age .1"
 delay 3
 
-vinyl v1 -clijson "ban.list -j"
-vinyl v1 -cliok "ban.list"
+varnish v1 -clijson "ban.list -j"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -expect bans == 1
-vinyl v1 -expect bans_completed == 1
-vinyl v1 -expect bans_req == 0
-vinyl v1 -expect bans_obj == 1
-vinyl v1 -expect bans_added == 11
-vinyl v1 -expect bans_deleted == 10
-vinyl v1 -expect bans_tested == 2
-vinyl v1 -expect bans_tests_tested == 2
-vinyl v1 -expect bans_obj_killed == 1
-vinyl v1 -expect bans_lurker_tested == 10
-vinyl v1 -expect bans_lurker_tests_tested == 11
-vinyl v1 -expect bans_lurker_obj_killed == 4
-vinyl v1 -expect bans_lurker_obj_killed_cutoff == 3
-vinyl v1 -expect bans_dups == 0
+varnish v1 -expect bans == 1
+varnish v1 -expect bans_completed == 1
+varnish v1 -expect bans_req == 0
+varnish v1 -expect bans_obj == 1
+varnish v1 -expect bans_added == 11
+varnish v1 -expect bans_deleted == 10
+varnish v1 -expect bans_tested == 2
+varnish v1 -expect bans_tests_tested == 2
+varnish v1 -expect bans_obj_killed == 1
+varnish v1 -expect bans_lurker_tested == 10
+varnish v1 -expect bans_lurker_tests_tested == 11
+varnish v1 -expect bans_lurker_obj_killed == 4
+varnish v1 -expect bans_lurker_obj_killed_cutoff == 3
+varnish v1 -expect bans_dups == 0
 
-vinyl v1 -expect n_object == 0
+varnish v1 -expect n_object == 0
 
 client c1 {
 	txreq -url /r1
 	rxresp
 } -run
 
-vinyl v1 -cliok "ban req.http.nevermatch == 1"
+varnish v1 -cliok "ban req.http.nevermatch == 1"
 
 client c1 {
 	txreq -url /r2
 	rxresp
 } -run
 
-vinyl v1 -cliok "ban req.http.nevermatch == 2"
+varnish v1 -cliok "ban req.http.nevermatch == 2"
 
 client c1 {
 	txreq -url /r3
 	rxresp
 } -run
 
-vinyl v1 -cliok "ban req.http.nevermatch == 3"
+varnish v1 -cliok "ban req.http.nevermatch == 3"
 
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -cliok "ban obj.http.status != 0"
+varnish v1 -cliok "ban obj.http.status != 0"
 
 delay 1
 
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban.list"
 
-vinyl v1 -expect n_object == 0
+varnish v1 -expect n_object == 0

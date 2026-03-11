@@ -1,27 +1,27 @@
 vtest "deprecated parameters"
 
-vinyl v1 -arg "-b none" -start
+varnish v1 -arg "-b none" -start
 
 # permanent alias
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliexpect "[+]syncvsl" "param.show deprecated_dummy"
-vinyl v1 -cliexpect "[+]syncvsl" "param.show -j deprecated_dummy"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliexpect "[+]syncvsl" "param.show deprecated_dummy"
+varnish v1 -cliexpect "[+]syncvsl" "param.show -j deprecated_dummy"
 
 shell -err {
-	vinyladm -n ${v1_name} "param.show" | grep deprecated_dummy
+	varnishadm -n ${v1_name} "param.show" | grep deprecated_dummy
 }
 
 shell -err {
-	vinyladm -n ${v1_name} "param.show -l" | grep deprecated_dummy
+	varnishadm -n ${v1_name} "param.show -l" | grep deprecated_dummy
 }
 
 shell -err {
-	vinyladm -n ${v1_name} "param.show -j" | grep deprecated_dummy
+	varnishadm -n ${v1_name} "param.show -j" | grep deprecated_dummy
 }
 
 # temporary aliases
 
-vinyl v1 -cliexpect vcc_feature "param.show vcc_allow_inline_c"
-vinyl v1 -cliexpect vcc_feature "param.show vcc_err_unref"
-vinyl v1 -cliexpect vcc_feature "param.show vcc_unsafe_path"
+varnish v1 -cliexpect vcc_feature "param.show vcc_allow_inline_c"
+varnish v1 -cliexpect vcc_feature "param.show vcc_err_unref"
+varnish v1 -cliexpect vcc_feature "param.show vcc_unsafe_path"

@@ -1,15 +1,15 @@
-vtest	"trivial run of vinylhist in curses mode"
+vtest	"trivial run of varnishhist in curses mode"
 
 server s1 {
 	rxreq
 	txresp -bodylen 32
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-process p1 -dump {vinylhist -n ${v1_name}} -start
-process p2 -dump {vinylhist -n ${v1_name} -P b:BereqAcct::5:-1:1} -start
-process p3 -dump {VINYL_DEFAULT_N="${v1_name}" vinylhist -P BerespBodytime -B 2} -start
+process p1 -dump {varnishhist -n ${v1_name}} -start
+process p2 -dump {varnishhist -n ${v1_name} -P b:BereqAcct::5:-1:1} -start
+process p3 -dump {VINYL_DEFAULT_N="${v1_name}" varnishhist -P BerespBodytime -B 2} -start
 
 process p1 -expect-text 24 0 {1e2}
 process p2 -expect-text 24 0 {1e-1}
@@ -22,7 +22,7 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 process p1 -expect-text 22 0 {#}
 process p2 -expect-text 22 80 {#}
@@ -32,7 +32,7 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 process p1 -expect-text 22 0 { |}
 

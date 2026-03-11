@@ -29,10 +29,10 @@ server stest {
 	txresp -body "All good"
 } -start
 
-vinyl v1 -arg "-p debug=+syncvsl -p debug=+flush_head"
-vinyl v1 -arg "-p thread_pools=1 -p thread_pool_min=10"
-vinyl v1 -arg "-p thread_pool_add_delay=0.01"
-vinyl v1 -vcl+backend {
+varnish v1 -arg "-p debug=+syncvsl -p debug=+flush_head"
+varnish v1 -arg "-p thread_pools=1 -p thread_pool_min=10"
+varnish v1 -arg "-p thread_pool_add_delay=0.01"
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url == "/test") {
 			set bereq.backend = stest;
@@ -47,7 +47,7 @@ vinyl v1 -vcl+backend {
 # threads. This is currently mitigated by increasing the
 # thread_pool_add_delay parameter.
 
-vinyl v1 -expect MAIN.threads == 10
+varnish v1 -expect MAIN.threads == 10
 
 client c1 {
 	txreq -url /1

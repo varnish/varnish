@@ -36,7 +36,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import debug;
 
@@ -87,8 +87,8 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set vsl_mask +Debug,-VCL_acl"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set vsl_mask +Debug,-VCL_acl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 logexpect l1 -v v1 -g raw {
 	expect * 1001 Debug {Sweep: 192.168.0.0    ---------XX-XX-X-X-X---X---------}
@@ -106,7 +106,7 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import debug;
 
@@ -137,7 +137,7 @@ client c1 {
 	expect resp.http.acl6 == ":NSi+7wpvQe7XJj8DPbESjpYPGnIzvjOsA5QCyCnW3kc=:"
 } -run
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import debug;
 

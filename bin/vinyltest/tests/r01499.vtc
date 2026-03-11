@@ -8,7 +8,7 @@ server s1 {
 	txresp -hdr "X-Resp: 2" -body {12}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.001s;
 		set beresp.grace = 0s;
@@ -31,4 +31,4 @@ client c1 {
 
 delay 3
 
-vinyl v1 -expect n_object == 0
+varnish v1 -expect n_object == 0

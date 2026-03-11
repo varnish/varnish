@@ -1,6 +1,6 @@
 vtest "Regression test for #1163: allow backends to be named storage*"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend storage_foo {
 		.host = "${localhost}";
 	}
@@ -10,7 +10,7 @@ vinyl v1 -vcl {
 	}
 }
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend storagefoo {
 		.host = "${localhost}";
 	}

@@ -4,90 +4,90 @@ vtest "Check that we fail to start with erroneous -a/-b arguments"
 # XXX: this cannot be tested reliably, we tolerate port collision
 shell -err -match "have same address|already in use|Address in use" {
 	if echo "${localhost}" | grep ":" >/dev/null ; then
-		vinyld -d -a "[${localhost}]":38484 -a "[${localhost}]":38484 -b None
+		varnishd -d -a "[${localhost}]":38484 -a "[${localhost}]":38484 -b None
 	else
-		vinyld -d -a ${localhost}:38484 -a ${localhost}:38484 -b None
+		varnishd -d -a ${localhost}:38484 -a ${localhost}:38484 -b None
 	fi
 }
 
 shell -err -match "have same address|already in use|Address in use" {
-	vinyld -d -a ${tmpdir}/vtc.sock -a ${tmpdir}/vtc.sock -b None
+	varnishd -d -a ${tmpdir}/vtc.sock -a ${tmpdir}/vtc.sock -b None
 }
 
 # -a bad protocol specs
 shell -err -expect "Too many protocol sub-args" {
-	vinyld -a ${localhost}:80000,PROXY,FOO -d
+	varnishd -a ${localhost}:80000,PROXY,FOO -d
 }
 shell -err -expect "Too many protocol sub-args" {
-	vinyld -a ${localhost}:80000,HTTP,FOO -d
+	varnishd -a ${localhost}:80000,HTTP,FOO -d
 }
 
 # -a UDS path too long
 shell -err -match "Got no socket" {
-	vinyld -a /Although/sizeof/sockaddr_un/sun_path/is/platform/specific/this/path/is/really/definitely/and/most/assuredly/too/long/on/any/platform/--/any/length/that/results/in/sizeof/sockaddr_un/being/greater/than/128/will/probably/be/enough/to/blow/it/up. -d
+	varnishd -a /Although/sizeof/sockaddr_un/sun_path/is/platform/specific/this/path/is/really/definitely/and/most/assuredly/too/long/on/any/platform/--/any/length/that/results/in/sizeof/sockaddr_un/being/greater/than/128/will/probably/be/enough/to/blow/it/up. -d
 }
 
 # -a relative path for a UDS address not permitted
 shell -err -expect "Unix domain socket addresses must be absolute paths" {
-	vinyld -a foo/bar.sock -d
+	varnishd -a foo/bar.sock -d
 }
 
 # -a args for UDS permissions not permitted with IP addresses
 shell -err -expect "Invalid sub-arg user=u" {
-	vinyld -a ${localhost}:80000,user=u -d
+	varnishd -a ${localhost}:80000,user=u -d
 }
 
 shell -err -expect "Invalid sub-arg group=g" {
-	vinyld -a ${localhost}:80000,group=g -d
+	varnishd -a ${localhost}:80000,group=g -d
 }
 
 shell -err -expect "Invalid sub-arg mode=660" {
-	vinyld -a ${localhost}:80000,mode=660 -d
+	varnishd -a ${localhost}:80000,mode=660 -d
 }
 
 shell -err -expect "Invalid sub-arg mode=660" {
-	vinyld -a @abstract,mode=660 -d
+	varnishd -a @abstract,mode=660 -d
 }
 
 # Illegal mode sub-args
 shell -err -expect "Too many mode sub-args" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=660,mode=600 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=660,mode=600 -d
 }
 
 shell -err -expect "Empty mode sub-arg" {
-	vinyld -a ${tmpdir}/vtc.sock,mode= -d
+	varnishd -a ${tmpdir}/vtc.sock,mode= -d
 }
 
 shell -err -expect "Invalid mode sub-arg 666devilish" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=666devilish -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=666devilish -d
 }
 
 shell -err -expect "Invalid mode sub-arg devilish" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=devilish -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=devilish -d
 }
 
 shell -err -expect "Invalid mode sub-arg 999" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=999 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=999 -d
 }
 
 shell -err -expect "Cannot parse mode sub-arg 7" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=77777777777777777777777777777777 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=77777777777777777777777777777777 -d
 }
 
 shell -err -expect "Cannot parse mode sub-arg -7" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=-77777777777777777777777777777777 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=-77777777777777777777777777777777 -d
 }
 
 shell -err -expect "Mode sub-arg 1666 out of range" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=1666 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=1666 -d
 }
 
 shell -err -expect "Mode sub-arg 0 out of range" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=0 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=0 -d
 }
 
 shell -err -expect "Mode sub-arg -1 out of range" {
-	vinyld -a ${tmpdir}/vtc.sock,mode=-1 -d
+	varnishd -a ${tmpdir}/vtc.sock,mode=-1 -d
 }
 
 ##
@@ -97,28 +97,28 @@ shell -err -expect "Mode sub-arg -1 out of range" {
 
 # Invalid sub-arg
 shell -err -expect "Invalid sub-arg foo=bar" {
-	vinyld -a ${tmpdir}/vtc.sock,foo=bar -d
+	varnishd -a ${tmpdir}/vtc.sock,foo=bar -d
 }
 
 # A sub-arg without '=' is interpreted as a protocol name.
 shell -err -expect "Unknown protocol" {
-	vinyld -a ${tmpdir}/vtc.sock,foobar -d
+	varnishd -a ${tmpdir}/vtc.sock,foobar -d
 }
 
 shell -err -expect "Invalid sub-arg userfoo=u" {
-	vinyld -a ${tmpdir}/vtc.sock,userfoo=u -d
+	varnishd -a ${tmpdir}/vtc.sock,userfoo=u -d
 }
 
 shell -err -expect "Invalid sub-arg groupfoo=g" {
-	vinyld -a ${tmpdir}/vtc.sock,groupfoo=g -d
+	varnishd -a ${tmpdir}/vtc.sock,groupfoo=g -d
 }
 
 shell -err -expect "Invalid sub-arg modefoo=666" {
-	vinyld -a ${tmpdir}/vtc.sock,modefoo=666 -d
+	varnishd -a ${tmpdir}/vtc.sock,modefoo=666 -d
 }
 
 shell -err -expect "Invalid sub-arg =foo" {
-	vinyld -a ${tmpdir}/vtc.sock,=foo -d
+	varnishd -a ${tmpdir}/vtc.sock,=foo -d
 }
 
 # This requires non-local binds to be disabled.  If you see this fail
@@ -126,10 +126,10 @@ shell -err -expect "Invalid sub-arg =foo" {
 
 # All bad listen addresses
 shell -err -expect "Error: Could not get socket" {
-	vinyld -F -a "${bad_ip}:0" -b '***'
+	varnishd -F -a "${bad_ip}:0" -b '***'
 }
 
 # old style address list
 shell -err -expect "Unknown protocol" {
-	vinyld -F -a "${listen_addr},${bad_ip}:0" -b '***'
+	varnishd -F -a "${listen_addr},${bad_ip}:0" -b '***'
 }

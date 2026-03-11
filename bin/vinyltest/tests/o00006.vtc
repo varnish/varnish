@@ -13,7 +13,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-p pool_sess=0,0,0" -proto "PROXY" -vcl+backend {} -start
+varnish v1 -arg "-p pool_sess=0,0,0" -proto "PROXY" -vcl+backend {} -start
 
 logexpect l1 -v v1 -g raw {
 	expect 0 1000	Begin		"sess 0 PROXY"
@@ -23,7 +23,7 @@ logexpect l1 -v v1 -g raw {
 	expect 0 =	SessClose	"RX_JUNK"
 } -start
 
-vinyl v1 -cliok "param.set workspace_session 480"
+varnish v1 -cliok "param.set workspace_session 488"
 
 client c1 {
 	# PROXY2 with CRC32C TLV

@@ -15,7 +15,7 @@ server s1 {
 	txresp -status 304 -nolen -hdr "foo: bazf"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.1s;
 		set beresp.grace = 0s;
@@ -37,7 +37,7 @@ client c1 {
 
 # Wait for ttl to expire on both objects
 delay 0.2
-vinyl v1 -expect n_object == 2
+varnish v1 -expect n_object == 2
 
 client c1 {
 	txreq -url /no-ims
@@ -55,4 +55,4 @@ client c1 {
 delay 1
 
 # Only one of each of /no-ims and /ims should be left
-vinyl v1 -expect n_object == 2
+varnish v1 -expect n_object == 2

@@ -7,7 +7,7 @@ server s1 {
 	txresp -status 700
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.http.x-abandon == "1") {
 			return (abandon);
@@ -32,7 +32,7 @@ client c1 {
 
 # Then across v_b_e and v_b_f
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend bad { .host = "${bad_backend}"; }
 	sub vcl_backend_fetch {
 		set bereq.backend = bad;

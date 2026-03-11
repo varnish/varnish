@@ -1,6 +1,6 @@
 vtest "VMOD blob base64 encode and decode"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -134,7 +134,7 @@ client c1 {
 	expect resp.http.b64cfxcodein == "+/Y="
 } -run
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -284,7 +284,7 @@ server s1 -repeat 3 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import blob;
 
 	sub vcl_deliver {
@@ -342,7 +342,7 @@ server s1 -repeat 6 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import blob;
 
 	sub vcl_deliver {

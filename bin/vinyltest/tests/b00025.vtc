@@ -1,6 +1,6 @@
 vtest "more backends"
 
-vinyl v1 -arg "-p vcc_feature=-err_unref" -vcl {
+varnish v1 -arg "-p vcc_feature=-err_unref" -vcl {
 	backend d0 { .host = "${bad_backend}"; }
 	backend d1 { .host = "${bad_backend}"; }
 	backend d2 { .host = "${bad_backend}"; }
@@ -110,4 +110,4 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-shell -match "d99" "vinylstat -1 -n ${v1_name}"
+shell -match "d99" "varnishstat -1 -n ${v1_name}"

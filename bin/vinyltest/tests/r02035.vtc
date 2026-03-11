@@ -17,7 +17,7 @@ server s1 {
 	send "B"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 } -start
 
 client c1 {

@@ -1,6 +1,6 @@
 vtest "VRE_quote() coverage"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 
 	backend be none;

@@ -1,6 +1,6 @@
 vtest "Regression test for ticket 409"
 
-vinyl v1 -errvcl {Unknown token '!' when looking for REGEX} {
+varnish v1 -errvcl {Unknown token '!' when looking for REGEX} {
 	backend be none;
 	sub vcl_recv {
 		if ( req.url ~ ! "\.(png|jpg|gif|js|css)$" ) {
@@ -9,7 +9,7 @@ vinyl v1 -errvcl {Unknown token '!' when looking for REGEX} {
 	}
 }
 
-vinyl v1 -errvcl {Expression has type STRING, expected REGEX} {
+varnish v1 -errvcl {Expression has type STRING, expected REGEX} {
 	backend be none;
 	sub vcl_recv {
 		set req.http.regex = "\.(png|jpg|gif|js|css)$";
@@ -19,7 +19,7 @@ vinyl v1 -errvcl {Expression has type STRING, expected REGEX} {
 	}
 }
 
-vinyl v1 -errvcl {Expression has type STRING, expected REGEX} {
+varnish v1 -errvcl {Expression has type STRING, expected REGEX} {
 	backend be none;
 	sub vcl_recv {
 		set req.http.regex = "\?.*";

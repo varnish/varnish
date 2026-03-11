@@ -1,6 +1,6 @@
 vtest "Test req_top.* in an ESI context"
 
-vinyl v1 -errvcl {Variable is read only.} {
+varnish v1 -errvcl {Variable is read only.} {
 	backend foo None;
 
 	sub vcl_recv {
@@ -52,10 +52,10 @@ server s1 {
 } -start
 
 # give enough stack to 32bit systems
-vinyl v1 -cliok "param.set thread_pool_stack 128k"
-vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
+varnish v1 -cliok "param.set thread_pool_stack 128k"
+varnish v1 -cliok "param.set feature +esi_disable_xml_check"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.esi_level > 0) {
 			set req.url = req.url + req.esi_level;
@@ -84,4 +84,4 @@ client c1 {
 	expect resp.bodylen == 81
 } -run
 
-vinyl v1 -expect esi_errors == 0
+varnish v1 -expect esi_errors == 0

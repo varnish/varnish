@@ -7,16 +7,16 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	sub vcl_recv {
 		std.cache_req_body(100KB);
 	}
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set h2_rx_window_low_water 65535"
-vinyl v1 -cliok "param.reset h2_initial_window_size"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set h2_rx_window_low_water 65535"
+varnish v1 -cliok "param.reset h2_initial_window_size"
 
 client c1 {
 	stream 1 {

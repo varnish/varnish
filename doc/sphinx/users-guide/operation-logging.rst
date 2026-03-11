@@ -20,12 +20,12 @@ when you need it.
 The flip side is that if you forget to have a program actually write the
 logs to disk they will be overwritten.
 
-`vinyllog` is one of the programs you can use to look at what Varnish
-is logging. `vinyllog` gives you the raw logs, everything that is
+`varnishlog` is one of the programs you can use to look at what Varnish
+is logging. `varnishlog` gives you the raw logs, everything that is
 written to the logs. There are other clients that can access the logs as well, we'll show you
 these later.
 
-In the terminal window you started Varnish now type ``vinyllog -g raw``
+In the terminal window you started Varnish now type ``varnishlog -g raw``
 and press enter.
 
 You'll see lines like these scrolling slowly by.::
@@ -61,7 +61,7 @@ The third column tell us whether this is is data coming from or going
 to the client ('c'), or the backend ('b'). The forth column is the data
 being logged.
 
-Now, you can filter quite a bit with `vinyllog`. The basic options we think you
+Now, you can filter quite a bit with `varnishlog`. The basic options we think you
 want to know are:
 
 '-b'
@@ -79,4 +79,4 @@ want to know are:
 
 .. XXX:Maybe a couple of sample commands here? benc
 
-For more information on this topic please see :ref:`vinyllog(1)`.
+For more information on this topic please see :ref:`varnishlog(1)`.

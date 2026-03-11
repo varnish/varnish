@@ -5,7 +5,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 
 	backend dummy None;
@@ -19,7 +19,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -expect MAIN.n_backend == 1
+varnish v1 -expect MAIN.n_backend == 1
 
 client c1 {
 	txreq
@@ -27,7 +27,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -errvcl {path must be an absolute path} {
+varnish v1 -errvcl {path must be an absolute path} {
 	import debug;
 
 	backend dummy None;
@@ -37,7 +37,7 @@ vinyl v1 -errvcl {path must be an absolute path} {
 	}
 }
 
-vinyl v1 -errvcl {path must be an absolute path} {
+varnish v1 -errvcl {path must be an absolute path} {
 	import debug;
 
 	backend dummy None;
@@ -49,7 +49,7 @@ vinyl v1 -errvcl {path must be an absolute path} {
 
 shell { rm -f ${tmpdir}/foo }
 
-vinyl v1 -errvcl {Cannot stat path} {
+varnish v1 -errvcl {Cannot stat path} {
 	import debug;
 
 	backend dummy None;
@@ -59,7 +59,7 @@ vinyl v1 -errvcl {Cannot stat path} {
 	}
 }
 
-vinyl v1 -errvcl {is not a socket} {
+varnish v1 -errvcl {is not a socket} {
 	import debug;
 
 	backend dummy None;

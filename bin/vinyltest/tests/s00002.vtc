@@ -37,7 +37,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -72,5 +72,5 @@ client c2 {
 	rxresp
 	expect resp.http.foo == "bar"
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1004 1002"
+	expect resp.http.X-Varnish == "1004 1002"
 } -run

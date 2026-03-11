@@ -3,7 +3,7 @@ vtest "Test VCL_PROBE type handling in VCC"
 # To truly test this we would have to inspect the generated
 # C-source code.
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	vcl 4.1;
 
 	backend be none;

@@ -1,10 +1,10 @@
 vtest "Unset bereq timeouts"
 
-vinyl v1 -cliok "param.set connect_timeout 42"
-vinyl v1 -cliok "param.set first_byte_timeout 42"
-vinyl v1 -cliok "param.set between_bytes_timeout 42"
+varnish v1 -cliok "param.set connect_timeout 42"
+varnish v1 -cliok "param.set first_byte_timeout 42"
+varnish v1 -cliok "param.set between_bytes_timeout 42"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend be none;
 
 	sub vcl_backend_fetch {

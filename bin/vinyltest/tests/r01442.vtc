@@ -10,7 +10,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 		set beresp.grace = 0s;

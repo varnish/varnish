@@ -1,6 +1,6 @@
 vtest "symbol lookup order issue"
 
-vinyl v1 -errvcl {Name 'debug' already defined.} {
+varnish v1 -errvcl {Name 'debug' already defined.} {
 	vcl 4.0;
 	import debug;
 

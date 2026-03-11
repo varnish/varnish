@@ -2,7 +2,7 @@ vtest "status codes"
 
 server s1 {} -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	sub vcl_recv {
 		return (synth(std.integer(req.http.x-vtc-response-code, 999)));

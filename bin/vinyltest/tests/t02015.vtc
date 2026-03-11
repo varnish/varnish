@@ -5,8 +5,8 @@ server s1 {
 	txresp -noserver -bodylen 12345
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		# make ReqAcct deterministic
 		unset resp.http.via;

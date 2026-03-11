@@ -14,7 +14,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 } -start
 
 # For PROXYv1 with a UDS backend, we send PROXY UNKNOWN in the probe.
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 		.path = "${s1_sock}";
 		.proxy_header = 1;
@@ -29,7 +29,7 @@ vinyl v1 -vcl {
 
 delay 1
 
-vinyl v1 -cliexpect "vcl1.s1[ ]+probe[ ]+1/1[ ]+healthy" backend.list
+varnish v1 -cliexpect "vcl1.s1[ ]+probe[ ]+1/1[ ]+healthy" backend.list
 
 # For PROXYv2, we apply a trick similar to o0000[24].vtc, since
 # Varnish accepts (and ignores) PROXY LOCAL.
@@ -41,11 +41,11 @@ server s2 {
 	txresp
 } -start
 
-vinyl v2 -arg "-a ${tmpdir}/v2.sock,PROXY,mode=0777" -vcl {
+varnish v2 -arg "-a ${tmpdir}/v2.sock,PROXY,mode=0777" -vcl {
 	backend s2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
 } -start
 
-vinyl v3 -vcl {
+varnish v3 -vcl {
 	backend bp {
 		.path = "${v2_sock}";
 		.host_header = "v2";
@@ -63,7 +63,7 @@ server s1 -wait
 
 delay 1
 
-vinyl v3 -cliexpect "vcl1.bp[ ]+probe[ ]+1/1[ ]+healthy" backend.list
+varnish v3 -cliexpect "vcl1.bp[ ]+probe[ ]+1/1[ ]+healthy" backend.list
 
 # Verify in the v2 log that PROXY LOCAL was sent.
 

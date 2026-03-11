@@ -1,7 +1,7 @@
 vtest "Test vcc 'unused' directive"
 
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 { .host = "localhost"; }
 
 	probe p1 { }
@@ -16,18 +16,18 @@ vinyl v1 -vcl {
 	unused sb;
 } -start
 
-vinyl v1 -errvcl "Symbol not found: 'nonexistentsymbol'" {
+varnish v1 -errvcl "Symbol not found: 'nonexistentsymbol'" {
 	unused nonexistentsymbol;
 }
 
-vinyl v1 -errvcl "Expected ID got ';'" {
+varnish v1 -errvcl "Expected ID got ';'" {
 	unused;
 }
 
-vinyl v1 -errvcl "Symbol 'req' cannot follow 'unused'" {
+varnish v1 -errvcl "Symbol 'req' cannot follow 'unused'" {
 	unused req;
 }
 
-vinyl v1 -errvcl "Symbol 'backend' cannot follow 'unused'" {
+varnish v1 -errvcl "Symbol 'backend' cannot follow 'unused'" {
 	unused bereq.backend;
 }

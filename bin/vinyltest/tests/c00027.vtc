@@ -18,7 +18,7 @@ server s1 {
 	txresp -body "${string,repeat,1024,1}"
 } -start
 
-vinyl v1 -arg "-s default,1M" -vcl+backend {
+varnish v1 -arg "-s default,1M" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 10m;
 	}

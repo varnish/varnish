@@ -139,13 +139,13 @@ Common actions for the backend side
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
+* :ref:`varnishd(1)`
 * :ref:`vcl(7)`
 
 COPYRIGHT
 =========
 
-This document is licensed under the same license as Vinyl Cache
+This document is licensed under the same license as Varnish
 itself. See LICENSE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

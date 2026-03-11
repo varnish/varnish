@@ -5,9 +5,9 @@ server s1 -repeat 12 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set thread_pools 1"
-vinyl v1 -cliok "param.set vsl_mask +ExpKill"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set thread_pools 1"
+varnish v1 -cliok "param.set vsl_mask +ExpKill"
+varnish v1 -vcl+backend {
 	import purge;
 
 	sub vcl_miss {
@@ -18,7 +18,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set timeout_idle 2"
+varnish v1 -cliok "param.set timeout_idle 2"
 
 logexpect l0 -v v1 -g raw {
 	expect * 0 ExpKill	"EXP_Removed x=1002"
@@ -52,7 +52,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_purge'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_purge'" {
 	import purge;
 
 	sub vcl_purge {
@@ -60,7 +60,7 @@ vinyl v1 -errvcl "Not available in subroutine 'vcl_purge'" {
 	}
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_pass'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_pass'" {
 	import purge;
 
 	sub vcl_pass {
@@ -68,7 +68,7 @@ vinyl v1 -errvcl "Not available in subroutine 'vcl_pass'" {
 	}
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_deliver'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_deliver'" {
 	import purge;
 
 	sub vcl_deliver {
@@ -76,7 +76,7 @@ vinyl v1 -errvcl "Not available in subroutine 'vcl_deliver'" {
 	}
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_synth'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_synth'" {
 	import purge;
 
 	sub vcl_synth {
@@ -84,7 +84,7 @@ vinyl v1 -errvcl "Not available in subroutine 'vcl_synth'" {
 	}
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
 	import purge;
 
 	sub vcl_backend_fetch {
@@ -92,7 +92,7 @@ vinyl v1 -errvcl "Not available in subroutine 'vcl_backend_fetch'" {
 	}
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_backend_error'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_backend_error'" {
 	import purge;
 
 	sub vcl_backend_error {
@@ -100,7 +100,7 @@ vinyl v1 -errvcl "Not available in subroutine 'vcl_backend_error'" {
 	}
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_backend_response'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_backend_response'" {
 	import purge;
 
 	sub vcl_backend_response {

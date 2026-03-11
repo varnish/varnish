@@ -1,6 +1,6 @@
 vtest "Long VMOD object names"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	backend b None;
 

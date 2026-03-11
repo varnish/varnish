@@ -12,7 +12,7 @@ server s1 {
 	delay .3
 } -start
 
-vinyl v1 -vcl+backend { } -start
+varnish v1 -vcl+backend { } -start
 
 logexpect l1 -v v1 -g session {
 	expect 0 1000	Begin		sess
@@ -28,12 +28,12 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -expect MAIN.sc_range_short == 1
+varnish v1 -expect MAIN.sc_range_short == 1
 logexpect l1 -wait
 
 delay .3
 
-vinyl v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set feature +http2"
 
 server s1 -start
 
@@ -50,4 +50,4 @@ client c2 {
 	} -run
 } -run
 
-vinyl v1 -expect MAIN.sc_range_short == 1
+varnish v1 -expect MAIN.sc_range_short == 1

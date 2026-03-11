@@ -22,7 +22,7 @@ server s1 -repeat 2 {
 	    -body " "
 } -start
 
-vinyl v1 \
+varnish v1 \
     -arg "-p feature=+no_coredump" \
     -vcl+backend {
 	import debug;
@@ -75,14 +75,14 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -wait
 logexpect l2 -wait
 
-vinyl v1 -stop
+varnish v1 -stop
 
-vinyl v1 -start
+varnish v1 -start
 
 client c2 {
 	txreq -url "/ok"
@@ -93,6 +93,6 @@ client c2 {
 
 delay 3
 
-vinyl v1 -cliexpect "body checksum" "panic.show"
-vinyl v1 -cliok "panic.clear"
-vinyl v1 -expectexit 0x40
+varnish v1 -cliexpect "body checksum" "panic.show"
+varnish v1 -cliok "panic.clear"
+varnish v1 -expectexit 0x40

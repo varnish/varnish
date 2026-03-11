@@ -17,7 +17,7 @@ server s2 {
 	txresp -hdr "Vary: foo" -bodylen 3
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.http.bar) {
 			set bereq.backend = s2;

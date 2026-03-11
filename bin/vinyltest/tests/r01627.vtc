@@ -5,7 +5,7 @@ server s1 {
 	txresp -body "Testing"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = true;
 		set beresp.do_gzip = true;

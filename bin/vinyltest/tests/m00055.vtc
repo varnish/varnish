@@ -8,7 +8,7 @@ server s1 {
 } -start
 
 
-vinyl v1 -arg "-pvmod_path=${tmpdir}" -vcl+backend {} -start
+varnish v1 -arg "-pvmod_path=${tmpdir}" -vcl+backend {} -start
 
 
 filewrite ${tmpdir}/libvmod_wrong.so "VMOD_JSON_SPEC\x02"
@@ -54,6 +54,6 @@ filewrite -a ${tmpdir}/libvmod_wrong.so {
 
 filewrite -a ${tmpdir}/libvmod_wrong.so "\x03"
 
-vinyl v1 -errvcl {invalid scope for $Restrict: foo} { import wrong; }
+varnish v1 -errvcl {invalid scope for $Restrict: foo} { import wrong; }
 
 shell "rm -f ${tmpdir}/libvmod_wrong.so ${tmpdir}wrong.vcl"

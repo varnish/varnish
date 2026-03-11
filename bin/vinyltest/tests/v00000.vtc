@@ -8,7 +8,7 @@ server s1 {
 
 server s1 -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		set req.max_age += 1 s;
 	}

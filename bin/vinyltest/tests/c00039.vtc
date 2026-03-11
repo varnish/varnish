@@ -13,12 +13,12 @@ server s1 {
 	txresp -bodylen 5
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-vcl+backend {
 	} -start
 
-vinyl v1 -cliok "param.set http_req_size 256"
-vinyl v1 -cliok "param.set http_req_hdr_len 40"
+varnish v1 -cliok "param.set http_req_size 256"
+varnish v1 -cliok "param.set http_req_hdr_len 40"
 
 client c1 {
 	txreq -url "/1" -hdr "host: 127.0.0.1" -hdr "1...5: ..0....5....0....5....0....5....0"
@@ -63,7 +63,7 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -cliok "param.set http_req_overflow_status 414"
+varnish v1 -cliok "param.set http_req_overflow_status 414"
 client c1 {
 	# Each line is 32 except last, which is 33. Total: 32 * 7 + 33 == 257
 	send "GET /..... HTTP/1.1\r\nHost: foo\r\n"
@@ -78,4 +78,4 @@ client c1 {
 	expect resp.status == 414
 } -run
 
-vinyl v1 -clierr 106 "param.set http_req_overflow_status 200"
+varnish v1 -clierr 106 "param.set http_req_overflow_status 200"

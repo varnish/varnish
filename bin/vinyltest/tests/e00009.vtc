@@ -17,7 +17,7 @@ server s1 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -35,9 +35,9 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-vinyl v1 -expect MAIN.s_resp_bodybytes == 57
+varnish v1 -expect MAIN.s_resp_bodybytes == 57
 
-vinyl v1  -cli "param.set feature +esi_disable_xml_check"
+varnish v1  -cli "param.set feature +esi_disable_xml_check"
 
 client c1 {
 	txreq -url bar
@@ -46,5 +46,5 @@ client c1 {
 	expect resp.bodylen == 22
 	expect resp.http.transfer-encoding == "chunked"
 } -run
-vinyl v1 -expect esi_errors == 0
-vinyl v1 -expect MAIN.s_resp_bodybytes == 79
+varnish v1 -expect esi_errors == 0
+varnish v1 -expect MAIN.s_resp_bodybytes == 79

@@ -1,6 +1,6 @@
 vtest "client.ip vs. string session attrs"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	import std;
 	backend dummy None;

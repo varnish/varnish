@@ -14,7 +14,7 @@ server s1 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -84,7 +84,7 @@ client c1 {
 	expect resp.body == "Response was served by File Four\n"
 } -run
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -118,17 +118,17 @@ vinyl v1 -vcl+backend {
 	}
 }
 
-vinyl v1 -cli "vcl.list"
-vinyl v1 -cli "vcl.use vcl2"
+varnish v1 -cli "vcl.list"
+varnish v1 -cli "vcl.use vcl2"
 
 client c1 -run
 client c1 -run
 
-vinyl v1 -cli "vcl.list"
-vinyl v1 -cli "vcl.discard vcl1"
+varnish v1 -cli "vcl.list"
+varnish v1 -cli "vcl.discard vcl1"
 
-vinyl v1 -vcl+backend { }
-vinyl v1 -cli "vcl.use vcl3"
+varnish v1 -vcl+backend { }
+varnish v1 -cli "vcl.use vcl3"
 
 client c1 {
 	txreq -url "/one"
@@ -139,9 +139,9 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -cli "vcl.list"
-vinyl v1 -cli "vcl.discard vcl2"
+varnish v1 -cli "vcl.list"
+varnish v1 -cli "vcl.discard vcl2"
 
 client c1 -run
 
-vinyl v1 -cli "vcl.list"
+varnish v1 -cli "vcl.list"

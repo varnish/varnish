@@ -1,22 +1,22 @@
-vtest "Test vinyladm and the Telnet CLI"
+vtest "Test varnishadm and the Telnet CLI"
 
-vinyl v1 -vcl {backend foo { .host = "${localhost}"; } } -start
+varnish v1 -vcl {backend foo { .host = "${localhost}"; } } -start
 
-shell -err -expect {Usage: vinyladm} \
-	"vinyladm -7"
+shell -err -expect {Usage: varnishadm} \
+	"varnishadm -7"
 
-shell -err -expect {Could not get hold of vinyld, is it running?} \
-	"vinyladm -n ${v1_name}/nonexistent"
+shell -err -expect {Could not get hold of varnishd, is it running?} \
+	"varnishadm -n ${v1_name}/nonexistent"
 
 shell -err -expect {Connection failed} \
-	"vinyladm -t 4 -T ${bad_ip}:1 -S ${v1_name}/_.secret"
+	"varnishadm -t 4 -T ${bad_ip}:1 -S ${v1_name}/_.secret"
 
 server s1 {
 	send "FOO\n"
 } -start
 
 shell -err -expect {Rejected 400} \
-	{vinyladm -T ${s1_sock} -S /etc/group}
+	{varnishadm -T ${s1_sock} -S /etc/group}
 
 server s1 {
 	send "107 59      \n"
@@ -26,7 +26,7 @@ server s1 {
 } -start
 
 shell -err -expect {Authentication required} \
-	{vinyladm -T ${s1_sock}}
+	{varnishadm -T ${s1_sock}}
 
 server s1 {
 	send "107 59      \n"
@@ -36,7 +36,7 @@ server s1 {
 } -start
 
 shell -err -expect {Cannot open } \
-	{vinyladm -T ${s1_sock} -S ${v1_name}/_.nonexistent}
+	{varnishadm -T ${s1_sock} -S ${v1_name}/_.nonexistent}
 
 server s1 {
 	send "107 59      \n"
@@ -50,7 +50,7 @@ server s1 {
 } -start
 
 shell -err -expect {Rejected 599} \
-	{vinyladm -T ${s1_sock} -S ${v1_name}/_.secret}
+	{varnishadm -T ${s1_sock} -S ${v1_name}/_.secret}
 
 server s1 {
 	send "107 59      \n"
@@ -66,7 +66,7 @@ server s1 {
 } -start
 
 shell -err -expect {No pong received from server} \
-	{vinyladm -T ${s1_sock} -S ${v1_name}/_.secret}
+	{varnishadm -T ${s1_sock} -S ${v1_name}/_.secret}
 
 server s1 {
 	send "107 59      \n"
@@ -90,8 +90,8 @@ server s1 {
 } -start
 
 shell -expect {Tested} \
-	{vinyladm -T ${s1_sock} -S ${v1_name}/_.secret test}
+	{varnishadm -T ${s1_sock} -S ${v1_name}/_.secret test}
 
-shell "vinyladm -n ${v1_name} help > /dev/null"
+shell "varnishadm -n ${v1_name} help > /dev/null"
 
-shell {VINYL_DEFAULT_N="${v1_name}" vinyladm help > /dev/null}
+shell {VINYL_DEFAULT_N="${v1_name}" varnishadm help > /dev/null}

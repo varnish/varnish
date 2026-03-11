@@ -233,7 +233,7 @@ send_line(char *l)
 		cli_write(line_sock, "\n");
 		if (*l)
 			add_history(l);
-		rl_callback_handler_install("vinyl> ", send_line);
+		rl_callback_handler_install("varnish> ", send_line);
 	} else {
 		RL_EXIT(0);
 	}
@@ -309,7 +309,7 @@ interactive(int sock)
 	unsigned status;
 	line_sock = sock;
 	rl_already_prompted = 1;
-	rl_callback_handler_install("vinyl> ", send_line);
+	rl_callback_handler_install("varnish> ", send_line);
 	rl_attempted_completion_function = vinyladm_completion;
 
 	fds[0].fd = sock;
@@ -388,7 +388,7 @@ static void v_noreturn_
 usage(int status)
 {
 	fprintf(stderr,
-	    "Usage: vinyladm [-h] [-n workdir] [-p] [-S secretfile] "
+	    "Usage: varnishadm [-h] [-n workdir] [-p] [-S secretfile] "
 	    "[-T [address]:port] [-t timeout] [command [...]]\n");
 	fprintf(stderr, "\t-n is mutually exclusive with -S and -T\n");
 	exit(status);

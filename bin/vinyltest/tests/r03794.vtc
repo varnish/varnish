@@ -7,9 +7,9 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend "" -start
+varnish v1 -vcl+backend "" -start
 
-vinyl v2 -vcl {
+varnish v2 -vcl {
 	backend v1 {
 		.host = "${v1_sock}";
 	}

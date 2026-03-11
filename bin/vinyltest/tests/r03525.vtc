@@ -5,7 +5,7 @@ server s1 {
 	txresp -status 500 -reason "my reason"
 } -start
 
-vinyl v1 -arg "-p first_byte_timeout=0.2" -vcl+backend {
+varnish v1 -arg "-p first_byte_timeout=0.2" -vcl+backend {
 	sub vcl_backend_response {
 		return (error(beresp.status, beresp.reason));
 	}

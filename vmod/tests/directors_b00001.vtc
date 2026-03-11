@@ -18,7 +18,7 @@ server s3 {
 	txresp -hdr "Foo: 3"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import directors;
 
@@ -47,10 +47,10 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +vclrel"
+varnish v1 -cliok "param.set debug +vclrel"
 
-vinyl v1 -cliok "backend.set_health s1 sick"
-vinyl v1 -cliok "backend.set_health s2 sick"
+varnish v1 -cliok "backend.set_health s1 sick"
+varnish v1 -cliok "backend.set_health s2 sick"
 
 client c1 {
 	# s1 & s2 are both sick, expect response from s3
@@ -59,9 +59,9 @@ client c1 {
 	expect resp.http.foo == "3"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -cliok "backend.set_health s2 healthy"
+varnish v1 -cliok "backend.set_health s2 healthy"
 
 client c1 {
 	txreq
@@ -69,9 +69,9 @@ client c1 {
 	expect resp.http.foo == "2"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -cliok "backend.set_health s1 healthy"
+varnish v1 -cliok "backend.set_health s1 healthy"
 
 client c1 {
 	txreq
@@ -79,9 +79,9 @@ client c1 {
 	expect resp.http.foo == "1"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -cliok "backend.set_health s1 sick"
+varnish v1 -cliok "backend.set_health s1 sick"
 server s3 -start
 
 client c1 {
@@ -93,14 +93,14 @@ client c1 {
 	expect resp.http.foo == "3"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		set req.backend_hint = s1;
 		set req.backend_hint = s2;
 		set req.backend_hint = s3;
 	}
 }
-vinyl v1 -cliok "vcl.discard vcl1"
-vinyl v1 -cliok "vcl.list"
+varnish v1 -cliok "vcl.discard vcl1"
+varnish v1 -cliok "vcl.list"

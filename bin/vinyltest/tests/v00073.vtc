@@ -12,7 +12,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -42,5 +42,5 @@ client c2 -connect ${v1_sock} {
 
 client c1 -wait
 
-vinyl v1 -expect backend_wait == 1
-vinyl v1 -expect backend_wait_fail == 1
+varnish v1 -expect backend_wait == 1
+varnish v1 -expect backend_wait_fail == 1

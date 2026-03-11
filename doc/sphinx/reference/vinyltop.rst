@@ -5,28 +5,28 @@
 
 .. role:: ref(emphasis)
 
-.. _vinyltop(1):
+.. _varnishtop(1):
 
-========
-vinyltop
-========
+==========
+varnishtop
+==========
 
-------------------------------------
-Vinyl Cache log entry real-time view
-------------------------------------
+-------------------------
+Varnish log entry ranking
+-------------------------
 
 :Manual section: 1
 
 SYNOPSIS
 ========
 
-.. include:: ../include/vinyltop_synopsis.rst
-vinyltop |synopsis|
+.. include:: ../include/varnishtop_synopsis.rst
+varnishtop |synopsis|
 
 DESCRIPTION
 ===========
 
-The `vinyltop` utility reads :ref:`vinyld(1)` shared memory logs and
+The varnishtop utility reads :ref:`varnishd(1)` shared memory logs and
 presents a continuously updated list of the most commonly occurring
 log entries.  With suitable filtering using the ``-I``, ``-i``, ``-X``
 and ``-x`` options, it can be used to display a ranking of requested
@@ -35,7 +35,7 @@ recorded in the log.
 
 The following options are available:
 
-.. include:: ../include/vinyltop_options.rst
+.. include:: ../include/varnishtop_options.rst
 
 EXAMPLES
 ========
@@ -43,27 +43,27 @@ EXAMPLES
 The following example displays a continuously updated list of the most
 frequently requested URLs::
 
-  vinyltop -i ReqURL
+  varnishtop -i ReqURL
 
 The following example displays a continuously updated list of the most
 commonly used user agents::
 
-  vinyltop -C -I ReqHeader:User-Agent
+  varnishtop -C -I ReqHeader:User-Agent
 
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
-* :ref:`vinylhist(1)`
-* :ref:`vinyllog(1)`
-* :ref:`vinylncsa(1)`
-* :ref:`vinylstat(1)`
+* :ref:`varnishd(1)`
+* :ref:`varnishhist(1)`
+* :ref:`varnishlog(1)`
+* :ref:`varnishncsa(1)`
+* :ref:`varnishstat(1)`
 
 HISTORY
 =======
 
-The `vinyltop` utility was originally developed by Poul-Henning Kamp
-in cooperation with Verdens Gang AS and Redpill-Linpro, and later
+The varnishtop utility was originally developed by Poul-Henning Kamp
+in cooperation with Verdens Gang AS and Varnish Software AS, and later
 substantially rewritten by Dag-Erling Smørgrav.  This manual page was
 written by Dag-Erling Smørgrav, and later updated by Martin Blix
 Grydeland.
@@ -72,7 +72,7 @@ Grydeland.
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Vinyl Cache
+This document is licensed under the same licence as Varnish
 itself. See LICENCE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

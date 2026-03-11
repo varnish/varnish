@@ -32,7 +32,7 @@
 
 struct vfil_path;
 
-/* from libvinyl/vfil.c */
+/* from libvarnish/vfil.c */
 
 void VFIL_null_fd(int);
 

@@ -5,14 +5,14 @@ server s1 {
     txresp
 } -start
 
-vinyl v1 -vcl+backend "" -start
+varnish v1 -vcl+backend "" -start
 
 client c1 {
     txreq
     rxresp
 } -run
 
-vinyl v1 -vsl_catchup
-vinyl v1 -expect shm_writes > 0
-vinyl v1 -expect shm_records > 0
-vinyl v1 -expect shm_bytes > 0
+varnish v1 -vsl_catchup
+varnish v1 -expect shm_writes > 0
+varnish v1 -expect shm_records > 0
+varnish v1 -expect shm_bytes > 0

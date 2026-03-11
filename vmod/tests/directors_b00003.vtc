@@ -20,7 +20,7 @@ server s2 -repeat 2 -keepalive {
 	txresp -hdr "Foo: 9" -body "9"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import directors;
 

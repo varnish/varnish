@@ -5,24 +5,24 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1
+varnish v1
 
-vinyl v1 -cliok "param.set vcc_feature +allow_inline_c"
+varnish v1 -cliok "param.set vcc_feature +allow_inline_c"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	C{ /*...*/ }C
 }
 
-vinyl v1 -cliok "param.set vcc_feature -allow_inline_c"
+varnish v1 -cliok "param.set vcc_feature -allow_inline_c"
 
-vinyl v1 -errvcl {Inline-C not allowed} {
+varnish v1 -errvcl {Inline-C not allowed} {
 	backend default {
 		.host = "${s1_sock}";
 	}
 	C{ /*...*/ }C
 }
 
-vinyl v1 -errvcl {Inline-C not allowed} {
+varnish v1 -errvcl {Inline-C not allowed} {
 	backend default {
 		.host = "${s1_sock}";
 	}
@@ -31,19 +31,19 @@ vinyl v1 -errvcl {Inline-C not allowed} {
 	}
 }
 
-vinyl v1 -cliok "param.set vcc_feature +allow_inline_c"
+varnish v1 -cliok "param.set vcc_feature +allow_inline_c"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		C{ /*...*/ }C
 	}
 }
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	C{ /*...*/ }C
 }
 
-vinyl v1 -start
+varnish v1 -start
 
 client c1 {
 	txreq

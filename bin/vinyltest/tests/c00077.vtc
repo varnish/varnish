@@ -5,19 +5,19 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.vcl = "vclA";
 	}
 } -start
 
-vinyl v1 -clierr 106 "vcl.label vcl.A vcl1"
-vinyl v1 -cliok "vcl.label vclA vcl1"
+varnish v1 -clierr 106 "vcl.label vcl.A vcl1"
+varnish v1 -cliok "vcl.label vclA vcl1"
 # labeling twice #2834
-vinyl v1 -cliok "vcl.label vclA vcl1"
-vinyl v1 -cliok "backend.list vcl1.*"
+varnish v1 -cliok "vcl.label vclA vcl1"
+varnish v1 -cliok "backend.list vcl1.*"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.vcl == "vcl1") {
 			return (vcl(vclA));
@@ -27,8 +27,8 @@ vinyl v1 -vcl+backend {
 		set resp.http.vcl = "vcl2";
 	}
 }
-vinyl v1 -cliok "vcl.label vclB vcl2"
-vinyl v1 -cliok "vcl.list"
+varnish v1 -cliok "vcl.label vclB vcl2"
+varnish v1 -cliok "vcl.list"
 
 client c1 {
 	txreq
@@ -40,9 +40,9 @@ client c1 {
 	expect resp.http.vcl == vclA
 } -run
 
-vinyl v1 -clierr 300 "vcl.discard vcl1"
+varnish v1 -clierr 300 "vcl.discard vcl1"
 
-vinyl v1 -vcl+backend { sub vcl_recv { return (vcl(vclB)); } }
+varnish v1 -vcl+backend { sub vcl_recv { return (vcl(vclB)); } }
 
 client c1 {
 	txreq -hdr "vcl: vcl1"
@@ -52,19 +52,19 @@ client c1 {
 
 delay .2
 
-vinyl v1 -vcl+backend { import std; sub vcl_recv { return (vcl(vclA)); } }
-vinyl v1 -vcl+backend { import debug; sub vcl_recv { return (vcl(vclA)); } }
-vinyl v1 -vcl+backend { sub vcl_recv { return (vcl(vclA)); } }
-vinyl v1 -vcl+backend { sub vcl_recv { return (vcl(vclA)); } }
+varnish v1 -vcl+backend { import std; sub vcl_recv { return (vcl(vclA)); } }
+varnish v1 -vcl+backend { import debug; sub vcl_recv { return (vcl(vclA)); } }
+varnish v1 -vcl+backend { sub vcl_recv { return (vcl(vclA)); } }
+varnish v1 -vcl+backend { sub vcl_recv { return (vcl(vclA)); } }
 
-vinyl v1 -clierr 300 "vcl.discard vclA"
+varnish v1 -clierr 300 "vcl.discard vclA"
 
-vinyl v1 -vcl+backend { }
+varnish v1 -vcl+backend { }
 
-vinyl v1 -clierr 106 "vcl.label vclA vcl3"
+varnish v1 -clierr 106 "vcl.label vclA vcl3"
 
-vinyl v1 -cliok "vcl.symtab"
+varnish v1 -cliok "vcl.symtab"
 
-vinyl v1 -clierr 300 "vcl.discard vcl*"
-vinyl v1 -clierr 300 "vcl.discard vcl[1-7]"
-vinyl v1 -cliok "vcl.discard vcl[1-7] vcl[A-B]"
+varnish v1 -clierr 300 "vcl.discard vcl*"
+varnish v1 -clierr 300 "vcl.discard vcl[1-7]"
+varnish v1 -cliok "vcl.discard vcl[1-7] vcl[A-B]"

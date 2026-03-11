@@ -1,25 +1,25 @@
 vtest "Various VCL compiler coverage tests"
 
-shell "true > ${tmpdir}/_vinyltest_empty_file"
+shell "true > ${tmpdir}/_varnishtest_empty_file"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b { .host = "${localhost}"; }
-	include "${tmpdir}/_vinyltest_empty_file" ;
+	include "${tmpdir}/_varnishtest_empty_file" ;
 }
 
-vinyl v1 -errvcl {include <string> not followed by semicolon.} {
+varnish v1 -errvcl {include <string> not followed by semicolon.} {
 	backend b none;
-	include "${tmpdir}/_vinyltest_empty_file" |
+	include "${tmpdir}/_varnishtest_empty_file" |
 }
 
-shell "rm -f ${tmpdir}/_vinyltest_empty_file"
+shell "rm -f ${tmpdir}/_varnishtest_empty_file"
 
-vinyl v1 -errvcl {include not followed by string constant.} {
+varnish v1 -errvcl {include not followed by string constant.} {
 	backend b none;
 	include <<
 }
 
-vinyl v1 -errvcl {include not followed by string constant.} {
+varnish v1 -errvcl {include not followed by string constant.} {
 	/* token test */
 	error lookup hash pipe pass fetch deliver discard keep restart
 	include
@@ -28,43 +28,43 @@ vinyl v1 -errvcl {include not followed by string constant.} {
 	{ } ( ) * + - / % > < = ; ! & . | ~ ,
 }
 
-vinyl v1 -errvcl {Unknown duration unit 'k'} {
+varnish v1 -errvcl {Unknown duration unit 'k'} {
 	backend b none;
 	sub vcl_backend_response { set beresp.ttl = 1. k; }
 }
 
-vinyl v1 -errvcl {Operator > not possible on BACKEND} {
+varnish v1 -errvcl {Operator > not possible on BACKEND} {
 	backend a none;
 	backend b none;
 	sub vcl_recv { if (a > b) { } }
 }
 
-vinyl v1 -errvcl {Unknown property 'foo' for type HTTP} {
+varnish v1 -errvcl {Unknown property 'foo' for type HTTP} {
 	backend b none;
 	sub vcl_hash { if (req.foo != "bar") { } }
 }
 
-vinyl v1 -errvcl {Symbol not found: 'foo.bar'} {
+varnish v1 -errvcl {Symbol not found: 'foo.bar'} {
 	sub vcl_init {
 		new bar = foo.bar();
 	}
 }
 
-vinyl v1 -errvcl {Cannot be set in subroutine 'vcl_pipe'} {
+varnish v1 -errvcl {Cannot be set in subroutine 'vcl_pipe'} {
 	backend b none;
 	sub vcl_pipe {
 		set bereq.first_byte_timeout = 10s;
 	}
 }
 
-vinyl v1 -errvcl {Cannot be set in subroutine 'vcl_pipe'.} {
+varnish v1 -errvcl {Cannot be set in subroutine 'vcl_pipe'.} {
 	backend b none;
 	sub vcl_pipe {
 		set bereq.between_bytes_timeout = 10s;
 	}
 }
 
-vinyl v1 -errvcl {Undefined backend c, first reference:} {
+varnish v1 -errvcl {Undefined backend c, first reference:} {
 	backend b none;
 	sub vcl_backend_response {
 		if (beresp.backend == c) {
@@ -73,41 +73,41 @@ vinyl v1 -errvcl {Undefined backend c, first reference:} {
 	}
 }
 
-vinyl v1 -errvcl {Regexp compilation error:} {
+varnish v1 -errvcl {Regexp compilation error:} {
 	backend b none;
 	sub vcl_recv {
 		if (req.url ~ "[a") {}
 	}
 }
 
-vinyl v1 -errvcl {Regexp compilation error:} {
+varnish v1 -errvcl {Regexp compilation error:} {
 	backend b none;
 	sub vcl_recv {
 		if (req.url ~ "[" + "a") {}
 	}
 }
 
-vinyl v1 -errvcl {Expected CSTR got 'req'} {
+varnish v1 -errvcl {Expected CSTR got 'req'} {
 	backend b none;
 	sub vcl_recv {
 		if (req.url ~ "a" + req.http.foo) {}
 	}
 }
 
-vinyl v1 -errvcl {Expected ')' got '-'} {
+varnish v1 -errvcl {Expected ')' got '-'} {
 	backend b none;
 	sub vcl_recv {
 		if (req.url ~ "a" - "b") {}
 	}
 }
 
-vinyl v1 -errvcl {Expression has type BODY, expected BOOL} {
+varnish v1 -errvcl {Expression has type BODY, expected BOOL} {
 	sub vcl_synth {
 		if (resp.body) { }
 	}
 }
 
-vinyl v1 -errvcl {Expression has type directors.shard, expected ACL} {
+varnish v1 -errvcl {Expression has type directors.shard, expected ACL} {
 	import directors;
 	backend b none;
 
@@ -121,7 +121,7 @@ vinyl v1 -errvcl {Expression has type directors.shard, expected ACL} {
 	}
 }
 
-vinyl v1 -syntax 4.0 -errvcl {Expression has type directors.shard, expected ACL} {
+varnish v1 -syntax 4.0 -errvcl {Expression has type directors.shard, expected ACL} {
 	import directors;
 	backend b none;
 
@@ -135,7 +135,7 @@ vinyl v1 -syntax 4.0 -errvcl {Expression has type directors.shard, expected ACL}
 	}
 }
 
-vinyl v1 -errvcl {Undefined sub foo} {
+varnish v1 -errvcl {Undefined sub foo} {
 	backend dummy None;
 	sub vcl_recv {
 		call foo;
@@ -145,7 +145,7 @@ vinyl v1 -errvcl {Undefined sub foo} {
 # NB: The line break in -errvcl is here on purpose, it prevents
 # a spurious "Only available when" addition to be missed when the
 # foo constructor could be confused with the foo instance name.
-vinyl v1 -syntax 4.0 -errvcl {Symbol not found: 'directors.foo'
+varnish v1 -syntax 4.0 -errvcl {Symbol not found: 'directors.foo'
 At:} {
 	import directors;
 	backend b none;
@@ -156,7 +156,7 @@ At:} {
 }
 
 # 'foo' overloaded
-vinyl v1 -syntax 4.0 -errvcl {Symbol not found: 'foo'} {
+varnish v1 -syntax 4.0 -errvcl {Symbol not found: 'foo'} {
 	backend b none;
 
 	acl foo -pedantic {

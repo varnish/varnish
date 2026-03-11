@@ -11,7 +11,7 @@ Troubleshooting Varnish
 Sometimes Varnish misbehaves or rather behaves the way you told it to
 behave but not necessarily the way you want it to behave. In order for
 you to understand whats going on there are a couple of places you can
-check. :ref:`vinyllog(1)`, ``/var/log/syslog``,
+check. :ref:`varnishlog(1)`, ``/var/log/syslog``,
 ``/var/log/messages`` are all good places where Varnish might leave
 clues of whats going on. This section will guide you through basic
 troubleshooting in Varnish.
@@ -37,7 +37,7 @@ on its port.::
     Platform: Linux,2.6.32-21-generic,i686,-smalloc,-hcritbit
     200 193
     -----------------------------
-    Vinyl Cache CLI.
+    Varnish Cache CLI.
     -----------------------------
     Type 'help' for command list.
     Type 'quit' to close CLI session.
@@ -129,7 +129,7 @@ data.
    in the service's ``[Service]]`` section of the unit file.
 
 Once you have the core, ``cd`` into varnish's working directory (as
-given by the ``-n`` parameter (see :ref:`vinyld(1)` for defaults),
+given by the ``-n`` parameter (see :ref:`varnishd(1)` for defaults),
 open the core with ``gdb`` and issue the command ``bt`` to get a stack
 trace of the thread that caused the segfault.
 
@@ -179,21 +179,21 @@ like this::
 Varnish gives me Guru meditation
 --------------------------------
 
-First find the relevant log entries in :ref:`vinyllog(1)`. That will
-probably give you a clue. Since :ref:`vinyllog(1)` logs a lot of
+First find the relevant log entries in :ref:`varnishlog(1)`. That will
+probably give you a clue. Since :ref:`varnishlog(1)` logs a lot of
 data it might be hard to track the entries down. You can set
-:ref:`vinyllog(1)` to log all your 503 errors by issuing the
+:ref:`varnishlog(1)` to log all your 503 errors by issuing the
 following command::
 
-   $ vinyllog -q 'RespStatus == 503' -g request
+   $ varnishlog -q 'RespStatus == 503' -g request
 
 If the error happened just a short time ago the transaction might
-still be in the shared memory log segment. To get :ref:`vinyllog(1)`
+still be in the shared memory log segment. To get :ref:`varnishlog(1)`
 to process the whole shared memory log just add the '-d' parameter::
 
-   $ vinyllog -d -q 'RespStatus == 503' -g request
+   $ varnishlog -d -q 'RespStatus == 503' -g request
 
-Please see the :ref:`vsl-query(7)` and :ref:`vinyllog(1)` man pages
+Please see the :ref:`vsl-query(7)` and :ref:`varnishlog(1)` man pages
 for elaborations on further filtering capabilities and explanation of
 the various options.
 

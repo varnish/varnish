@@ -7,7 +7,7 @@ server s1 -repeat 2 {
 	txresp
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-pvmod_path=/nonexistent" \
 	-arg "-E${topbuild}/vmod/.libs/libvmod_std.so" \
 	-vcl+backend {
@@ -24,9 +24,9 @@ client c1 {
 	expect resp.http.foobar ~ [0-9]
 } -run
 
-vinyl v1 -stop
+varnish v1 -stop
 
-vinyl v2 \
+varnish v2 \
 	-arg "-Estd" \
 	-vcl+backend {
 		import std;
@@ -42,7 +42,7 @@ client c2 -connect ${v2_sock} {
 	expect resp.http.foobar ~ [0-9]
 } -run
 
-vinyl v2 -stop
+varnish v2 -stop
 
 shell -err -match {Error:.*Cannot open libvmod_std.so} \
-	"vinyld -pvmod_path=/nonexistent -Estd -b none -a ${tmpdir}/vtc.sock"
+	"varnishd -pvmod_path=/nonexistent -Estd -b none -a ${tmpdir}/vtc.sock"

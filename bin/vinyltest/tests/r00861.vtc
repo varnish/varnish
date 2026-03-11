@@ -21,7 +21,7 @@ server s1 {
 
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-vcl+backend {
 		sub vcl_backend_response {
 			if (bereq.url == "/1" || bereq.url == "/2") {

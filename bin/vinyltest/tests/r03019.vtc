@@ -8,9 +8,9 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend ""
-vinyl v1 -cliok "vcl.label lbl vcl1"
-vinyl v1 -vcl {
+varnish v1 -vcl+backend ""
+varnish v1 -cliok "vcl.label lbl vcl1"
+varnish v1 -vcl {
 	backend be { .host = "${bad_backend}"; }
 
 	sub vcl_recv {

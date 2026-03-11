@@ -1,14 +1,14 @@
 vtest "SF-binary/BLOB parsing in VCL"
 
-vinyl v1 -errvcl "BLOB must have n*4 base64 characters" { sub vcl_recv { :a: } }
-vinyl v1 -errvcl "BLOB must have n*4 base64 characters" { sub vcl_recv { :bbbbaa: } }
-vinyl v1 -errvcl "BLOB must have n*4 base64 characters" { sub vcl_recv { :bbbbccccaaa: } }
-vinyl v1 -errvcl "Illegal BLOB character:" { sub vcl_recv { :aa?: } }
-vinyl v1 -errvcl "Wrong padding ('=') in BLOB" { sub vcl_recv { :aaaa=aa: } }
-vinyl v1 -errvcl "Wrong padding ('=') in BLOB" { sub vcl_recv { :aaaa==a: } }
-vinyl v1 -errvcl "Wrong padding ('=') in BLOB" { sub vcl_recv { :aaaaa=a: } }
-vinyl v1 -errvcl "Missing colon at end of BLOB" " sub vcl_recv { :aaaa"
-vinyl v1 -errvcl "Missing colon at end of BLOB" " sub vcl_recv { :"
+varnish v1 -errvcl "BLOB must have n*4 base64 characters" { sub vcl_recv { :a: } }
+varnish v1 -errvcl "BLOB must have n*4 base64 characters" { sub vcl_recv { :bbbbaa: } }
+varnish v1 -errvcl "BLOB must have n*4 base64 characters" { sub vcl_recv { :bbbbccccaaa: } }
+varnish v1 -errvcl "Illegal BLOB character:" { sub vcl_recv { :aa?: } }
+varnish v1 -errvcl "Wrong padding ('=') in BLOB" { sub vcl_recv { :aaaa=aa: } }
+varnish v1 -errvcl "Wrong padding ('=') in BLOB" { sub vcl_recv { :aaaa==a: } }
+varnish v1 -errvcl "Wrong padding ('=') in BLOB" { sub vcl_recv { :aaaaa=a: } }
+varnish v1 -errvcl "Missing colon at end of BLOB" " sub vcl_recv { :aaaa"
+varnish v1 -errvcl "Missing colon at end of BLOB" " sub vcl_recv { :"
 
 # hint: the 'B' leaves bits in the second output byte
-vinyl v1 -errvcl "Illegal BLOB character:" { sub vcl_recv { :AB==: } }
+varnish v1 -errvcl "Illegal BLOB character:" { sub vcl_recv { :AB==: } }

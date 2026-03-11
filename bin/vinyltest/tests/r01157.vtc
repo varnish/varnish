@@ -10,7 +10,7 @@ server s1 {
 	expect req.url == "/"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv { return (pass); }
 	sub vcl_backend_response {	set beresp.do_stream = true; }
 } -start

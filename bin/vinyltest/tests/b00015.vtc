@@ -2,9 +2,9 @@ vtest "Check synthetic error page caching"
 
 # First test that an internally generated error is not cached
 
-vinyl v1 -cliok "param.set backend_remote_error_holddown 60"
+varnish v1 -cliok "param.set backend_remote_error_holddown 60"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend foo {
 		.host = "${bad_backend}";
 	}
@@ -14,27 +14,27 @@ client c1 {
 	txreq -url "/"
 	rxresp
 	expect resp.status == 503
-	expect resp.http.X-Vinyl == "1001"
+	expect resp.http.X-Varnish == "1001"
 
 	txreq -url "/"
 	rxresp
 	expect resp.status == 503
-	expect resp.http.X-Vinyl == "1003"
+	expect resp.http.X-Varnish == "1003"
 } -run
 
-vinyl v1 -expect VBE.vcl1.foo.fail_econnrefused > 0
-vinyl v1 -expect VBE.vcl1.foo.helddown > 0
+varnish v1 -expect VBE.vcl1.foo.fail_econnrefused > 0
+varnish v1 -expect VBE.vcl1.foo.helddown > 0
 
 # Then check that a cacheable error from the backend is
 
-vinyl v1 -cliok "ban req.url ~ .*"
+varnish v1 -cliok "ban req.url ~ .*"
 
 server s1 {
 	rxreq
 	txresp -status 301
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.ttl = beresp.ttl;
 		set beresp.http.uncacheable = beresp.uncacheable;
@@ -45,12 +45,12 @@ client c2 {
 	txreq -url "/"
 	rxresp
 	expect resp.status == 301
-	expect resp.http.X-Vinyl == "1006"
+	expect resp.http.X-Varnish == "1006"
 
 	txreq -url "/"
 	rxresp
 	expect resp.status == 301
-	expect resp.http.X-Vinyl == "1008 1007"
+	expect resp.http.X-Varnish == "1008 1007"
 } -run
 
 server s1 -wait
@@ -62,7 +62,7 @@ server s1 {
 	txresp -status 502
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.status == 502) {
 			set beresp.ttl = 10m;
@@ -74,10 +74,10 @@ client c3 {
 	txreq -url "/2"
 	rxresp
 	expect resp.status == 502
-	expect resp.http.X-Vinyl == "1010"
+	expect resp.http.X-Varnish == "1010"
 
 	txreq -url "/2"
 	rxresp
 	expect resp.status == 502
-	expect resp.http.X-Vinyl == "1012 1011"
+	expect resp.http.X-Varnish == "1012 1011"
 } -run

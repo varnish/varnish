@@ -11,7 +11,7 @@ server s1 {
 	send "1234567890"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.url == "/synth") {

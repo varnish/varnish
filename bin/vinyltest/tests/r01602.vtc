@@ -15,7 +15,7 @@ server s1 {
 	txresp -status 204 -hdr "Content-Encoding: gzip"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

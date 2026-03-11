@@ -8,7 +8,7 @@ server s1 {
 	txresp -status 304
 } -start
 
-vinyl v1 \
+varnish v1 \
     -arg "-smalloc=malloc,1M" \
     -arg "-scondfetch=debug,maxspace=1024B" \
     -vcl+backend {
@@ -22,7 +22,7 @@ vinyl v1 \
 	}
 } -start
 
-vinyl v1 -cliok "debug.fragfetch 2048"
+varnish v1 -cliok "debug.fragfetch 2048"
 
 client c1 {
 	txreq

@@ -32,7 +32,7 @@ server s4 {
 	txresp -body "4444"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -52,7 +52,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "debug.srandom"
+varnish v1 -cliok "debug.srandom"
 
 client c1 {
 	txreq

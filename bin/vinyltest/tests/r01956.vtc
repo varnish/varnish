@@ -13,7 +13,7 @@ server s1 {
 	txresp -status 200 -hdr {ETag: "baz"} -body "asdf"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.1s;
 		set beresp.keep = 60s;

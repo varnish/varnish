@@ -24,7 +24,7 @@ server s1 {
 	txresp -body "x"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -78,7 +78,7 @@ client c1 {
 # let the latest object's ttl expire.
 delay .2
 
-vinyl v1 -expect n_object == 1
+varnish v1 -expect n_object == 1
 
 # c2 asks for the object under grace
 client c2 {

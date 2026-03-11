@@ -22,8 +22,8 @@ as the *workdir*.
 
 To ensure ``tmpfs`` is used, check the following:
 
-Determine the *workdir*. If you use a specific ``-n`` option to ``vinyld`` or
-set the ``VINYL_DEFAULT_N`` variable, it is that value. Otherwise run
+Determine the *workdir*. If you use a specific ``-n`` option to ``varnishd`` or
+set the ``VARNISH_DEFAULT_N`` variable, it is that value. Otherwise run
 ``varnishd -x options``, which outputs the *workdir* default.
 
 Run ``df *workdir*``. If it reports ``tmpfs`` as the file system in the first
@@ -66,7 +66,7 @@ On certain Linux distributions Transparent Hugepage (THP) kernel support is
 enabled by default. This is known to cause instabilities of Varnish.
 
 By default, Varnish tries to disable the THP feature, but does not fail if it
-can't. The ``linux`` :ref:`ref-vinyld-opt_j` offers to optionally enable,
+can't. The ``linux`` :ref:`ref-varnishd-opt_j` offers to optionally enable,
 disable or ignore THP.
 
 Alternatively, THP can be disabled system-wide. If Varnish is the only

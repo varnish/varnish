@@ -1,6 +1,6 @@
 vtest "VMOD blob same(), equal(), length() and sub()"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -166,7 +166,7 @@ client c1 {
 } -run
 
 # sub()
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import blob;
 	backend b None;
 
@@ -223,7 +223,7 @@ server s1 -repeat 3 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import blob;
 
 	sub vcl_init {
@@ -289,7 +289,7 @@ logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
 } -run
 
 # VCL load failures from sub()
-vinyl v1 -errvcl {vmod blob error: blob is empty in blob.sub()} {
+varnish v1 -errvcl {vmod blob error: blob is empty in blob.sub()} {
 	import blob;
 	backend b None;
 
@@ -301,7 +301,7 @@ vinyl v1 -errvcl {vmod blob error: blob is empty in blob.sub()} {
 	}
 }
 
-vinyl v1 -errvcl {vmod blob error: size 9 from offset 0 requires more bytes than blob length 8 in blob.sub()} {
+varnish v1 -errvcl {vmod blob error: size 9 from offset 0 requires more bytes than blob length 8 in blob.sub()} {
 	import blob;
 	backend b None;
 
@@ -313,7 +313,7 @@ vinyl v1 -errvcl {vmod blob error: size 9 from offset 0 requires more bytes than
 	}
 }
 
-vinyl v1 -errvcl {vmod blob error: size 4 from offset 5 requires more bytes than blob length 8 in blob.sub()} {
+varnish v1 -errvcl {vmod blob error: size 4 from offset 5 requires more bytes than blob length 8 in blob.sub()} {
 	import blob;
 	backend b None;
 

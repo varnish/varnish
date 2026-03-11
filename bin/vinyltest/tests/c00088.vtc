@@ -20,7 +20,7 @@ server s2 -listen "${tmpdir}/s2.sock" {
 	}
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -34,7 +34,7 @@ vinyl v1 -vcl {
 
 delay 1
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -48,7 +48,7 @@ vinyl v1 -vcl {
 
 delay 1
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 		.path = "${s1_sock}";
 	}
@@ -56,8 +56,8 @@ vinyl v1 -vcl {
 
 delay 1
 
-vinyl v1 -cliok "vcl.list"
-vinyl v1 -cliok "backend.list -p"
+varnish v1 -cliok "vcl.list"
+varnish v1 -cliok "backend.list -p"
 
 server s1 -break {
 	rxreq

@@ -1,9 +1,9 @@
-vtest "Initial vinylstat verbosity"
+vtest "Initial varnishstat verbosity"
 
-vinyl v1 -vcl {backend be none;} -start
+varnish v1 -vcl {backend be none;} -start
 
-process p1 -dump {vinylstat -n ${v1_name}} -start
-process p2 -dump {vinylstat -n ${v1_name} -f MGT.child_start} -start
+process p1 -dump {varnishstat -n ${v1_name}} -start
+process p2 -dump {varnishstat -n ${v1_name} -f MGT.child_start} -start
 
 process p1 -expect-text 0 0 INFO
 process p1 -screen_dump

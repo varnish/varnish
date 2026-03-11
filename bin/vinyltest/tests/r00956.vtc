@@ -5,7 +5,7 @@ server s1 {
 	txresp -hdr "Cache-Control: max-age=23" -hdr "Age: 4" -bodylen 40
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.fooA = beresp.ttl;
 		set beresp.ttl = 10s;

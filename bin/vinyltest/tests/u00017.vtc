@@ -1,11 +1,11 @@
-vtest "SLT_Debug can be printed by vinylncsa -j"
+vtest "SLT_Debug can be printed by varnishncsa -j"
 
 server s1 {
 	rxreq
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import cookie;
 
 	sub vcl_recv {
@@ -13,7 +13,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set vsl_mask +Debug"
+varnish v1 -cliok "param.set vsl_mask +Debug"
 
 client c1 {
 	txreq
@@ -23,9 +23,9 @@ client c1 {
 # Let's fist create a script to reduce in all the variants below.
 
 shell {
-	vinylncsa -d -n ${v1_name} -F '%{VSL:Debug}x' -j | grep "^cookie: nothing to parse\\\\u0000"
+	varnishncsa -d -n ${v1_name} -F '%{VSL:Debug}x' -j | grep "^cookie: nothing to parse\\\\u0000"
 }
 
 shell -err -expect "Tag Debug can contain control characters" {
-	vinylncsa -d -n ${v1_name} -F '%{VSL:Debug}x'
+	varnishncsa -d -n ${v1_name} -F '%{VSL:Debug}x'
 }

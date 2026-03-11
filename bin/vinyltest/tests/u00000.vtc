@@ -1,81 +1,81 @@
 vtest "Code coverage of mgt_main, (VCL compiler and RSTdump etc)"
 
-shell "vinyld -b None -C 2> ${tmpdir}/_.c"
+shell "varnishd -b None -C 2> ${tmpdir}/_.c"
 
 shell {
-	vinyld -n ${tmpdir}/no_keep -C -b None 2> no_keep.c
+	varnishd -n ${tmpdir}/no_keep -C -b None 2> no_keep.c
 	test -s no_keep.c && ! test -d no_keep || test -d no_keep/*/vgc.so.dSYM
 }
 
 shell {
-	vinyld -n ${tmpdir}/keep -p debug=+vcl_keep -C -b None 2> keep.c
+	varnishd -n ${tmpdir}/keep -p debug=+vcl_keep -C -b None 2> keep.c
 	test -s keep.c && test -d keep
 }
 
 shell -err -expect {VCL version declaration missing} {
 	echo 'bad vcl' > ${tmpdir}/bad.vcl
-	vinyld -f ${tmpdir}/bad.vcl -n ${tmpdir}
+	varnishd -f ${tmpdir}/bad.vcl -n ${tmpdir}
 }
 
-shell -err -expect {-x must be the first argument} "vinyld -d -x foo "
-shell -err -expect {-V must be the first argument} "vinyld -d -V foo "
+shell -err -expect {-x must be the first argument} "varnishd -d -x foo "
+shell -err -expect {-V must be the first argument} "varnishd -d -V foo "
 
-shell -err -expect {Too many arguments for -x} "vinyld -x foo bar"
-shell -err -expect {Invalid -x argument} "vinyld -x foo "
+shell -err -expect {Too many arguments for -x} "varnishd -x foo bar"
+shell -err -expect {Invalid -x argument} "varnishd -x foo "
 
 # This one is tricky, the getopt message on stderr is not standardized.
-shell -err -expect {option} "vinyld -A "
+shell -err -expect {option} "varnishd -A "
 
-shell -err -expect {Usage: vinyld [options]} "vinyld -? "
-shell -err -expect {Too many arguments} "vinyld foo "
+shell -err -expect {Usage: varnishd [options]} "varnishd -? "
+shell -err -expect {Too many arguments} "varnishd foo "
 
-shell "vinyld -x parameter > ${tmpdir}/_.param"
-shell "vinyld -x vsl > ${tmpdir}/_.vsl"
-shell "vinyld -x cli > ${tmpdir}/_.cli"
-shell "vinyld -x builtin > ${tmpdir}/_.builtin"
-shell "vinyld -x optstring > ${tmpdir}/_.optstring"
-shell "vinyld --optstring > ${tmpdir}/_.optstring2"
+shell "varnishd -x parameter > ${tmpdir}/_.param"
+shell "varnishd -x vsl > ${tmpdir}/_.vsl"
+shell "varnishd -x cli > ${tmpdir}/_.cli"
+shell "varnishd -x builtin > ${tmpdir}/_.builtin"
+shell "varnishd -x optstring > ${tmpdir}/_.optstring"
+shell "varnishd --optstring > ${tmpdir}/_.optstring2"
 
 shell -err -expect {-C needs either -b <backend> or -f <vcl_file>} {
-	vinyld -C
+	varnishd -C
 }
 
 shell -err -expect {Cannot open -S file} {
-	vinyld -S ${tmpdir}/nonexistent -n ${tmpdir}/v0 -f ''
+	varnishd -S ${tmpdir}/nonexistent -n ${tmpdir}/v0 -f ''
 }
 
 shell -err -expect {Cannot remove preexisting secret-file in} {
 	mkdir ${tmpdir}/is_a_dir ${tmpdir}/is_a_dir/_.secret
-	vinyld -n ${tmpdir}/is_a_dir -d -a :0
+	varnishd -n ${tmpdir}/is_a_dir -d -a :0
 }
 
-shell -err -expect {Unknown jail method "xyz"} "vinyld -jxyz -f '' "
+shell -err -expect {Unknown jail method "xyz"} "varnishd -jxyz -f '' "
 
-shell -err -expect {Too many arguments for -V} "vinyld -V -V"
-shell -expect {Copyright (c) 2006} "vinyld -V"
+shell -err -expect {Too many arguments for -V} "varnishd -V -V"
+shell -expect {Copyright (c) 2006} "varnishd -V"
 
-shell -err -expect {Only one of -d or -F can be specified} "vinyld -d -F "
-shell -err -expect {Only one of -b or -f can be specified} "vinyld -b a -f b "
-shell -err -expect {-d makes no sense with -C} "vinyld -C -b None -d "
-shell -err -expect {-F makes no sense with -C} "vinyld -C -b None -F "
-shell -err -expect {Neither -b nor -f given} { vinyld -n ${tmpdir}/v0  }
+shell -err -expect {Only one of -d or -F can be specified} "varnishd -d -F "
+shell -err -expect {Only one of -b or -f can be specified} "varnishd -b a -f b "
+shell -err -expect {-d makes no sense with -C} "varnishd -C -b None -d "
+shell -err -expect {-F makes no sense with -C} "varnishd -C -b None -F "
+shell -err -expect {Neither -b nor -f given} { varnishd -n ${tmpdir}/v0  }
 
 # Test -I and -l arguments (former a00016)
 
 shell -err -expect {Only one -I allowed} {
 	touch foo bar
-	vinyld -f '' -I foo -I bar -n ${tmpdir}/v0 -a :0
+	varnishd -f '' -I foo -I bar -n ${tmpdir}/v0 -a :0
 }
 
 shell -err -expect {Error: -I file CLI command failed (104)} {
 	echo "vcl.list" > foo
 	echo "-foobar" >> foo
 	echo "vcl.load" >> foo
-	vinyld -f '' -I foo -n ${tmpdir}/v0 -a :0 -l 2m
+	varnishd -f '' -I foo -n ${tmpdir}/v0 -a :0 -l 2m
 }
 
 shell -err -expect "Can't open nonexistent" {
-	vinyld -f '' -I nonexistent -n ${tmpdir}/v0 -a :0
+	varnishd -f '' -I nonexistent -n ${tmpdir}/v0 -a :0
 }
 
 
@@ -84,7 +84,7 @@ shell -err -expect "Can't open nonexistent" {
 # Test -F mode with no VCL loaded
 
 shell {echo ping > ${tmpdir}/I_file}
-process p1 "exec vinyld -n ${tmpdir}/v1 -F -f '' -a :0 -l2m -I ${tmpdir}/I_file 2>&1" -start
+process p1 "exec varnishd -n ${tmpdir}/v1 -F -f '' -a :0 -l2m -I ${tmpdir}/I_file 2>&1" -start
 
 process p1 -expect-text 0 1 {PONG}
 process p1 -expect-text 0 1 {END of -I file processing}
@@ -101,35 +101,35 @@ shell {
 }
 
 shell -expect {VCL compiled.} {
-	vinyladm -n ${tmpdir}/v1 vcl.load vcl1 ${tmpdir}/vcl
+	varnishadm -n ${tmpdir}/v1 vcl.load vcl1 ${tmpdir}/vcl
 }
 
 shell -expect {VCL 'vcl1' now active} {
-	vinyladm -n ${tmpdir}/v1 vcl.use vcl1
+	varnishadm -n ${tmpdir}/v1 vcl.use vcl1
 }
 
 shell -expect {active   auto   warm   -   vcl1} {
-	vinyladm -n ${tmpdir}/v1 vcl.list
+	varnishadm -n ${tmpdir}/v1 vcl.list
 }
 
-shell {vinyladm -n ${tmpdir}/v1 start}
+shell {varnishadm -n ${tmpdir}/v1 start}
 
-shell {vinyladm -n ${tmpdir}/v1 debug.listen_address}
+shell {varnishadm -n ${tmpdir}/v1 debug.listen_address}
 
 shell -exit 1 -expect "Command failed with error code 500" {
-	vinyladm -n ${tmpdir}/v1 quit
+	varnishadm -n ${tmpdir}/v1 quit
 }
 
 shell -exit 1 -expect "Command failed with error code 102" {
-	vinyladm -n ${tmpdir}/v1 debug.panic.master -j
+	varnishadm -n ${tmpdir}/v1 debug.panic.master -j
 }
 
 shell -exit 1 -expect "Command failed with error code 101" {
-	vinyladm -n ${tmpdir}/v1 123
+	varnishadm -n ${tmpdir}/v1 123
 }
 
-shell "vinyladm -n ${tmpdir}/v1 param.set cli_limit 128"
-shell -expect "[response was truncated]" "vinyladm -n ${tmpdir}/v1 help"
+shell "varnishadm -n ${tmpdir}/v1 param.set cli_limit 128"
+shell -expect "[response was truncated]" "varnishadm -n ${tmpdir}/v1 help"
 
 process p1 -expect-exit 64 -stop -wait
 
@@ -151,31 +151,31 @@ shell {
 	EOF
 }
 
-vinyl v2 -arg "-f ${tmpdir}/ok1" -arg "-f ${tmpdir}/ok2" -start
-vinyl v2 -cliexpect {available   auto   warm   0   boot0} "vcl.list"
-vinyl v2 -cliexpect {active      auto   warm   0   boot1} "vcl.list"
-vinyl v2 -stop -wait
+varnish v2 -arg "-f ${tmpdir}/ok1" -arg "-f ${tmpdir}/ok2" -start
+varnish v2 -cliexpect {available   auto   warm   0   boot0} "vcl.list"
+varnish v2 -cliexpect {active      auto   warm   0   boot1} "vcl.list"
+varnish v2 -stop -wait
 
 # Test multiple -f options with a bad VCL
 
 shell -err -expect {Cannot read -f file} {
-	exec vinyld -n ${tmpdir}/v0 -F -a :0 -l2m -f ${tmpdir}/ok1 \
+	exec varnishd -n ${tmpdir}/v0 -F -a :0 -l2m -f ${tmpdir}/ok1 \
 	    -f ${tmpdir}/ok2 -f ${tmpdir}/bad
 }
 
 shell -err -expect {Cannot read -f file} {
-	exec vinyld -n ${tmpdir}/v0 -F -a :0 -l2m -f ${tmpdir}/ok1 \
+	exec varnishd -n ${tmpdir}/v0 -F -a :0 -l2m -f ${tmpdir}/ok1 \
 	    -f ${tmpdir}/bad -f ${tmpdir}/ok2
 }
 
-# vinyld -spersistent is tested in p00000.vtc
+# varnishd -spersistent is tested in p00000.vtc
 
 # Test that incomplete CLI commands in -I causes failure
 
 filewrite ${tmpdir}/_foobar foobar
 
 process p1 {
-	exec vinyld -n ${tmpdir}/v0 -d -a :0 -I ${tmpdir}/_foobar 2>&1
+	exec varnishd -n ${tmpdir}/v0 -d -a :0 -I ${tmpdir}/_foobar 2>&1
 } -expect-exit 2 -dump -start
 
 process p1 -expect-text 0 0 "-I file had incomplete CLI command at the end"
@@ -184,7 +184,7 @@ process p1 -wait
 
 process p2 {
 	/bin/echo 'foobar << blabla' > ${tmpdir}/_foobar
-	exec vinyld -n ${tmpdir}/v0 -d -a :0 -I ${tmpdir}/_foobar 2>&1
+	exec varnishd -n ${tmpdir}/v0 -d -a :0 -I ${tmpdir}/_foobar 2>&1
 } -expect-exit 2 -start
 
 process p2 -expect-text 0 0 "-I file had incomplete CLI command at the end"

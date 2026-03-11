@@ -35,7 +35,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-#include "cache/cache_varnishd.h"
+#include "cache/cache_vinyld.h"
 
 #include "cache/cache_transport.h"
 #include "cache/cache_filter.h"

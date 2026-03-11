@@ -8,7 +8,7 @@ server s1 {
 	    -hdr "Expires: Fri, 2 Mar 2018 14:26:02 GMT"
 } -start
 
-vinyl v1 -arg "-p feature=+http_date_postel" -vcl+backend {
+varnish v1 -arg "-p feature=+http_date_postel" -vcl+backend {
 	import std;
 
 	sub vcl_backend_response {

@@ -8,9 +8,9 @@
 Parameters
 ----------
 
-Vinyl Cache comes with a set of parameters that affects behaviour and
+Varnish Cache comes with a set of parameters that affects behaviour and
 performance. Parameters are set either though command line
-arguments to ``vinyld`` or at runtime through ``vinyladm`` using
+arguments to ``varnishd`` or at runtime through ``varnishadm`` using
 the ``param.set`` CLI command.
 
 We don't recommend that you tweak parameters unless you're sure of what

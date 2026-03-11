@@ -1,10 +1,10 @@
 vtest "Test logexpect fail command"
 
-# NOTE: this is a test of vinyltest itself, so it would fall under
+# NOTE: this is a test of varnishtest itself, so it would fall under
 # the "a" category, but has been filed under the "b" category because
-# it needs vinyld
+# it needs varnishd
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 
 	backend proforma None;

@@ -2,9 +2,9 @@ vtest "Create a backend after a COLD event"
 
 server s1 -start
 
-vinyl v1 -cliok "param.set feature +no_coredump"
-vinyl v1 -expectexit 0x40
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set feature +no_coredump"
+varnish v1 -expectexit 0x40
+varnish v1 -vcl+backend {
 	import debug;
 	sub vcl_init {
 		debug.cold_backend();
@@ -12,22 +12,22 @@ vinyl v1 -vcl+backend {
 } -start
 
 # load and use a new VCL
-vinyl v1 -vcl+backend {}
+varnish v1 -vcl+backend {}
 
 # expect a panic during the COLD event, COLD state
-vinyl v1 -clierr 400 "vcl.state vcl1 cold"
+varnish v1 -clierr 400 "vcl.state vcl1 cold"
 delay 3
-vinyl v1 -cliexpect "Dynamic Backends can only be added to warm VCLs" panic.show
-vinyl v1 -cliok panic.clear
+varnish v1 -cliexpect "Dynamic Backends can only be added to warm VCLs" panic.show
+varnish v1 -cliok panic.clear
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 	sub vcl_init {
 		debug.cooling_backend();
 	}
 }
 
-vinyl v1 -cliok "vcl.use vcl2"
+varnish v1 -cliok "vcl.use vcl2"
 
 # expect no panic during the COLD event, COOLING state
-vinyl v1 -cliok "vcl.state vcl3 cold"
+varnish v1 -cliok "vcl.state vcl3 cold"

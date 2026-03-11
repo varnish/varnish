@@ -1,5 +1,5 @@
 vtest "client.identity is 0.0.0.0 if unset & client addr is UDS"
-# vinyltest "vtc remote.ip, remote.port and remote.path" (a00020)
+# varnishtest "vtc remote.ip, remote.port and remote.path" (a00020)
 
 server s1 {
 	rxreq
@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	txreq
@@ -19,12 +19,12 @@ client c1 {
 	expect remote.path == <undef>
 } -run
 
-vinyl v1 -stop
+varnish v1 -stop
 
 server s1 -wait
 server s1 -start
 
-vinyl v2 -arg "-a ${tmpdir}/v2.sock" -vcl+backend {} -start
+varnish v2 -arg "-a ${tmpdir}/v2.sock" -vcl+backend {} -start
 
 client c1 -connect "${tmpdir}/v2.sock" {
 	txreq
@@ -34,7 +34,7 @@ client c1 -connect "${tmpdir}/v2.sock" {
 	expect remote.path == "${tmpdir}/v2.sock"
 } -run
 
-vinyl v3 -arg "-a ${tmpdir}/v3.sock" -vcl {
+varnish v3 -arg "-a ${tmpdir}/v3.sock" -vcl {
 	backend b None;
 
 	sub vcl_recv {

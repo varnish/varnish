@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import unix;
 
 	sub vcl_backend_response {
@@ -58,7 +58,7 @@ logexpect l1 -v v1 -d 1 -c {
 } -run
 
 
-vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
+varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -68,7 +68,7 @@ vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
+varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -78,7 +78,7 @@ vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
+varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -88,7 +88,7 @@ vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
+varnish v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	import unix;
 	import std;
 	backend b None;
@@ -98,11 +98,11 @@ vinyl v1 -errvcl {Not available in subroutine 'vcl_init'} {
 	}
 }
 
-vinyl v1 -stop
+varnish v1 -stop
 server s1 -wait
 server s1 -start
 
-vinyl v2 -arg "-a ${tmpdir}/v2.sock" -vcl+backend {
+varnish v2 -arg "-a ${tmpdir}/v2.sock" -vcl+backend {
 	import unix;
 
 	sub vcl_backend_response {

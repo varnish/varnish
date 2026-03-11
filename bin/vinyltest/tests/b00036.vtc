@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "foo: 2"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.method == "PURGE") {
 			return (purge);
@@ -34,10 +34,10 @@ client c1 {
 
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MAIN.n_purges == 1
-vinyl v1 -expect MAIN.n_obj_purged == 1
+varnish v1 -expect MAIN.n_purges == 1
+varnish v1 -expect MAIN.n_obj_purged == 1
 
 # NB: a purge used to increase n_expired
-vinyl v1 -expect MAIN.n_expired == 0
+varnish v1 -expect MAIN.n_expired == 0

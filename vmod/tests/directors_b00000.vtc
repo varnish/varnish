@@ -20,7 +20,7 @@ server s4 {
 	txresp -body "4444"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 	import std;
 

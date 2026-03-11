@@ -19,7 +19,7 @@ server s2 {
 	txresp -body bar
 } -start
 
-vinyl v1 -arg "-p debug=+syncvsl" -vcl+backend {
+varnish v1 -arg "-p debug=+syncvsl" -vcl+backend {
 	import vtc;
 	sub vcl_backend_fetch {
 		set bereq.http.retries = bereq.retries;

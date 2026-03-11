@@ -22,7 +22,7 @@ server s3 {
 #
 # shard:
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import directors;
 	import blob;

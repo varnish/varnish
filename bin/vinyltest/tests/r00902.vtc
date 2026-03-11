@@ -12,10 +12,10 @@ server s1 {
 		-bodylen 5
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 } -start
 
-vinyl v1 -cliok "param.set debug +req_state"
+varnish v1 -cliok "param.set debug +req_state"
 
 client c1 {
 	txreq  -hdr "foo: /foo"

@@ -5,7 +5,7 @@ server s1 {
 	txresp -hdr "Cache-Control: mag-age=3600" -bodylen 1024
 } -start
 
-vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
+varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
 	import debug;
 	import vtc;
 	sub vcl_recv {
@@ -21,12 +21,12 @@ vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set vsl_mask -ReqHeader,-ReqUnset"
-vinyl v1 -cliok "param.set vsl_mask -ReqProtocol"
-vinyl v1 -cliok "param.set vsl_mask -RespHeader,-RespUnset"
-vinyl v1 -cliok "param.set vsl_mask -RespReason,-RespProtocol"
-vinyl v1 -cliok "param.set vsl_mask -Timestamp,-Debug"
-vinyl v1 -cliok "param.set vsl_mask -VCL_call,-VCL_return,-Hit"
+varnish v1 -cliok "param.set vsl_mask -ReqHeader,-ReqUnset"
+varnish v1 -cliok "param.set vsl_mask -ReqProtocol"
+varnish v1 -cliok "param.set vsl_mask -RespHeader,-RespUnset"
+varnish v1 -cliok "param.set vsl_mask -RespReason,-RespProtocol"
+varnish v1 -cliok "param.set vsl_mask -Timestamp,-Debug"
+varnish v1 -cliok "param.set vsl_mask -VCL_call,-VCL_return,-Hit"
 
 logexpect l1 -v v1 -g raw {
 	expect * *	VCL_Error	"Attempted negative WS allocation"

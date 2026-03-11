@@ -28,7 +28,7 @@ server s1 {
 	txresp -body {fo}
 } -start
 
-vinyl v1 -arg "-pfetch_chunksize=4k" \
+varnish v1 -arg "-pfetch_chunksize=4k" \
 	-arg "-p feature=+esi_disable_xml_check" \
 	-arg "-sdefault,1m" -vcl+backend {
 	sub vcl_backend_fetch {
@@ -48,4 +48,4 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -expect SM?.s0.c_fail == 1
+varnish v1 -expect SM?.s0.c_fail == 1

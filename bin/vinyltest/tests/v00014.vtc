@@ -20,7 +20,7 @@ server s1 {
 	barrier b4 sync
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 
 	import std;
 
@@ -49,8 +49,8 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -cliok "backend.list -p"
-vinyl v1 -clijson "backend.list -j -p"
+varnish v1 -cliok "backend.list -p"
+varnish v1 -clijson "backend.list -j -p"
 
 client c1 {
 	txreq

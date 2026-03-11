@@ -9,7 +9,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-a ${tmpdir}/v1.sock" \
+varnish v1 -arg "-a ${tmpdir}/v1.sock" \
 	-jail "-junix,user=varnish,ccgroup=varnish" \
 	-vcl+backend {
 } -start
@@ -28,7 +28,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v2 -arg "-a ${tmpdir}/v2.sock,user=varnish,group=varnish,mode=666" \
+varnish v2 -arg "-a ${tmpdir}/v2.sock,user=varnish,group=varnish,mode=666" \
 	-jail "-junix,user=varnish,ccgroup=varnish" \
 	-vcl+backend {
 } -start

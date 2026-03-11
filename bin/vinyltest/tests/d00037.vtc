@@ -11,7 +11,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp
 } -start
 
-vinyl v1 -arg "-p thread_pools=1" -vcl {
+varnish v1 -arg "-p thread_pools=1" -vcl {
 	import debug;
 
 	backend dummy None;
@@ -31,7 +31,7 @@ client c1 {
 	expect resp.status == 200
 } -start
 
-vinyl v1 -expect MAIN.n_backend == 1
+varnish v1 -expect MAIN.n_backend == 1
 
 server s2 -listen "${tmpdir}/s2.sock" {
 	rxreq
@@ -41,7 +41,7 @@ server s2 -listen "${tmpdir}/s2.sock" {
 
 barrier b1 sync
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 
 	backend dummy None;
@@ -55,16 +55,16 @@ vinyl v1 -vcl {
 	}
 }
 
-vinyl v1 -cli "vcl.discard vcl1"
+varnish v1 -cli "vcl.discard vcl1"
 barrier b2 sync
 
 client c1 -wait
 delay 2
 
-vinyl v1 -expect MAIN.n_backend == 2
+varnish v1 -expect MAIN.n_backend == 2
 
-vinyl v1 -expect n_vcl_avail == 1
-vinyl v1 -expect n_vcl_discard == 1
+varnish v1 -expect n_vcl_avail == 1
+varnish v1 -expect n_vcl_discard == 1
 
 client c1 {
 	txreq -url "/bar"
@@ -72,5 +72,5 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -cli "vcl.list"
-vinyl v1 -expect n_vcl_avail == 1
+varnish v1 -cli "vcl.list"
+varnish v1 -expect n_vcl_avail == 1

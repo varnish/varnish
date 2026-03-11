@@ -5,7 +5,7 @@ server s1 -repeat 6 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

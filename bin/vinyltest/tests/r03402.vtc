@@ -10,7 +10,7 @@ server s0 {
 	send "\r\n"
 } -dispatch
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	probe default {
 		.window = 1;
 		.threshold = 1;
@@ -21,4 +21,4 @@ vinyl v1 -vcl+backend {
 
 delay 5
 
-vinyl v1 -cliexpect sick backend.list
+varnish v1 -cliexpect sick backend.list

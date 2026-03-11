@@ -4,12 +4,12 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include
 
-bin_PROGRAMS = vinyllog
+bin_PROGRAMS = varnishlog
 
-vinyllog_SOURCES = \
+varnishlog_SOURCES = \
 	vinyllog.c \
-	vinyllog_options.h
+	varnishlog_options.h
 
-vinyllog_LDADD = \
+varnishlog_LDADD = \
 	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
 	${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}

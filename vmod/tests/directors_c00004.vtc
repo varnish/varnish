@@ -15,7 +15,7 @@ server s3 -repeat 2 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import directors;
 
@@ -98,7 +98,7 @@ client c1 {
 	expect resp.http.backend == "vd"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 client c1 {
 	txreq -url /1 -hdr "pipe: true"

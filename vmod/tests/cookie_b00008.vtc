@@ -1,6 +1,6 @@
 vtest "Test large cookies"
 
-vinyl v1 -cliok "param.set workspace_client 64k" -vcl {
+varnish v1 -cliok "param.set workspace_client 64k" -vcl {
 	import cookie;
 	backend be none;
 	sub vcl_recv { return (synth(200)); }

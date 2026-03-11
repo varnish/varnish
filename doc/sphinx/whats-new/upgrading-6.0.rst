@@ -16,7 +16,7 @@ Unix domain sockets as listen addresses
 
 The ``varnishd -a`` command-line argument now has this form, where the
 ``address`` may be a Unix domain socket, identified as such when it
-begins with ``/`` (see varnishd :ref:`ref-vinyld-options`)::
+begins with ``/`` (see varnishd :ref:`ref-varnishd-options`)::
 
   -a [name=][address][:port][,PROTO][,user=<user>][,group=<group>][,mode=<mode>]
 
@@ -90,7 +90,7 @@ backend.
 
 The path of a socket file may also be specified in the
 ``varnishd -b`` command-line option (see varnishd
-:ref:`ref-vinyld-options`)::
+:ref:`ref-varnishd-options`)::
 
   $ varnishd -b /path/to/backend.sock
 
@@ -161,7 +161,7 @@ request was received.
 
 ``local.socket`` is the name provided in the ``-a`` command-line
 argument for the current listener, which defaults to ``a0``, ``a1``
-and so on (see varnishd :ref:`ref-vinyld-options`).
+and so on (see varnishd :ref:`ref-varnishd-options`).
 
 ``local.endpoint`` is the value of the ``address[:port]`` or ``path``
 field provided as the ``-a`` value for the current listener, exactly

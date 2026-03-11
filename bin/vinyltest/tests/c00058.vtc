@@ -10,7 +10,7 @@ server s1 {
 	barrier b1 sync
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.5s;
 		set beresp.grace = 10s;
@@ -26,7 +26,7 @@ client c1 {
 	delay 1
 } -run
 
-vinyl v1 -expect n_object == 1
+varnish v1 -expect n_object == 1
 
 client c1 {
 	# We still get old object
@@ -46,4 +46,4 @@ client c1 {
 } -run
 
 # and the old one has got superseded
-vinyl v1 -expect n_object == 1
+varnish v1 -expect n_object == 1

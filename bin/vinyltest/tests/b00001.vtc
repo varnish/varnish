@@ -11,7 +11,7 @@ server s1 -repeat 1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return(pipe);
 	}
@@ -33,8 +33,8 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -expect n_object == 0
-vinyl v1 -expect sess_conn == 1
-vinyl v1 -expect client_req == 1
-vinyl v1 -expect s_sess == 1
-vinyl v1 -expect s_pipe == 1
+varnish v1 -expect n_object == 0
+varnish v1 -expect sess_conn == 1
+varnish v1 -expect client_req == 1
+varnish v1 -expect s_sess == 1
+varnish v1 -expect s_pipe == 1

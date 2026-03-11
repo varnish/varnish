@@ -5,7 +5,7 @@ server s1 {
 	txresp -status 302
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 		set beresp.uncacheable = true;

@@ -5,7 +5,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp
 } -start
 
-vinyl v1 -arg "-a foo=${tmpdir}/v1.sock" -vcl+backend {} -start
+varnish v1 -arg "-a foo=${tmpdir}/v1.sock" -vcl+backend {} -start
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	txreq

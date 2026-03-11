@@ -8,8 +8,8 @@ server s1 {
 	rxreq
 } -start
 
-vinyl v1 -cliok "param.set first_byte_timeout 10"
-vinyl v1 -vcl+backend {} -start
+varnish v1 -cliok "param.set first_byte_timeout 10"
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	txreq
@@ -30,5 +30,5 @@ client c2 {
 logexpect l2 -wait
 
 shell -expect POST {
-	exec vinylncsa -d -n ${v1_name} -q 'Timestamp:Process[2] < 10.0'
+	exec varnishncsa -d -n ${v1_name} -q 'Timestamp:Process[2] < 10.0'
 }

@@ -17,9 +17,9 @@ server s1 -listen "::1" {
 	expect_close
 } -start
 
-vinyl v1 -cliok "param.set debug +vclrel"
+varnish v1 -cliok "param.set debug +vclrel"
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	txreq -url /s1
@@ -35,7 +35,7 @@ client c1 {
 
 barrier b1 sync
 
-vinyl v1 -cliok "param.set debug +vclrel"
+varnish v1 -cliok "param.set debug +vclrel"
 
 server s2 -listen "::1" {
 	rxreq
@@ -43,22 +43,22 @@ server s2 -listen "::1" {
 	txresp -hdr "Host: s2"
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b2 {
 		.host = "${s2_sock}";
 	}
 }
 
-vinyl v1 -vsc LCK.conn_pool.*
-vinyl v1 -cliok "vcl.discard vcl1"
-vinyl v1 -cliok "vcl.list"
-vinyl v1 -vsc LCK.conn_pool.*
-vinyl v1 -expect LCK.conn_pool.destroy == 0
+varnish v1 -vsc LCK.conn_pool.*
+varnish v1 -cliok "vcl.discard vcl1"
+varnish v1 -cliok "vcl.list"
+varnish v1 -vsc LCK.conn_pool.*
+varnish v1 -expect LCK.conn_pool.destroy == 0
 
 barrier b2 sync
 
 client c1 -wait
-vinyl v1 -cliok "vcl.list"
+varnish v1 -cliok "vcl.list"
 server s1 -wait
-vinyl v1 -vsc LCK.conn_pool.*
-vinyl v1 -expect LCK.conn_pool.destroy == 1
+varnish v1 -vsc LCK.conn_pool.*
+varnish v1 -expect LCK.conn_pool.destroy == 1

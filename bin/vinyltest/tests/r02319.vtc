@@ -6,7 +6,7 @@ server s1 {
 	       -body 1024
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.between_bytes_timeout = 0.001s;
 	}

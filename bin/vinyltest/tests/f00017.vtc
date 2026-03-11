@@ -8,12 +8,12 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set h2_rapid_reset_limit 3"
-vinyl v1 -cliok "param.set h2_rapid_reset 5"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set h2_rapid_reset_limit 3"
+varnish v1 -cliok "param.set h2_rapid_reset 5"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {
@@ -60,4 +60,4 @@ client c1 {
 	stream 0 -wait
 } -run
 
-vinyl v1 -expect sc_rapid_reset == 1
+varnish v1 -expect sc_rapid_reset == 1

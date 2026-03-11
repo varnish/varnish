@@ -9,7 +9,7 @@ server s1 {
 	txresp -status 304 -reason "Not Modified"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 1ms;
 		set beresp.grace = 0s;

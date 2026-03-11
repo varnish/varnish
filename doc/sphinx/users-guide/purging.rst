@@ -78,7 +78,7 @@ Support for bans is built into Varnish and available in the CLI
 interface. To ban every png object belonging on example.com, issue
 the following command from the shell::
 
-  vinyladm ban req.http.host == example.com '&&' req.url '~' '\\.png$'
+  varnishadm ban req.http.host == example.com '&&' req.url '~' '\\.png$'
 
 See :ref:`std.ban()` for details on the syntax of ban expressions. In
 particular, note that in the example given above, the quotes are

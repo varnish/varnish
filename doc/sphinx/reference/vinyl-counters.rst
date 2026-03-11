@@ -3,15 +3,15 @@
 	SPDX-License-Identifier: BSD-2-Clause
 	See LICENSE file for full text of license
 
-.. _vinyl-counters(7):
+.. _varnish-counters(7):
 
-==============
-vinyl-counters
-==============
+================
+varnish-counters
+================
 
--------------------------------------
-Vinyl Cache counter field definitions
--------------------------------------
+---------------------------------
+Varnish counter field definitions
+---------------------------------
 
 :Manual section: 7
 

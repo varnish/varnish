@@ -7,13 +7,13 @@
 Getting help
 %%%%%%%%%%%%
 
-Getting hold of the gang behind Vinyl Cache is pretty straight forward,
+Getting hold of the gang behind Varnish is pretty straight forward,
 we try to help out as much as time permits and have tried to streamline
 this process as much as possible.
 
 But before you grab hold of us, spend a moment composing your
 thoughts and formulate your question. From our perspective there
-is nothing as pointless as simply telling us "Vinyl Cache does not work
+is nothing as pointless as simply telling us "Varnish does not work
 for me" with no further information. This does not give us any
 relevant information to use when trying to figure out whats wrong.
 
@@ -26,7 +26,7 @@ IRC Channel
 
 The most immediate way to get hold of us is to join our IRC channel:
 
-	`#vinyl on server irc.linpro.no`
+	`#varnish on server irc.linpro.no`
 
 The main timezone of the channel is Europe work hours.
 
@@ -47,14 +47,14 @@ Mailing Lists
 
 Subscribing or unsubscribing to our mailing lists is handled through mailman_.
 
-If you are going to use Vinyl Cache, subscribing to our `vinyl-announce`
+If you are going to use Varnish, subscribing to our `varnish-announce`
 mailing list is a very good idea. The typical pattern is that
-people spend some time getting Vinyl Cache running, and then more or less
+people spend some time getting Varnish running, and then more or less
 forget about it. Therefore the announce list is a good way to be
 reminded about new releases, bugs or potential (security) vulnerabilities.
 
-The `vinyl-misc` mailing list is for general banter, questions,
-suggestions, ideas and so on.  If you are new to Vinyl Cache it may pay
+The `varnish-misc` mailing list is for general banter, questions,
+suggestions, ideas and so on.  If you are new to Varnish it may pay
 off to subscribe to it, simply to have an ear to the telegraph-pole
 and potentially learn some smart tricks.  This is also a good place to ask for help
 with more complex issues, that may require file-chunks, references to files and/or long
@@ -65,7 +65,7 @@ thread changes, please change the subject to match, some of us deal
 with hundreds of emails per day, after spam-filters, and we need all
 the help we can get to pick the interesting ones.
 
-The `vinyl-dev` mailing list is used by the developers and is
+The `varnish-dev` mailing list is used by the developers and is
 usually quite focused on source-code and such. Everybody on the
 `-dev` list is also on `-misc`, so cross-posting only serves to
 annoy those people.
@@ -74,7 +74,7 @@ Trouble Tickets
 ===============
 
 Our bugtracker lives on GitHub, but please do not open a trouble
-ticket, unless you have spotted an actual bug in Vinyl Cache.  Ask on
+ticket, unless you have spotted an actual bug in Varnish.  Ask on
 IRC first if you are in doubt.
 
 The reason for this policy, is to avoid bugs being drowned in a
@@ -90,7 +90,7 @@ Commercial Support
 ==================
 
 If you need commercial support, there are companies which offer that
-and you can find a `list on our homepage. <http://vinyl-cache.org/business/>`_.
+and you can find a `list on our homepage. <http://varnish-cache.org/business/>`_.
 
-.. _mailman: https://www.vinyl-cache.org/lists/mailman/listinfo
+.. _mailman: https://www.varnish-cache.org/lists/mailman/listinfo
 .. _pastebin: https://gist.github.com/

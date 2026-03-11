@@ -95,7 +95,7 @@ mgt_DumpOptions(void)
 	       "compiled VCLs etc.\n\n");
 	printf("  In performance critical applications, this directory "
 	       "should be on a RAM backed filesystem.\n\n");
-	printf("  When running multiple vinyld instances, separate "
+	printf("  When running multiple varnishd instances, separate "
 	       "directories need to be used.\n\n");
 	VIN_DumpDefaults();
 }
@@ -108,7 +108,7 @@ usage(void)
 #define FMT_NONL "  %-35s # %s"
 #define FMT FMT_NONL "\n"
 
-	printf( "Usage: vinyld [options]\n");
+	printf( "Usage: varnishd [options]\n");
 
 	printf("\nBasic options:\n");
 
@@ -156,7 +156,7 @@ usage(void)
 	printf(FMT, "-M address:port", "Reverse CLI destination");
 	printf(FMT, "", "Can be specified multiple times.");
 	printf(FMT, "-P file", "PID file");
-	printf(FMT, "-i identity", "Identity of Vinyl Cache instance");
+	printf(FMT, "-i identity", "Identity of Varnish instance");
 	printf(FMT, "-I clifile", "Initialization CLI commands");
 	printf(FMT, "-E extension", "Load extension");
 
@@ -584,7 +584,7 @@ create_bogo_n_arg(void)
 		VSB_printf(vsb, "%s", getenv("TMPDIR"));
 	else
 		VSB_cat(vsb, "/tmp");
-	VSB_cat(vsb, "/vinyld_C_XXXXXXX");
+	VSB_cat(vsb, "/varnishd_C_XXXXXXX");
 	AZ(VSB_finish(vsb));
 	p = strdup(VSB_data(vsb));
 	AN(p);
@@ -610,7 +610,7 @@ create_pid_file(pid_t *ppid, const char *fmt, ...)
 	pfh = VPF_Open(VSB_data(vsb), 0644, ppid);
 	if (pfh == NULL && errno == EEXIST)
 		ARGV_ERR(
-		    "vinyld is already running (pid=%jd) (pidfile=%s)\n",
+		    "varnishd is already running (pid=%jd) (pidfile=%s)\n",
 		    (intmax_t)*ppid, VSB_data(vsb));
 	if (pfh == NULL)
 		ARGV_ERR("Could not open pid-file (%s): %s\n",
@@ -632,7 +632,7 @@ main(int argc, char * const *argv)
 	const char *i_arg = NULL;
 	const char *j_arg = NULL;
 	const char *h_arg = "critbit";
-	const char *n_arg = getenv("VINYL_DEFAULT_N");
+	const char *n_arg = getenv("VARNISH_DEFAULT_N");
 	const char *S_arg = NULL;
 	const char *s_arg = "default,100m";
 	const char *W_arg = NULL;
@@ -670,7 +670,7 @@ main(int argc, char * const *argv)
 				ARGV_ERR("-V must be the first argument\n");
 			if (argc != 2)
 				ARGV_ERR("Too many arguments for -V\n");
-			VCS_Message("vinyld");
+			VCS_Message("varnishd");
 			exit(0);
 		case 'x':
 			if (!first_arg)
@@ -889,7 +889,7 @@ main(int argc, char * const *argv)
 
 	mgt_ProcTitle("Mgt");
 
-	openlog("vinyld", LOG_PID, LOG_LOCAL0);
+	openlog("varnishd", LOG_PID, LOG_LOCAL0);
 
 	vsb = VSB_new_auto();
 	AN(vsb);

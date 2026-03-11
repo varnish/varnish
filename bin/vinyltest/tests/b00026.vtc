@@ -13,7 +13,7 @@ server s2 {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -39,7 +39,7 @@ vinyl v1 -vcl {
 		}
 	}
 } -start
-vinyl v1 -cliok "param.set first_byte_timeout 0.5"
+varnish v1 -cliok "param.set first_byte_timeout 0.5"
 
 client c1 {
 	txreq -url "from_backend"

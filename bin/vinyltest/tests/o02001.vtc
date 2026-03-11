@@ -37,7 +37,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -proto "PROXY"	\
+varnish v1 -proto "PROXY"	\
     -arg "-p feature=+http2"	\
     -vcl+backend {
 	import proxy;

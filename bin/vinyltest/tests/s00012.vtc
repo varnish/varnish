@@ -7,7 +7,7 @@ server s1 {
 	txresp -bodylen 100000
 } -start
 
-vinyl v1				\
+varnish v1				\
 	-arg "-p timeout_idle=1"	\
 	-arg "-p idle_send_timeout=.1"	\
 	-arg "-p send_timeout=.1"	\
@@ -60,8 +60,8 @@ client c2 -connect "${tmpdir}/v1.sock" -rcvbuf 128 {
 client c1 -wait
 client c2 -wait
 
-vinyl v1 -cliok "param.set idle_send_timeout 1"
-vinyl v1 -cliok "param.reset send_timeout"
+varnish v1 -cliok "param.set idle_send_timeout 1"
+varnish v1 -cliok "param.reset send_timeout"
 
 logexpect l2 -v v1 -q "ReqURL ~ \"^/$\"" {
 	expect * * Debug "Hit idle send timeout"

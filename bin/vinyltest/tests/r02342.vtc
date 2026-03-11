@@ -1,4 +1,4 @@
-vtest "honor vcl_path with vinyld -f"
+vtest "honor vcl_path with varnishd -f"
 
 shell {
 	cat >unlikely_file_name.vcl <<-EOF
@@ -11,10 +11,10 @@ shell {
 }
 
 shell -err -expect "Cannot read -f file 'unlikely_file_name.vcl'" {
-	vinyld -F -a :0 -n ${tmpdir}/tmp -f unlikely_file_name.vcl
+	varnishd -F -a :0 -n ${tmpdir}/tmp -f unlikely_file_name.vcl
 }
 
-vinyl v1 -arg "-p vcl_path=${tmpdir} -f unlikely_file_name.vcl" -start
+varnish v1 -arg "-p vcl_path=${tmpdir} -f unlikely_file_name.vcl" -start
 
 # Even when loaded from a relative path, show an absolute one
-vinyl v1 -cliexpect "VCL.SHOW .+ ${tmpdir}/unlikely_file_name.vcl" "vcl.show -v boot"
+varnish v1 -cliexpect "VCL.SHOW .+ ${tmpdir}/unlikely_file_name.vcl" "vcl.show -v boot"

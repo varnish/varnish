@@ -12,8 +12,8 @@ server s1 {
 	    -hdr {ETag: "bar"}
 } -start
 
-vinyl v1 -vcl+backend { } -start
-vinyl v1 -cliok "param.set feature +http2"
+varnish v1 -vcl+backend { } -start
+varnish v1 -cliok "param.set feature +http2"
 
 client c1 {
 	stream 1 {

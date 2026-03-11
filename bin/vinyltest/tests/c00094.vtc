@@ -37,9 +37,9 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	barrier b1 sync
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 
 	backend foo {
 		.path = "${s1_sock}";
@@ -53,5 +53,5 @@ vinyl v1 -vcl {
 
 barrier b1 sync
 
-vinyl v1 -cliexpect "^CLI RX|  -+U+-{0,5} Good UNIX" "backend.list -p"
-vinyl v1 -cliexpect "^CLI RX|  -+H{10}-{5}H{2}-{0,5} Happy" "backend.list -p"
+varnish v1 -cliexpect "^CLI RX|  -+U+-{0,5} Good UNIX" "backend.list -p"
+varnish v1 -cliexpect "^CLI RX|  -+H{10}-{5}H{2}-{0,5} Happy" "backend.list -p"

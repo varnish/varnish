@@ -15,7 +15,7 @@ server s1 {
 	txresp -body {<a>\0<esi:include src="/bar"/><b>c}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

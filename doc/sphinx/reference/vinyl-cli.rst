@@ -5,23 +5,23 @@
 
 .. role:: ref(emphasis)
 
-.. _vinyl-cli(7):
+.. _varnish-cli(7):
 
-=========
-vinyl-cli
-=========
+===========
+varnish-cli
+===========
 
-----------------------------------
-Vinyl Cache Command Line Interface
-----------------------------------
+------------------------------
+Varnish Command Line Interface
+------------------------------
 
 :Manual section: 7
 
 DESCRIPTION
 ===========
 
-Vinyl Cache has a command line interface (CLI) which can control and change
-most of the operational parameters and the configuration of Vinyl Cache,
+Varnish has a command line interface (CLI) which can control and change
+most of the operational parameters and the configuration of Varnish,
 without interrupting the running service.
 
 The CLI can be used for the following tasks:
@@ -30,13 +30,13 @@ configuration
      You can upload, change and delete VCL files from the CLI.
 
 parameters
-     You can inspect and change the various parameters Vinyl Cache has
+     You can inspect and change the various parameters Varnish has
      available through the CLI. The individual parameters are
-     documented in the vinyld(1) man page.
+     documented in the varnishd(1) man page.
 
 bans
-     Bans are filters that are applied to keep Vinyl Cache from serving
-     stale content. When you issue a ban Vinyl Cache will not serve any
+     Bans are filters that are applied to keep Varnish from serving
+     stale content. When you issue a ban Varnish will not serve any
      *banned* object from cache, but rather re-fetch it from its
      backend servers.
 
@@ -45,18 +45,18 @@ process management
      CLI. You can also retrieve the latest stack trace if the child
      process has crashed.
 
-If you invoke vinyld(1) with -T, -M or -d the CLI will be
+If you invoke varnishd(1) with -T, -M or -d the CLI will be
 available. In debug mode (-d) the CLI will be in the foreground, with
--T you can connect to it with vinyladm or telnet and with -M
-``vinyld`` will connect back to a listening service *pushing* the CLI to
-that service. Please see :ref:`vinyld(1)` for details.
+-T you can connect to it with varnishadm or telnet and with -M
+varnishd will connect back to a listening service *pushing* the CLI to
+that service. Please see :ref:`varnishd(1)` for details.
 
 .. _ref_syntax:
 
 Syntax
 ------
 
-The Vinyl Cache CLI is similar to another command line interface, the Bourne
+The Varnish CLI is similar to another command line interface, the Bourne
 Shell. Commands are usually terminated with a newline, and they may take
 arguments. The command and its arguments are *tokenized* before parsing,
 and as such arguments containing spaces must be enclosed in double quotes.
@@ -98,7 +98,7 @@ used.
 Quoting pitfalls
 ----------------
 
-Integrating with the Vinyl Cache CLI can be sometimes surprising when quoting
+Integrating with the Varnish CLI can be sometimes surprising when quoting
 is involved. For instance in Bourne Shell the delimiter used with here
 documents may or may not be separated by spaces from the ``<<`` token::
 
@@ -109,7 +109,7 @@ documents may or may not be separated by spaces from the ``<<`` token::
    hello
    world
 
-With the Vinyl Cache CLI, the ``<<`` and ``EOF`` tokens must be separated by
+With the Varnish CLI, the ``<<`` and ``EOF`` tokens must be separated by
 at least one blank::
 
    vcl.inline boot <<EOF
@@ -153,20 +153,20 @@ its meaning, even quoted::
    200 14
    VCL compiled.
 
-When using a front-end to the Vinyl Cache CLI like ``vinyladm``, one must
+When using a front-end to the Varnish-CLI like ``varnishadm``, one must
 take into account the double expansion happening.  First in the shell
-launching the ``vinyladm`` command and then in the Vinyl Cache CLI itself.
+launching the ``varnishadm`` command and then in the Varnish CLI itself.
 When a command's parameter require spaces, you need to ensure that the
-Vinyl Cache CLI will see the double quotes::
+Varnish CLI will see the double quotes::
 
-   vinyladm param.set cc_command '"my alternate cc command"'
+   varnishadm param.set cc_command '"my alternate cc command"'
 
    Change will take effect when VCL script is reloaded
 
 Otherwise if you don't quote the quotes, you may get a seemingly unrelated
 error message::
 
-   vinyladm param.set cc_command "my alternate cc command"
+   varnishadm param.set cc_command "my alternate cc command"
    Unknown request.
    Type 'help' for more info.
    Too many parameters
@@ -176,7 +176,7 @@ error message::
 If you are quoting with a here document, you must wrap it inside a shell
 multi-line argument::
 
-   vinyladm vcl.inline test '<< EOF
+   varnishadm vcl.inline test '<< EOF
    vcl 4.0;
 
    backend be {
@@ -202,7 +202,7 @@ The expected output is::
    hello
    world
 
-With the Vinyl Cache CLI, only the last parameter may use the here document form,
+With the Varnish CLI, only the last parameter may use the here document form,
 which greatly restricts the number of commands that can effectively use them.
 Trying to use multiple here documents only takes the last one into account.
 
@@ -222,8 +222,8 @@ This conceptually results in the following command line:
 - ``"EOF1"``
 - ``"heredoc1\nEOF1\nheredoc2\n"``
 
-Other pitfalls include variable expansion of the shell invoking ``vinyladm``
-but this is not directly related to the Vinyl Cache CLI. If you get the quoting
+Other pitfalls include variable expansion of the shell invoking ``varnishadm``
+but this is not directly related to the Varnish CLI. If you get the quoting
 right you should be fine even with complex commands.
 
 JSON
@@ -317,9 +317,9 @@ active VCL and keep older VCLs in case you'd need to rollback to a
 previous version.
 
 The VCL temperature allows you to minimize the footprint of inactive
-VCLs. Once a VCL becomes cold, Vinyl Cache will release all the resources
+VCLs. Once a VCL becomes cold, Varnish will release all the resources
 that can be be later reacquired. You can manually set the temperature
-of a VCL or let Vinyl Cache
+of a VCL or let varnish
 automatically handle it.
 
 EXAMPLES
@@ -356,7 +356,7 @@ Poul-Henning Kamp.
 SEE ALSO
 ========
 
-* :ref:`vinyladm(1)`
-* :ref:`vinyld(1)`
+* :ref:`varnishadm(1)`
+* :ref:`varnishd(1)`
 * :ref:`vcl(7)`
 * For API use of the CLI: The Reference Manual.

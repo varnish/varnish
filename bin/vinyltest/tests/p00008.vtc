@@ -15,7 +15,7 @@ server s1 {
 	expect req.url == "/silo2"
 	txresp -hdr "X-Foo: foo"
 } -start
-vinyl v1 \
+varnish v1 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-pban_lurker_sleep=0" \
 	-arg "-sper1=deprecated_persistent,${tmpdir}/_.per1,5m" \
@@ -40,30 +40,30 @@ client c1 {
 	expect resp.status == 200
 	expect resp.http.x-foo == "foo"
 } -run
-vinyl v1 -stop
+varnish v1 -stop
 server s1 -wait
 
 # Only silo 1
 # Ban on obj.http.x-foo == foo
-vinyl v2 \
+varnish v2 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-pban_lurker_sleep=0" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per1,5m" \
 	-vcl+backend { } -start
-vinyl v2 -cliok "ban obj.http.x-foo == foo"
-vinyl v2 -cliok "ban.list"
-vinyl v2 -stop
+varnish v2 -cliok "ban obj.http.x-foo == foo"
+varnish v2 -cliok "ban.list"
+varnish v2 -stop
 
 # Silo 1 & 2
 # Bans should be transferred
-vinyl v3 \
+varnish v3 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-pban_lurker_sleep=0" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per1,5m" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per2,5m" \
 	-vcl+backend { } -start
-vinyl v3 -cliok "ban.list"
-vinyl v3 -stop
+varnish v3 -cliok "ban.list"
+varnish v3 -stop
 
 # Only silo 2
 # Check that /silo2 is banned
@@ -72,7 +72,7 @@ server s1 {
 	expect req.url == "/silo2"
 	txresp -hdr "X-Foo: bar"
 } -start
-vinyl v4 \
+varnish v4 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-pban_lurker_sleep=0" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per2,5m" \

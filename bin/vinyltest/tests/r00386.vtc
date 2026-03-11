@@ -9,7 +9,7 @@ server s1 {
 	txresp -body {<X><esi:include src="/body"/></X>}
 } -start
 
-vinyl v1 -arg "-p debug=+workspace" -vcl+backend {
+varnish v1 -arg "-p debug=+workspace" -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;

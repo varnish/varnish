@@ -5,7 +5,7 @@ server s1 -repeat 2 -keepalive {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_recv {
@@ -23,7 +23,7 @@ client c1 {
 	expect resp.http.X-Backend-Name == "s1"
 } -run
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -49,7 +49,7 @@ client c1 {
 	expect resp.http.X-Backend-Name == "s1"
 } -run
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_recv'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_recv'" {
 	import directors;
 
 	backend dummy None;

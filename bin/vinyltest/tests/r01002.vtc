@@ -1,6 +1,6 @@
 vtest "Real relational comparisons"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 
 	backend foo { .host = "${localhost}"; }

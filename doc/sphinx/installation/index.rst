@@ -5,8 +5,8 @@
 
 .. _install-index:
 
-Vinyl Cache Installation
-========================
+Varnish Installation
+====================
 
 This section covers installation prerequisites, a step-by-step
 installation procedure, how and where to get help, and how to report

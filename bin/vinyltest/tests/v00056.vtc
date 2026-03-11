@@ -20,7 +20,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	barrier b4 sync
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 
 	import std;
 
@@ -48,7 +48,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -cliok "backend.list -p"
+varnish v1 -cliok "backend.list -p"
 
 client c1 {
 	txreq

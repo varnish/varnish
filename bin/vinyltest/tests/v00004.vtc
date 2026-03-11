@@ -141,7 +141,7 @@ server s1 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import debug;
 	import vtc;
@@ -184,7 +184,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq \
@@ -204,4 +204,4 @@ client c1 {
 }
 
 client c1 -run
-vinyl v1 -expect esi_errors == 0
+varnish v1 -expect esi_errors == 0

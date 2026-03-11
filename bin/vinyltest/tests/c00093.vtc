@@ -13,7 +13,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	send "1234567890"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_backend_response {
 		vtc.barrier_sync("${b1_sock}");

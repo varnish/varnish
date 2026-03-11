@@ -23,7 +23,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-vcl+backend {
 		sub vcl_backend_response {
 			set beresp.do_stream = false;
@@ -33,8 +33,8 @@ vinyl v1 \
 		}
 }
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -start
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -start
 
 client c1 {
 	txreq -url /1

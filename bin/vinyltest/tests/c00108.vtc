@@ -12,11 +12,11 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set workspace_client 24k"
-vinyl v1 -cliok "param.set http_req_size 1k"
-vinyl v1 -cliok "param.set http_resp_size 1k"
-vinyl v1 -cliok "param.set vsl_buffer 1k"
-vinyl v1 -vcl+backend { } -start
+varnish v1 -cliok "param.set workspace_client 24k"
+varnish v1 -cliok "param.set http_req_size 1k"
+varnish v1 -cliok "param.set http_resp_size 1k"
+varnish v1 -cliok "param.set vsl_buffer 1k"
+varnish v1 -vcl+backend { } -start
 
 client c1 {
 	# Multi-line strings aren't escaped, the send argument
@@ -41,7 +41,7 @@ ${string,repeat,1024,abcdefghijklmnopqrstuvwxyz012345}
 	}
 } -run
 
-vinyl v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set feature +http2"
 
 client c2 {
 	stream 1 {

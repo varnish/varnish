@@ -5,7 +5,7 @@ server s1 {
 	txresp -gzipbody "FOOOOOOBAR"
 } -start
 
-vinyl v1 -vcl+backend { } -start
+varnish v1 -vcl+backend { } -start
 
 logexpect l1 -v v1 -g raw {
 	expect * 1004	BogoHeader	"Illegal char 0x20 in header name"

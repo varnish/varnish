@@ -30,7 +30,7 @@
  *
  * Varnish process internal CLI stuff.
  *
- * XXX: at a latter date we may want to move some to cli.h/libvinylapi
+ * XXX: at a latter date we may want to move some to cli.h/libvarnishapi
  */
 
 #include "vcli.h"
@@ -106,7 +106,7 @@ void VCLS_AddFunc(struct VCLS *cs, struct cli_proto *clp);
 int VCLS_Poll(struct VCLS *cs, const struct cli*, int timeout);
 void VCLS_Destroy(struct VCLS **);
 
-/* From libvinyl/cli.c */
+/* From libvarnish/cli.c */
 cli_func_t	VCLS_func_close;
 cli_func_t	VCLS_func_help;
 cli_func_t	VCLS_func_help_json;

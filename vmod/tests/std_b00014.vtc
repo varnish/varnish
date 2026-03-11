@@ -1,6 +1,6 @@
 vtest "std.fnmatch()"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 	backend b None;
 
@@ -150,7 +150,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_deliver {

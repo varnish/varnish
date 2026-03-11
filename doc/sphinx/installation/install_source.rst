@@ -16,7 +16,7 @@ Getting hold of the source
 --------------------------
 
 Download the appropriate release tarball, which you can find on
-https://vinyl-cache.org/releases/ .
+https://varnish-cache.org/releases/ .
 
 Alternatively, if you want to hack on Varnish, you should clone our
 git repository by doing.
@@ -47,8 +47,6 @@ Or if you want the built from sources::
 
 	cd /usr/ports/www/varnish6
 	make depends clean
-
-.. XXX furo for sphinx
 
 Then continue `Compiling Varnish`_
 
@@ -86,10 +84,6 @@ Recommended, in particular if you plan on building custom vmods::
 Optionally, to pull from a repository::
 
     sudo apt-get install git
-
-Optionally, to build the HTML documentation::
-
-    sudo apt-get install pip furo
 
 Then continue `Compiling Varnish`_
 
@@ -155,8 +149,6 @@ Optionally, to pull from a repository::
 
     yum install git
 
-.. XXX furo for sphinx
-
 .. XXX autoconf-archive ? is this any helpful on the notoriously
    outdated Redhats?
 
@@ -179,8 +171,6 @@ dependencies:
 	libtool \
 	docutils \
 	sphinx-doc
-
-.. XXX furo for sphinx
 
 * Add the sphinx tools and the docutils to PATH so `configure` will find them.
 
@@ -226,8 +216,6 @@ Optionally, to pull from a repository::
 
     apk add -q git
 
-.. XXX furo for sphinx
-
 Then continue `Compiling Varnish`_, using the ``--with-unwind``
 ``configure`` option.
 
@@ -248,11 +236,6 @@ Optionally, to rebuild the svg files::
 Optionally, to pull from a repository::
 
 	pkgin in git
-
-Optionally, to build the HTML documentation::
-
-        pkgin in py311-pip-25.3
-        pip install furo
 
 Building on Solaris and other Solaris-ish OSes
 ----------------------------------------------
@@ -322,6 +305,6 @@ Installing
 
 And finally, the true test of a brave heart: ``sudo make install``
 
-Varnish will now be installed in ``/usr/local``. The ``vinyld`` binary is in
+Varnish will now be installed in ``/usr/local``. The ``varnishd`` binary is in
 `/usr/local/sbin/varnishd`. To make sure that the necessary links and caches
 of the most recent shared libraries are found, run ``sudo ldconfig``.

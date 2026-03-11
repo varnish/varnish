@@ -43,7 +43,7 @@ server s1 {
 	txresp -hdr "Connection: close" -body "pipe"
 } -start
 
-vinyl v1 -proto PROXY -vcl+backend {
+varnish v1 -proto PROXY -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -51,7 +51,7 @@ vinyl v1 -proto PROXY -vcl+backend {
 	}
 } -start
 
-vinyl v2 -proto PROXY -vcl {
+varnish v2 -proto PROXY -vcl {
 	import std;
 
 	backend bp1 {

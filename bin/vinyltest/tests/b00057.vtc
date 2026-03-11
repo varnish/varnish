@@ -12,7 +12,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	chunkedlen 0
 } -start
 
-vinyl v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend { } -start
+varnish v1 -arg "-a ${tmpdir}/v1.sock" -vcl+backend { } -start
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	txreq -hdr "Connection: close"

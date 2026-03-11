@@ -1,6 +1,6 @@
 vtest "Access protected headers"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend be none;
 
 	sub access_req {

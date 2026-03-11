@@ -38,7 +38,7 @@ haproxy h2 -conf {
 	server s0 0.0.0.0:0 ssl verify none sni fc_pp_authority
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend h2 { .path = "${tmpdir}/h2.sock"; }
 
 	# The ssl-onloader uses the port number set here.

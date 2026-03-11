@@ -8,8 +8,8 @@ server s1 {
 	send garbage
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl,+waitinglist"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set debug +syncvsl,+waitinglist"
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_backend_fetch {
 		vtc.barrier_sync("${b1_sock}");
@@ -68,4 +68,4 @@ client c3 -wait
 client c4 -wait
 client c5 -wait
 
-vinyl v1 -expect n_expired == 1
+varnish v1 -expect n_expired == 1

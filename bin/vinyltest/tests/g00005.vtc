@@ -16,7 +16,7 @@ server s1 -repeat 3 {
 	}
 } -start
 
-vinyl v1 -cliok "param.set http_gzip_support true" -vcl+backend {
+varnish v1 -cliok "param.set http_gzip_support true" -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url ~  "^/nostream") {
 			set beresp.do_stream = false;
@@ -34,7 +34,7 @@ client c1 {
 	expect resp.body == "BAR"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 client c2 {
 	txreq -hdr "Accept-encoding: gzip;q=0.1"
@@ -44,7 +44,7 @@ client c2 {
 	expect resp.bodylen == "10"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 # This delay attempts to ensure that the busyobj
 # is completed before we attempt the range request
@@ -59,7 +59,7 @@ client c3 {
 	expect resp.body == "BAR"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 client c4 {
 	txreq -url "/nostreamcachemiss" -hdr "Range: bytes=3-5"
@@ -70,7 +70,7 @@ client c4 {
 	expect resp.body == "BAR"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 client c5 {
 	# simple cache miss, no stream, no gunzip

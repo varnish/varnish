@@ -22,7 +22,7 @@ server s2 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.c) {
 			set req.backend_hint = s2;
@@ -53,9 +53,9 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set debug +waitinglist"
-vinyl v1 -cliok "param.show debug"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +waitinglist"
+varnish v1 -cliok "param.show debug"
 
 client c1 {
 	# This is a plain miss

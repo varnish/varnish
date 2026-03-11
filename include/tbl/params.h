@@ -69,7 +69,7 @@ PARAM_SIMPLE(
 	/* descr */
 	"Enable kernel accept-filters. This may require a kernel module to "
 	"be loaded to have an effect when enabled.\n\n"
-	"Enabling accept_filter may prevent some requests to reach Vinyl Cache "
+	"Enabling accept_filter may prevent some requests to reach Varnish "
 	"in the first place. Malformed requests may go unnoticed and not "
 	"increase the client_req_400 counter. GET or HEAD requests with a "
 	"body may be blocked altogether.",
@@ -593,16 +593,16 @@ PARAM_SIMPLE(
 	/* def */	"on",
 	/* units */	"bool",
 	/* descr */
-	"Enable gzip support. When enabled Vinyl Cache request compressed "
+	"Enable gzip support. When enabled Varnish request compressed "
 	"objects from the backend and store them compressed. If a client "
-	"does not support gzip encoding Vinyl Cache will uncompress compressed "
-	"objects on demand. Vinyl Cache will also rewrite the Accept-Encoding "
+	"does not support gzip encoding Varnish will uncompress compressed "
+	"objects on demand. Varnish will also rewrite the Accept-Encoding "
 	"header of clients indicating support for gzip to:\n"
 	"  Accept-Encoding: gzip\n"
 	"\n"
 	"Clients that do not support gzip will have their Accept-Encoding "
 	"header removed. For more information on how gzip is implemented "
-	"please see the chapter on gzip in the Vinyl Cache reference.\n"
+	"please see the chapter on gzip in the Varnish reference.\n"
 	"\n"
 	"When gzip support is disabled the variables beresp.do_gzip and "
 	"beresp.do_gunzip have no effect in VCL."
@@ -681,7 +681,7 @@ PARAM_SIMPLE(
 	"the implementation of http_req_size. 414 applies to the URL only, "
 	"while 413 applies to the request body. 400 is probably the least "
 	"incorrect alternative value to sending no response at all (0). It "
-	"can also be seen as an internal error on the Vinyl Cache side due to "
+	"can also be seen as an internal error on the Varnish side due to "
 	"configured limits, so 500 is also allowed."
 )
 
@@ -1148,9 +1148,9 @@ PARAM_SIMPLE(
 	/* units */	"bytes",
 	/* descr */
 
-	"The number of bytes which Vinyl Cache buffers for uncacheable "
+	"The number of bytes which Varnish buffers for uncacheable "
 	"backend streaming fetches - in other words, how many bytes "
-	"Vinyl Cache reads from the backend ahead of what has been sent to "
+	"Varnish reads from the backend ahead of what has been sent to "
 	"the client.\n"
 	"A zero value means no limit, the object is fetched as fast as "
 	"possible.\n\n"
@@ -1269,7 +1269,7 @@ PARAM_SIMPLE(
 	/* descr */
 	"The amount of space to allocate for the VSL fifo buffer in the "
 	"VSM memory segment.  If you make this too small, "
-	"vinyl{ncsa|log} etc will not be able to keep up.  Making it too "
+	"varnish{ncsa|log} etc will not be able to keep up.  Making it too "
 	"large just costs memory resources.",
 	/* flags */	MUST_RESTART
 )
@@ -1812,7 +1812,7 @@ PARAM_THREAD(
 	"\n"
 	"The required stack size is primarily driven by the"
 	" depth of the call-tree. The most common relevant"
-	" determining factors in Vinyl Cache core code are GZIP"
+	" determining factors in varnish core code are GZIP"
 	" (un)compression, ESI processing and regular"
 	" expression matches. VMODs may also require"
 	" significant amounts of additional stack. The"
@@ -1826,10 +1826,10 @@ PARAM_THREAD(
 	"\n"
 	"Thus, in particular for setups with many threads,"
 	" keeping the stack size at a minimum helps reduce"
-	" the amount of memory required by Vinyl Cache.\n"
+	" the amount of memory required by Varnish.\n"
 	"\n"
 	"On the other hand, thread_pool_stack must be large"
-	" enough under all circumstances, otherwise Vinyl Cache"
+	" enough under all circumstances, otherwise varnish"
 	" will crash due to a stack overflow. Usually, a"
 	" stack overflow manifests itself as a segmentation"
 	" fault (aka segfault / SIGSEGV) with the faulting"
@@ -1894,7 +1894,7 @@ PARAM_STRING(
 	/* descr */
 	"Warnings used when compiling the C source code with "
 	"the cc_command parameter. By default, VCL is compiled "
-	"with the same set of warnings as Vinyl Cache itself.",
+	"with the same set of warnings as Varnish itself.",
 	/* flags */	MUST_RELOAD | BUILD_OPTIONS,
 	/* dyn_min_reason */	NULL,
 	/* dyn_max_reason */	NULL,
@@ -1920,7 +1920,7 @@ PARAM_STRING(
 	/* descr */
 	"Directory (or colon separated list of directories) "
 	"from which relative VCL filenames (vcl.load and "
-	"include) are to be found.  By default Vinyl Cache searches "
+	"include) are to be found.  By default Varnish searches "
 	"VCL files in both the system configuration and shared "
 	"data directories to allow packages to drop their VCL "
 	"files in a standard location where relative includes "

@@ -1,6 +1,6 @@
 vtest "H2 RxStuff conditions"
 
-vinyl v1 -arg "-p feature=+http2" -arg "-p debug=+syncvsl" -vcl {
+varnish v1 -arg "-p feature=+http2" -arg "-p debug=+syncvsl" -vcl {
 	backend none none;
 	sub vcl_recv {
 		return (synth(200));

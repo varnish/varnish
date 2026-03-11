@@ -36,7 +36,7 @@
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
 
-#include "cache/cache_varnishd.h"
+#include "cache/cache_vinyld.h"
 #include "cache/cache_conn_pool_ssl.h"
 #include "cache/cache_pool.h"
 #include "cache_tls.h"

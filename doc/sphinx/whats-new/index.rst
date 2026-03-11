@@ -31,6 +31,123 @@ Varnish 7.7
    changes-7.7
    upgrading-7.7
 
+Varnish 7.6
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.6
+   upgrading-7.6
+
+Varnish 7.5
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.5
+   upgrading-7.5
+
+Varnish 7.4
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.4
+   upgrading-7.4
+
+Varnish 7.3
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.3
+   upgrading-7.3
+
+Varnish 7.2
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.2
+   upgrading-7.2
+
+Varnish 7.1
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.1
+   upgrading-7.1
+
+Varnish 7.0
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-7.0
+   upgrading-7.0
+
+Varnish 6.6
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-6.6
+   upgrading-6.6
+
+Varnish 6.5
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-6.5
+   upgrading-6.5
+
+Varnish 6.4
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-6.4
+   upgrading-6.4
+
+Varnish 6.3
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-6.3
+   upgrading-6.3
+
+Varnish 6.2
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-6.2
+   upgrading-6.2
+
+Varnish 6.1
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   changes-6.1
+   upgrading-6.1
+
 Varnish 6.0
 -----------
 

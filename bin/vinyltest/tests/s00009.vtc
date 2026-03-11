@@ -12,7 +12,7 @@ server s1 {
 	txresp -body "bar"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_backend_response {
 		# Simulate processing for 1.5 sec

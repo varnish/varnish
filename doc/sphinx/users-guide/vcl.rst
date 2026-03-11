@@ -32,7 +32,7 @@ request, another when files are fetched from the backend server.
 
 If you don't call an action in your subroutine and it reaches the end
 Varnish will execute some built-in VCL code. You will see this VCL
-code commented out in the file `builtin.vcl` that ships with Vinyl Cache.
+code commented out in the file `builtin.vcl` that ships with Varnish Cache.
 
 .. _users-guide-vcl_fetch_actions:
 

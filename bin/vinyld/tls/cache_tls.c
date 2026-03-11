@@ -41,7 +41,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#include "cache/cache_varnishd.h"
+#include "cache/cache_vinyld.h"
 #include "cache/cache_conn_oper.h"
 #include "cache/cache_conn_pool.h"
 #include "cache/cache_pool.h"

@@ -29,7 +29,7 @@ server s3 {
 	txresp -gzipbody {<esi:include src="/included"/>}
 } -start
 
-vinyl v1 -arg "-p debug=+syncvsl" -vcl+backend {
+varnish v1 -arg "-p debug=+syncvsl" -vcl+backend {
 	sub vcl_deliver {
 	}
 	sub vcl_backend_fetch {

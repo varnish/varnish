@@ -5,28 +5,28 @@
 
 .. role:: ref(emphasis)
 
-.. _vinylhist(1):
+.. _varnishhist(1):
 
-=========
-vinylhist
-=========
+===========
+varnishhist
+===========
 
------------------------------
-Vinyl Cache request histogram
------------------------------
+-------------------------
+Varnish request histogram
+-------------------------
 
 :Manual section: 1
 
 SYNOPSIS
 ========
 
-.. include:: ../include/vinylhist_synopsis.rst
-vinylhist |synopsis|
+.. include:: ../include/varnishhist_synopsis.rst
+varnishhist |synopsis|
 
 DESCRIPTION
 ===========
 
-The vinylhist utility reads vinyld(1) shared memory logs and
+The varnishhist utility reads varnishd(1) shared memory logs and
 presents a continuously updated histogram showing the distribution
 of the last N requests by their processing.  The value of N and the
 vertical scale are displayed in the top left corner.  The horizontal
@@ -35,28 +35,28 @@ and misses are marked with a hash character ("#").
 
 The following options are available:
 
-.. include:: ../include/vinylhist_options.rst
+.. include:: ../include/varnishhist_options.rst
 
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
-* :ref:`vinyllog(1)`
-* :ref:`vinylncsa(1)`
-* :ref:`vinylstat(1)`
-* :ref:`vinyltop(1)`
+* :ref:`varnishd(1)`
+* :ref:`varnishlog(1)`
+* :ref:`varnishncsa(1)`
+* :ref:`varnishstat(1)`
+* :ref:`varnishtop(1)`
 * :ref:`vsl(7)`
 
 HISTORY
 =======
-The vinylhist utility was developed by Poul-Henning Kamp in cooperation with
-Verdens Gang AS and Redpill-Linpro. This manual page was written by
+The varnishhist utility was developed by Poul-Henning Kamp in cooperation with
+Verdens Gang AS and Varnish Software AS. This manual page was written by
 Dag-Erling Smørgrav.
 
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Vinyl Cache
+This document is licensed under the same licence as Varnish
 itself. See LICENCE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

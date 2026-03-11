@@ -18,7 +18,7 @@ Deciding on cache size can be a tricky task. A few things to consider:
    they are cheap to serve from the backend and you have a limited
    amount of memory.
 
- * Watch the `n_lru_nuked` counter with :ref:`vinylstat(1)` or some
+ * Watch the `n_lru_nuked` counter with :ref:`varnishstat(1)` or some
    other tool. If you have a lot of LRU activity then your cache is
    evicting objects due to space constraints and you should consider
    increasing the size of the cache.

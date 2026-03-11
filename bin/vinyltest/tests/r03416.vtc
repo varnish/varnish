@@ -5,8 +5,8 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.Keep-Alive = "timeout=5, max=1000";
 		set resp.http.Connection = "other";

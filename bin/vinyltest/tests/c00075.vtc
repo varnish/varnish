@@ -50,7 +50,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-s default,1m" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.be-hitmiss = bereq.is_hitmiss;
@@ -65,7 +65,7 @@ vinyl v1 \
 	}
 } -start
 
-vinyl v1 -cliok "debug.fragfetch 8192"
+varnish v1 -cliok "debug.fragfetch 8192"
 
 client c1 {
 	txreq -url "/hfm"
@@ -83,13 +83,13 @@ client c1 {
 } -start
 
 barrier ba1 sync
-vinyl v1 -expect SM?.Transient.g_bytes < 24576
+varnish v1 -expect SM?.Transient.g_bytes < 24576
 barrier ba2 sync
 
 client c1 -wait
 
 # HFM object
-vinyl v1 -expect SM?.Transient.g_bytes < 500
+varnish v1 -expect SM?.Transient.g_bytes < 500
 
 # pass on the HFM
 client c1 {
@@ -108,13 +108,13 @@ client c1 {
 } -start
 
 barrier bb1 sync
-vinyl v1 -expect SM?.Transient.g_bytes < 24576
+varnish v1 -expect SM?.Transient.g_bytes < 24576
 barrier bb2 sync
 
 client c1 -wait
 
 # HFM object
-vinyl v1 -expect SM?.Transient.g_bytes < 500
+varnish v1 -expect SM?.Transient.g_bytes < 500
 
 ##### hfp
 
@@ -134,13 +134,13 @@ client c1 {
 } -start
 
 barrier bc1 sync
-vinyl v1 -expect SM?.Transient.g_bytes < 24576
+varnish v1 -expect SM?.Transient.g_bytes < 24576
 barrier bc2 sync
 
 client c1 -wait
 
 # HFM + HFP object
-vinyl v1 -expect SM?.Transient.g_bytes < 1000
+varnish v1 -expect SM?.Transient.g_bytes < 1000
 
 # pass on the HFP
 client c1 {
@@ -159,10 +159,10 @@ client c1 {
 } -start
 
 barrier bd1 sync
-vinyl v1 -expect SM?.Transient.g_bytes < 24576
+varnish v1 -expect SM?.Transient.g_bytes < 24576
 barrier bd2 sync
 
 client c1 -wait
 
 # HFM + HFP object
-vinyl v1 -expect SM?.Transient.g_bytes < 1000
+varnish v1 -expect SM?.Transient.g_bytes < 1000

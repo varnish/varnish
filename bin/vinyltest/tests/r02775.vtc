@@ -5,9 +5,9 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -vcl+backend {} -start
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	stream 1 {

@@ -12,7 +12,7 @@ server s1 {
 	expect req.http.content-length == 0
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_error {
 		if (bereq.method == "GETCL0") {
 			return (retry);

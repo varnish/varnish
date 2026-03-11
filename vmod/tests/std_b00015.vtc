@@ -17,7 +17,7 @@ server s1 {
 	txresp -status 304 -hdr "Cache-Control: s-maxage=11, stale-while-revalidate=77"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_backend_refresh {

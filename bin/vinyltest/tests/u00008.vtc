@@ -1,19 +1,19 @@
-vtest    "trivial run of vinylstat in curses mode"
+vtest    "trivial run of varnishstat in curses mode"
 
 server s1 -repeat 4 {
 	rxreq
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	probe default {
 		.url = "/";
 	}
 } -start
 
-process p1 {vinylstat -n ${v1_name}} -start
-process p2 {vinylstat -n ${v1_name}} -start
-process p3 {vinylstat -n ${v1_name}} -start
+process p1 {varnishstat -n ${v1_name}} -start
+process p2 {varnishstat -n ${v1_name}} -start
+process p3 {varnishstat -n ${v1_name}} -start
 
 process p1 -expect-text 0 0 "VBE.vcl1.s1.happy"
 process p1 -screen_dump
@@ -39,7 +39,7 @@ process p1 -expect-text 0 0 "VBE.vcl1.s1.req"
 process p1 -expect-text 0 0 "DIAG"
 process p1 -screen_dump
 
-vinyl v1 -stop
+varnish v1 -stop
 process p1 -expect-text 2 1 "Uptime child:   Not Running"
 process p1 -screen_dump
 

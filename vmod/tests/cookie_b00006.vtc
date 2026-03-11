@@ -15,7 +15,7 @@ server s2 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import cookie;
 
 	sub vcl_recv {

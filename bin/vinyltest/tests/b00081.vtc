@@ -8,38 +8,34 @@ server s0 {
 # http1_iovs
 # Simple request/response
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-<<<<<<< HEAD
 varnish v1 -cliok "param.set http1_iovs 32"
-=======
-vinyl v1 -cliok "param.set http1_iovs 30"
->>>>>>> 04041adf7c (Rename the varnishd binary to vinyld.)
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -expect MAIN.http1_iovs_flush == 0
+varnish v1 -expect MAIN.http1_iovs_flush == 0
 
 # Decreasing http1_iovs causes premature flushes
-vinyl v1 -cliok "param.set http1_iovs 5"
+varnish v1 -cliok "param.set http1_iovs 5"
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -expect MAIN.http1_iovs_flush > 0
+varnish v1 -expect MAIN.http1_iovs_flush > 0
 
 ##################################################
 # Increase number of headers on fetch side
 
-vinyl v1 -cliok "param.set http1_iovs 30"
+varnish v1 -cliok "param.set http1_iovs 30"
 
-vinyl v1 -stop
-vinyl v1 -vcl+backend {
+varnish v1 -stop
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.hdr1 = "hdr";
 		set bereq.http.hdr2 = "hdr";
@@ -71,13 +67,13 @@ client c1 {
 } -run
 
 # http1_iovs parameter does not affect fetch
-vinyl v1 -expect MAIN.http1_iovs_flush == 0
+varnish v1 -expect MAIN.http1_iovs_flush == 0
 
 #####################################################
 # Increase number of headers on deliver side
 
-vinyl v1 -stop
-vinyl v1 -vcl+backend {
+varnish v1 -stop
+varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.hdr1 = "hdr";
 		set resp.http.hdr2 = "hdr";
@@ -102,7 +98,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set http1_iovs 30"
+varnish v1 -cliok "param.set http1_iovs 30"
 
 client c1 {
 	txreq
@@ -110,33 +106,28 @@ client c1 {
 } -run
 
 # http1_iovs parameter affects deliver
-vinyl v1 -expect MAIN.http1_iovs_flush > 0
+varnish v1 -expect MAIN.http1_iovs_flush > 0
 
 ##################################################
 # Compare with workspace_thread
 # 0.5k is enough for simplest request/response
 
-vinyl v1 -cliok "param.reset http1_iovs"
-vinyl v1 -stop
+varnish v1 -cliok "param.reset http1_iovs"
+varnish v1 -stop
 
-<<<<<<< HEAD
 varnish v1 -cliok "param.set workspace_thread 0.6k"
 varnish v1 -vcl+backend {} -start
-=======
-vinyl v1 -cliok "param.set workspace_thread 0.5k"
-vinyl v1 -vcl+backend {} -start
->>>>>>> 04041adf7c (Rename the varnishd binary to vinyld.)
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -expect MAIN.http1_iovs_flush == 0
+varnish v1 -expect MAIN.http1_iovs_flush == 0
 
 # Increase number of headers on fetch side
-vinyl v1 -stop
-vinyl v1 -vcl+backend {
+varnish v1 -stop
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.hdr1 = "hdr";
 		set bereq.http.hdr2 = "hdr";
@@ -167,11 +158,11 @@ client c1 {
 } -run
 
 # workspace_thread parameter affects fetch
-vinyl v1 -expect MAIN.http1_iovs_flush > 0
+varnish v1 -expect MAIN.http1_iovs_flush > 0
 
 # Increase number of headers on deliver side
-vinyl v1 -stop
-vinyl v1 -vcl+backend {
+varnish v1 -stop
+varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.hdr1 = "hdr";
 		set resp.http.hdr2 = "hdr";
@@ -202,4 +193,4 @@ client c1 {
 } -run
 
 # workspace_thread parameter affects deliver
-vinyl v1 -expect MAIN.http1_iovs_flush > 0
+varnish v1 -expect MAIN.http1_iovs_flush > 0

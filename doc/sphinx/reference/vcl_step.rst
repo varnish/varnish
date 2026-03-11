@@ -57,7 +57,7 @@ of the following keywords:
   |  The ``vcl(label)`` return is only valid while the ``req.restarts``
   |  count is zero and if used from the active vcl.
   |
-  |  See the :ref:`ref_cli_vcl_label` command in :ref:`vinyl-cli(7)`.
+  |  See the :ref:`ref_cli_vcl_label` command in :ref:`varnish-cli(7)`.
 
 .. _vcl_pipe:
 
@@ -318,7 +318,7 @@ backend request as follows:
   ``bereq.http.If-Modified-Since`` from its ``Last-Modified`` header
   and/or set ``bereq.http.If-None-Match`` from its ``Etag`` header
 
-* Set ``bereq.http.X-Vinyl`` to the current transaction id (`vxid`)
+* Set ``bereq.http.X-Varnish`` to the current transaction id (`vxid`)
 
 These changes can be undone or modified in `vcl_backend_fetch` before
 the backend request is issued.
@@ -344,8 +344,6 @@ the stale ones.
 
 The returned value only affects response headers, the body that is delivered
 is always the one from the stale object.
-
-See :ref:`vcl-built-in-refresh` for additional explanations.
 
   |
   | ``merge``

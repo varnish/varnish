@@ -2,7 +2,7 @@ vtest "Test std.getenv"
 
 setenv FOO "BAR BAZ"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 
 	backend dummy { .host = "${bad_backend}"; }

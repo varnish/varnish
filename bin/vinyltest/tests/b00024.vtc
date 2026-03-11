@@ -1,6 +1,6 @@
 vtest "Check that max_restarts from vcl_recv works and that we don't fall over"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend dummy { .host = "${bad_backend}"; }
 
 	sub vcl_recv {
@@ -23,7 +23,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -cliok "param.set max_restarts 2"
+varnish v1 -cliok "param.set max_restarts 2"
 
 client c1 {
 	txreq -url "/"
@@ -31,7 +31,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -cliok "param.set max_restarts 3"
+varnish v1 -cliok "param.set max_restarts 3"
 
 client c1 {
 	txreq -url "/"
@@ -39,7 +39,7 @@ client c1 {
 	expect resp.status == 501
 } -run
 
-vinyl v1 -cliok "param.set max_restarts 1"
+varnish v1 -cliok "param.set max_restarts 1"
 
 client c1 {
 	txreq -url "/"

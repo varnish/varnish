@@ -5,7 +5,7 @@ server s1 {
 	txresp -hdr "Foo: bar" -hdr "Bar: foo" -body "1111\n"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		if (beresp.http.foo ~ "b" + "ar") {

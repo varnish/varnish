@@ -5,7 +5,7 @@ server s0 {
 	expect_close
 } -dispatch
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 logexpect l1 -v v1 {
 	expect * 1001 FetchError "chunked tail no NL"
@@ -68,7 +68,7 @@ client c4 {
 
 logexpect l1 -wait
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

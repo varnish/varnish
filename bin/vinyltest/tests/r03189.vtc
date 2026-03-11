@@ -14,7 +14,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1				\
+varnish v1				\
 	-arg "-p idle_send_timeout=.1"	\
 	-arg "-p send_timeout=.8"	\
 	-vcl+backend { } -start

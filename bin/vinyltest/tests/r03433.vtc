@@ -10,7 +10,7 @@ server s2 -repeat 2 {
 	txresp -bodylen 1000
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 

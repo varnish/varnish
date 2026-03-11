@@ -1,9 +1,9 @@
-vtest "vinylstat curses field exclusion"
+vtest "varnishstat curses field exclusion"
 
 server s1 -start
 
-vinyl v1 -vcl+backend "" -start
+varnish v1 -vcl+backend "" -start
 
-process p1 -dump {vinylstat -n ${v1_name} -f '^VSB.*'} -start
+process p1 -dump {varnishstat -n ${v1_name} -f '^VSB.*'} -start
 process p1 -expect-text 0 0 "MAIN.pools"
 process p1 -screen_dump -write q -wait

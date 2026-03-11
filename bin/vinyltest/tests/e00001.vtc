@@ -13,7 +13,7 @@ server s1 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -37,5 +37,5 @@ client c1 {
 
 client c1 -run
 logexpect l1 -wait
-vinyl v1 -expect esi_errors == 2
-vinyl v1 -expect MAIN.s_resp_bodybytes == 40
+varnish v1 -expect esi_errors == 2
+varnish v1 -expect MAIN.s_resp_bodybytes == 40

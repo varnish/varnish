@@ -3,7 +3,7 @@ vtest "PROXY v2 TLV overflow"
 # this does not work with IPv6, the workspace overflow test is too brittle
 feature ipv4
 
-vinyl v1 -arg "-p pool_sess=0,0,0" -proto "PROXY" -vcl {
+varnish v1 -arg "-p pool_sess=0,0,0" -proto "PROXY" -vcl {
 	backend be none;
 } -start
 
@@ -36,7 +36,7 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -wait
 
@@ -70,7 +70,7 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -wait
 
@@ -103,7 +103,7 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -wait
 
@@ -136,7 +136,7 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -wait
 
@@ -152,13 +152,13 @@ logexpect l1 -wait
 #
 # 20210825: Minimum possible seems to be 364, but param.min is 384 now.
 
-vinyl v1 -cliok "param.set workspace_session 384"
+varnish v1 -cliok "param.set workspace_session 384"
 
 # get rid of the surplus session mpl & zero vsc
 
-vinyl v1 -stop
-vinyl v1 -cliok "param.set pool_sess 1,1,1"
-vinyl v1 -start
+varnish v1 -stop
+varnish v1 -cliok "param.set pool_sess 1,1,1"
+varnish v1 -start
 
 client c2 {
 	# PROXY2 with CRC32C TLV
@@ -184,13 +184,13 @@ client c2 {
 	expect_close
 } -run
 
-vinyl v1 -expect ws_session_overflow == 1
+varnish v1 -expect ws_session_overflow == 1
 
 # increased workspace is being reflected immediately
 
-vinyl v1 -cliok "param.set workspace_session 524"
+varnish v1 -cliok "param.set workspace_session 524"
 
-vinyl v1 -cliok "param.set debug +workspace"
+varnish v1 -cliok "param.set debug +workspace"
 
 client c1 {
 	# PROXY2 sp->ws overflow
@@ -217,4 +217,4 @@ client c1 {
 
 delay 1
 
-vinyl v1 -expect ws_session_overflow >= 2
+varnish v1 -expect ws_session_overflow >= 2

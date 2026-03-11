@@ -154,10 +154,10 @@ Resp_Setup_Deliver(struct req *req)
 	http_ForceField(h, HTTP_HDR_PROTO, "HTTP/1.1");
 
 	if (req->is_hit)
-		http_PrintfHeader(h, "X-Vinyl: %ju %ju", VXID(req->vsl->wid),
+		http_PrintfHeader(h, "X-Varnish: %ju %ju", VXID(req->vsl->wid),
 		    VXID(ObjGetXID(req->wrk, oc)));
 	else
-		http_PrintfHeader(h, "X-Vinyl: %ju", VXID(req->vsl->wid));
+		http_PrintfHeader(h, "X-Varnish: %ju", VXID(req->vsl->wid));
 
 	/*
 	 * We base Age calculation upon the last timestamp taken during client
@@ -194,7 +194,7 @@ Resp_Setup_Synth(struct req *req)
 
 	http_TimeHeader(h, "Date: ", W_TIM_real(req->wrk));
 	http_SetHeader(h, "Server: Varnish");
-	http_PrintfHeader(h, "X-Vinyl: %ju", VXID(req->vsl->wid));
+	http_PrintfHeader(h, "X-Varnish: %ju", VXID(req->vsl->wid));
 
 	/*
 	 * For late 100-continue, we suggest to VCL to close the connection to
@@ -807,7 +807,7 @@ cnt_pipe(struct worker *wrk, struct req *req)
 
 	HTTP_Setup(bo->bereq, req->ws, bo->vsl, SLT_BereqMethod);
 	http_FilterReq(bo->bereq, req->http, 0);	// XXX: 0 ?
-	http_PrintfHeader(bo->bereq, "X-Vinyl: %ju", VXID(req->vsl->wid));
+	http_PrintfHeader(bo->bereq, "X-Varnish: %ju", VXID(req->vsl->wid));
 	http_ForceHeader(bo->bereq, H_Connection, "close");
 
 	if (req->want100cont) {

@@ -5,7 +5,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-p feature=+http2" -vcl+backend {
+varnish v1 -arg "-p feature=+http2" -vcl+backend {
 } -start
 
 client c1 {
@@ -63,7 +63,7 @@ client c7 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 client c8 {
 	stream 1 {

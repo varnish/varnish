@@ -5,7 +5,7 @@ server s1 -repeat 3 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url == "/errorsynth") {
 			return (error(403));
@@ -75,4 +75,4 @@ client c1 {
 
 # Make sure we don't increment the failed fetch counter
 
-vinyl v1 -expect fetch_failed == 0
+varnish v1 -expect fetch_failed == 0

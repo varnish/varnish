@@ -4,6 +4,6 @@ server s1 {
 	rxreq
 } -start
 
-vinyl v1 -vcl+backend { }
+varnish v1 -vcl+backend { }
 
-vinyl v1 -cliok "param.show -l"
+varnish v1 -cliok "param.show -l"

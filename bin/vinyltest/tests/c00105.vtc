@@ -16,9 +16,9 @@ server s2 {
 	txresp -status 304 -nolen -hdr {Etag: "abc"} -hdr "Content-Length: 100"
 } -start
 
-vinyl v1 -cliok "param.set vsl_mask +ExpKill"
+varnish v1 -cliok "param.set vsl_mask +ExpKill"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {
@@ -49,7 +49,7 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 barrier b1 sync
 

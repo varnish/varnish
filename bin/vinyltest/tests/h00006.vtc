@@ -23,7 +23,7 @@ haproxy h1 -D -conf {
 	server v1 ${tmpdir}/v1.sock send-proxy-v2
 } -start
 
-vinyl v1 -arg "-a ${tmpdir}/v1.sock,PROXY" -vcl+backend {
+varnish v1 -arg "-a ${tmpdir}/v1.sock,PROXY" -vcl+backend {
 	import std;
 
 	acl localhost {

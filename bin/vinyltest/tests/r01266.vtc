@@ -11,17 +11,17 @@ server s1 {
 	txresp -hdr "x-foo: foo"
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-pban_lurker_sleep=0.01" \
 	-arg "-sper1=deprecated_persistent,${tmpdir}/_.per1,5m" \
 	-vcl+backend {
 	}
-vinyl v1 -start
+varnish v1 -start
 
 # Add a ban that will (with lurker help) become a truncated completed ban last
 # in the list
-vinyl v1 -cliok "ban obj.http.x-foo == bar"
+varnish v1 -cliok "ban obj.http.x-foo == bar"
 delay 1
 
 # Add an object that will point to our ban
@@ -32,8 +32,8 @@ client c1 {
 } -run
 
 # Force a reload
-vinyl v1 -stop
-vinyl v1 -start
+varnish v1 -stop
+varnish v1 -start
 
 # Check that our object is still there
 client c1 {

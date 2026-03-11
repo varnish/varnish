@@ -8,28 +8,28 @@
 CLI - bossing Varnish around
 ============================
 
-Once ``vinyld`` is started, you can control it using the ``vinyladm``
+Once ``varnishd`` is started, you can control it using the ``varnishadm``
 program and the command line interface::
 
-	vinyladm help
+	varnishadm help
 
-If you want to run ``vinyladm`` from a remote system, we recommend
-you use ``ssh`` into the system where ``vinyld`` runs. (But see also:
+If you want to run ``varnishadm`` from a remote system, we recommend
+you use ``ssh`` into the system where ``varnishd`` runs. (But see also:
 :ref:`Local and remote CLI connections <ref_remote_cli>`)
 
-You can SSH into the ``vinyld`` computer and run ``vinyladm``::
+You can SSH into the ``varnishd`` computer and run ``varnishadm``::
 
-	ssh $hostname vinyladm help
+	ssh $hostname varnishadm help
 
-If you give no command arguments, ``vinyladm`` runs in interactive mode
+If you give no command arguments, ``varnishadm`` runs in interactive mode
 with command-completion, command-history and other comforts:
 
 .. code-block:: text
 
-    critter phk> ./vinyladm
+    critter phk> ./varnishadm
     200
     -----------------------------
-    Vinyl Cache CLI 1.0
+    Varnish Cache CLI 1.0
     -----------------------------
     FreeBSD,13.0-CURRENT,amd64,-jnone,-sdefault,-sdefault,-hcritbit
     varnish-trunk revision 2bd5d2adfc407216ebaa653fae882d3c8d47f5e1
@@ -38,7 +38,7 @@ with command-completion, command-history and other comforts:
     Type 'quit' to close CLI session.
     Type 'start' to launch worker process.
 
-    vinyl>
+    varnish>
 
 The CLI always returns a three digit status code to tell how things went.
 
@@ -48,7 +48,7 @@ prevented the execution of the command.
 (If you get 201, it means that the output was truncated,
 See the :ref:`ref_param_cli_limit` parameter.)
 
-When commands are given as arguments to ``vinyladm``, a status
+When commands are given as arguments to ``varnishadm``, a status
 different than 200 or 201 will cause it to exit with status 1
 and print the status code on standard error.
 
@@ -75,7 +75,7 @@ all new requests start out.
 
 To load new VCL program::
 
-	vinyl> vcl.load some_name some_filename
+	varnish> vcl.load some_name some_filename
 
 Loading will read the VCL program from the file, and compile it. If
 the compilation fails, you will get an error messages:
@@ -93,12 +93,12 @@ the compilation fails, you will get an error messages:
 If compilation succeeds, the VCL program is loaded, and you can
 now make it the active VCL, whenever you feel like it::
 
-	vinyl> vcl.use some_name
+	varnish> vcl.use some_name
 
 If you find out that was a really bad idea, you can switch back
 to the previous VCL program again::
 
-	vinyl> vcl.use old_name
+	varnish> vcl.use old_name
 
 The switch is instantaneous, all new requests will start using the
 VCL you activated right away. The requests currently being processed complete
@@ -123,7 +123,7 @@ Varnish to stop serving the old logo out of the cache:
 
 .. code-block:: text
 
-	vinyl> ban req.url ~ "logo.*[.]png"
+	varnish> ban req.url ~ "logo.*[.]png"
 
 should do that, and yes, that is a regular expression.
 
@@ -134,7 +134,7 @@ cache is unaffected.
 Even when you want to throw out *all* the cached content, banning is
 both faster and less disruptive that a restart::
 
-	vinyl> ban obj.http.date ~ .*
+	varnish> ban obj.http.date ~ .*
 
 .. In addition to handling such special occasions, banning can be used
 .. in many creative ways to keep the cache up to date, more about
@@ -150,14 +150,14 @@ from the CLI:
 
 .. code-block:: text
 
-	vinyl> param.show prefer_ipv6
+	varnish> param.show prefer_ipv6
 	200
 	prefer_ipv6         off [bool]
                             Default is off
                             Prefer IPv6 address when connecting to backends
                             which have both IPv4 and IPv6 addresses.
 
-	vinyl> param.set prefer_ipv6 true
+	varnish> param.set prefer_ipv6 true
 	200
 
 In general it is not a good idea to modify parameters unless you
@@ -176,13 +176,13 @@ Starting and stopping the worker process
 In general you should just leave the worker process running, but
 if you need to stop and/or start it, the obvious commands work::
 
-	vinyl> stop
+	varnish> stop
 
 and::
 
-	vinyl> start
+	varnish> start
 
-If you start ``vinyld`` with the '-d' (debugging) argument, you will
+If you start ``varnishd`` with the '-d' (debugging) argument, you will
 always need to start the child process explicitly.
 
 Should the child process die, the master process will automatically

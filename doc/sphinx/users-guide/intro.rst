@@ -13,7 +13,7 @@ In this section we will cover answers to the questions:
 - what are all the different bits and pieces named?
 - Will you need a hex-wrench for assembly?
 
-The two main parts of Varnish are the two processes in the `vinyld`
+The two main parts of Varnish are the two processes in the `varnishd`
 program. The first process is called "the manager", and its job is to
 talk to you, the administrator, and make the things you ask for
 happen.
@@ -22,7 +22,7 @@ The second process is called "the worker" or just "the child" and
 this is the process which does all the actual work with your HTTP
 traffic.
 
-When you start `vinyld`, you start the manager process, and once it is
+When you start `varnishd`, you start the manager process, and once it is
 done handling all the command line flags, it will start the child
 process for you. Should the child process die, the manager will start
 it again for you, automatically and right away.
@@ -92,7 +92,7 @@ of cache hit-rate, resource usage and specific performance indicating
 metrics.
 
 Varnish comes with a number of tools which reports from shared
-memory, `vinyllog`, `vinylstats`, `vinylncsa` etc, and with an API
+memory, `varnishlog`, `varnishstats`, `varnishncsa` etc, and with an API
 library so you can write your own tools, should you need that.
 
 :ref:`users_report` explains how all that work.

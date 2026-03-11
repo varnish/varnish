@@ -17,13 +17,13 @@ server s0 {
 	chunkedlen 0
 } -dispatch
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set thread_pools 1"
-vinyl v1 -cliok "param.set timeout_idle 1"
-vinyl v1 -cliok "param.set idle_send_timeout .1"
-vinyl v1 -cliok "param.set send_timeout .1"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set thread_pools 1"
+varnish v1 -cliok "param.set timeout_idle 1"
+varnish v1 -cliok "param.set idle_send_timeout .1"
+varnish v1 -cliok "param.set send_timeout .1"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import debug;
 	sub vcl_recv {
@@ -67,7 +67,7 @@ client c1 -wait
 
 # case 2: send_timeout overridden in VCL
 
-vinyl v1 -cliok "param.reset send_timeout"
+varnish v1 -cliok "param.reset send_timeout"
 
 logexpect l2 -v v1 -g raw {
 	expect * 1004 Debug	"Hit total send timeout"
@@ -113,7 +113,7 @@ client c3 -wait
 
 # case 4: idle_send_timeout overridden in VCL
 
-vinyl v1 -cliok "param.reset idle_send_timeout"
+varnish v1 -cliok "param.reset idle_send_timeout"
 
 logexpect l4 -v v1 -g raw {
 	expect * 1010 Debug "Hit idle send timeout"

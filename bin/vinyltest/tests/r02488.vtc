@@ -1,6 +1,6 @@
 vtest "Test vmod_blob wb_create for empty workspace"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import blob;
 	import vtc;
 

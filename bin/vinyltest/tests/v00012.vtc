@@ -10,7 +10,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 
 	backend default {
 		.host = "${s1_addr}";
@@ -39,4 +39,4 @@ client c2 {
 barrier b2 sync
 client c1 -wait
 
-vinyl v1 -expect backend_busy == 1
+varnish v1 -expect backend_busy == 1

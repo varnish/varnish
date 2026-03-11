@@ -1,6 +1,6 @@
 vtest "Do not allow critical headers to be marked hop-by-hop"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default none;
 } -start
 

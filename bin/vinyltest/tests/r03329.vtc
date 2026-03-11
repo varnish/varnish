@@ -2,7 +2,7 @@ vtest "Lost reason from pipe to synth"
 
 server s1 {} -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.http.workspace) {

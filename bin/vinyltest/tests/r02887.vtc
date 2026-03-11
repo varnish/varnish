@@ -1,6 +1,6 @@
 vtest "Test that director with sick backends only is shown as sick"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 
 	import directors;
 
@@ -17,4 +17,4 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -cliexpect "foo.*sick" "backend.list"
+varnish v1 -cliexpect "foo.*sick" "backend.list"

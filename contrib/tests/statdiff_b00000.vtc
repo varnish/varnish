@@ -1,4 +1,4 @@
-vtest "vinylstatdiff coverage"
+vtest "varnishstatdiff coverage"
 
 feature cmd "command -v diff"
 
@@ -7,10 +7,10 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend "" -start
+varnish v1 -vcl+backend "" -start
 
 shell {
-	vinylstat -n ${v1_name} -1 \
+	varnishstat -n ${v1_name} -1 \
 		-I MAIN.n_object -I MAIN.cache_* -I MAIN.client_req |
 	tee stat1.txt
 }
@@ -20,21 +20,21 @@ client c1 {
 	rxresp
 } -start
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 shell {
-	vinylstat -n ${v1_name} -1 \
+	varnishstat -n ${v1_name} -1 \
 		-I MAIN.n_object -I MAIN.cache_* -I MAIN.esi_req |
 	tee stat2.txt
 }
 
-shell -expect Usage: {vinylstatdiff -h}
-shell -expect "Error: not enough arguments" -err {vinylstatdiff}
-shell -expect "Error: not enough arguments" -err {vinylstatdiff a}
-shell -expect "Error: too many arguments" -err {vinylstatdiff a b c}
+shell -expect Usage: {varnishstatdiff -h}
+shell -expect "Error: not enough arguments" -err {varnishstatdiff}
+shell -expect "Error: not enough arguments" -err {varnishstatdiff a}
+shell -expect "Error: too many arguments" -err {varnishstatdiff a b c}
 
 shell {
-	vinylstatdiff stat1.txt stat2.txt | tee diff.txt
+	varnishstatdiff stat1.txt stat2.txt | tee diff.txt
 }
 
 shell {

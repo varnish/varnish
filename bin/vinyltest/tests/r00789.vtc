@@ -8,7 +8,7 @@ server s1 {
 } -start
 
 
-vinyl v1 -vcl+backend { sub vcl_recv {return(pass);} } -start
+varnish v1 -vcl+backend { sub vcl_recv {return(pass);} } -start
 
 client c1 {
 	txreq -hdr "Range: bytes=1-1"

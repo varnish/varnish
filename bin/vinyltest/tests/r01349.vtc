@@ -1,4 +1,4 @@
-vtest "Exact matching for vinyladm backend.set_health"
+vtest "Exact matching for varnishadm backend.set_health"
 
 server s1 -repeat 2 {
 	rxreq
@@ -10,7 +10,7 @@ server s2 -repeat 2 {
        txresp -hdr "Backend: b"
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";
@@ -36,7 +36,7 @@ vinyl v1 -vcl {
 
 } -start
 
-vinyl v1 -cliok "backend.list b"
+varnish v1 -cliok "backend.list b"
 
 client c1 {
 	txreq -hdr "Backend: b1"
@@ -50,7 +50,7 @@ client c1 {
 	expect resp.http.backend == "b"
 } -run
 
-vinyl v1 -cliok "backend.set_health b sick"
+varnish v1 -cliok "backend.set_health b sick"
 
 client c1 {
 	txreq -hdr "Backend: b1"
@@ -63,4 +63,4 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-vinyl v1 -clierr 106 "backend.set_health b(1.2.3.4:) healthy"
+varnish v1 -clierr 106 "backend.set_health b(1.2.3.4:) healthy"

@@ -20,7 +20,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -40,11 +40,11 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "debug.srandom"
+varnish v1 -cliok "debug.srandom"
 
 delay 8
 
-vinyl v1 -cliok "backend.set_health s1 sick"
+varnish v1 -cliok "backend.set_health s1 sick"
 
 # s1 down, s2 and s3 both in rampup - s2 chosen
 client c1 {
@@ -56,7 +56,7 @@ client c1 {
 
 delay 8
 
-vinyl v1 -cliok "backend.set_health s1 healthy"
+varnish v1 -cliok "backend.set_health s1 healthy"
 
 # s1 just came up, s2 chosen for ramup
 client c1 {

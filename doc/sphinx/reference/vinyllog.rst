@@ -5,30 +5,30 @@
 
 .. role:: ref(emphasis)
 
-.. _vinyllog(1):
+.. _varnishlog(1):
 
-========
-vinyllog
-========
+==========
+varnishlog
+==========
 
-------------------------
-Display Vinyl Cache logs
-------------------------
+--------------------
+Display Varnish logs
+--------------------
 
 :Manual section: 1
 
 SYNOPSIS
 ========
 
-.. include:: ../include/vinyllog_synopsis.rst
-vinyllog |synopsis|
+.. include:: ../include/varnishlog_synopsis.rst
+varnishlog |synopsis|
 
 OPTIONS
 =======
 
 The following options are available:
 
-.. include:: ../include/vinyllog_options.rst
+.. include:: ../include/varnishlog_options.rst
 
 SIGNALS
 =======
@@ -44,27 +44,27 @@ SIGNALS
 
 SEE ALSO
 ========
-* :ref:`vinyld(1)`
-* :ref:`vinylhist(1)`
-* :ref:`vinylncsa(1)`
-* :ref:`vinylstat(1)`
-* :ref:`vinyltop(1)`
+* :ref:`varnishd(1)`
+* :ref:`varnishhist(1)`
+* :ref:`varnishncsa(1)`
+* :ref:`varnishstat(1)`
+* :ref:`varnishtop(1)`
 * :ref:`vsl(7)`
 * :ref:`vsl-query(7)`
 
 HISTORY
 =======
 
-The vinyllog utility was developed by Poul-Henning Kamp
+The varnishlog utility was developed by Poul-Henning Kamp
 <phk@phk.freebsd.dk> in cooperation with Verdens Gang AS and
-Redpill-Linpro. This manual page was initially written by Dag-Erling
+Varnish Software AS. This manual page was initially written by Dag-Erling
 Smørgrav, and later updated by Per Buer and Martin Blix Grydeland.
 
 
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Vinyl Cache
+This document is licensed under the same licence as Varnish
 itself. See LICENCE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

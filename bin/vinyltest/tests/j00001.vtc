@@ -12,7 +12,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-jail "-junix,user=varnish,ccgroup=varnish,workuser=vcache" \
 	-vcl+backend {
 } -start

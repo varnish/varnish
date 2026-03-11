@@ -5,8 +5,8 @@ vtest "VMOD blob workspace overflow conditions"
 # Since not all of them may be called by all VCLs we also need to ensure this
 # will not result in a compilation failure.
 
-vinyl v1 -cliok "param.set vcc_feature -err_unref"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set vcc_feature -err_unref"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 shell {
 	cat >vrt_blob.vcl <<-EOF
@@ -100,7 +100,7 @@ logexpect l4 -v v1 -i ReqURL,VCL_Error,VCL_Log,VCL_use -q "ReqURL ~ req.hash"
 
 # IDENTITY codec
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	include "${tmpdir}/vrt_blob.vcl";
 
 	sub vcl_recv {
@@ -155,7 +155,7 @@ logexpect l3 -wait
 
 # BASE64 codec
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	include "${tmpdir}/vrt_blob.vcl";
 
 	sub vcl_recv {
@@ -211,7 +211,7 @@ logexpect l3 -wait
 
 # URL codec
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	include "${tmpdir}/vrt_blob.vcl";
 
 	sub vcl_recv {
@@ -266,7 +266,7 @@ logexpect l3 -wait
 
 # HEX codec
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	include "${tmpdir}/vrt_blob.vcl";
 
 	sub vcl_recv {
@@ -322,7 +322,7 @@ logexpect l3 -wait
 
 # blob.sub() function
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	include "${tmpdir}/vrt_blob.vcl";
 
 	sub vcl_miss {

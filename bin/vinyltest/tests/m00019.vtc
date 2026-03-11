@@ -5,7 +5,7 @@ server s1 {
 	txresp -bodylen 6
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {
@@ -70,7 +70,7 @@ client c1 {
 
 delay .1
 
-vinyl v1 -errvcl {Argument 'one' already used} {
+varnish v1 -errvcl {Argument 'one' already used} {
 	import debug;
 	backend b1 {.host = "${localhost}";}
 	sub vcl_deliver {
@@ -78,7 +78,7 @@ vinyl v1 -errvcl {Argument 'one' already used} {
 	}
 }
 
-vinyl v1 -errvcl {Argument 'one' missing} {
+varnish v1 -errvcl {Argument 'one' missing} {
 	import debug;
 	backend b1 {.host = "${localhost}";}
 	sub vcl_deliver {
@@ -86,7 +86,7 @@ vinyl v1 -errvcl {Argument 'one' missing} {
 	}
 }
 
-vinyl v1 -errvcl {Unknown argument 'five'} {
+varnish v1 -errvcl {Unknown argument 'five'} {
 	import debug;
 	backend b1 {.host = "${localhost}";}
 	sub vcl_deliver {

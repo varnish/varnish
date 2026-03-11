@@ -1,11 +1,11 @@
-vtest "vinylncsa coverage"
+vtest "varnishncsa coverage"
 
 server s1 -repeat 2 {
 	rxreq
 	txresp -bodylen 100
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -25,11 +25,11 @@ vinyl v1 -vcl+backend {
 } -start
 
 shell {
-	vinylncsa -n ${v1_name} -D -P ${tmpdir}/ncsa.pid \
+	varnishncsa -n ${v1_name} -D -P ${tmpdir}/ncsa.pid \
 		-w ${tmpdir}/ncsa.log -R 100/s
 }
 
-process p1 -winsz 25 200 {vinylncsa -n ${v1_name}} -start
+process p1 -winsz 25 200 {varnishncsa -n ${v1_name}} -start
 
 delay 1
 
@@ -63,70 +63,70 @@ ${localhost} - - \[../.../20[1-9][0-9]:..:..:.. [+-]....\] (?#
 shell "grep -q /2 ${tmpdir}/ncsa.log"
 
 # command line
-shell -match "Usage: .*vinylncsa <options>" \
-	"vinylncsa -h"
+shell -match "Usage: .*varnishncsa <options>" \
+	"varnishncsa -h"
 shell -expect "Copyright (c) 2006 Verdens Gang AS" \
-	"vinylncsa -V"
+	"varnishncsa -V"
 shell -err -expect "Missing -w option" \
-	{vinylncsa -D}
+	{varnishncsa -D}
 shell -err -expect "Daemon cannot write to stdout" \
-	"vinyllog -D -w -"
+	"varnishlog -D -w -"
 shell -err -expect "Unknown format specifier at: %{foo}A" \
-	{vinylncsa -F "%{foo}A"}
+	{varnishncsa -F "%{foo}A"}
 shell -err -expect "Unknown format specifier at: %A" \
-	{vinylncsa -F "%A"}
+	{varnishncsa -F "%A"}
 shell -err -expect "Unmatched bracket at: %{foo" \
-	"vinylncsa -F %{foo"
+	"varnishncsa -F %{foo"
 shell -err -expect "Unknown formatting extension: foo" \
-	{vinylncsa -F "%{foo}x"}
+	{varnishncsa -F "%{foo}x"}
 shell -err -expect "Missing tag in VSL:" \
-	{vinylncsa -F "%{VSL:}x"}
+	{varnishncsa -F "%{VSL:}x"}
 shell -err -expect "Unknown log tag: nonexistent" \
-	{vinylncsa -F "%{VSL:nonexistent}x"}
+	{varnishncsa -F "%{VSL:nonexistent}x"}
 shell -err -expect "Tag not unique: Req" \
-	{vinylncsa -F "%{VSL:Req}x"}
+	{varnishncsa -F "%{VSL:Req}x"}
 shell -err -expect "Unknown log tag: Begin[" \
-	{vinylncsa -F "%{VSL:Begin[}x"}
+	{varnishncsa -F "%{VSL:Begin[}x"}
 shell -err -expect "Syntax error: VSL:Begin]" \
-	{vinylncsa -F "%{VSL:Begin]}x"}
+	{varnishncsa -F "%{VSL:Begin]}x"}
 shell -err -expect "Unknown log tag: Begin[a" \
-	{vinylncsa -F "%{VSL:Begin[a}x"}
+	{varnishncsa -F "%{VSL:Begin[a}x"}
 shell -err -expect "Syntax error: VSL:Begin[a]" \
-	{vinylncsa -F "%{VSL:Begin[a]}x"}
+	{varnishncsa -F "%{VSL:Begin[a]}x"}
 shell -err -match {Syntax error. (?#
 )Field specifier must be between 1 and 255: Begin\[0\]} \
-	{vinylncsa -F "%{VSL:Begin[0]}x"}
+	{varnishncsa -F "%{VSL:Begin[0]}x"}
 shell -err -match {Syntax error. (?#
 )Field specifier must be between 1 and 255: Begin\[999999999999\]} \
-	{vinylncsa -F "%{VSL:Begin[999999999999]}x"}
+	{varnishncsa -F "%{VSL:Begin[999999999999]}x"}
 shell -err -expect "Can't open format file (No such file or directory)" \
-	{vinylncsa -f /nonexistent/file}
+	{varnishncsa -f /nonexistent/file}
 shell -err -expect "Empty format file" \
-	{vinylncsa -f /dev/null}
+	{varnishncsa -f /dev/null}
 # In Linux and SunOS, getline(3) fails when the stream refers to a
 # directory but happily works in FreeBSD.
 #shell -err -expect "Can't read format from file (Is a directory)" \
-#	{vinylncsa -f ${tmpdir}}
+#	{varnishncsa -f ${tmpdir}}
 shell -err -expect "Invalid grouping mode: session" \
-	{vinylncsa -g session}
+	{varnishncsa -g session}
 shell -err -expect "Can't open output file (No such file or directory)" \
-	{vinylncsa -w /nonexistent/file}
-shell -err -match "Usage: .*vinylncsa <options>" \
-	{vinylncsa extra}
+	{varnishncsa -w /nonexistent/file}
+shell -err -match "Usage: .*varnishncsa <options>" \
+	{varnishncsa extra}
 
 # -b
 shell -match {^${localhost} 100
 ${localhost} 0$} \
-	{vinylncsa -n ${v1_name} -b -d -F "%{Host}i %b"}
+	{varnishncsa -n ${v1_name} -b -d -F "%{Host}i %b"}
 # -b with VINYL_DEFAULT_N
 shell -match {^${localhost} 100
 ${localhost} 0$} \
-	{VINYL_DEFAULT_N="${v1_name}" vinylncsa -b -d -F "%{Host}i %b"}
+	{VINYL_DEFAULT_N="${v1_name}" varnishncsa -b -d -F "%{Host}i %b"}
 # -c
 shell -match {^${localhost} 100
 ${localhost} \d+
 ${localhost} -$} \
-	{vinylncsa -n ${v1_name} -c -d -F "%{Host}i %b"}
+	{varnishncsa -n ${v1_name} -c -d -F "%{Host}i %b"}
 
 # -f and standard formatters
 shell {echo "%b %D %H %h %I %{baz}i %l %m %{Age}o %O %q %s %t %{%Y}t \
@@ -137,13 +137,13 @@ shell -match {^100 \d+ HTTP/1.1 (?:\d+.\d+.\d+.\d+|[a-f0-9:]+) \d+ - - GET 0 \d+
 )\?foo=bar 404 \[../.../(20[1-9][0-9]):..:..:.. [+-]....\] \1 \d+ /1 -
 - \d+ HTTP/1.1 (?:\d+.\d+.\d+.\d+|[a-f0-9:]+) \d+ - - GET - \d+ (?#
 ) - \[../.../(20[1-9][0-9]):..:..:.. [+-]....\] \1 \d+ /2 -$} \
-	{vinylncsa -n ${v1_name} -d -f ${tmpdir}/format}
+	{varnishncsa -n ${v1_name} -d -f ${tmpdir}/format}
 
 # extended variables
 shell -match {^\d+.\d{6} miss miss c 1001 quuz
 \d+.\d{6} miss synth c 1003\s
 \d+.\d{6} miss pipe c 1005\s$} \
-	{vinylncsa -n ${v1_name} -d -F "%{Vinyl:time_firstbyte}x \
+	{varnishncsa -n ${v1_name} -d -F "%{Vinyl:time_firstbyte}x \
 %{Vinyl:hitmiss}x %{Vinyl:handling}x %{Vinyl:side}x \
 %{Vinyl:vxid}x %{VCL_Log:quux}x"}
 
@@ -151,13 +151,13 @@ shell -match {^\d+.\d{6} miss miss c 1001 quuz
 shell -match {^req (\d+) rxreq \1 \d{10}\.\d{6} (\d+\.\d{6}) \d+\.\d{6} \2 - -
 req (\d+) rxreq \3 \d{10}\.\d{6} (\d+\.\d{6}) \d+\.\d{6} \4 - -
 req (\d+) rxreq \5 - - - -$} \
-	{vinylncsa -n ${v1_name} -d -F "%{VSL:Begin}x \
+	{varnishncsa -n ${v1_name} -d -F "%{VSL:Begin}x \
 %{VSL:Begin[2]}x %{VSL:Timestamp:Resp}x \
 %{VSL:Timestamp:Resp[2]}x %{VSL:Timestamp:foo}x %{VSL:ReqURL[2]}x"}
 
 # times
 shell -match {^\{\d{4}-\d{2}-\d{2}\}T\{\d{2}:\d{2}:\d{2}\} \{\{\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\}\} \d+ \d+ \d+ \d{10,} \d{13,} \d{16,} \d{3} \d{6} usecx msecy} \
-	{vinylncsa -n ${v1_name} -d -F "%{{%F}T{%T}}t %{{{%FT%T}}}t \
+	{varnishncsa -n ${v1_name} -d -F "%{{%F}T{%T}}t %{{{%FT%T}}}t \
 %{s}T %{ms}T %{us}T %{sec}t %{msec}t %{usec}t %{msec_frac}t %{usec_frac}t \
 %{usecx}t %{msecy}t"}
 
@@ -167,7 +167,7 @@ process p1 -expect-text 1 0 { - user [}
 process p1 -expect-text 2 0 {/1?foo=bar HTTP/1.1" 404 246 "-" "-"}
 process p1 -expect-text 3 0 {/2 HTTP/1.1" - - "-" "-"}
 
-process p2 {vinylncsa -t 5 -n nonexistent} -start
+process p2 {varnishncsa -t 5 -n nonexistent} -start
 delay 1
 process p2 -expect-exit 1 -kill INT -wait
 shell {grep -q "VSM: Attach interrupted" ${p2_err}}
@@ -180,18 +180,18 @@ client c3 {
 	expect resp.status == 400
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 shell -expect ${localhost} {
-	vinylncsa -n ${v1_name} -d -q 'RespStatus == 400'
+	varnishncsa -n ${v1_name} -d -q 'RespStatus == 400'
 }
 
 shell {
 	(
-		vinylncsa -n ${v1_name} -d -k 1
-		vinylncsa -n ${v1_name} -d -k 1 -F "%{User-Agent}i"
+		varnishncsa -n ${v1_name} -d -k 1
+		varnishncsa -n ${v1_name} -d -k 1 -F "%{User-Agent}i"
 	) >def_then_ua.txt
-	vinylncsa -n ${v1_name} -d -k 1 >def_with_ua.txt \
+	varnishncsa -n ${v1_name} -d -k 1 >def_with_ua.txt \
 		-F "%{Vinyl:default_format}x\n%{User-Agent}i"
 	diff -u def_then_ua.txt def_with_ua.txt
 }

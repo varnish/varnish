@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "foo"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_synth {
@@ -48,7 +48,7 @@ vinyl v1 -vcl+backend {
 client c1 {
 	txreq
 	rxresp
-	expect resp.http.X-Vinyl == "1001"
+	expect resp.http.X-Varnish == "1001"
 } -run
 
 logexpect l1 -v v1 -d 1 -g vxid {
@@ -69,7 +69,7 @@ logexpect l1 -v v1 -d 1 -g vxid {
 client c1 {
 	txreq -req "BAN"
 	rxresp
-	expect resp.http.X-Vinyl == "1004"
+	expect resp.http.X-Varnish == "1004"
 	expect resp.status == 209
 	expect resp.http.b1 == false
 	expect resp.http.b1e == {Null argument}
@@ -100,5 +100,5 @@ logexpect l1 -wait
 client c1 {
 	txreq
 	rxresp
-	expect resp.http.X-Vinyl == "1006"
+	expect resp.http.X-Varnish == "1006"
 } -run

@@ -1,6 +1,6 @@
 vtest "shard director error handling"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
     import directors;
     import blob;
 
@@ -39,7 +39,7 @@ client c1 {
 
 logexpect l2 -wait
 
-vinyl v1 -errvcl {shard .associate param invalid} {
+varnish v1 -errvcl {shard .associate param invalid} {
     import directors;
     import blob;
 
@@ -51,7 +51,7 @@ vinyl v1 -errvcl {shard .associate param invalid} {
     }
 }
 
-vinyl v1 -errvcl {missing key argument with by=KEY} {
+varnish v1 -errvcl {missing key argument with by=KEY} {
     import directors;
     import blob;
 
@@ -63,7 +63,7 @@ vinyl v1 -errvcl {missing key argument with by=KEY} {
     }
 }
 
-vinyl v1 -errvcl {invalid key argument -5 with by=KEY} {
+varnish v1 -errvcl {invalid key argument -5 with by=KEY} {
     import directors;
     import blob;
 
@@ -75,7 +75,7 @@ vinyl v1 -errvcl {invalid key argument -5 with by=KEY} {
     }
 }
 
-vinyl v1 -errvcl {missing key_blob argument with by=BLOB} {
+varnish v1 -errvcl {missing key_blob argument with by=BLOB} {
     import directors;
     import blob;
 
@@ -87,7 +87,7 @@ vinyl v1 -errvcl {missing key_blob argument with by=BLOB} {
     }
 }
 
-vinyl v1 -errvcl {key and key_blob arguments are invalid with by=URL} {
+varnish v1 -errvcl {key and key_blob arguments are invalid with by=URL} {
     import directors;
     import blob;
 
@@ -99,7 +99,7 @@ vinyl v1 -errvcl {key and key_blob arguments are invalid with by=URL} {
     }
 }
 
-vinyl v1 -errvcl {key and key_blob arguments are invalid with by=HASH} {
+varnish v1 -errvcl {key and key_blob arguments are invalid with by=HASH} {
     import directors;
     import blob;
 
@@ -111,7 +111,7 @@ vinyl v1 -errvcl {key and key_blob arguments are invalid with by=HASH} {
     }
 }
 
-vinyl v1 -errvcl {invalid alt argument -1} {
+varnish v1 -errvcl {invalid alt argument -1} {
     import directors;
     import blob;
 
@@ -123,7 +123,7 @@ vinyl v1 -errvcl {invalid alt argument -1} {
     }
 }
 
-vinyl v1 -errvcl {invalid warmup argument -0.5} {
+varnish v1 -errvcl {invalid warmup argument -0.5} {
     import directors;
     import blob;
 
@@ -135,7 +135,7 @@ vinyl v1 -errvcl {invalid warmup argument -0.5} {
     }
 }
 
-vinyl v1 -errvcl {invalid warmup argument 1.1} {
+varnish v1 -errvcl {invalid warmup argument 1.1} {
     import directors;
     import blob;
 
@@ -147,7 +147,7 @@ vinyl v1 -errvcl {invalid warmup argument 1.1} {
     }
 }
 
-vinyl v1 -errvcl {vmod_directors: shard shard: .backend(resolve=LAZY) with other parameters can only be used in backend/pipe context} {
+varnish v1 -errvcl {vmod_directors: shard shard: .backend(resolve=LAZY) with other parameters can only be used in backend/pipe context} {
     import directors;
     import blob;
 
@@ -160,7 +160,7 @@ vinyl v1 -errvcl {vmod_directors: shard shard: .backend(resolve=LAZY) with other
     }
 }
 
-vinyl v1 -errvcl {vmod_directors: shard shard: .backend(resolve=NOW) cannot be used in vcl_init{}/vcl_fini{}} {
+varnish v1 -errvcl {vmod_directors: shard shard: .backend(resolve=NOW) cannot be used in vcl_init{}/vcl_fini{}} {
     import directors;
     import blob;
 
@@ -173,7 +173,7 @@ vinyl v1 -errvcl {vmod_directors: shard shard: .backend(resolve=NOW) cannot be u
     }
 }
 
-vinyl v1 -errvcl {vmod_directors: shard shard: None backend cannot be added}{
+varnish v1 -errvcl {vmod_directors: shard shard: None backend cannot be added}{
     import directors;
 
     backend dummy None;
@@ -184,7 +184,7 @@ vinyl v1 -errvcl {vmod_directors: shard shard: None backend cannot be added}{
     }
 }
 
-vinyl v1 -errvcl {vmod_directors: shard shard: .remove_backend(): either backend or ident are required}{
+varnish v1 -errvcl {vmod_directors: shard shard: .remove_backend(): either backend or ident are required}{
     import directors;
 
     backend dummy None;
@@ -195,7 +195,7 @@ vinyl v1 -errvcl {vmod_directors: shard shard: .remove_backend(): either backend
     }
 }
 
-vinyl v1 -errvcl "Not available in subroutine 'vcl_recv'" {
+varnish v1 -errvcl "Not available in subroutine 'vcl_recv'" {
     import directors;
     import blob;
 

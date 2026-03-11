@@ -5,7 +5,7 @@ server s1 {
 	txresp  -bodylen 10
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		set req.url = req.http.foo;
 	}
@@ -18,7 +18,7 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.url = bereq.http.foo;
 	}

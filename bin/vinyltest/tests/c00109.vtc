@@ -1,18 +1,18 @@
 vtest "cc_command and cc_warnings"
 
-vinyl v1 -cliok {param.set debug +vcl_keep}
-vinyl v1 -cliok {param.set cc_warnings hello}
-vinyl v1 -cliok {param.set cc_command << EOF
+varnish v1 -cliok {param.set debug +vcl_keep}
+varnish v1 -cliok {param.set cc_warnings hello}
+varnish v1 -cliok {param.set cc_command << EOF
 printf 'd="%%s" D="%%s" w="%%s"' '%d' '%D' '%w' >world
 printf '%%s' '%n' >v1_name
 EOF}
 
-vinyl v1 -errvcl "VCL compilation failed" "backend be none;"
+varnish v1 -errvcl "VCL compilation failed" "backend be none;"
 
 shell -match {d=".+" D=".+hello.+" w="hello"} {
 	exec cat v1/vcl_*/world
 }
 
 shell -expect "Value is: hello" {
-	exec vinyladm -n "$(cat v1/vcl_*/v1_name)" param.show cc_warnings
+	exec varnishadm -n "$(cat v1/vcl_*/v1_name)" param.show cc_warnings
 }

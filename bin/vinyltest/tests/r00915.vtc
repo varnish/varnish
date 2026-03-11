@@ -9,7 +9,7 @@ server s1 {
 
 shell "rm -f ${tmpdir}/_.per"
 
-vinyl v1 \
+varnish v1 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
 	-vcl+backend {

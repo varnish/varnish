@@ -11,7 +11,7 @@ server s1 {
 	txresp -hdr "HFP: True" -bodylen 65550
 } -start
 
-vinyl v1 -arg "-s Transient=default" -vcl+backend {
+varnish v1 -arg "-s Transient=default" -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/hfm") {
 			set beresp.uncacheable = true;
@@ -39,5 +39,5 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect SM?.Transient.c_bytes > 131072
-vinyl v1 -expect SM?.Transient.g_bytes < 2000
+varnish v1 -expect SM?.Transient.c_bytes > 131072
+varnish v1 -expect SM?.Transient.g_bytes < 2000

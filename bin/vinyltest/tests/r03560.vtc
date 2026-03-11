@@ -10,7 +10,7 @@ server s1 {
 	# Early connection close error
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_deliver {

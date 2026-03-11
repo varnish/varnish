@@ -1,7 +1,7 @@
 vtest "Test priv_call discard"
 
-vinyl v1 -cliok "param.set thread_pools 1"
-vinyl v1 -vcl {
+varnish v1 -cliok "param.set thread_pools 1"
+varnish v1 -vcl {
 	import cookie;
 	backend be none;
 	sub vcl_recv { return (synth(200)); }
@@ -23,13 +23,13 @@ client c1 {
 } -run
 
 # load a new VCL to discard the first one
-vinyl v1 -vcl {backend be none;}
-vinyl v1 -cliok {vcl.discard vcl1}
+varnish v1 -vcl {backend be none;}
+varnish v1 -cliok {vcl.discard vcl1}
 
 # tickle the CLI to trigger the effective VCL discard
-vinyl v1 -cliok ping
-vinyl v1 -expect n_vcl_avail == 1
-vinyl v1 -expect n_vcl_discard == 0
+varnish v1 -cliok ping
+varnish v1 -expect n_vcl_avail == 1
+varnish v1 -expect n_vcl_discard == 0
 
 # tickle again, check we survived discard-time assertions
-vinyl v1 -cliok ping
+varnish v1 -cliok ping

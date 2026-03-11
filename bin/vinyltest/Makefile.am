@@ -14,13 +14,13 @@ AM_CPPFLAGS = \
 	-I$(srcdir)/vtest2/lib \
 	-I$(srcdir)/vtest2/src
 
-bin_PROGRAMS =	vinyltest
+bin_PROGRAMS =	varnishtest
 
 # for -i invocation / a00000.vtc
 all-local: vtest
 
-vtest: vinyltest
-	ln -f vinyltest vtest
+vtest: varnishtest
+	ln -f varnishtest vtest
 
 install-exec-hook:
 	ln -f $(DESTDIR)$(bindir)/vinyltest$(EXEEXT) \
@@ -29,7 +29,7 @@ install-exec-hook:
 uninstall-hook:
 	rm -f $(DESTDIR)$(bindir)/vtest$(EXEEXT)
 
-vinyltest_SOURCES = \
+varnishtest_SOURCES = \
 		vtest2/src/hpack.h \
 		vtest2/src/cmds.h \
 		vtest2/src/vtc.h \
@@ -71,18 +71,19 @@ vinyltest_SOURCES = \
 		vtest2/src/vtest_api.h \
 		vtest2/lib/vudp.h \
 		vtest2/lib/vudp.c \
-		vtc_vinyl.c
+		vtc_varnish.c
 
-vinyltest_LDADD = \
+varnishtest_LDADD = \
 		$(top_builddir)/lib/libvinylapi/libvinylapi.la \
 		$(top_builddir)/lib/libvinyl/libvinyl.la \
 		$(top_builddir)/lib/libvgz/libvgz.la \
 		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
 		${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
 
-vinyltest_CFLAGS = \
+varnishtest_CFLAGS = \
 		-DVTEST_WITH_VTC_LOGEXPECT \
 		-DVTEST_WITH_VTC_VINYL \
+		-DVTEST_WITH_VTC_VARNISH \
 		-DVTEST_WITH_VTC_VSM \
 		-DTOP_BUILDDIR='"${top_builddir}"' \
 		${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}

@@ -2,10 +2,10 @@ vtest "Count purges when there are many variants"
 
 server s1 -repeat 72 -keepalive {
 	rxreq
-	txresp -hdr "Vary: X-Vinyl"
+	txresp -hdr "Vary: X-Varnish"
 } -start
 
-vinyl v1 -arg "-p workspace_thread=512" -vcl+backend {
+varnish v1 -arg "-p workspace_thread=512" -vcl+backend {
 	sub vcl_recv {
 		if (req.method == "PURGE") {
 			return (purge);
@@ -29,7 +29,7 @@ client c2 {
 	rxresp
 } -run
 
-vinyl v1 -expect n_lru_nuked == 0
-vinyl v1 -expect cache_hit == 0
-vinyl v1 -expect n_purges == 1
-vinyl v1 -expect n_obj_purged == 72
+varnish v1 -expect n_lru_nuked == 0
+varnish v1 -expect cache_hit == 0
+varnish v1 -expect n_purges == 1
+varnish v1 -expect n_obj_purged == 72

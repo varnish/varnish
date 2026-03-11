@@ -17,7 +17,7 @@ server s2 {
 	txresp -status 404
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 
 	import directors;
 
@@ -38,8 +38,8 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -cliok "backend.set_health s2 sick"
-vinyl v1 -cliok "backend.list"
+varnish v1 -cliok "backend.set_health s2 sick"
+varnish v1 -cliok "backend.list"
 
 client c1 {
 	timeout 10

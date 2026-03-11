@@ -37,7 +37,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -proto "PROXY" -vcl+backend {
+varnish v1 -proto "PROXY" -vcl+backend {
 	import std;
 
 	acl fwd_client {

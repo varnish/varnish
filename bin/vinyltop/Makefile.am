@@ -5,12 +5,12 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/include \
 	@CURSES_CFLAGS@
 
-bin_PROGRAMS = vinyltop
+bin_PROGRAMS = varnishtop
 
-vinyltop_SOURCES = \
+varnishtop_SOURCES = \
 	vinyltop.c \
 	vinyltop_options.h
 
-vinyltop_LDADD = \
+varnishtop_LDADD = \
 	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
 	@CURSES_LIBS@ ${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}

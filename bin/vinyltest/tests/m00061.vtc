@@ -5,7 +5,7 @@ server s1 {
 	txresp -gziplen 13107
 } -start
 
-vinyl v1 \
+varnish v1 \
     -arg "-p fetch_chunksize=4k" \
     -vcl+backend {
 	import debug;
@@ -37,9 +37,9 @@ logexpect l1 -v v1 -g raw {
 	fail clear
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set debug +req_state"
-vinyl v1 -cliok "param.set debug +processors"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +req_state"
+varnish v1 -cliok "param.set debug +processors"
 
 client c0 -repeat 8 -keepalive {
 	txreq -hdr "Accept-Encoding: gzip"
