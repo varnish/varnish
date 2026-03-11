@@ -1,6 +1,6 @@
 vtest "VMOD h2 basics"
 
-vinyl v1 -arg "-p feature=+http2" -vcl {
+varnish v1 -arg "-p feature=+http2" -vcl {
 	import h2;
 
 	backend proforma none;
@@ -36,7 +36,7 @@ client c1 -wait
 client c2 -wait
 
 # coverage
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import h2;
 
 	backend proforma none;

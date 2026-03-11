@@ -5,7 +5,7 @@ server s1 {
 	txresp -hdr {ETag: "foo"} -body "11111\n"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = true;
 	}

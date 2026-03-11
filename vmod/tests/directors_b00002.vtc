@@ -7,7 +7,7 @@ server s1 {
 	txresp -body "bar1"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 	import std;
 
@@ -44,7 +44,7 @@ server s2 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {

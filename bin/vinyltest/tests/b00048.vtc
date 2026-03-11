@@ -10,7 +10,7 @@ server s0 {
 	expect_close
 } -dispatch
 
-vinyl v1 -arg "-Wpoll" -vcl+backend {
+varnish v1 -arg "-Wpoll" -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}

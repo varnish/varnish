@@ -19,7 +19,7 @@ server s1 {
 	barrier b2 sync
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/2") {
 			return (pass);
@@ -53,4 +53,4 @@ client c1 {
 # Delay to allow expiry thread to do it's job
 delay 1
 
-vinyl v1 -expect n_object == 0
+varnish v1 -expect n_object == 0

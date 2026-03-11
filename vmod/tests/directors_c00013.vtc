@@ -33,7 +33,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {

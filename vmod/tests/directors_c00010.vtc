@@ -11,7 +11,7 @@ server s3 {
 	txresp -body "xiuFi3Pe"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import directors;
 
@@ -285,4 +285,4 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -cliexpect {(?s)Ident.*s3 +1 +h.*s3 +2 +h.*s3 +4a +h.*s3 +5a +h.*s3 +6 +h.*s3 +7 +h} "backend.list -p"
+varnish v1 -cliexpect {(?s)Ident.*s3 +1 +h.*s3 +2 +h.*s3 +4a +h.*s3 +5a +h.*s3 +6 +h.*s3 +7 +h} "backend.list -p"

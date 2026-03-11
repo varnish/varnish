@@ -10,7 +10,7 @@ server s1 {
 	txresp -hdr "Accept-ranges: bytes" -bodylen 2000
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
@@ -18,7 +18,7 @@ vinyl v1 -vcl+backend {
 		unset resp.http.date;
 		unset resp.http.age;
 		unset resp.http.via;
-		unset resp.http.X-Vinyl;
+		unset resp.http.X-Varnish;
 	}
 } -start
 
@@ -112,7 +112,7 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect s_req_hdrbytes == 133
-vinyl v1 -expect s_req_bodybytes == 4
-vinyl v1 -expect s_resp_hdrbytes == 325
-vinyl v1 -expect s_resp_bodybytes == 5000
+varnish v1 -expect s_req_hdrbytes == 133
+varnish v1 -expect s_req_bodybytes == 4
+varnish v1 -expect s_resp_hdrbytes == 325
+varnish v1 -expect s_resp_bodybytes == 5000

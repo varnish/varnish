@@ -1,6 +1,6 @@
 vtest vmod_math
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import math;
 
 	backend proforma none;

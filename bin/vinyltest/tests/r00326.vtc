@@ -7,7 +7,7 @@ server s1 {
 	txresp -body "<pre>FOO</pre>\n"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

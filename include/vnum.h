@@ -30,7 +30,7 @@
  *
  */
 
-/* from libvinyl/vnum.c */
+/* from libvarnish/vnum.c */
 #define VNUM_EPSILON (1e-9)
 double VNUM(const char *p);
 vtim_dur VNUM_duration_unit(vtim_dur r, const char *b, const char *e);

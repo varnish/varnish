@@ -28,7 +28,7 @@ server s5 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 	sub vcl_init {
 		new rd = directors.random();
@@ -44,10 +44,10 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "backend.set_health s1 sick"
-vinyl v1 -cliok "backend.set_health s2 sick"
-vinyl v1 -cliok "backend.set_health s3 sick"
-vinyl v1 -cliok "backend.set_health s4 sick"
+varnish v1 -cliok "backend.set_health s1 sick"
+varnish v1 -cliok "backend.set_health s2 sick"
+varnish v1 -cliok "backend.set_health s3 sick"
+varnish v1 -cliok "backend.set_health s4 sick"
 
 client c1 {
 	txreq

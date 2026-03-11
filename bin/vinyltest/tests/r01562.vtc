@@ -12,7 +12,7 @@ server s2 {
 	txresp -status 200 -hdr "Foo: Foo" -body "56"
 } -start
 
-vinyl v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl+backend {
+varnish v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
@@ -28,7 +28,7 @@ vinyl v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -req "POST" -nolen -hdr "Content-Length: 10000" -bodylen 9999

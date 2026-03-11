@@ -21,7 +21,7 @@ server s1 {
 	txresp -bodylen 4074
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-pfetch_chunksize=4k" \
 	-arg "-pgzip_level=0" \
 	-arg "-pthread_pool_stack=131072" \

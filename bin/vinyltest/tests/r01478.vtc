@@ -29,7 +29,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		set req.hash_ignore_busy         = true;
 		return(hash);

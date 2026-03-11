@@ -13,9 +13,9 @@ server s1 {
 
 } -start
 
-vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
-vinyl v1 -cliok "param.set feature +esi_include_onerror"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set feature +esi_disable_xml_check"
+varnish v1 -cliok "param.set feature +esi_include_onerror"
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url == "/fail") {
 			return (error(604));
@@ -63,7 +63,7 @@ client c1 {
 	expect resp.body == "before "
 } -run
 
-vinyl v1 -cliok "param.set max_esi_depth 0"
+varnish v1 -cliok "param.set max_esi_depth 0"
 
 client c1 {
 	txreq -url "/abort"
@@ -76,9 +76,9 @@ client c1 {
 	expect resp.body == "before "
 } -run
 
-vinyl v1 -cliok "param.set max_esi_depth 1"
+varnish v1 -cliok "param.set max_esi_depth 1"
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 server s1 -wait
 
@@ -96,7 +96,7 @@ client c1 {
 	expect resp.body == "before  after"
 } -run
 
-vinyl v1 -cliok "param.set max_esi_depth 0"
+varnish v1 -cliok "param.set max_esi_depth 0"
 
 client c1 {
 	fatal

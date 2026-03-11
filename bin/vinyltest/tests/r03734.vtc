@@ -1,6 +1,6 @@
 vtest "Issue 3734 - Discard dependency check and labels"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default none;
 
 	sub vcl_recv {
@@ -8,7 +8,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default none;
 
 	sub vcl_recv {
@@ -16,9 +16,9 @@ vinyl v1 -vcl {
 	}
 }
 
-vinyl v1 -cliok { vcl.label lbl_vcl2 vcl2 }
+varnish v1 -cliok { vcl.label lbl_vcl2 vcl2 }
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default none;
 
 	sub vcl_recv {
@@ -41,4 +41,4 @@ client c1 {
 	expect resp.reason == vcl2
 } -run
 
-vinyl v1 -cliok { vcl.discard vcl1 }
+varnish v1 -cliok { vcl.discard vcl1 }

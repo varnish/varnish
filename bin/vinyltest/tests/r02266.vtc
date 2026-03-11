@@ -17,22 +17,22 @@ server s1 {
 } -start
 
 # -cli because accept_filter may not be supported
-vinyl v1 -cli "param.set accept_filter off"
+varnish v1 -cli "param.set accept_filter off"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -url "/foo" -hdr "client: c1"
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 12
-	expect resp.http.X-Vinyl == "1001"
+	expect resp.http.X-Varnish == "1001"
 } -start
 
 barrier b1 sync
@@ -44,10 +44,10 @@ client c2 {
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 12
-	expect resp.http.X-Vinyl == "1004 1002"
+	expect resp.http.X-Varnish == "1004 1002"
 } -run
 
 client c1 -wait
 
-vinyl v1 -expect busy_sleep >= 1
-vinyl v1 -expect busy_wakeup >= 1
+varnish v1 -expect busy_sleep >= 1
+varnish v1 -expect busy_wakeup >= 1

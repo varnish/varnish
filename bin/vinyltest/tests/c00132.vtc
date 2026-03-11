@@ -9,7 +9,7 @@ server s1 {
 	txresp -status 304 -hdr "etag: foo"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import purge;
 
 	sub vcl_hit {

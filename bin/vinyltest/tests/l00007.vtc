@@ -1,6 +1,6 @@
 vtest "Begin[4] and VSL_OPT_E"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import vtc;
 
 	backend be none;
@@ -24,7 +24,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -v v1 -d 1 {
 	expect 0 1003 Begin	"bereq 1002 fetch"

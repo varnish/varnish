@@ -10,13 +10,13 @@ server s1 {
 	txresp -hdr "Foo: foo"
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-pfeature=+wait_silo" \
 	-arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
 	-arg "-pban_lurker_sleep=0.01" \
 	-vcl+backend { } -start
 
-vinyl v1 -cliok ban.list
+varnish v1 -cliok ban.list
 
 client c1 {
 	txreq -url "/"
@@ -26,14 +26,14 @@ client c1 {
 } -run
 
 # Count of 1 here (magic ban only)
-vinyl v1 -expect bans == 1
-vinyl v1 -cliok "ban req.url == /"
-vinyl v1 -cliok ban.list
+varnish v1 -expect bans == 1
+varnish v1 -cliok "ban req.url == /"
+varnish v1 -cliok ban.list
 
 # Count of 2 here (our + magic ban)
-vinyl v1 -expect bans == 2
-vinyl v1 -expect bans_req == 1
-vinyl v1 -stop
+varnish v1 -expect bans == 2
+varnish v1 -expect bans_req == 1
+varnish v1 -stop
 server s1 -wait
 
 server s1 {
@@ -42,12 +42,12 @@ server s1 {
 	txresp -hdr "Foo: bar"
 } -start
 
-vinyl v1 -start
+varnish v1 -start
 
-vinyl v1 -cliok ban.list
+varnish v1 -cliok ban.list
 
 # Count of >2 here, ours plus magic bans from 2 startups
-vinyl v1 -expect bans >= 2
+varnish v1 -expect bans >= 2
 
 client c1 {
 	txreq -url "/"
@@ -56,9 +56,9 @@ client c1 {
 	expect resp.http.foo == "bar"
 } -run
 
-vinyl v1 -cliok ban.list
+varnish v1 -cliok ban.list
 # Count of 1 here
-vinyl v1 -expect bans == 1
-vinyl v1 -expect bans_req == 0
+varnish v1 -expect bans == 1
+varnish v1 -expect bans_req == 0
 
-vinyl v1 -stop
+varnish v1 -stop

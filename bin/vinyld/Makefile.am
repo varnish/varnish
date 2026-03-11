@@ -7,9 +7,9 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/include \
 	-I$(top_builddir)/lib/libvsc
 
-sbin_PROGRAMS = vinyld
+sbin_PROGRAMS = varnishd
 
-vinyld_SOURCES = \
+varnishd_SOURCES = \
 	acceptor/cache_acceptor.c \
 	acceptor/cache_acceptor_tcp.c \
 	acceptor/cache_acceptor_uds.c \
@@ -126,22 +126,22 @@ vinyld_SOURCES = \
 	waiter/mgt_waiter.c
 
 if ENABLE_WORKSPACE_EMULATOR
-vinyld_SOURCES += \
+varnishd_SOURCES += \
 	cache/cache_ws_emu.c
 else
-vinyld_SOURCES += \
+varnishd_SOURCES += \
 	cache/cache_ws.c
 endif
 
 if WITH_PERSISTENT_STORAGE
-vinyld_SOURCES += \
+varnishd_SOURCES += \
 	storage/mgt_storage_persistent.c \
 	storage/storage_persistent.c \
 	storage/storage_persistent_silo.c \
 	storage/storage_persistent_subr.c
 endif
 
-nodist_vinyld_SOURCES = \
+nodist_varnishd_SOURCES = \
 	builtin_vcl.c
 
 noinst_HEADERS = \
@@ -195,16 +195,16 @@ vcldir=$(datarootdir)/$(PACKAGE)/vcl
 
 AM_YFLAGS = -d
 
-vinyld_CFLAGS = \
+varnishd_CFLAGS = \
 	-DNOT_IN_A_VMOD \
 	-DVINYL_STATE_DIR='"${VARNISH_STATE_DIR}"' \
 	-DVINYL_VMOD_DIR='"${vmoddir}"' \
 	-DVINYL_VCL_DIR='"${pkgsysconfdir}:${vcldir}"' \
 	${OPENSSL_CFLAGS}
 
-vinyld_LDFLAGS = -export-dynamic
+varnishd_LDFLAGS = -export-dynamic
 
-vinyld_LDADD = \
+varnishd_LDADD = \
 	$(top_builddir)/lib/libvcc/libvcc.la \
 	$(top_builddir)/lib/libvinyl/libvinyl.la \
 	$(top_builddir)/lib/libvsc/libvsc.la \
@@ -214,8 +214,8 @@ vinyld_LDADD = \
 	${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
 
 if WITH_UNWIND
-vinyld_CFLAGS += -DUNW_LOCAL_ONLY ${LIBUNWIND_CFLAGS}
-vinyld_LDADD += ${LIBUNWIND_LIBS}
+varnishd_CFLAGS += -DUNW_LOCAL_ONLY ${LIBUNWIND_CFLAGS}
+varnishd_LDADD += ${LIBUNWIND_LIBS}
 endif
 
 noinst_PROGRAMS = vhp_gen_hufdec

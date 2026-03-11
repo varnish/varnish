@@ -19,10 +19,10 @@ server s1 {
 	# does not reach the backend
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -req POST -nolen -hdr "Transfer-encoding: chunked"
@@ -40,7 +40,7 @@ client c1 {
 
 delay .2
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {

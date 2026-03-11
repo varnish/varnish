@@ -43,7 +43,7 @@
 #include <stdlib.h>
 
 #include "common/common_vtls_types.h"
-#include "cache/cache_varnishd.h"
+#include "cache/cache_vinyld.h"
 #include "cache/cache_conn_oper.h"
 #include "cache/cache_pool.h"
 #include "vcli_serve.h"

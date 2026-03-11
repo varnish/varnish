@@ -7,10 +7,10 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set timeout_idle 1"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set timeout_idle 1"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_deliver {

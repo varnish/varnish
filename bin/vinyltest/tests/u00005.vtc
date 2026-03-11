@@ -1,4 +1,4 @@
-vtest "vinylstat coverage"
+vtest "varnishstat coverage"
 
 feature cmd "command -v cmp"
 
@@ -7,57 +7,57 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-# On fast systems the next vinylstat will return "inf" counters
-# if we don't give vinyld a chance to get going.
+# On fast systems the next varnishstat will return "inf" counters
+# if we don't give varnishd a chance to get going.
 
 delay 1
 
-process p1 {vinylstat -1 -n ${v1_name} -f ^LCK.vbe.destroy \
+process p1 {varnishstat -1 -n ${v1_name} -f ^LCK.vbe.destroy \
 	-f LCK.vbe.* -f LCK.mempool.creat | tr '[1-9]' '0'} -run
 
 shell "grep -q vbe ${p1_out}"
 shell "grep -q LCK.mempool.creat ${p1_out}"
 shell -err "grep -q LCK.vbe.destroy ${p1_out}"
 
-process p2 {vinylstat -1 -n ${v1_name} -f ^*vbe.destroy -f *vbe* \
+process p2 {varnishstat -1 -n ${v1_name} -f ^*vbe.destroy -f *vbe* \
 	-f LCK.mempool.c* | tr '[1-9]' '0'} -run
 
-process p3 {vinylstat -1 -n ${v1_name} -X *vbe.destroy -I *vbe* \
+process p3 {varnishstat -1 -n ${v1_name} -X *vbe.destroy -I *vbe* \
 	-f LCK.mempool.c* | tr '[1-9]' '0'} -run
 
 shell "cmp -s ${p1_out} ${p2_out}"
 shell "cmp -s ${p1_out} ${p3_out}"
 
 shell -expect "MGT.uptime" \
-	"vinylstat -1 -n ${v1_name} -f ^MAIN*"
+	"varnishstat -1 -n ${v1_name} -f ^MAIN*"
 shell -match "^MGT" \
-	"vinylstat -1 -n ${v1_name} -f ^foo"
+	"varnishstat -1 -n ${v1_name} -f ^foo"
 
-shell -match "Usage: .*vinylstat <options>" \
-	"vinylstat -h"
+shell -match "Usage: .*varnishstat <options>" \
+	"varnishstat -h"
 shell -expect "Vinylstat -f option fields:" \
-	"vinylstat -n ${v1_name} -l"
+	"varnishstat -n ${v1_name} -l"
 shell -expect "Copyright (c) 2006 Verdens Gang AS" \
-	"vinylstat -V"
-shell -err -match "Usage: .*vinylstat <options>" \
-	"vinylstat extra"
+	"varnishstat -V"
+shell -err -match "Usage: .*varnishstat <options>" \
+	"varnishstat extra"
 shell -err -expect "-t: Invalid argument: -1" \
-	"vinylstat -t -1"
+	"varnishstat -t -1"
 shell -err -expect "-t: Invalid argument: Nan" \
-	"vinylstat -t Nan"
+	"varnishstat -t Nan"
 shell -err -expect "-t: Invalid argument: foo" \
-	"vinylstat -t foo"
-shell -err -expect "Could not get hold of vinyld" \
-	"vinylstat -n /nonexistent -t 1"
-shell -err -expect "Could not get hold of vinyld" \
-	{VINYL_DEFAULT_N="/nonexistent" vinylstat -t 1}
+	"varnishstat -t foo"
+shell -err -expect "Could not get hold of varnishd" \
+	"varnishstat -n /nonexistent -t 1"
+shell -err -expect "Could not get hold of varnishd" \
+	{VINYL_DEFAULT_N="/nonexistent" varnishstat -t 1}
 shell -expect "MAIN.uptime" \
-	"vinylstat -n ${v1_name} -1"
+	"varnishstat -n ${v1_name} -1"
 shell -expect "MAIN.uptime" \
-	{VINYL_DEFAULT_N="${v1_name}" vinylstat -1}
+	{VINYL_DEFAULT_N="${v1_name}" varnishstat -1}
 shell -expect "<name>MAIN.uptime</name>" \
-	"vinylstat -n ${v1_name} -x"
+	"varnishstat -n ${v1_name} -x"
 shell -match {"MAIN.uptime":} \
-	"vinylstat -n ${v1_name} -j"
+	"varnishstat -n ${v1_name} -j"

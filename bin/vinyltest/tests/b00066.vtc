@@ -29,7 +29,7 @@ server s1 {
 		-hdr "Cache-Control: s-maxage=3"
 } -start
 
-vinyl v1 -arg "-pdefault_ttl=0" -vcl+backend {
+varnish v1 -arg "-pdefault_ttl=0" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.ttl = beresp.ttl;
 		set beresp.uncacheable = true;
@@ -99,6 +99,6 @@ client c1 {
 } -run
 
 
-vinyl v1 -expect *.s1.req == 12
-vinyl v1 -expect beresp_uncacheable == 12
-vinyl v1 -expect beresp_shortlived == 0
+varnish v1 -expect *.s1.req == 12
+varnish v1 -expect beresp_uncacheable == 12
+varnish v1 -expect beresp_shortlived == 0

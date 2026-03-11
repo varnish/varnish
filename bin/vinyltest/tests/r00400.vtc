@@ -8,7 +8,7 @@ server s1 {
 	send "12345\r\n"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 } -start
 
 client c1 {

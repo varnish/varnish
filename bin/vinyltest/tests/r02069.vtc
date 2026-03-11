@@ -5,7 +5,7 @@ server s1 -repeat 20 {
 	send "HTTP/1.1 200\r\n\r\n"
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 
 	backend s1 {

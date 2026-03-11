@@ -40,7 +40,7 @@ server s1 {
 	    -bodylen 8
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	sub vcl_miss {
 		set req.http.X-Cache = "MISS";
@@ -110,7 +110,7 @@ client c1 {
 	expect resp.http.X-Cache == "MISS"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 # The next two tests are adapted from the former r01206.vtc, reflecting
 # changes for the recv->pass and beresp.uncacheable (hit-for-miss) cases
@@ -145,7 +145,7 @@ server s1 {
 	    -bodylen 8
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return(pass);
 	}
@@ -224,7 +224,7 @@ server s1 {
 	    -bodylen 8
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_miss {
 		set req.http.X-Cache = "MISS";
 	}

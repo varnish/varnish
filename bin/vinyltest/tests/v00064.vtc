@@ -15,7 +15,7 @@ server s1 {
     txresp -noserver -status 304
 } -start
 
-vinyl v1 \
+varnish v1 \
  -arg "-s Transient=default,1m" \
  -arg "-s malloc,1m" \
  -arg "-p nuke_limit=0" \
@@ -30,7 +30,7 @@ vinyl v1 \
     }
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 delay .1
 
@@ -43,8 +43,8 @@ client c1 {
 
 delay .1
 
-vinyl v1 -expect SM?.Transient.g_bytes > 1048000
-vinyl v1 -expect SM?.Transient.g_space < 50
+varnish v1 -expect SM?.Transient.g_bytes > 1048000
+varnish v1 -expect SM?.Transient.g_space < 50
 
 client c1 {
     # Fill malloc
@@ -55,8 +55,8 @@ client c1 {
     delay 3
 } -run
 
-vinyl v1 -expect SM?.s0.g_bytes > 1048000
-vinyl v1 -expect SM?.s0.g_space < 50
+varnish v1 -expect SM?.s0.g_bytes > 1048000
+varnish v1 -expect SM?.s0.g_space < 50
 
 client c1 {
     # Check that Varnish is still alive

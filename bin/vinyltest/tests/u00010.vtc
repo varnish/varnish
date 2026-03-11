@@ -1,15 +1,15 @@
-vtest	"trivial run of vinyltop in curses mode"
+vtest	"trivial run of varnishtop in curses mode"
 
 server s1 {
 	rxreq
 	txresp -hdr "Connection: close"
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-process p1 -dump {vinyltop -n ${v1_name}} -start
-process p2 -dump {vinyltop -n ${v1_name}} -start
-process p3 -dump {vinyltop -n ${v1_name}} -start
+process p1 -dump {varnishtop -n ${v1_name}} -start
+process p2 -dump {varnishtop -n ${v1_name}} -start
+process p3 -dump {varnishtop -n ${v1_name}} -start
 
 process p1 -expect-text 1 1 {list length}
 
@@ -20,7 +20,7 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 process p1 -expect-text 1 1 {list length 7}
 

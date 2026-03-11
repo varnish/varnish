@@ -6,8 +6,8 @@
 
 .. _glossary:
 
-Vinyl Cache Glossary
-====================
+Varnish Glossary
+================
 
 .. glossary::
    :sorted:
@@ -17,15 +17,15 @@ Vinyl Cache Glossary
 	so we keep the source in subject order to make sure we
 	cover all bases.
 
-   .. comment: "components of Vinyl Cache --------------------------------"
+   .. comment: "components of varnish --------------------------------"
 
-   vinyld (NB: with 'd')
-	This is the main Vinyl Cache program.  There is only
+   varnishd (NB: with 'd')
+	This is the actual Varnish cache program.  There is only
 	one program, but when you run it, you will get *two*
 	processes:  The "master" and the "worker" (or "child").
 
    master (process)
-	One of the two processes in the vinyld program.
+	One of the two processes in the varnishd program.
 	The master process is a manager/nanny process which handles
 	configuration, parameters, compilation of :term:VCL etc.
 	but it does never get near the actual HTTP traffic.
@@ -33,38 +33,38 @@ Vinyl Cache Glossary
    worker (process)
 	The worker process is started and configured by the master
 	process.  This is the process that does all the work you actually
-	want vinyld to do.  If the worker dies, the master will try start
+	want varnish to do.  If the worker dies, the master will try start
 	it again, to keep your website alive.
 
    backend
-	The HTTP server vinyld is caching for.  This can be
+	The HTTP server varnishd is caching for.  This can be
 	any sort of device that handles HTTP requests, including, but
 	not limited to: a webserver, a CMS, a load-balancer
-	another vinyld, etc.
+	another varnishd, etc.
 
    client
-	The program which sends vinyld an HTTP request, typically
+	The program which sends varnishd an HTTP request, typically
 	a browser, but do not forget to think about spiders, robots
 	script-kiddies and criminals.
 
-   vinylstat
-	Program which presents Vinyl Cache statistics counters.
+   varnishstat
+	Program which presents varnish statistics counters.
 
-   vinyllog
-	Program which presents Vinyl Cache transaction log in native format.
+   varnishlog
+	Program which presents varnish transaction log in native format.
 
-   vinyltop
+   varnishtop
 	Program which gives real-time "top-X" list view of transaction log.
 
-   vinylncsa
-	Program which presents Vinyl Cache transaction log in "NCSA" format.
+   varnishncsa
+	Program which presents varnish transaction log in "NCSA" format.
 
-   vinylhist
+   varnishhist
 	Eye-candy program showing response time histogram in 1980s
 	ASCII-art style.
 
-   vinyltest
-	Program to test vinyld's behaviour with, simulates backend
+   varnishtest
+	Program to test varnishd's behaviour with, simulates backend
 	and client according to test-scripts.
 
    .. comment: "components of traffic ---------------------------------"
@@ -73,51 +73,51 @@ Vinyl Cache Glossary
 	An HTTP protocol header, like "Accept-Encoding:".
 
    request
-	What the client sends to vinyld and vinyld sends to the backend.
+	What the client sends to varnishd and varnishd sends to the backend.
 
    response
-	What the backend returns to vinyld and vinyld returns to
-	the client.  When the response is stored in vinyld's cache,
+	What the backend returns to varnishd and varnishd returns to
+	the client.  When the response is stored in varnishd's cache,
 	we call it an object.
 
    backend response
         The response specifically served from a backend to
-        vinyld. The backend response may be manipulated in
+        varnishd. The backend response may be manipulated in
         vcl_backend_response.
 
    body
-	The bytes that make up the contents of the object, vinyld
+	The bytes that make up the contents of the object, varnishd
 	does not care if they are in HTML, XML, JPEG or even EBCDIC,
-	to vinyld they are just bytes.
+	to varnishd they are just bytes.
 
    object
-	The (possibly) cached version of a backend response. vinyld
+	The (possibly) cached version of a backend response. varnishd
 	receives a response from the backend and creates an object,
 	from which it may deliver cached responses to clients. If the
 	object is created as a result of a request which is passed, it
 	will not be stored for caching.
 
-   .. comment: "configuration of vinyld -----------------------------"
+   .. comment: "configuration of varnishd -----------------------------"
 
    VCL
-	Vinyl Configuration Language, a small specialized language
-	for instructing vinyld how to behave.
+	Varnish Configuration Language, a small specialized language
+	for instructing Varnish how to behave.
 
    .. comment: "actions in VCL ----------------------------------------"
 
    hit
-	An object vinyld delivers from cache.
+	An object Varnish delivers from cache.
 
    miss
-	An object vinyld fetches from the backend before it is served
+	An object Varnish fetches from the backend before it is served
 	to the client.  The object may or may not be put in the cache,
 	that depends.
 
    pass
-	An object vinyld does not try to cache, but simply fetches
+	An object Varnish does not try to cache, but simply fetches
 	from the backend and hands to the client.
 
    pipe
-	vinyld just moves the bytes between client and backend, it
+	Varnish just moves the bytes between client and backend, it
 	does not try to understand what they mean.
 

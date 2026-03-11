@@ -59,7 +59,7 @@ server s1 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -98,9 +98,9 @@ logexpect l3 -v v1 -g vxid {
 	expect 0 = BackendClose
 } -start
 
-vinyl v1 -cliok "param.set debug +esi_chop"
+varnish v1 -cliok "param.set debug +esi_chop"
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq
@@ -113,5 +113,5 @@ client c1 -run
 logexpect l1 -wait
 logexpect l2 -wait
 logexpect l3 -wait
-vinyl v1 -expect esi_errors == 18
-vinyl v1 -expect MAIN.s_resp_bodybytes == 472
+varnish v1 -expect esi_errors == 18
+varnish v1 -expect MAIN.s_resp_bodybytes == 472

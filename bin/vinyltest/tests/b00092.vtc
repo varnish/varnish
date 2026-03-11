@@ -15,7 +15,7 @@ server s0 {
 # copy anyway to (re)generate the header name (we could avoid that by special
 # casing copies from workspaces and objects)
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_recv {

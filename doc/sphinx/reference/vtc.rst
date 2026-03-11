@@ -11,18 +11,18 @@
 VTC
 ===
 
-----------------------------
-Vinyl Cache Test Case Syntax
-----------------------------
+------------------------
+Varnish Test Case Syntax
+------------------------
 
 :Manual section: 7
 
 OVERVIEW
 ========
 
-This document describes the syntax used by Vinyl Cache Test Cases files (.vtc).
+This document describes the syntax used by Varnish Test Cases files (.vtc).
 A vtc file describe a scenario with different scripted HTTP-talking entities,
-and generally one or more Vinyl Cache instances to test.
+and generally one or more Varnish instances to test.
 
 PARSING
 =======
@@ -95,7 +95,7 @@ Built-in macros
 	The first IP address that resolves to "localhost".
 
 ``${pwd}``
-	The working directory from which ``vinyltest`` was executed.
+	The working directory from which ``varnishtest`` was executed.
 
 ``${string,<action>[,<args>...]}``
 	The ``string`` macro is the entry point for text generation, it takes
@@ -114,7 +114,7 @@ Built-in macros
 	absolute path to the working directory is needed.
 
 ``${topbuild}``
-	Only present when the ``-i`` option is used, to work on Vinyl Cache itself
+	Only present when the ``-i`` option is used, to work on Varnish itself
 	instead of a regular installation.
 
 SYNTAX
@@ -130,13 +130,13 @@ This document has been written by Guillaume Quintard.
 SEE ALSO
 ========
 
-* :ref:`vinyltest(1)`
+* :ref:`varnishtest(1)`
 * :ref:`vmod_vtc(3)`
 
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Vinyl Cache
+This document is licensed under the same licence as Varnish
 itself. See LICENCE for details.
 
 * Copyright (c) 2006-2016 Varnish Software AS

@@ -89,18 +89,18 @@ dist-hook:
 distclean-local:
 	rm -rf $(BUILDDIR)
 
-include/cli.rst: $(top_builddir)/bin/vinyld/vinyld
-	$(top_builddir)/bin/vinyld/vinyld -x cli > ${@}_
+include/cli.rst: $(top_builddir)/bin/vinyld/varnishd
+	$(top_builddir)/bin/vinyld/varnishd -x cli > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES = include/cli.rst
 
-include/params.rst: $(top_builddir)/bin/vinyld/vinyld
-	$(top_builddir)/bin/vinyld/vinyld -x parameter > ${@}_
+include/params.rst: $(top_builddir)/bin/vinyld/varnishd
+	$(top_builddir)/bin/vinyld/varnishd -x parameter > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES += include/params.rst
 
-include/options.rst: $(top_builddir)/bin/vinyld/vinyld
-	$(top_builddir)/bin/vinyld/vinyld -x options > ${@}_
+include/options.rst: $(top_builddir)/bin/vinyld/varnishd
+	$(top_builddir)/bin/vinyld/varnishd -x options > ${@}_
 	mv -f ${@}_ ${@}
 BUILT_SOURCES += include/options.rst
 
@@ -108,23 +108,23 @@ include/counters.rst:
 	ln -s $(abs_top_builddir)/lib/libvsc/counters.rst $@
 BUILT_SOURCES += include/counters.rst
 
-include/vinylncsa_options.rst: $(top_builddir)/bin/vinylncsa/vinylncsa
-	$(top_builddir)/bin/vinylncsa/vinylncsa --options > ${@}_
+include/varnishncsa_options.rst: $(top_builddir)/bin/vinylncsa/varnishncsa
+	$(top_builddir)/bin/vinylncsa/varnishncsa --options > ${@}_
 	mv -f ${@}_ ${@}
-include/vinylncsa_synopsis.rst: $(top_builddir)/bin/vinylncsa/vinylncsa
-	$(top_builddir)/bin/vinylncsa/vinylncsa --synopsis > ${@}_
+include/varnishncsa_synopsis.rst: $(top_builddir)/bin/vinylncsa/varnishncsa
+	$(top_builddir)/bin/vinylncsa/varnishncsa --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/vinylncsa_options.rst \
-	include/vinylncsa_synopsis.rst
+BUILT_SOURCES += include/varnishncsa_options.rst \
+	include/varnishncsa_synopsis.rst
 
-include/vinyllog_options.rst: $(top_builddir)/bin/vinyllog/vinyllog
-	$(top_builddir)/bin/vinyllog/vinyllog --options > ${@}_
+include/varnishlog_options.rst: $(top_builddir)/bin/vinyllog/varnishlog
+	$(top_builddir)/bin/vinyllog/varnishlog --options > ${@}_
 	mv -f ${@}_ ${@}
-include/vinyllog_synopsis.rst: $(top_builddir)/bin/vinyllog/vinyllog
-	$(top_builddir)/bin/vinyllog/vinyllog --synopsis > ${@}_
+include/varnishlog_synopsis.rst: $(top_builddir)/bin/vinyllog/varnishlog
+	$(top_builddir)/bin/vinyllog/varnishlog --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/vinyllog_options.rst \
-	include/vinyllog_synopsis.rst
+BUILT_SOURCES += include/varnishlog_options.rst \
+	include/varnishlog_synopsis.rst
 
 
 include/varnishlog-json_options.rst: $(top_builddir)/bin/varnishlog-json/varnishlog-json
@@ -136,36 +136,36 @@ include/varnishlog-json_synopsis.rst: $(top_builddir)/bin/varnishlog-json/varnis
 BUILT_SOURCES += include/varnishlog-json_options.rst \
 	include/varnishlog-json_synopsis.rst
 
-include/vinyltop_options.rst: $(top_builddir)/bin/vinyltop/vinyltop
-	$(top_builddir)/bin/vinyltop/vinyltop --options > ${@}_
+include/varnishtop_options.rst: $(top_builddir)/bin/vinyltop/varnishtop
+	$(top_builddir)/bin/vinyltop/varnishtop --options > ${@}_
 	mv -f ${@}_ ${@}
-include/vinyltop_synopsis.rst: $(top_builddir)/bin/vinyltop/vinyltop
-	$(top_builddir)/bin/vinyltop/vinyltop --synopsis > ${@}_
+include/varnishtop_synopsis.rst: $(top_builddir)/bin/vinyltop/varnishtop
+	$(top_builddir)/bin/vinyltop/varnishtop --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/vinyltop_options.rst \
-	 include/vinyltop_synopsis.rst
+BUILT_SOURCES += include/varnishtop_options.rst \
+	 include/varnishtop_synopsis.rst
 
-include/vinylhist_options.rst: $(top_builddir)/bin/vinylhist/vinylhist
-	$(top_builddir)/bin/vinylhist/vinylhist --options > ${@}_
+include/varnishhist_options.rst: $(top_builddir)/bin/vinylhist/varnishhist
+	$(top_builddir)/bin/vinylhist/varnishhist --options > ${@}_
 	mv -f ${@}_ ${@}
-include/vinylhist_synopsis.rst: $(top_builddir)/bin/vinylhist/vinylhist
-	$(top_builddir)/bin/vinylhist/vinylhist --synopsis > ${@}_
+include/varnishhist_synopsis.rst: $(top_builddir)/bin/vinylhist/varnishhist
+	$(top_builddir)/bin/vinylhist/varnishhist --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/vinylhist_options.rst \
-	 include/vinylhist_synopsis.rst
+BUILT_SOURCES += include/varnishhist_options.rst \
+	 include/varnishhist_synopsis.rst
 
-include/vinylstat_options.rst: $(top_builddir)/bin/vinylstat/vinylstat
-	$(top_builddir)/bin/vinylstat/vinylstat --options > ${@}_
+include/varnishstat_options.rst: $(top_builddir)/bin/vinylstat/varnishstat
+	$(top_builddir)/bin/vinylstat/varnishstat --options > ${@}_
 	mv -f ${@}_ ${@}
-include/vinylstat_synopsis.rst: $(top_builddir)/bin/vinylstat/vinylstat
-	$(top_builddir)/bin/vinylstat/vinylstat --synopsis > ${@}_
+include/varnishstat_synopsis.rst: $(top_builddir)/bin/vinylstat/varnishstat
+	$(top_builddir)/bin/vinylstat/varnishstat --synopsis > ${@}_
 	mv -f ${@}_ ${@}
-include/vinylstat_bindings.rst: $(top_builddir)/bin/vinylstat/vinylstat
-	$(top_builddir)/bin/vinylstat/vinylstat --bindings > ${@}_
+include/varnishstat_bindings.rst: $(top_builddir)/bin/vinylstat/varnishstat
+	$(top_builddir)/bin/vinylstat/varnishstat --bindings > ${@}_
 	mv -f ${@}_ ${@}
-BUILT_SOURCES += include/vinylstat_options.rst \
-	 include/vinylstat_synopsis.rst \
-	 include/vinylstat_bindings.rst
+BUILT_SOURCES += include/varnishstat_options.rst \
+	 include/varnishstat_synopsis.rst \
+	 include/varnishstat_bindings.rst
 
 include/vsl-tags.rst: $(top_builddir)/lib/libvinylapi/vsl2rst
 	$(top_builddir)/lib/libvinylapi/vsl2rst > ${@}_
@@ -185,7 +185,7 @@ VTCSYN_SRC = \
 	$(vtest2_src)/vtc_process.c \
 	$(vtest2_src)/vtc_syslog.c \
 	$(vtest2_src)/vtc_tunnel.c \
-	$(top_srcdir)/bin/vinyltest/vtc_vinyl.c \
+	$(top_srcdir)/bin/vinyltest/vtc_varnish.c \
 	$(vtest2_src)/vtc_vsm.c
 include/vtc-syntax.rst: $(srcdir)/vtc-syntax.py $(VTCSYN_SRC)
 	$(AM_V_GEN) $(PYTHON) $(srcdir)/vtc-syntax.py $(VTCSYN_SRC) > ${@}_

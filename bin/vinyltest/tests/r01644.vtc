@@ -6,7 +6,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	import debug;
 
@@ -16,7 +16,7 @@ vinyl v1 -vcl+backend {
 
 } -start
 
-vinyl v1 -cliok "param.set pcre2_match_limit 100"
+varnish v1 -cliok "param.set pcre2_match_limit 100"
 
 client c1 {
 	txreq
@@ -24,7 +24,7 @@ client c1 {
 	expect resp.http.foo == 100
 } -run
 
-vinyl v1 -cliok "param.set pcre2_match_limit 200"
+varnish v1 -cliok "param.set pcre2_match_limit 200"
 
 client c1 {
 	txreq

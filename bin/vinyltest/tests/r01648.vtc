@@ -25,7 +25,7 @@ server s3 {
 	txresp -hdr "Server: s3" -body "abcdef"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.client == "c1") {
 			set req.backend_hint = s1;
@@ -44,7 +44,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 # This client gets a streaming failing result from s1
 client c1 {
@@ -76,4 +76,4 @@ client c3 {
 } -run
 
 client c1 -wait
-vinyl v1 -expect fetch_failed == 2
+varnish v1 -expect fetch_failed == 2

@@ -8,7 +8,7 @@
 ## The current assumption is that all the tests for the Makefile are VTCs
 ## and may be revisited if needed.
 
-VTC_LOG_COMPILER = $(top_builddir)/bin/vinyltest/vinyltest -v -i
+VTC_LOG_COMPILER = $(top_builddir)/bin/vinyltest/varnishtest -v -i
 TEST_EXTENSIONS = .vtc
 
 check: vtc-check-tests

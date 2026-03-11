@@ -13,7 +13,7 @@ server s1 {
 	txresp -noserver -hdr "Accept-ranges: bytes"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.url == "/a") {
@@ -28,7 +28,7 @@ vinyl v1 -vcl+backend {
 		unset resp.http.via;
 	}
 } -cliok "param.set feature +http2" -start
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 logexpect l1 -v v1 -g raw {
 	expect	* 1001 ReqAcct	"160 7 167 78 16 94"

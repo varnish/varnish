@@ -14,7 +14,7 @@ server s1 -repeat 40 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 

@@ -9,54 +9,54 @@ server s1 {
 	txresp -body "foobar1"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}
 }
 
-vinyl v1 -cli "vcl.list"
-vinyl v1 -cli "vcl.use vcl1"
+varnish v1 -cli "vcl.list"
+varnish v1 -cli "vcl.use vcl1"
 
 client c1 {
 	txreq -url "/foo"
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 6
-	expect resp.http.X-Vinyl == "1001"
+	expect resp.http.X-Varnish == "1001"
 } -run
 
-vinyl v1 -cli "vcl.use vcl2"
+varnish v1 -cli "vcl.use vcl2"
 
 client c2 {
 	txreq -url "/foo"
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 7
-	expect resp.http.X-Vinyl == "1004"
+	expect resp.http.X-Varnish == "1004"
 } -run
 
-vinyl v1 -cli "vcl.use vcl1"
+varnish v1 -cli "vcl.use vcl1"
 
 client c3 {
 	txreq -url "/foo"
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == 6
-	expect resp.http.X-Vinyl == "1007 1002"
+	expect resp.http.X-Varnish == "1007 1002"
 } -run
 
-vinyl v1 -cli "vcl.show vcl2"
-vinyl v1 -cli "vcl.show -v vcl2"
-vinyl v1 -cli "vcl.discard vcl2"
-vinyl v1 -cli "vcl.list"
-vinyl v1 -cli "vcl.show"
-vinyl v1 -cli "vcl.show -v"
-vinyl v1 -clierr 106 "vcl.show -x nowhere"
-vinyl v1 -clierr 106 "vcl.show nothere"
-vinyl v1 -clierr 106 "vcl.use nothere"
-vinyl v1 -clierr 106 "vcl.discard nowhere"
-vinyl v1 -clierr 300 "vcl.discard vcl1"
+varnish v1 -cli "vcl.show vcl2"
+varnish v1 -cli "vcl.show -v vcl2"
+varnish v1 -cli "vcl.discard vcl2"
+varnish v1 -cli "vcl.list"
+varnish v1 -cli "vcl.show"
+varnish v1 -cli "vcl.show -v"
+varnish v1 -clierr 106 "vcl.show -x nowhere"
+varnish v1 -clierr 106 "vcl.show nothere"
+varnish v1 -clierr 106 "vcl.use nothere"
+varnish v1 -clierr 106 "vcl.discard nowhere"
+varnish v1 -clierr 300 "vcl.discard vcl1"

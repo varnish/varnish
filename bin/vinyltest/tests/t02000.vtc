@@ -13,17 +13,17 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return (pipe);
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
-vinyl v1 -cliok "param.set vsl_mask +H2RxHdr,+H2RxBody,+H2TxHdr,+H2TxBody"
+varnish v1 -cliok "param.set vsl_mask +H2RxHdr,+H2RxBody,+H2TxHdr,+H2TxBody"
 
-process p1 {exec vinyllog -n ${v1_name} -g raw -w ${tmpdir}/vlog -A} -start
+process p1 {exec varnishlog -n ${v1_name} -g raw -w ${tmpdir}/vlog -A} -start
 
 shell {while ! test -s ${tmpdir}/vlog ; do sleep 1 ; done}
 
@@ -32,8 +32,8 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.reset h2_initial_window_size"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.reset h2_initial_window_size"
 
 client c2 {
 	stream 1 {
@@ -61,10 +61,10 @@ client c2 {
 	stream 7 -wait
 } -run
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 process p1 -stop
 # shell {cat ${tmpdir}/vlog}
@@ -75,7 +75,7 @@ shell -match {1001 H2TxHdr        c \[00000c040000000000\]} {
 
 # While we're here, test sess.xid over H2 as well
 
-vinyl v1 -syntax 4.1 -vcl+backend {
+varnish v1 -syntax 4.1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.B-Sess-XID = sess.xid;
 	}
@@ -108,17 +108,17 @@ client c3 {
 
 # Check default settings
 
-vinyl v1 -cliok "param.reset h2_header_table_size"
-vinyl v1 -cliok "param.reset h2_max_concurrent_streams"
-vinyl v1 -cliok "param.reset h2_initial_window_size"
-vinyl v1 -cliok "param.reset h2_max_frame_size"
-vinyl v1 -cliok "param.reset h2_max_header_list_size"
-vinyl v1 -cliok "param.reset http_req_size"
+varnish v1 -cliok "param.reset h2_header_table_size"
+varnish v1 -cliok "param.reset h2_max_concurrent_streams"
+varnish v1 -cliok "param.reset h2_initial_window_size"
+varnish v1 -cliok "param.reset h2_max_frame_size"
+varnish v1 -cliok "param.reset h2_max_header_list_size"
+varnish v1 -cliok "param.reset http_req_size"
 
 client c4 {
 	txpri
 	stream 0 {
-		# check initial settings from vinyld
+		# check initial settings from varnishd
 		txsettings
 		rxsettings
 		expect settings.ack == false
@@ -129,7 +129,7 @@ client c4 {
 		expect settings.framesize == <undef>
 		expect settings.hdrsize ~ ^(12288|32768)$
 
-		# check (some) values not set by vinyld
+		# check (some) values not set by varnishd
 		expect stream.window == 65535
 
 		txsettings -ack

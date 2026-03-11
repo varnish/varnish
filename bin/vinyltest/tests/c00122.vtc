@@ -10,7 +10,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/retry" &&
 		    bereq.retries == 0) {
@@ -26,11 +26,11 @@ vinyl v1 -vcl+backend {
 
 } -start
 
-process p1 -winsz 100 200 {exec vinyllog -n ${v1_name} -g raw} -start
+process p1 -winsz 100 200 {exec varnishlog -n ${v1_name} -g raw} -start
 process p1 -expect-text 0 0 CLI
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "debug.xid 999999999999998"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "debug.xid 999999999999998"
 
 logexpect l1 -v v1 -g request -T 2 {
 	expect 0 1	Begin		"req 999999999999998"
@@ -57,7 +57,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -wait
 process p1 -expect-text 0 1 "999999999999998 SessClose"
@@ -71,8 +71,8 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "debug.xid 999999999999997"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "debug.xid 999999999999997"
 
 logexpect l1 -v v1 -g request {
 	expect 0 999999999999998	Begin		"req 999999999999997"
@@ -98,7 +98,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 logexpect l1 -wait
 
 process p1 -expect-text 0 1 "999999999999998 Link           c req 2 restart"

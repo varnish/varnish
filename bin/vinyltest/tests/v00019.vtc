@@ -1,44 +1,44 @@
 vtest "VCL compiler coverage test: vcc_token.c"
 
-vinyl v1 -errvcl {Unterminated inline C source, starting at} " C{ "
+varnish v1 -errvcl {Unterminated inline C source, starting at} " C{ "
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b { .host = "${localhost}"; }
 	# comment
 	sub vcl_recv { set req.url = "x"; }
 }
 
-vinyl v1 -errvcl {Unterminated /* ... */ comment, starting at} {
+varnish v1 -errvcl {Unterminated /* ... */ comment, starting at} {
 	backend b { .host = "${localhost}"; }
 	/*
 }
 
-vinyl v1 -errvcl {Unterminated long-string, starting at} {
+varnish v1 -errvcl {Unterminated long-string, starting at} {
 	backend b { .host = "${localhost}"; }
 	{" }
 }
 
-vinyl v1 -errvcl {Unterminated long-string, starting at} {
+varnish v1 -errvcl {Unterminated long-string, starting at} {
 	backend b { .host = "${localhost}"; }
 	""" ""
 }
 
-vinyl v1 -errvcl {Unterminated string, starting at} {
+varnish v1 -errvcl {Unterminated string, starting at} {
 	backend b { .host = "${localhost}"; }
 	"
 }
 
-vinyl v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl {
+varnish v1 -cliok "param.set vcc_feature +allow_inline_c" -vcl {
 	backend b { .host = "${localhost}"; }
 	sub vcl_recv { C{ int i; (void)i; }C }
 }
 
-vinyl v1 -errvcl {Syntax error at} {
+varnish v1 -errvcl {Syntax error at} {
 	backend b { .host = "${localhost}"; }
 	?
 }
 
-vinyl v1 -errvcl {Comparison of different types: STRING '==' INT} {
+varnish v1 -errvcl {Comparison of different types: STRING '==' INT} {
 	backend b { .host = "${localhost}"; }
 	sub vcl_recv {
 		if ("foo" + "bar" == 777) {
@@ -47,7 +47,7 @@ vinyl v1 -errvcl {Comparison of different types: STRING '==' INT} {
 	}
 }
 
-vinyl v1 -errvcl {Comparison of different types: STRING '==' INT} {
+varnish v1 -errvcl {Comparison of different types: STRING '==' INT} {
 	backend b { .host = "${localhost}"; }
 	sub vcl_recv {
 		if ("foo" + "bar" ==
@@ -57,7 +57,7 @@ vinyl v1 -errvcl {Comparison of different types: STRING '==' INT} {
 	}
 }
 
-vinyl v1 -errvcl {Comparison of different types: STRING '==' INT} {
+varnish v1 -errvcl {Comparison of different types: STRING '==' INT} {
 	backend b { .host = "${localhost}"; }
 	sub vcl_recv {
 		if ("foo" + "bar" ==
@@ -69,7 +69,7 @@ vinyl v1 -errvcl {Comparison of different types: STRING '==' INT} {
 	}
 }
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	backend be none;
 	sub vcl_init {
@@ -91,21 +91,21 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -errvcl {Symbol not found: 'req.http.req.http.foo'} {
+varnish v1 -errvcl {Symbol not found: 'req.http.req.http.foo'} {
 	backend b { .host = "${localhost}"; }
 	sub vcl_recv {
 		set req.http.req.http.foo = "bar";
 	}
 }
 
-vinyl v1 -errvcl {Unknown token '--' when looking for INT} {
+varnish v1 -errvcl {Unknown token '--' when looking for INT} {
 	backend be none;
 	sub vcl_synth {
 		set resp.status = --200;
 	}
 }
 
-vinyl v1 -errvcl "Syntax error" {
+varnish v1 -errvcl "Syntax error" {
 	import debug;
 	backend be none;
 	sub vcl_init {

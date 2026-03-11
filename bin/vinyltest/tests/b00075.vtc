@@ -13,7 +13,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 		.host = "${s1_sock}";
 		.preamble = :UE9TVCAvcHJlYW1ibGUgSFRUUC83LjMKSGVhZGVyOiA0MgoKCg==: ;

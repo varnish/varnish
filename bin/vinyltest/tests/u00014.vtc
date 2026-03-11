@@ -11,7 +11,7 @@ server s1 {
 	txresp -status 503
 } -start
 
-vinyl v1 -vcl+backend "" -start
+varnish v1 -vcl+backend "" -start
 
 client c1 {
 	txreq
@@ -29,7 +29,7 @@ shell {
 	cat >ncsa.sh <<-EOF
 	#!/bin/sh
 
-	vinylncsa -d -n ${v1_name} -F '%s' "\$@" |
+	varnishncsa -d -n ${v1_name} -F '%s' "\$@" |
 	tr '\n' ' '
 	# '
 	EOF
@@ -42,13 +42,13 @@ shell -match "^500 503 $" {
 }
 
 shell -err -expect "Query expression error" {
-	vinylncsa -d -n ${v1_name} -q '
+	varnishncsa -d -n ${v1_name} -q '
 		# empty multiline query
 	'
 }
 
 shell -err -expect "Query expression error" {
-	vinylncsa -d -n ${v1_name} -q '
+	varnishncsa -d -n ${v1_name} -q '
 		* ~ "Incomplete quoted
 		string"
 	'
@@ -56,11 +56,11 @@ shell -err -expect "Query expression error" {
 
 shell -err -expect "Query expression error" {
 	echo '# empty query file' >empty.vslq
-	vinylncsa -d -n ${v1_name} -Q empty.vslq
+	varnishncsa -d -n ${v1_name} -Q empty.vslq
 }
 
 shell -err -expect "-Q missing.vslq: No such file or directory" {
-	vinylncsa -d -n ${v1_name} -Q missing.vslq
+	varnishncsa -d -n ${v1_name} -Q missing.vslq
 }
 
 shell -match "^500 $" {
@@ -155,7 +155,7 @@ shell -err -expect "Query expression error" {
 	string"
 	EOF
 
-	vinylncsa -d -n ${v1_name} -Q string_cont.vslq
+	varnishncsa -d -n ${v1_name} -Q string_cont.vslq
 }
 
 # Make v1 log a multiline VSL record and query it (hardly useful)
@@ -164,6 +164,6 @@ logexpect l1 -v v1 -g raw -q {CLI ~ "\\nvcl1.s1"} {
 	expect 0 0 CLI "vcl1.s1 +healthy"
 } -start
 
-vinyl v1 -cliok backend.list
+varnish v1 -cliok backend.list
 
 logexpect l1 -wait

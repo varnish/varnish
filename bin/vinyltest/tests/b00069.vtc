@@ -7,7 +7,7 @@ server s1 -repeat 3 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend "" -start
+varnish v1 -vcl+backend "" -start
 
 # This test checks a bug that was dependent on the contents of the buffer left behind
 # by the previous request

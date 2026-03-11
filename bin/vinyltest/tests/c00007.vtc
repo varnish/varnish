@@ -1,5 +1,5 @@
 vtest "Test banning a hash"
 
-vinyl v1 -arg "-b None" -start
+varnish v1 -arg "-b None" -start
 
-vinyl v1 -clierr 101 "ban.hash foo"
+varnish v1 -clierr 101 "ban.hash foo"

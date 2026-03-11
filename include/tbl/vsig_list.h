@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * NB: Changing the list of signals requires updating libvinylapi.map
+ * NB: Changing the list of signals requires updating libvarnishapi.map
  *
  */
 

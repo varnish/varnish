@@ -22,15 +22,6 @@ Varnish 8.0
    changes-8.0
    upgrading-8.0
 
-Varnish 7.7
------------
-
-.. toctree::
-   :maxdepth: 2
-
-   changes-7.7
-   upgrading-7.7
-
 Varnish 6.0
 -----------
 

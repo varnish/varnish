@@ -34,7 +34,7 @@ server s1 {
 	txresp -hdr "Vary: fooqux, Accept-Encoding" -gzipbody "fooqux"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url ~ "/baz") {
 			set beresp.do_gzip = true;

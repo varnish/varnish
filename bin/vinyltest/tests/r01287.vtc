@@ -3,7 +3,7 @@ vtest "#1287 - check NULL as first pointer to VRT_synth_page"
 server s1 {
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return (synth(200, "OK"));
 	}

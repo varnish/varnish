@@ -5,7 +5,7 @@ server s1 -repeat 17 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return(pass);
 	}
@@ -16,112 +16,112 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 33}
+varnish v1 -cliok {param.set http_max_hdr 33}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 34}
+varnish v1 -cliok {param.set http_max_hdr 34}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 35}
+varnish v1 -cliok {param.set http_max_hdr 35}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 36}
+varnish v1 -cliok {param.set http_max_hdr 36}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 37}
+varnish v1 -cliok {param.set http_max_hdr 37}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 38}
+varnish v1 -cliok {param.set http_max_hdr 38}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 39}
+varnish v1 -cliok {param.set http_max_hdr 39}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 40}
+varnish v1 -cliok {param.set http_max_hdr 40}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 41}
+varnish v1 -cliok {param.set http_max_hdr 41}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 42}
+varnish v1 -cliok {param.set http_max_hdr 42}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 43}
+varnish v1 -cliok {param.set http_max_hdr 43}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 44}
+varnish v1 -cliok {param.set http_max_hdr 44}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 45}
+varnish v1 -cliok {param.set http_max_hdr 45}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 46}
+varnish v1 -cliok {param.set http_max_hdr 46}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 47}
+varnish v1 -cliok {param.set http_max_hdr 47}
 
 client c1 {
 	txreq
 	rxresp
 } -run
 
-vinyl v1 -cliok {param.set http_max_hdr 48}
+varnish v1 -cliok {param.set http_max_hdr 48}
 
 client c1 {
 	txreq

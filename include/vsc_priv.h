@@ -30,7 +30,7 @@
  *
  * Define the layout of the statistics VSM segments
  *
- * NB: THIS IS NOT A PUBLIC API TO VINYL!
+ * NB: THIS IS NOT A PUBLIC API TO VARNISH!
  */
 
 #ifdef VSC_PRIV_H_INCLUDED

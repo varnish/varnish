@@ -1,6 +1,6 @@
 vtest "VCL_SUB wrong vmod behavior"
 
-vinyl v1 -arg "-p feature=+no_coredump" -vcl {
+varnish v1 -arg "-p feature=+no_coredump" -vcl {
 	import debug;
 
 	backend dummy None;
@@ -14,7 +14,7 @@ vinyl v1 -arg "-p feature=+no_coredump" -vcl {
 	}
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	backend dummy None;
 
@@ -29,8 +29,8 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -wait-stopped
-vinyl v1 -cliexpect "Assert error in VPI_Call_Check" "panic.show"
-vinyl v1 -cliok "panic.clear"
-vinyl v1 -expect MGT.child_panic == 1
-vinyl v1 -expectexit 0x40
+varnish v1 -wait-stopped
+varnish v1 -cliexpect "Assert error in VPI_Call_Check" "panic.show"
+varnish v1 -cliok "panic.clear"
+varnish v1 -expect MGT.child_panic == 1
+varnish v1 -expectexit 0x40

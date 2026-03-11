@@ -5,7 +5,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp
 } -start
 
-vinyl v1 -syntax 4.1 -arg "-a foo=${tmpdir}/v1.sock" -vcl+backend {
+varnish v1 -syntax 4.1 -arg "-a foo=${tmpdir}/v1.sock" -vcl+backend {
 	acl acl1 +log {
 		"${localhost}";
 	}
@@ -68,7 +68,7 @@ logexpect l1 -v v1 -d 1 -g vxid -q "VCL_acl" {
 	expect * = End
 } -run
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b None;
 
 	acl acl1 {
@@ -96,7 +96,7 @@ client c1 -connect "${tmpdir}/v1.sock" {
 	expect resp.http.remote == "true"
 } -run
 
-vinyl v1 -errvcl {.../mask is not numeric.} {
+varnish v1 -errvcl {.../mask is not numeric.} {
 	backend b None;
 
 	acl acl1 {
@@ -114,7 +114,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {}
+varnish v1 -vcl+backend {}
 
 client c1 -connect "${tmpdir}/v1.sock" {
 	txreq -url /1

@@ -28,7 +28,7 @@ server s1 -repeat 2 {
 	chunkedlen 0
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_deliver {

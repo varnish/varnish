@@ -5,7 +5,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -proto "PROXY" -vcl+backend {}-start
+varnish v1 -proto "PROXY" -vcl+backend {}-start
 
 # Too large proxy payload using TLV
 client c1 {

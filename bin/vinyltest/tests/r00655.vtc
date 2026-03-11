@@ -1,6 +1,6 @@
 vtest "Test nested /*...*/ comments "
 
-vinyl v1 -errvcl {/* ... */ comment contains /*} {
+varnish v1 -errvcl {/* ... */ comment contains /*} {
 
 	/* foo
 		/* bar

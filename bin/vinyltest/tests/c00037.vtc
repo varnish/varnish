@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "Inc: 2"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.http.x-missit == "1") {
 			set req.hash_always_miss = true;

@@ -12,7 +12,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/retry" &&
 		    bereq.retries == 0) {
@@ -33,9 +33,9 @@ vinyl v1 -vcl+backend {
 #
 #    VSLb(bo->vsl, SLT_Link, "bereq %u retry", wid);
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 # vxid wrap at 1<<30
-vinyl v1 -cliok "debug.xid 1073741823"
+varnish v1 -cliok "debug.xid 1073741823"
 
 logexpect l1 -v v1 -g request -T 2 {
 	expect 0 1	Begin		"req 107374182"
@@ -77,9 +77,9 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 # vxid wrap at 1<<30
-vinyl v1 -cliok "debug.xid 1073741823"
+varnish v1 -cliok "debug.xid 1073741823"
 
 logexpect l1 -v v1 -g request {
 	expect 0 1	Begin		"req 1073741823"

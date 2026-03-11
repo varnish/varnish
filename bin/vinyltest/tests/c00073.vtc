@@ -13,7 +13,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-s default,1m" -vcl+backend { } -start
 
 client c1 {
@@ -22,9 +22,9 @@ client c1 {
 } -start
 
 barrier b1 sync
-vinyl v1 -expect SM?.s0.g_bytes > 10000
+varnish v1 -expect SM?.s0.g_bytes > 10000
 
 barrier b2 sync
 
 client c1 -wait
-vinyl v1 -expect SM?.s0.g_bytes < 6000
+varnish v1 -expect SM?.s0.g_bytes < 6000

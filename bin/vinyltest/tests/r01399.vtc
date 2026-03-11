@@ -25,7 +25,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.Is-bg = bereq.is_bgfetch;
 	}

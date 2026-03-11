@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "1"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	sub vcl_recv {
 		std.rollback(req);

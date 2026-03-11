@@ -7,7 +7,7 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-p fetch_chunksize=4k" \
 	-arg "-s default,1m" -vcl+backend { } -start
 

@@ -5,9 +5,9 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-vinyl v1 -clierr 100 "-"
+varnish v1 -clierr 100 "-"
 
 client c1 {
 	txreq

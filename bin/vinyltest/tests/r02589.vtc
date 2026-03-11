@@ -5,17 +5,17 @@ server s1 {
 	txresp -hdrlen Foo 500
 } -start
 
-vinyl v1 -vcl+backend  {
+varnish v1 -vcl+backend  {
 	import vtc;
 	sub vcl_deliver {
 		vtc.workspace_alloc(client, -50);
 	}
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set vsl_mask +H2TxHdr"
-vinyl v1 -cliok "param.set vsl_mask +H2TxBody"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set vsl_mask +H2TxHdr"
+varnish v1 -cliok "param.set vsl_mask +H2TxBody"
 
 
 client c1 {
@@ -28,5 +28,5 @@ client c1 {
 	} -run
 } -run
 
-vinyl v1 -expect client_resp_500 == 1
-vinyl v1 -expect ws_client_overflow == 1
+varnish v1 -expect client_resp_500 == 1
+varnish v1 -expect ws_client_overflow == 1

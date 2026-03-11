@@ -1,6 +1,6 @@
 vtest "Test vcl_backend_error is called if vcl_backend_fetch fails"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default { .host = "${bad_backend}"; }
 
 	sub vcl_backend_error {

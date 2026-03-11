@@ -1,6 +1,6 @@
 vtest "Test that we can't recurse restarts forever"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend bad {
 		.host = "${bad_backend}";
 	}

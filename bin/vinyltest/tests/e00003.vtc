@@ -19,7 +19,7 @@ server s1 {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_synth {
 		set resp.body = """
 		""";
@@ -50,7 +50,7 @@ vinyl v1 -vcl+backend {
 
 logexpect l1 -v v1 -g request {
 	expect 0 1001   Begin   "^req .* rxreq"
-	expect * =	ReqAcct	"^45 0 45 180 75 255$"
+	expect * =	ReqAcct	"^45 0 45 182 75 257$"
 	expect 0 =      End
 } -start
 
@@ -72,8 +72,8 @@ logexpect l4 -v v1 -g request {
 
 logexpect l5 -v v1 -g request {
 	expect * 1006   Begin   "^req .* rxreq"
-	# Header bytes is 5 larger than in l1 due to two item X-Vinyl hdr
-	expect * =	ReqAcct	"^45 0 45 185 75 260$"
+	# Header bytes is 5 larger than in l1 due to two item X-Varnish hdr
+	expect * =	ReqAcct	"^45 0 45 187 75 262$"
 	expect 0 =      End
 } -start
 
@@ -94,9 +94,9 @@ client c1 {
 }
 
 client c1 -run
-vinyl v1 -expect esi_req == 4
-vinyl v1 -expect esi_errors == 0
-vinyl v1 -expect MAIN.s_resp_bodybytes == 150
+varnish v1 -expect esi_req == 4
+varnish v1 -expect esi_errors == 0
+varnish v1 -expect MAIN.s_resp_bodybytes == 150
 
 logexpect l1 -wait
 logexpect l2 -wait
@@ -105,7 +105,7 @@ logexpect l4 -wait
 logexpect l5 -wait
 
 shell {
-	vinylncsa -n ${v1_name} -d \
+	varnishncsa -n ${v1_name} -d \
 		-F '%{Vinyl:vxid}x %{Vinyl:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -117,7 +117,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -b \
+	varnishncsa -n ${v1_name} -d -b \
 		-F '%{Vinyl:vxid}x %{Vinyl:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -129,7 +129,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -E \
+	varnishncsa -n ${v1_name} -d -E \
 		-F '%{Vinyl:vxid}x %{Vinyl:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -145,7 +145,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -b -E \
+	varnishncsa -n ${v1_name} -d -b -E \
 		-F '%{Vinyl:vxid}x %{Vinyl:side}x %{VSL:Begin[3]}x' |
 	sort > ncsa.txt
 
@@ -162,8 +162,8 @@ shell {
 	diff -u expected.txt ncsa.txt
 }
 
-shell -err {vinyllog -n ${v1_name} -d -c -i Begin | grep esi}
-shell -err {vinyllog -n ${v1_name} -d -c -i Begin -g request | grep esi}
-shell {vinyllog -n ${v1_name} -d -c -i Begin -g raw | grep esi}
-shell {vinyllog -n ${v1_name} -d -E -i Begin | grep esi}
-shell {vinyllog -n ${v1_name} -d -E -i Begin | grep rxreq}
+shell -err {varnishlog -n ${v1_name} -d -c -i Begin | grep esi}
+shell -err {varnishlog -n ${v1_name} -d -c -i Begin -g request | grep esi}
+shell {varnishlog -n ${v1_name} -d -c -i Begin -g raw | grep esi}
+shell {varnishlog -n ${v1_name} -d -E -i Begin | grep esi}
+shell {varnishlog -n ${v1_name} -d -E -i Begin | grep rxreq}

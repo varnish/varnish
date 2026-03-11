@@ -8,7 +8,7 @@ server s1 {
 	txresp -hdr "Foo: bar,\n \t\n\tbarf: fail" -body "xxx"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.bar = beresp.http.foo;
 		unset beresp.http.foo;

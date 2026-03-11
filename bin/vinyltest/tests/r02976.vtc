@@ -9,9 +9,9 @@ server s1 -repeat 5 { # probe requests
 	txresp
 } -start
 
-vinyl v1 -cliok {param.set vcc_feature -err_unref}
+varnish v1 -cliok {param.set vcc_feature -err_unref}
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b1 {
 		.host = "${s1_sock}";
 		.probe = { .interval = 1s; }

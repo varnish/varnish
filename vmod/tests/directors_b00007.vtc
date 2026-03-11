@@ -5,7 +5,7 @@ server s1 {
 	txresp -body "ech3Ooj"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {

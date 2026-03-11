@@ -31,7 +31,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
@@ -54,7 +54,7 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_backend_fetch {
@@ -79,12 +79,12 @@ client c1 {
 
 server s1 -wait
 
-vinyl v1 -cliok "param.set vsl_buffer 4k"
-vinyl v1 -cliok "param.set workspace_client 12000"
-vinyl v1 -cliok "param.set workspace_backend 12000"
+varnish v1 -cliok "param.set vsl_buffer 4k"
+varnish v1 -cliok "param.set workspace_client 12000"
+varnish v1 -cliok "param.set workspace_backend 12000"
 
 # Dont panic
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 
@@ -119,7 +119,7 @@ client c1 {
 server s1 -wait
 
 # Dont run out of workspace
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 
@@ -151,7 +151,7 @@ client c2 {
 server s1 -wait
 
 # Keep workspace intact (and possibly overflow)
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 
@@ -208,7 +208,7 @@ server s1 -wait
 # CLIENT
 
 # Dont panic
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import debug;
 	import vtc;
@@ -254,7 +254,7 @@ client c4 {
 server s1 -wait
 
 # Dont run out of workspace
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 
@@ -286,7 +286,7 @@ client c5 {
 server s1 -wait
 
 # Keep workspace intact (and possibly overflow)
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	import vtc;
 
@@ -344,7 +344,7 @@ server s1 -wait
 
 # this could work, but would need additional coding to save
 # the right snapshot of the bereq on the req ws
-vinyl v1 -errvcl {Not available in subroutine 'vcl_pipe'} {
+varnish v1 -errvcl {Not available in subroutine 'vcl_pipe'} {
 	import std;
 
 	backend proforma None;
@@ -359,7 +359,7 @@ vinyl v1 -errvcl {Not available in subroutine 'vcl_pipe'} {
 # We would want to remove req from vcl_pipe, but that could break
 # vmods, so we fail specifically at runtime
 
-vinyl v1 -errvcl {Not available in subroutine 'vcl_pipe'} {
+varnish v1 -errvcl {Not available in subroutine 'vcl_pipe'} {
 	import std;
 
 	backend proforma None;

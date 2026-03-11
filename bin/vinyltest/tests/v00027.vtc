@@ -10,7 +10,7 @@ server s2 {
 	txresp -bodylen 52
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 		.host = "${s1_addr}";
 		.port = "${s1_port}";

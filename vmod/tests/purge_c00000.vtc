@@ -14,8 +14,8 @@ server s1 {
 	txresp -hdr "Vary: Accept-Language" -body en
 } -start
 
-vinyl v1 -cliok "param.set vsl_mask +ExpKill"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set vsl_mask +ExpKill"
+varnish v1 -vcl+backend {
 	import purge;
 
 	sub vcl_recv {
@@ -55,7 +55,7 @@ vinyl v1 -vcl+backend {
 	}
 
 	sub vcl_backend_response {
-		set beresp.http.X-Vinyl-Be = bereq.xid;
+		set beresp.http.X-Varnish-Be = bereq.xid;
 	}
 } -start
 
@@ -64,7 +64,7 @@ logexpect l1 -v v1 -q Hit -i Hit {
 } -start
 
 logexpect l2 -v v1 -q "Begin ~ bgfetch" {
-	expect * * BerespHeader "X-Vinyl-Be: 1005"
+	expect * * BerespHeader "X-Varnish-Be: 1005"
 } -start
 
 logexpect l3 -v v1 -g raw -q "vxid == 0" {
@@ -75,7 +75,7 @@ client c1 {
 	txreq -hdr "Accept-Language: fr"
 	rxresp
 	expect resp.body == fr
-	expect resp.http.X-Vinyl-Be == 1002
+	expect resp.http.X-Varnish-Be == 1002
 
 	txreq -req SOFTPURGE
 	rxresp
@@ -85,8 +85,8 @@ client c1 {
 	txreq -hdr "Accept-Language: fr"
 	rxresp
 	expect resp.body == fr
-	expect resp.http.X-Vinyl == "1004 1002"
-	expect resp.http.X-Vinyl-Be == 1002
+	expect resp.http.X-Varnish == "1004 1002"
+	expect resp.http.X-Varnish-Be == 1002
 } -run
 
 # Wait until bgfetch triggered by 1004 is done
@@ -96,7 +96,7 @@ client c1 {
 	txreq -hdr "Accept-Language: en"
 	rxresp
 	expect resp.body == en
-	expect resp.http.X-Vinyl-Be == 1008
+	expect resp.http.X-Varnish-Be == 1008
 
 	txreq -req PURGE
 	rxresp

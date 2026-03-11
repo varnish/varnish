@@ -1,6 +1,6 @@
 vtest "storage failure with synthetic body"
 
-vinyl v1 -arg "-sTransient=debug,maxspace=32B" -vcl {
+varnish v1 -arg "-sTransient=debug,maxspace=32B" -vcl {
 	backend none none;
 
 	sub vcl_recv {

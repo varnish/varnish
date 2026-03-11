@@ -1,6 +1,6 @@
 vtest "Test VCC errors out if probe is used before it is defined"
 
-vinyl v1 -errvcl "Symbol not found: 'p'" {
+varnish v1 -errvcl "Symbol not found: 'p'" {
 	backend b {
 		.host = "${localhost}";
 		.probe = p;

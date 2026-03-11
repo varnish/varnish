@@ -20,7 +20,7 @@ server s4 -listen "${tmpdir}/s4.sock" {
 	txresp -body "4444"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -61,7 +61,7 @@ client c1 {
 	expect resp.bodylen == 4
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 server s1 -start
 server s2 -start
@@ -76,7 +76,7 @@ client c2 {
 	expect resp.bodylen == 2
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 server s4 -start
 

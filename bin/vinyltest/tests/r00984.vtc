@@ -29,7 +29,7 @@ server s1 {
 	txresp -status 200 -body "11"
 } -start
 
-vinyl v1 -arg "-t 300" -vcl+backend {
+varnish v1 -arg "-t 300" -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/ban") {
 			ban("req.url ~ /");

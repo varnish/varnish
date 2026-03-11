@@ -1,18 +1,18 @@
 vtest "VCL compiler coverage test: vcc_backend.c"
 
-vinyl v1 -errvcl "IPv6 address lacks ']'" {
+varnish v1 -errvcl "IPv6 address lacks ']'" {
 	backend b1 {
 		.host = "[0:0:0:0";
 	}
 }
 
-vinyl v1 -errvcl "IPv6 address has wrong port separator" {
+varnish v1 -errvcl "IPv6 address has wrong port separator" {
 	backend b1 {
 		.host = "[0:0:0:0]/0";
 	}
 }
 
-vinyl v1 -errvcl "with exactly three digits" {
+varnish v1 -errvcl "with exactly three digits" {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -21,7 +21,7 @@ vinyl v1 -errvcl "with exactly three digits" {
 	}
 }
 
-vinyl v1 -errvcl "Must specify .threshold with .window" {
+varnish v1 -errvcl "Must specify .threshold with .window" {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -30,7 +30,7 @@ vinyl v1 -errvcl "Must specify .threshold with .window" {
 	}
 }
 
-vinyl v1 -errvcl "Threshold must be 64 or less" {
+varnish v1 -errvcl "Threshold must be 64 or less" {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -39,7 +39,7 @@ vinyl v1 -errvcl "Threshold must be 64 or less" {
 	}
 }
 
-vinyl v1 -errvcl "Window must be 64 or less" {
+varnish v1 -errvcl "Window must be 64 or less" {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -49,7 +49,7 @@ vinyl v1 -errvcl "Window must be 64 or less" {
 	}
 }
 
-vinyl v1 -errvcl "Threshold cannot be greater than window" {
+varnish v1 -errvcl "Threshold cannot be greater than window" {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = {
@@ -59,20 +59,20 @@ vinyl v1 -errvcl "Threshold cannot be greater than window" {
 	}
 }
 
-vinyl v1 -errvcl "NB: Backend Syntax has changed:" {
+varnish v1 -errvcl "NB: Backend Syntax has changed:" {
 	backend b1 {
 		set .host = "${localhost}";
 	}
 }
 
-vinyl v1 -errvcl "Expected '{' or name of probe, got" {
+varnish v1 -errvcl "Expected '{' or name of probe, got" {
 	backend b1 {
 		.host = "${localhost}";
 		.probe = "NONE";
 	}
 }
 
-vinyl v1 -errvcl "Field 'port' redefined at:" {
+varnish v1 -errvcl "Field 'port' redefined at:" {
 	backend b1 {
 		.host = "${localhost}";
 		.port = "NONE";
@@ -80,56 +80,56 @@ vinyl v1 -errvcl "Field 'port' redefined at:" {
 	}
 }
 
-vinyl v1 -errvcl "Unknown field:" {
+varnish v1 -errvcl "Unknown field:" {
 	backend b1 {
 		.host = "${localhost}";
 		.fourscoreandsevenyearsago = "NONE";
 	}
 }
 
-vinyl v1 -errvcl "Expected .host or .path." {
+varnish v1 -errvcl "Expected .host or .path." {
 	backend b1 {
 		.port = "NONE";
 	}
 }
 
-vinyl v1 -errvcl "No default probe defined" {
+varnish v1 -errvcl "No default probe defined" {
 	backend b1 {
 		.probe = default;
 	}
 }
 
-vinyl v1 -errvcl "Only one default director possible." {
+varnish v1 -errvcl "Only one default director possible." {
 	backend b1 { .host = "${localhost}"; }
 	backend default { .host = "${localhost}"; }
 	backend default { .host = "${localhost}"; }
 }
 
-vinyl v1 -errvcl "Unused backend b1, defined:" {
+varnish v1 -errvcl "Unused backend b1, defined:" {
 	backend b1 { .host = "${localhost}"; }
 	backend default { .host = "${localhost}"; }
 }
 
-vinyl v1 -errvcl "Address redefinition at:" {
+varnish v1 -errvcl "Address redefinition at:" {
 	backend b1 {
 		.host = "${localhost}";
 		.path = "/path/to/uds";
 	}
 }
 
-vinyl v1 -errvcl "Must be a valid path or abstract socket:" {
+varnish v1 -errvcl "Must be a valid path or abstract socket:" {
 	backend b1 {
 		.path = "server.sock";
 	}
 }
 
-vinyl v1 -errvcl "Path too long for a Unix domain socket" {
+varnish v1 -errvcl "Path too long for a Unix domain socket" {
 	backend b1 {
 		.path = "/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path/this/super/long/path";
 	}
 }
 
-vinyl v1 -errvcl "Not a socket:" {
+varnish v1 -errvcl "Not a socket:" {
 	backend b1 {
 		.path = "${tmpdir}";
 	}
@@ -138,9 +138,9 @@ vinyl v1 -errvcl "Not a socket:" {
 # VCC warns, but does not fail, if stat(UDS) fails with ENOENT.
 shell { rm -f ${tmpdir}/foo }
 
-vinyl v1 -vcl { backend b None; }
+varnish v1 -vcl { backend b None; }
 
-vinyl v1 -cliexpect "(?s)Cannot stat:.+That was just a warning" \
+varnish v1 -cliexpect "(?s)Cannot stat:.+That was just a warning" \
 	{vcl.inline test "vcl 4.1; backend b {.path=\"${tmpdir}/foo\";}"}
 
 # VCC also warns but doesn't fail for EACCES. Tested in c00086.vtc.
@@ -153,7 +153,7 @@ server s1 -listen "${tmpdir}/server.sock" {
 	txresp -hdr "Connection: close" -hdr "Cache-Control: max-age=0"
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend b {.path = "${s1_sock}"; }
 } -start
 

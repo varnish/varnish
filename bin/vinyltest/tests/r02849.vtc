@@ -23,9 +23,9 @@ server s1 {
 } -start
 
 # give enough stack to 32bit systems
-vinyl v1 -cliok "param.set thread_pool_stack 128k"
+varnish v1 -cliok "param.set thread_pool_stack 128k"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/l3") {
 			set req.url = "/l3b";
@@ -39,11 +39,11 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
-vinyl v1 -cliok "vcl.label lab1 vcl1"
+varnish v1 -cliok "vcl.label lab1 vcl1"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/l3") {
 			set req.url = "/l3a";
@@ -57,9 +57,9 @@ vinyl v1 -vcl+backend {
 	}
 }
 
-vinyl v1 -cliok "vcl.label lab2 vcl2"
+varnish v1 -cliok "vcl.label lab2 vcl2"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		if (req.url == "/l1") {
 			return (vcl(lab1));
@@ -93,7 +93,7 @@ client c1 {
 	expect resp.http.vcl == vcl3
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 logexpect l1 -v v1 -g raw {
 

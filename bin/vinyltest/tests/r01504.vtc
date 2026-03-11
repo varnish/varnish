@@ -1,6 +1,6 @@
 vtest "unreferenced or null acls"
 
-vinyl v1 -arg "-p vcc_feature=-err_unref" -vcl {
+varnish v1 -arg "-p vcc_feature=-err_unref" -vcl {
 	import vtc;
 	backend s1 {
 		.host = "${bad_backend}";

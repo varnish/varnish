@@ -8,7 +8,7 @@ server s1 {
 	 txresp -hdr "Cache-Control: max-age=1" -hdr "Age: 2"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 	sub vcl_deliver {
 		std.collect(resp.http.age);

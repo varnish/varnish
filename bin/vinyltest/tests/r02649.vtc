@@ -1,13 +1,13 @@
 vtest "Cleanly stop a VUT app via vtc process -stop"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend be {
 		.host = "${bad_backend}";
 	}
 } -start
 
 process p1 {
-	exec vinylncsa -n ${v1_name} -P ${tmpdir}/ncsa.pid -w ${tmpdir}/ncsa.log
+	exec varnishncsa -n ${v1_name} -P ${tmpdir}/ncsa.pid -w ${tmpdir}/ncsa.log
 } -start
 
 delay 1

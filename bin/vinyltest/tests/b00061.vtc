@@ -5,7 +5,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	txresp -hdr "s1: got it"
 } -start
 
-vinyl v1 -arg "-b ${s1_sock}" -start
+varnish v1 -arg "-b ${s1_sock}" -start
 
 client c1 {
 	txreq

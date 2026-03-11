@@ -11,9 +11,9 @@
 VCL
 ===
 
-----------------------------
-Vinyl Configuration Language
-----------------------------
+------------------------------
+Varnish Configuration Language
+------------------------------
 
 :Manual section: 7
 
@@ -22,15 +22,19 @@ DESCRIPTION
 
 The VCL language is a small domain-specific language designed to be
 used to describe request handling and document caching policies for
-Vinyl Cache.
+Varnish Cache.
 
-When a new configuration is loaded, the `vinyld` management process
+When a new configuration is loaded, the varnishd management process
 translates the VCL code to C and compiles it to a shared object which
 is then loaded into the server process.
 
 This document focuses on the syntax of the VCL language. For a full
 description of syntax and semantics, with ample examples, please see
-the online documentation at https://www.vinyl-cache.org/docs/ .
+the online documentation at https://www.varnish-cache.org/docs/ .
+
+Starting with Varnish 4.0, each VCL file must start by declaring its
+version with ``vcl`` *<major>.<minor>*\ ``;`` marker at the top of
+the file.  See more about this under Versioning below.
 
 .. _Identifiers:
 
@@ -48,11 +52,11 @@ To illustrate, ``e1xam_p-le`` is a valid identifier, ``1try`` and
 Character Sets
 --------------
 
-.. _VMODs: https://vinyl-cache.org/docs/trunk/reference/vmod.html
+.. _VMODs: https://varnish-cache.org/docs/trunk/reference/vmod.html
 
 While identifiers can only consist of this subset of ASCII, **strings** can
 contain any bytes except *NUL* (zero, 0), which marks the end of the string. The
-Vinyl Configuration Language itself is not concerned with the character
+Varnish Configuration Language itself is not concerned with the character
 encoding of strings. VCL code handling strings in different character sets needs
 to track encodings itself. `VMODs`_ exist to help with such tasks (e.g.
 ``iconv``).
@@ -99,27 +103,6 @@ The following operators are available in VCL:
   ``&&`` / ``||``
     Logical and/or.
 
-On Equality
-~~~~~~~~~~~
-
-In this section, "compare equal" means that the ``==`` operator returns ``true``
-and, conversely, the ``!=`` operator returns ``false``.
-
-The VCL types ``INT``, ``DURATION``, ``BYTES``, ``REAL`` and ``TIME`` compare
-equal if their values compare equal numerically.
-
-Notice that ``DURATION``, ``REAL`` and ``TIME`` are represented as floating
-point numbers, and hence testing for (in)equality might be unreliable.
-
-``IP`` compares equal for equal address.
-
-``STRING`` and ``STRANDS`` compare equal if the represented strings are equal.
-
-``BOOL`` compares equal if the truth value is the same.
-
-The VCL types ``BACKEND``, ``ACL``, ``PROBE``, ``STEVEDORE``, ``SUB`` and
-``INSTANCE`` compare equal if they represent the same object. Different objects
-with the same properties will never compare equal.
 
 Conditionals
 ------------
@@ -246,7 +229,7 @@ with their value rounded to 3 decimal places, e.g. ``3.142``.
 Regular Expressions
 -------------------
 
-Vinyl Cache uses Perl-compatible regular expressions (PCRE). For a
+Varnish uses Perl-compatible regular expressions (PCRE). For a
 complete description please see the pcre(3) man page.
 
 To send flags to the PCRE engine, such as to do case-insensitive matching, add
@@ -275,7 +258,7 @@ The included file can be specified as follows:
 Optionally, the ``include`` keyword can take a ``+glob`` flag to include all
 files matching a glob pattern::
 
-    include +glob "/etc/vinyl/example.org/*.vcl";
+    include +glob "/etc/varnish/example.org/*.vcl";
 
 Note that the ``+glob`` option can only be used with absolute paths and
 relative paths starting with './', which means that ``+glob`` includes cannot
@@ -284,7 +267,7 @@ be searched in ``vcl_path`` directories.
 Import statement
 ----------------
 
-The ``import`` statement is used to load Vinyl Modules (VMODs.)
+The ``import`` statement is used to load Varnish Modules (VMODs.)
 
 Example::
 
@@ -329,7 +312,7 @@ control list which can later be used to match client addresses::
         ! "192.0.2.23"; # except for the dial-in router
     }
 
-If an ACL entry specifies a host name which `vinyld` is unable to
+If an ACL entry specifies a host name which Varnish is unable to
 resolve, it will match any address it is compared to. Consequently,
 if it is preceded by a negation mark, it will reject any address it is
 compared to, which may not be what you intended. If the entry is
@@ -369,9 +352,9 @@ individually:
   folded (e.g.  if both 1.2.3.0/25 and 1.2.3.128/25 are added, they will be
   folded to 1.2.3.0/24).
 
-  Skip and fold operations on ACL entries are output as warnings
+  Skip and fold operations on VCL entries are output as warnings
   during VCL compilation as entries from the VCL are processed in
-  order unless the `-report` sub-flag is also given (see below).
+  order.
 
   Logging under the ``VCL_acl`` tag can change with this parameter
   enabled: Matches on skipped subnet entries are now logged as matches
@@ -381,19 +364,6 @@ individually:
   ``fixed: folded``.
 
   Negated ACL entries are never folded.
-
-  Exactly one sub-flag is supported following `fold` in parenthesis:
-
-  - `+fold(+report)` - Fold with reporting (default)
-
-    Report about folding as described above
-
-  - `+fold(-report)` - Fold without reporting
-
-    Enable folding, but do not output folding-related warnings during VCL
-    compilation
-
-  The ``report`` sub-option is only valid with ``+fold``.
 
 VCL objects
 -----------
@@ -432,28 +402,6 @@ subroutine's name::
         call pipe_if_local;
     }
 
-Symbol references
------------------
-
-Some VCL symbols are subject to reference counting, and would trigger a vcl
-compiler error if they were declared but not used. One way to turn these errors
-into warnings is to add ``-p vcc_feature=-err_unref`` to your ``vinyld``
-command line. This will disable the error globally for all symbols in every VCL
-that is compiled.
-
-If you only want to disable the error for some specific symbols, the ``unused``
-keyword can be used to mark such symbols as intentionally unused::
-
-    backend b1 { .host = "localhost"; }
-    probe p1 { }
-    acl acl1 { "localhost"; }
-    sub sb {}
-
-    unused b1;
-    unused p1;
-    unused acl1;
-    unused sb;
-
 Return statements
 ~~~~~~~~~~~~~~~~~
 
@@ -480,7 +428,7 @@ Multiple subroutines
 If multiple subroutines with the name of one of the built-in ones are defined,
 they are concatenated in the order in which they appear in the source.
 
-The built-in VCL distributed with Vinyl Cach will be implicitly concatenated
+The built-in VCL distributed with Varnish will be implicitly concatenated
 when the VCL is compiled.
 
 Functions
@@ -552,7 +500,7 @@ not have surprises in the future.  The syntax version set in an
 included file only applies to that file and any files it includes -
 unless these set their own VCL syntax version.
 
-The version of Vinyl Cache this file belongs to supports syntax 4.0 and 4.1.
+The version of Varnish this file belongs to supports syntax 4.0 and 4.1.
 
 
 EXAMPLES
@@ -563,7 +511,7 @@ For examples, please see the online documentation.
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
+* :ref:`varnishd(1)`
 * :ref:`vcl-backend(7)`
 * :ref:`vcl-probe(7)`
 * :ref:`vcl-step(7)`
@@ -582,7 +530,7 @@ Kristian Lyngstøl, Lasse Karstensen and others.
 COPYRIGHT
 =========
 
-This document is licensed under the same license as Vinyl Cache
+This document is licensed under the same license as Varnish
 itself. See LICENSE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

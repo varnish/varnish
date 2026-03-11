@@ -12,7 +12,7 @@ server s1 {
 	delay 1
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;

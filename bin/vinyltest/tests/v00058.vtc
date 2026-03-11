@@ -1,6 +1,6 @@
 vtest "Test VRT STRANDS related functions"
 
-vinyl v1 -arg "-i foobar" -vcl {
+varnish v1 -arg "-i foobar" -vcl {
 	import debug;
 	backend b None;
 
@@ -133,7 +133,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 	import vtc;
 
@@ -177,8 +177,8 @@ client c1 {
 	expect resp.status <= 503
 } -run
 
-vinyl v1 -expect client_resp_500 == 1
-vinyl v1 -expect ws_client_overflow == 2
+varnish v1 -expect client_resp_500 == 1
+varnish v1 -expect ws_client_overflow == 2
 
 # Test $STRINGS.{upper|lower}
 
@@ -187,7 +187,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_deliver {
 		set resp.http.l-proto = resp.proto.lower();
 		set resp.http.u-proto = resp.proto.upper();

@@ -2,7 +2,7 @@ vtest "HTTP/1.0 POST and PUT need a valid Content-Length"
 
 server s1 { } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	txreq -proto HTTP/1.0 -req "POST" -nolen

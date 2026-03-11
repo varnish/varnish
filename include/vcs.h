@@ -30,6 +30,6 @@
  *
  */
 
-/* from libvinyl/version.c */
+/* from libvarnish/version.c */
 void VCS_Message(const char *);
 const char *VCS_String(const char *which);

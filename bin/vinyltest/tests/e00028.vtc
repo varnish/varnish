@@ -34,7 +34,7 @@ server s1 {
 	txresp -hdr "Vary: fooqux, Accept-Encoding" -gzipbody "fooqux"
 } -start
 
-vinyl v1 -arg "-p feature=+esi_disable_xml_check" -vcl+backend {
+varnish v1 -arg "-p feature=+esi_disable_xml_check" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.http.filters1 = beresp.filters;
 		set beresp.do_esi = true;

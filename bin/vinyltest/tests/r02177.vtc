@@ -10,13 +10,13 @@ server s2 {
 	txresp -status 404
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 { .host="${s1_addr}"; .port="${s1_port}"; }
 }
 
-vinyl v1 -cli "vcl.label lbl1 vcl1"
+varnish v1 -cli "vcl.label lbl1 vcl1"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 { .host="${s1_addr}"; .port="${s1_port}"; }
 
 	sub vcl_recv {
@@ -24,9 +24,9 @@ vinyl v1 -vcl {
 	}
 }
 
-vinyl v1 -cli "vcl.label lbl2 vcl2"
+varnish v1 -cli "vcl.label lbl2 vcl2"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s2 { .host="${s2_addr}"; .port="${s2_port}"; }
 
 	sub vcl_recv {
@@ -43,9 +43,9 @@ vinyl v1 -vcl {
 	}
 }
 
-vinyl v1 -cliok "vcl.list"
-vinyl v1 -start
-vinyl v1 -cliok "vcl.list"
+varnish v1 -cliok "vcl.list"
+varnish v1 -start
+varnish v1 -cliok "vcl.list"
 
 logexpect l1 -v v1 -g raw {
 	expect * * VCL_Error "Illegal return.vcl.: Not after restarts"

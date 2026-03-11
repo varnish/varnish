@@ -11,18 +11,18 @@
 VSL
 ===
 
----------------------------------
-Vinyl Cache Shared Memory Logging
----------------------------------
+-----------------------------
+Varnish Shared Memory Logging
+-----------------------------
 
 :Manual section: 7
 
 OVERVIEW
 ========
 
-This document describes the format and content of all the Vinyl Cache shared memory
-logging tags. These tags are used by the vinyllog(1), vinyltop(1), etc.
-logging tools supplied with Vinyl Cache.
+This document describes the format and content of all the Varnish shared memory
+logging tags. These tags are used by the varnishlog(1), varnishtop(1), etc.
+logging tools supplied with Varnish.
 
 VSL tags
 ~~~~~~~~
@@ -38,7 +38,7 @@ which event was completed. The reported fields show the absolute time
 of the event, the time spent since the start of the task and the time
 spent since the last timestamp was logged.
 
-The timestamps logged automatically by `vinyld` are inserted after
+The timestamps logged automatically by Varnish are inserted after
 completing events that are expected to have delays (e.g. network IO or
 spending time on a waitinglist). Timestamps can also be inserted from
 VCL using the std.timestamp() function. If one is doing time consuming
@@ -78,7 +78,7 @@ Restart
 
 Reset
         The client closed its connection, reset its stream or caused
-        a stream error that forced `vinyld` to reset the stream. Request
+        a stream error that forced Varnish to reset the stream. Request
         processing is interrupted and considered failed, with a 408
         "Request Timeout" status code.
 
@@ -136,7 +136,7 @@ NOTICE MESSAGES
 Notice messages contain informational messages about the handling of a
 request. These can be exceptional circumstances encountered that causes
 deviation from the normal handling. The messages are prefixed with ``vsl:``
-for core `vinyld` generated messages, and VMOD authors are encouraged to
+for core Varnish generated messages, and VMOD authors are encouraged to
 use ``vmod_<name>:`` for their own notice messages. This matches the name
 of the manual page where detailed descriptions of notice messages are
 expected.
@@ -177,15 +177,15 @@ Martin Blix Grydeland.
 SEE ALSO
 ========
 
-* :ref:`vinylhist(1)`
-* :ref:`vinyllog(1)`
-* :ref:`vinylncsa(1)`
-* :ref:`vinyltop(1)`
+* :ref:`varnishhist(1)`
+* :ref:`varnishlog(1)`
+* :ref:`varnishncsa(1)`
+* :ref:`varnishtop(1)`
 
 COPYRIGHT
 =========
 
-This document is licensed under the same licence as Vinyl Cache
+This document is licensed under the same licence as Varnish
 itself. See LICENCE for details.
 
 * Copyright (c) 2006 Verdens Gang AS

@@ -34,7 +34,7 @@ port number or bind it to a loopback address first.
 Multiple '-a' arguments can be provided to service multiple endpoints. *name* is
 the ``local.socket`` name for VCL. *listen_address* can be an IPv4 or IPv6
 address with a port, a unix domain socket path or an abstract socket. See
-:ref:`vinyld(1)` for more details.
+:ref:`varnishd(1)` for more details.
 
 Here are some examples::
 
@@ -75,4 +75,4 @@ Optional arguments
 ^^^^^^^^^^^^^^^^^^
 
 For a complete list of the command line arguments please see
-:ref:`vinyld(1) options <ref-vinyld-options>`.
+:ref:`varnishd(1) options <ref-varnishd-options>`.

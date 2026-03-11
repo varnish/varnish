@@ -10,7 +10,7 @@ server s1 {
 	txresp -body "Ponto Facto, Caesar Transit!"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_response {
@@ -24,9 +24,9 @@ client c1 {
 	expect resp.body == "Cbagb Snpgb, Pnrfne Genafvg!"
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_response {
@@ -41,7 +41,7 @@ client c1 {
 } -run
 
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_backend_response {
@@ -61,7 +61,7 @@ server s1 {
 	txresp -body "Ponto Facto, Caesar Transit!"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_deliver {
@@ -80,7 +80,7 @@ client c1 -repeat 2 {
 	expect resp.body == "Cbagb Snpgb, Pnrfne Genafvg!"
 } -run
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	backend none none;
 

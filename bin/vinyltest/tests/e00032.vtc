@@ -7,7 +7,7 @@ server s1 {
 	txresp -gzipbody "foo"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return (pass);
 	}

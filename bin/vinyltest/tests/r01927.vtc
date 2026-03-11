@@ -14,7 +14,7 @@ server s1 {
 	barrier b1 sync
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		# We ignore the actual body for this test.
 		set req.http.method = req.method;

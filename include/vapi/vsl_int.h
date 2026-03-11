@@ -32,7 +32,7 @@
  * Define the layout of the shared memory log segment.
  *
  * This file SHALL only be included from:
- *	bin/vinyld/cache/cache.h
+ *	bin/varnishd/cache/cache.h
  *	include/vsl_priv.h
  *	include/vapi/vsl.h
  *

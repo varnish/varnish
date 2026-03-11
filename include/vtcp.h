@@ -32,7 +32,7 @@
 
 struct suckaddr;
 
-/* from libvinyl/tcp.c */
+/* from libvarnish/tcp.c */
 /* NI_MAXHOST and NI_MAXSERV are ridiculously long for numeric format */
 #define VTCP_ADDRBUFSIZE		64
 #define VTCP_PORTBUFSIZE		16

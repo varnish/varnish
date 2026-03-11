@@ -7,11 +7,11 @@ server s1 {
 
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set debug +h2_nocheck"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +h2_nocheck"
 
-vinyl v1 -vcl+backend { } -start
+varnish v1 -vcl+backend { } -start
 
 client c1 {
 	stream 0 {

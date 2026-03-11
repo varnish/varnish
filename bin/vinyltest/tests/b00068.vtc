@@ -9,7 +9,7 @@ feature !workspace_emulator
 # Would we want VSL Info about waiter involvement?
 #
 
-vinyl v1 -arg "-p timeout_linger=1"	\
+varnish v1 -arg "-p timeout_linger=1"	\
 	   -arg "-a ${listen_addr}"	\
 	   -arg "-a ${tmpdir}/v1.sock"	\
 	   -vcl {

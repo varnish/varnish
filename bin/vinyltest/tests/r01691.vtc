@@ -5,7 +5,7 @@ server s1 {
 	txresp -nolen -hdr "Content-Length: bogus"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 } -start
 

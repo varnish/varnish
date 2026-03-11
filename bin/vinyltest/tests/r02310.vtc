@@ -8,10 +8,10 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set feature -vcl_req_reset"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set feature -vcl_req_reset"
 
 client c1 {
 	send "GET / HTTP/1.1\r\n"
@@ -36,6 +36,6 @@ client c1 {
 } -run
 
 barrier b1 sync
-vinyl v1 -expect client_req != 0
-vinyl v1 -wait
+varnish v1 -expect client_req != 0
+varnish v1 -wait
 

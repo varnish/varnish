@@ -5,7 +5,7 @@ server s0 -listen "${tmpdir}/s1.sock" {
 	txresp -hdr "connection: close"
 } -dispatch
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv { return (pass); }
 	sub vcl_backend_response {
 		set beresp.http.retries = bereq.retries;
@@ -22,7 +22,7 @@ client c1 {
 	expect resp.http.retries == 2
 } -run
 
-vinyl v1 -cliok "param.set max_retries 2"
+varnish v1 -cliok "param.set max_retries 2"
 
 client c2 {
 	txreq -hdr "stop: 2"
@@ -38,4 +38,4 @@ client c3 {
 	expect resp.http.retries == <undef>
 } -run
 
-vinyl v1 -expect backend_conn == 9
+varnish v1 -expect backend_conn == 9

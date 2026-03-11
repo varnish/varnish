@@ -24,7 +24,7 @@ server s4 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	sub vcl_backend_fetch {
 		if (bereq.url == "/1") {
@@ -39,9 +39,9 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set timeout_idle 10"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set timeout_idle 10"
 
 client c1 {
 	stream 1 {

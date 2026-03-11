@@ -8,17 +8,17 @@ server s1 {
 	chunkedlen 0
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
 } -start
 
-vinyl v1 -cliok "debug.fragfetch 4"
+varnish v1 -cliok "debug.fragfetch 4"
 
 client c1 {
 	txreq -url /foo
 	rxresp
 } -run
 
-vinyl v1 -expect esi_errors == 0
+varnish v1 -expect esi_errors == 0

@@ -5,7 +5,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {

@@ -5,7 +5,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-p lru_interval=1" -vcl+backend {
+varnish v1 -arg "-p lru_interval=1" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_stream = false;
 	}
@@ -16,7 +16,7 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -expect MAIN.n_lru_moved == 0
+varnish v1 -expect MAIN.n_lru_moved == 0
 
 delay 2
 
@@ -27,4 +27,4 @@ client c1 {
 	rxresp
 } -run
 
-vinyl v1 -expect MAIN.n_lru_moved == 1
+varnish v1 -expect MAIN.n_lru_moved == 1

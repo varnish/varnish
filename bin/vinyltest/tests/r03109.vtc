@@ -11,7 +11,7 @@ server s1 {
 	sendhex "00 62 61 64 0a"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		# no gunzip check
 		set beresp.filters = "";

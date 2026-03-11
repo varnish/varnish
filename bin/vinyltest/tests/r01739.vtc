@@ -6,7 +6,7 @@ server s1 {
 } -start
 
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_backend_response {
@@ -27,4 +27,4 @@ client c1 {
 } -run
 
 logexpect l1 -wait
-vinyl v1 -expect ws_backend_overflow == 1
+varnish v1 -expect ws_backend_overflow == 1

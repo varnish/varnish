@@ -5,8 +5,8 @@ server s1 -repeat 2 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend { } -start
-vinyl v1 -cliok "param.set feature +http2"
+varnish v1 -vcl+backend { } -start
+varnish v1 -cliok "param.set feature +http2"
 
 logexpect l1 -v v1 {
 	expect * * BereqProtocol	HTTP/1.1

@@ -17,15 +17,15 @@ server s1 {
 	txresp -hdr "Vary: accept"
 } -start
 
-vinyl v1 -cliok "param.set thread_pools 1"
-vinyl v1 -cliok "param.set rush_exponent 1"
-vinyl v1 -cliok "param.set debug +syncvsl,+waitinglist"
-vinyl v1 -vcl+backend "" -start
+varnish v1 -cliok "param.set thread_pools 1"
+varnish v1 -cliok "param.set rush_exponent 1"
+varnish v1 -cliok "param.set debug +syncvsl,+waitinglist"
+varnish v1 -vcl+backend "" -start
 
 client c1 {
 	txreq
 	rxresp
-	expect resp.http.X-Vinyl == 1001
+	expect resp.http.X-Varnish == 1001
 } -start
 
 barrier b1 sync
@@ -37,7 +37,7 @@ logexpect l1 -v v1 -q Debug -g raw {
 client c2 {
 	txreq -hdr "accept: nothing"
 	rxresp
-	expect resp.http.X-Vinyl == 1004
+	expect resp.http.X-Varnish == 1004
 } -start
 
 logexpect l1 -wait -start
@@ -45,7 +45,7 @@ logexpect l1 -wait -start
 client c3 {
 	txreq
 	rxresp
-	expect resp.http.X-Vinyl == "1006 1002"
+	expect resp.http.X-Varnish == "1006 1002"
 } -start
 
 logexpect l1 -wait
@@ -56,9 +56,9 @@ client c1 -wait
 client c2 -wait
 client c3 -wait
 
-vinyl v1 -expect cache_miss == 2
-vinyl v1 -expect cache_hit == 1
-vinyl v1 -expect cache_hit_grace == 0
-vinyl v1 -expect s_bgfetch == 0
-vinyl v1 -expect busy_sleep == 2
-vinyl v1 -expect busy_wakeup == 2
+varnish v1 -expect cache_miss == 2
+varnish v1 -expect cache_hit == 1
+varnish v1 -expect cache_hit_grace == 0
+varnish v1 -expect s_bgfetch == 0
+varnish v1 -expect busy_sleep == 2
+varnish v1 -expect busy_wakeup == 2

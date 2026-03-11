@@ -15,7 +15,7 @@ server s1 {
 	txresp -body "\xeb\xbc    <html>   <esi:remove>blabla</esi:remove>"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}
@@ -40,7 +40,7 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -cliok "param.set feature +esi_remove_bom"
+varnish v1 -cliok "param.set feature +esi_remove_bom"
 
 client c1 {
 	# BOM removed, ESI processing

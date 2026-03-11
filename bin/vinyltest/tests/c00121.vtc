@@ -22,7 +22,7 @@ server s2 -listen "@${vtcid}.s2.sock" {
 	}
 } -start
 
-vinyl v1 -arg "-a @${vtcid}.v1.sock" -vcl {
+varnish v1 -arg "-a @${vtcid}.v1.sock" -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -36,7 +36,7 @@ vinyl v1 -arg "-a @${vtcid}.v1.sock" -vcl {
 
 delay 1
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	probe default {
 		.window = 8;
 		.initial = 7;
@@ -50,7 +50,7 @@ vinyl v1 -vcl {
 
 delay 1
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 		.path = "@${vtcid}.s1.sock";
 	}
@@ -58,8 +58,8 @@ vinyl v1 -vcl {
 
 delay 1
 
-vinyl v1 -cliok "vcl.list"
-vinyl v1 -cliok "backend.list -p"
+varnish v1 -cliok "vcl.list"
+varnish v1 -cliok "backend.list -p"
 
 server s1 -break {
 	rxreq
@@ -81,11 +81,11 @@ client c1 -connect "@${vtcid}.v1.sock" {
 ########################################
 # coverage
 
-vinyl v1 -errvcl {Backend path: The empty abstract socket name is not supported} {
+varnish v1 -errvcl {Backend path: The empty abstract socket name is not supported} {
 	backend s1 {
 		.path = "@";
 	}
 }
 
 shell -err -expect "Error: Got no socket(s) for a0=@ (The empty abstract socket name is not supported)" \
-	"vinyld -n ${tmpdir}/v0 -a @ -b None"
+	"varnishd -n ${tmpdir}/v0 -a @ -b None"

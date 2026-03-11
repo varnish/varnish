@@ -9,10 +9,10 @@ server s0 {
         txresp
 } -dispatch
 
-vinyl v1 -arg {-a TCP=${localhost}:0 -a "UDS=${tmpdir}/v1.sock"}
-vinyl v1 -cliok "param.set debug +flush_head"
-vinyl v1 -cliok "param.set timeout_idle 1"
-vinyl v1 -vcl+backend { } -start
+varnish v1 -arg {-a TCP=${localhost}:0 -a "UDS=${tmpdir}/v1.sock"}
+varnish v1 -cliok "param.set debug +flush_head"
+varnish v1 -cliok "param.set timeout_idle 1"
+varnish v1 -vcl+backend { } -start
 
 client c1 {
         txreq -req POST -hdr "Content-Length: 100"
@@ -27,7 +27,7 @@ client c1 -run
 # This run relies on the inheritance test results
 client c1 -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 # This run checks that TCP results aren't applied to a UDS
 client c1 -connect "${tmpdir}/v1.sock"

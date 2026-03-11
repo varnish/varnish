@@ -53,12 +53,12 @@ server s1 {
 	send "asdf"
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-vcl+backend {
 	} -start
 
-vinyl v1 -cliok "param.set http_resp_size 256"
-vinyl v1 -cliok "param.set http_resp_hdr_len 40"
+varnish v1 -cliok "param.set http_resp_size 256"
+varnish v1 -cliok "param.set http_resp_hdr_len 40"
 
 client c1 {
 	txreq -url "/1"

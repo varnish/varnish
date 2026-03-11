@@ -5,7 +5,7 @@ server s1 {
 	txresp -status 204 -body "HiHo"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (beresp.http.foo == "bar") {
 			set beresp.status = 204;

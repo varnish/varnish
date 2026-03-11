@@ -6,7 +6,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend default none;
 } -start
 
@@ -18,7 +18,7 @@ client c1 {
 
 # Test NULL none default backend
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	backend null_backend none;
 	backend null_backend_uppercase None;
 	sub vcl_recv {
@@ -44,8 +44,8 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-vinyl v1 -cliok "param.set vcc_feature -err_unref"
-vinyl v1 -vcl {
+varnish v1 -cliok "param.set vcc_feature -err_unref"
+varnish v1 -vcl {
 	backend bad { .host = "${bad_backend}"; }
 	backend nil none;
 }

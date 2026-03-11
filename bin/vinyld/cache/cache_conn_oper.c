@@ -39,7 +39,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "cache/cache_varnishd.h"
+#include "cache/cache_vinyld.h"
 #include "cache/cache_conn_oper.h"
 
 #include "vtcp.h"

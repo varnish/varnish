@@ -12,11 +12,11 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set debug +waitinglist"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +waitinglist"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_recv {
 		return (hash);
 	}
@@ -60,8 +60,8 @@ client c2 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -vsl_catchup
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0

@@ -7,7 +7,7 @@ server s1 {
 	txresp -gzipbody "bar"
 } -start
 
-vinyl v1 -arg "-p http_gzip_support=off" -vcl+backend {
+varnish v1 -arg "-p http_gzip_support=off" -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.do_esi = true;
 	}

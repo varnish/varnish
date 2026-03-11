@@ -1,5 +1,5 @@
 #-
-# This document is licensed under the same conditions as Vinyl Cache itself.
+# This document is licensed under the same conditions as Varnish Cache itself.
 # See LICENSE for details.
 #
 # SPDX-License-Identifier: BSD-2-Clause
@@ -371,7 +371,7 @@ But the `xblob.encode()`_ object method is more efficient --
 the encoding is computed once and cached (with allocation in heap
 memory), and the cached encoding is retrieved on every subsequent
 call. The `blob.encode()`_ function computes the encoding on every
-call, allocating space for the string in Vinyl Cache workspaces.
+call, allocating space for the string in Varnish Cache workspaces.
 
 So if the data in a BLOB are fixed at VCL initialization time, so that
 its encodings will always be the same, it is better to create a
@@ -414,20 +414,20 @@ from the heap, and hence they are only limited by available virtual
 memory.
 
 The `blob.encode()`_, `blob.decode()`_ and
-`blob.transcode()`_ functions allocate Vinyl Cache workspace, as does
+`blob.transcode()`_ functions allocate Varnish Cache workspace, as does
 `blob.sub()`_ for the newly created BLOB.  If these functions are
-failing, as indicated by "out of space" messages in the Vinyl Cache log
+failing, as indicated by "out of space" messages in the Varnish Cache log
 (with the ``VCL_Error`` tag), then you will need to increase the
-`vinyld` parameters ``workspace_client`` and/or ``workspace_backend``.
+`varnishd` parameters ``workspace_client`` and/or ``workspace_backend``.
 
 The `blob.transcode()`_ function also allocates space on the stack
 for a temporary BLOB. If this function causes stack overflow, you may
-need to increase the `vinyld` parameter ``thread_pool_stack``.
+need to increase the `varnishd` parameter ``thread_pool_stack``.
 
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
+* :ref:`varnishd(1)`
 * :ref:`vcl(7)`
 * :ref:`vsl(7)`
 * :ref:`vmod_std(3)`

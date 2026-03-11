@@ -1,8 +1,8 @@
 vtest "h2 CONTINUATION flood"
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set vsl_mask -H2RxHdr,-H2RxBody"
-vinyl v1 -vcl { backend be none; } -start
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set vsl_mask -H2RxHdr,-H2RxBody"
+varnish v1 -vcl { backend be none; } -start
 
 client c1 {
 	non_fatal
@@ -15,5 +15,5 @@ client c1 {
 	} -run
 } -run
 
-vinyl v1 -expect MAIN.s_req_hdrbytes < 65536
-vinyl v1 -expect MAIN.sc_overload == 1
+varnish v1 -expect MAIN.s_req_hdrbytes < 65536
+varnish v1 -expect MAIN.sc_overload == 1

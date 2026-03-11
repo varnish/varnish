@@ -1,4 +1,4 @@
-vtest "new vinylncsa matching rules"
+vtest "new varnishncsa matching rules"
 
 # Test things we send to the backend
 
@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	sub vcl_backend_fetch {
 		set bereq.http.bereqhdr = "vbf-modified";
@@ -35,7 +35,7 @@ client c1 {
 } -run
 
 shell {
-	vinylncsa -n ${v1_name} -d -b -F '%H %{bereqhdr}i %{notsent}i %{unset}i %m %q %U %u' > ncsa_sb.txt
+	varnishncsa -n ${v1_name} -d -b -F '%H %{bereqhdr}i %{notsent}i %{unset}i %m %q %U %u' > ncsa_sb.txt
 
 	cat >expected_sb.txt <<-EOF
 	HTTP/1.1 vbf-modified - - HEAD ?q=vbfQuerry /vbf-url vbf
@@ -44,7 +44,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -b -F '%{notsent:first}i %{notsent:last}i %{unset:first}i %{unset:last}i' > ncsa_sb.txt
+	varnishncsa -n ${v1_name} -d -b -F '%{notsent:first}i %{notsent:last}i %{unset:first}i %{unset:last}i' > ncsa_sb.txt
 
 	cat >expected_sb.txt <<-EOF
 	notsent notsent client toolate
@@ -52,7 +52,7 @@ shell {
 	diff -u expected_sb.txt ncsa_sb.txt
 }
 
-vinyl v1 -stop
+varnish v1 -stop
 
 # Test things we receive from the backend
 
@@ -61,7 +61,7 @@ server s1 {
 	txresp -status 202 -hdr "beresp: origin" -hdr "unset: origin"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.http.beresp = "vbr-updated";
@@ -79,7 +79,7 @@ client c1 {
 
 
 shell {
-	vinylncsa -n ${v1_name} -d -b -F '%s %{beresp}o %{unset}o' > ncsa_rb.txt
+	varnishncsa -n ${v1_name} -d -b -F '%s %{beresp}o %{unset}o' > ncsa_rb.txt
 
 	cat >expected_rb.txt <<-EOF
 	202 origin origin
@@ -88,7 +88,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -b -F '%{beresp:first}o %{beresp:last}o %{unset:first}o %{unset:last}o' > ncsa_rb.txt
+	varnishncsa -n ${v1_name} -d -b -F '%{beresp:first}o %{beresp:last}o %{unset:first}o %{unset:last}o' > ncsa_rb.txt
 
 	cat >expected_rb.txt <<-EOF
 	origin vbr-updated origin origin
@@ -96,7 +96,7 @@ shell {
 	diff -u expected_rb.txt ncsa_rb.txt
 }
 
-vinyl v1 -stop
+varnish v1 -stop
 
 # Test things we send to the client
 
@@ -105,7 +105,7 @@ server s1 {
 	txresp -status 202 -hdr "resp: origin" -hdr "unset: origin"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	sub vcl_backend_response {
 		set beresp.http.resp = "vbr-updated";
@@ -128,7 +128,7 @@ client c1 {
 } -run
 
 shell {
-	vinylncsa -n ${v1_name} -d -c -F '%s %{resp}o %{unset}o %{added}o' > ncsa_sc.txt
+	varnishncsa -n ${v1_name} -d -c -F '%s %{resp}o %{unset}o %{added}o' > ncsa_sc.txt
 
 	cat >expected_sc.txt <<-EOF
 	201 deliver-updated - deliver
@@ -137,7 +137,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -c -F '%{resp:first}o %{resp:last}o %{unset:first}o %{unset:last}o' > ncsa_sc.txt
+	varnishncsa -n ${v1_name} -d -c -F '%{resp:first}o %{resp:last}o %{unset:first}o %{unset:last}o' > ncsa_sc.txt
 
 	cat >expected_sc.txt <<-EOF
 	vbr-updated deliver-updated origin origin
@@ -145,7 +145,7 @@ shell {
 	diff -u expected_sc.txt ncsa_sc.txt
 }
 
-vinyl v1 -stop
+varnish v1 -stop
 
 # Test things we receive from the client
 
@@ -154,7 +154,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 
 	sub vcl_recv {
 		set req.http.reqhdr = "recv-modified";
@@ -187,7 +187,7 @@ client c1 {
 
 
 shell {
-	vinylncsa -n ${v1_name} -d -c -F '%H %{reqhdr}i %{notreceived}i %{unset}i %m %q %U %u' > ncsa_rc.txt
+	varnishncsa -n ${v1_name} -d -c -F '%H %{reqhdr}i %{notreceived}i %{unset}i %m %q %U %u' > ncsa_rc.txt
 
 	cat >expected_rc.txt <<-EOF
 	HTTP/1.1 client-header - client POST ?q=clientQuerry /client-url client
@@ -196,7 +196,7 @@ shell {
 }
 
 shell {
-	vinylncsa -n ${v1_name} -d -c -F '%{notreceived:first}i %{notreceived:last}i %{unset:first}i %{unset:last}i' > ncsa_rc.txt
+	varnishncsa -n ${v1_name} -d -c -F '%{notreceived:first}i %{notreceived:last}i %{unset:first}i %{unset:last}i' > ncsa_rc.txt
 
 	cat >expected_rc.txt <<-EOF
 	recv hash client hash

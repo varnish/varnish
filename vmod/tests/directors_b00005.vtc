@@ -24,7 +24,7 @@ server s3 {
 
 server s4 {} -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import directors;
 
 	sub vcl_init {
@@ -51,8 +51,8 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "backend.set_health s1 sick"
-vinyl v1 -cliok "backend.set_health s2 sick"
+varnish v1 -cliok "backend.set_health s1 sick"
+varnish v1 -cliok "backend.set_health s2 sick"
 
 client c1 {
 	txreq -url /bar
@@ -60,7 +60,7 @@ client c1 {
 	expect resp.status == 200
 } -run
 
-vinyl v1 -cliok "backend.set_health s2 healthy"
+varnish v1 -cliok "backend.set_health s2 healthy"
 
 client c1 {
 	txreq -url /baz
@@ -76,7 +76,7 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-vinyl v1 -cliok "backend.set_health s1 healthy"
+varnish v1 -cliok "backend.set_health s1 healthy"
 
 client c1 {
 	txreq -url /foo

@@ -10,9 +10,9 @@ server s1 {
 } -start
 
 # -cli because accept_filter may not be supported
-vinyl v1 -cli "param.set accept_filter off"
+varnish v1 -cli "param.set accept_filter off"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		set beresp.ttl = 0.5s;
 	}

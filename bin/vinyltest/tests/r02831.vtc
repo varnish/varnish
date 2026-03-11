@@ -6,7 +6,7 @@ server s1 {
 	txresp -noserver -bodylen 1048400
 } -start
 
-vinyl v1 \
+varnish v1 \
 	-arg "-p nuke_limit=0" \
 	-arg "-sTransient=default,1m" \
 	-syntax 4.0 \
@@ -25,7 +25,7 @@ vinyl v1 \
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 delay .1
 
@@ -38,8 +38,8 @@ client c1 {
 
 delay .1
 
-vinyl v1 -expect SM?.Transient.g_bytes > 1048400
-vinyl v1 -expect SM?.Transient.g_space < 100
+varnish v1 -expect SM?.Transient.g_bytes > 1048400
+varnish v1 -expect SM?.Transient.g_space < 100
 
 client c1 {
 	# No space for caching this req.body
@@ -47,7 +47,7 @@ client c1 {
 	delay 1
 } -run
 
-vinyl v1 -expect SM?.Transient.c_fail == 1
+varnish v1 -expect SM?.Transient.c_fail == 1
 
 client c1 {
 	# Check that Varnish is still alive

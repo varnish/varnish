@@ -11,13 +11,13 @@ server s1 {
 	txresp -hdr "foo: 3" -body "foo3"
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-vinyl v1 -cliok "ban req.url ~ FOO"
+varnish v1 -cliok "ban req.url ~ FOO"
 
 # There is one "magic" ban from boot
-vinyl v1 -expect bans_added == 2
-vinyl v1 -cliok "ban.list"
+varnish v1 -expect bans_added == 2
+varnish v1 -cliok "ban.list"
 
 # Our fetch is not affected by the ban
 # as the FOO-ban was preexisting
@@ -30,14 +30,14 @@ client c1 {
 	expect resp.http.foo == 1
 } -run
 
-vinyl v1 -cliok "ban.list"
-vinyl v1 -expect bans_tested == 0
-vinyl v1 -expect bans_tests_tested == 0
+varnish v1 -cliok "ban.list"
+varnish v1 -expect bans_tested == 0
+varnish v1 -expect bans_tests_tested == 0
 
 # Add another ban
-vinyl v1 -cliok "ban req.url ~ FOO"
-vinyl v1 -expect bans_added == 3
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban req.url ~ FOO"
+varnish v1 -expect bans_added == 3
+varnish v1 -cliok "ban.list"
 
 # The cached object will be band, and a new
 # fetched from the backend
@@ -47,9 +47,9 @@ client c1 {
 	expect resp.http.foo == 2
 } -run
 
-vinyl v1 -expect bans_tested == 1
-vinyl v1 -expect bans_tests_tested == 1
-vinyl v1 -cliok "ban.list"
+varnish v1 -expect bans_tested == 1
+varnish v1 -expect bans_tests_tested == 1
+varnish v1 -cliok "ban.list"
 
 # Fetch the cached copy, just for grins
 client c1 {
@@ -60,18 +60,18 @@ client c1 {
 
 
 # Now add another two bans, Kilroy should not be hit
-vinyl v1 -cliok "ban req.url ~ KILROY"
-vinyl v1 -cliok "ban req.url ~ FOO"
-vinyl v1 -expect bans_added == 5
+varnish v1 -cliok "ban req.url ~ KILROY"
+varnish v1 -cliok "ban req.url ~ FOO"
+varnish v1 -expect bans_added == 5
 
 # Enable dup removal of bans
-vinyl v1 -cliok "param.set ban_dups on"
+varnish v1 -cliok "param.set ban_dups on"
 
 # This should incapacitate the two previous FOO bans.
-vinyl v1 -cliok "ban req.url ~ FOO"
-vinyl v1 -expect bans_added == 6
-vinyl v1 -expect bans_dups == 3
-vinyl v1 -cliok "ban.list"
+varnish v1 -cliok "ban req.url ~ FOO"
+varnish v1 -expect bans_added == 6
+varnish v1 -expect bans_dups == 3
+varnish v1 -cliok "ban.list"
 
 # And we should get a fresh object from backend
 client c1 {
@@ -81,16 +81,16 @@ client c1 {
 } -run
 
 # With only two objects having ever been compared
-vinyl v1 -expect bans_tested == 2
-vinyl v1 -expect bans_tests_tested == 2
-vinyl v1 -cliok "ban.list"
-vinyl v1 -clijson "ban.list -j"
+varnish v1 -expect bans_tested == 2
+varnish v1 -expect bans_tests_tested == 2
+varnish v1 -cliok "ban.list"
+varnish v1 -clijson "ban.list -j"
 
 # Test a bogus regexp
-vinyl v1 -clierr 106 "ban req.url ~ [[["
+varnish v1 -clierr 106 "ban req.url ~ [[["
 
 # Ban expression with quoting
-vinyl v1 -cliok {ban req.url ~ "BAR"}
-shell {vinyladm -n ${tmpdir}/v1 ban 'obj.http.Host ~ \"Foo\"'}
-vinyl v1 -cliexpect {(?s)\d+\.\d+\s+\d+\s+-\s+\Qobj.http.Host ~ "Foo"\E} "ban.list"
-vinyl v1 -clijson "ban.list -j"
+varnish v1 -cliok {ban req.url ~ "BAR"}
+shell {varnishadm -n ${tmpdir}/v1 ban 'obj.http.Host ~ \"Foo\"'}
+varnish v1 -cliexpect {(?s)\d+\.\d+\s+\d+\s+-\s+\Qobj.http.Host ~ "Foo"\E} "ban.list"
+varnish v1 -clijson "ban.list -j"

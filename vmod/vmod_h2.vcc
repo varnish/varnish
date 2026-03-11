@@ -34,7 +34,7 @@ DESCRIPTION
 ===========
 
 This VMOD contains functions to control the HTTP2 transport built into
-Vinyl Cache.
+Varnish Cache.
 
 $Function BOOL is()
 $Restrict client
@@ -45,7 +45,7 @@ $Function DURATION rapid_reset([DURATION threshold])
 $Restrict client
 
 Get and optionally set the ``h2_rapid_reset`` parameter (See
-:ref:`vinyld(1)`) for this HTTP2 session only.
+:ref:`varnishd(1)`) for this HTTP2 session only.
 
 Returns -1 when used outside the HTTP2 transport. Otherwise returns
 the previous value.
@@ -58,7 +58,7 @@ $Function INT rapid_reset_limit([INT number])
 $Restrict client
 
 Get and optionally set the ``h2_rapid_reset_limit`` parameter (See
-:ref:`vinyld(1)`) for this HTTP2 session only.
+:ref:`varnishd(1)`) for this HTTP2 session only.
 
 Returns -1 when used outside the HTTP2 transport. Otherwise returns
 the previous value.
@@ -71,7 +71,7 @@ $Function DURATION rapid_reset_period([DURATION duration])
 $Restrict client
 
 Get and optionally set the ``h2_rapid_reset_period`` parameter (See
-:ref:`vinyld(1)`) for this HTTP2 session only.
+:ref:`varnishd(1)`) for this HTTP2 session only.
 
 Returns -1 when used outside the HTTP2 transport. Otherwise returns
 the previous value.
@@ -89,5 +89,5 @@ allowed to send before the session is going to be closed.
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
+* :ref:`varnishd(1)`
 * :ref:`vsl(7)`

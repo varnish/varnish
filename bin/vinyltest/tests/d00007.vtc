@@ -6,7 +6,7 @@ vtest "Test dynamic backends"
 # not use any prior information for the actual backend connection -
 # just the information from the proxy protocol
 
-vinyl v2 -proto PROXY -vcl {
+varnish v2 -proto PROXY -vcl {
 	import debug;
 	import std;
 	import proxy;
@@ -66,11 +66,11 @@ server s1 {
 #
 # we vtc.sleep to make sure that the health check is done and server
 # s1 has accepted again. We would rather want to use barriers, but
-# there is a (yet not understood) bug in vinyltest which prevents
+# there is a (yet not understood) bug in varnishtest which prevents
 # the bX_sock macros from being available in the second varnish
 # instance
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	import vtc;
 
@@ -117,7 +117,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -expect MAIN.n_backend == 3
+varnish v1 -expect MAIN.n_backend == 3
 
 client c1 {
 	txreq -url /1

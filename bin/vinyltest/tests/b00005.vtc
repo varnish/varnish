@@ -5,8 +5,8 @@ server s1 {
 	txresp -hdr "Connection: close" -body "012345\n"
 } -start
 
-vinyl v1 \
-	-arg "-s file,${tmpdir}/vinyltest_backing,10M" \
+varnish v1 \
+	-arg "-s file,${tmpdir}/varnishtest_backing,10M" \
 	-vcl+backend {} -start
 
 client c1 {
@@ -17,5 +17,5 @@ client c1 {
 
 server s1 -wait
 
-vinyl v1 -stop
-shell "rm ${tmpdir}/vinyltest_backing"
+varnish v1 -stop
+shell "rm ${tmpdir}/varnishtest_backing"

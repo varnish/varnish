@@ -12,21 +12,21 @@ local, server, remote and client
 --------------------------------
 
 These variables describe the network connection between the
-client and `vinyld`.
+client and varnishd.
 
 Without PROXY protocol::
 
 	     client    server
 	     remote    local
 	       v          v
-	CLIENT ------------ VINYLD
+	CLIENT ------------ VARNISHD
 
 
 With PROXY protocol::
 
 	     client    server   remote     local
 	       v          v       v          v
-	CLIENT ------------ PROXY ------------ VINYLD
+	CLIENT ------------ PROXY ------------ VARNISHD
 
 
 .. _client.identity:
@@ -83,7 +83,7 @@ server.identity
 
 	The identity of the server, as set by the ``-i`` parameter.
 
-	If an ``-i`` parameter is not passed to `vinyld`, the return
+	If an ``-i`` parameter is not passed to varnishd, the return
 	value from `gethostname(3)` system function will be used.
 
 
@@ -246,7 +246,7 @@ req.filters
 
 	Writable from: vcl_recv
 
-	List of Vinyl Fetch Processor (VFP) filters the req.body
+	List of Varnish Fetch Processor (VFP) filters the req.body
 	will be pulled through. The order left to right signifies
 	processing from client to cache, iow the leftmost filter is
 	run first on the body as received from the client after
@@ -515,7 +515,7 @@ req.trace
 	request, see :ref:`vsl(7)`.
 
 	Defaults to the setting of the ``feature trace`` parameter,
-	see :ref:`vinyld(1)`. Does not get reset by a rollback.
+	see :ref:`varnishd(1)`. Does not get reset by a rollback.
 
 
 .. _req.transport:
@@ -557,11 +557,12 @@ req.ttl
 
 	Writable from: client
 
-	Unsettable from: client
+        Unsettable from: client
 
 
-	Deprecated alias of ``req.max-age``, which will be removed in a future
-	version of Varnish-Cache.
+	Upper limit on the object age for cache lookups to return hit.
+
+        When reading the unset value, it is returned as -1.
 
 .. _req.url:
 
@@ -705,7 +706,7 @@ bereq.between_bytes_timeout
 
 	Default: ``.between_bytes_timeout`` attribute from the
 	:ref:`backend_definition`, which defaults to the
-	``between_bytes_timeout`` parameter, see :ref:`vinyld(1)`.
+	``between_bytes_timeout`` parameter, see :ref:`varnishd(1)`.
 
 	The time in seconds to wait between each received byte from the
 	backend.  Not available in pipe mode.
@@ -737,7 +738,7 @@ bereq.connect_timeout
 
 	Default: ``.connect_timeout`` attribute from the
 	:ref:`backend_definition`, which defaults to the
-	``connect_timeout`` parameter, see :ref:`vinyld(1)`.
+	``connect_timeout`` parameter, see :ref:`varnishd(1)`.
 
 	The time in seconds to wait for a backend connection to be
 	established.
@@ -771,7 +772,7 @@ bereq.first_byte_timeout
 
 	Default: ``.first_byte_timeout`` attribute from the
 	:ref:`backend_definition`, which defaults to the
-	``first_byte_timeout`` parameter, see :ref:`vinyld(1)`.
+	``first_byte_timeout`` parameter, see :ref:`varnishd(1)`.
 
 	The time in seconds to wait getting the first byte back
 	from the backend.  Not available in pipe mode.
@@ -943,7 +944,7 @@ bereq.task_deadline
 	Unsettable from: vcl_pipe
 
 	Deadline for pipe sessions, defaults ``0s``, which falls back to the
-	``pipe_task_deadline`` parameter, see :ref:`vinyld(1)`
+	``pipe_task_deadline`` parameter, see :ref:`varnishd(1)`
 
 
 .. _bereq.time:
@@ -1161,7 +1162,7 @@ beresp.do_stream
 	Default: ``true``.
 
 	Deliver the object to the client while fetching the whole
-	object into `vinyld`.
+	object into varnish.
 
 	For uncacheable objects, storage for parts of the body which
 	have been sent to the client may get freed early, depending
@@ -1181,7 +1182,7 @@ beresp.filters
 
 	Writable from: vcl_backend_response
 
-	List of Vinyl Fetch Processor (VFP) filters the beresp.body
+	List of Varnish Fetch Processor (VFP) filters the beresp.body
 	will be pulled through. The order left to right signifies
 	processing from backend to cache, iow the leftmost filter is
 	run first on the body as received from the backend after
@@ -1191,7 +1192,7 @@ beresp.filters
 	being handed to the client side, where it may get processed
 	again by resp.filters.
 
-	The following VFP filters exist in Vinyl Cache:
+	The following VFP filters exist in varnish-cache:
 
 	* ``gzip``: compress a body using gzip
 
@@ -1367,7 +1368,7 @@ beresp.storage
 
 
 	The storage backend to use to save this object. If
-	none is set, `vinyld` will pick a storage backend in a
+	none is set, Varnish will pick a storage backend in a
 	round-robin fashion, or the `Transient` backend if
 	the object is short-lived.
 
@@ -1393,12 +1394,12 @@ beresp.transit_buffer
 
 	Writable from: vcl_backend_response
 
-	Default: ``transit_buffer`` parameter, see :ref:`vinyld(1)`.
+	Default: ``transit_buffer`` parameter, see :ref:`varnishd(1)`.
 
 	The maximum number of bytes the client can be ahead of the
 	backend during a streaming pass if ``beresp`` is
 	uncacheable. See also ``transit_buffer`` parameter
-	documentation in :ref:`vinyld(1)`.
+	documentation in :ref:`varnishd(1)`.
 
 
 .. _beresp.ttl:
@@ -1829,7 +1830,7 @@ resp.do_esi	``VCL >= 4.1``
 
 	This can be used to selectively disable ESI processing, even
 	though ESI parsing happened during fetch (see beresp.do_esi).
-	This is useful when Vinyl Caches peer with each other.
+	This is useful when Varnish caches peer with each other.
 
 	It is a VCL error to use resp.do_esi after setting resp.filters.
 
@@ -1847,7 +1848,7 @@ resp.filters
 	List of VDP filters the resp.body will be pushed through.
 
 	Before resp.filters is set, the value read will be the default
-	filter list as determined by `vinyld` based on resp.do_esi and
+	filter list as determined by varnish based on resp.do_esi and
 	request headers.
 
 	After resp.filters is set, changing any of the conditions
@@ -2012,7 +2013,7 @@ now
 sess
 ----
 
-A session corresponds to the "conversation" that `vinyld` has with a
+A session corresponds to the "conversation" that Varnish has with a
 single client connection, over which one or more request/response
 transactions may take place. It may comprise the traffic over an
 HTTP/1 keep-alive connection, or the multiplexed traffic over an
@@ -2032,7 +2033,7 @@ sess.idle_send_timeout
 
 	Send timeout for individual pieces of data on client
 	connections, defaults to the ``idle_send_timeout`` parameter,
-	see :ref:`vinyld(1)`
+	see :ref:`varnishd(1)`
 
 
 .. _sess.send_timeout:
@@ -2048,7 +2049,7 @@ sess.send_timeout
 	Unsettable from: client
 
 	Total timeout for ordinary HTTP1 responses, defaults to the
-	``send_timeout`` parameter, see :ref:`vinyld(1)`
+	``send_timeout`` parameter, see :ref:`varnishd(1)`
 
 
 .. _sess.timeout_idle:
@@ -2064,7 +2065,7 @@ sess.timeout_idle
 	Unsettable from: client
 
 	Idle timeout for this session, defaults to the
-	``timeout_idle`` parameter, see :ref:`vinyld(1)`
+	``timeout_idle`` parameter, see :ref:`varnishd(1)`
 
 
 .. _sess.timeout_linger:
@@ -2080,7 +2081,7 @@ sess.timeout_linger
 	Unsettable from: client
 
 	Linger timeout for this session, defaults to the
-	``timeout_linger`` parameter, see :ref:`vinyld(1)`
+	``timeout_linger`` parameter, see :ref:`varnishd(1)`
 
 
 .. _sess.xid:

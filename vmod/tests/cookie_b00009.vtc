@@ -1,6 +1,6 @@
 vtest "Test cookie parser"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import cookie;
 	backend be none;
 	sub vcl_recv { return (synth(200)); }

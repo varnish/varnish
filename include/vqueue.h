@@ -32,8 +32,8 @@
  * $FreeBSD: head/sys/sys/queue.h 251887 2013-06-18 02:57:56Z lstewart $
  */
 
-#ifndef VINYL_QUEUE_H
-#define	VINYL_QUEUE_H
+#ifndef VARNISH_QUEUE_H
+#define	VARNISH_QUEUE_H
 
 /*
  * This file defines four types of data structures: singly-linked lists,
@@ -573,4 +573,4 @@ struct {								\
 		(head2)->vtqh_last = &(head2)->vtqh_first;		\
 } while (0)
 
-#endif /* !VINYL_QUEUE_H */
+#endif /* !VARNISH_QUEUE_H */

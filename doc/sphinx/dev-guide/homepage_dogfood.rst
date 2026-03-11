@@ -11,7 +11,7 @@ How our website works
 The principle of eating your own dogfood is important for software
 quality, that is how you experience what your users are dealing with,
 and I am not the least ashamed to admit that several obvious improvements
-have happened to Vinyl Cache as a result of running the project webserver.
+have happened to Varnish as a result of running the project webserver.
 
 But it is also important to externalize what you learn doing so, and
 therefore I thought I would document here how the projects new "internal
@@ -40,10 +40,10 @@ So, dogfood:  Obviously FreeBSD.
 
 Apart from the obvious reason that I wrote a lot of FreeBSD and
 can get world-class support by bugging my buddies about it, there
-are two equally serious reasons for the Vinyl Cache Project to run on
+are two equally serious reasons for the Varnish Project to run on
 FreeBSD:  Dogfood and jails.
 
-Vinyl Cache is not "software for Linux", it is software for any
+Varnish Cache is not "software for Linux", it is software for any
 competent UNIX-like operating system, and FreeBSD is our primary
 "keep us honest about this" platform.
 
@@ -60,7 +60,7 @@ We currently have three jails:
 
 * Hitch - runs the `Hitch SSL proxy <https://hitch-tls.org/>`_
 
-* Vinyl Cache - <a href="rimshot.mp3">You guessed it</a>
+* Varnish - <a href="rimshot.mp3">You guessed it</a>
 
 * Tools - backend webserver, currently `ACME Labs' thttpd <http://acme.com/software/thttpd/>`_
 
@@ -86,7 +86,7 @@ is, unabridged::
 	# Configure the host
 	sh build_host.sh |& tee _.bh
 	# Build the jails
-	foreach i (Tools Hitch Vinyl)
+	foreach i (Tools Hitch Varnish)
 		(cd $i ; sh build* |& tee _.bj)
 	end
 
@@ -144,14 +144,14 @@ the kinks on one of my test-machines.
 
 Once it was as I wanted it, I pushed the changes the live machine and then::
 
-	vinyladm vcl.use backup
+	varnishadm vcl.use backup
 	# The 'backup' VCL does a "pass" of all traffic to my server
 	cd Admin
 	git pull
 	cd Tools
 	sh build_j_tools.sh |& tee _.bj
-	vinyladm vcl.load foobar vinyl-live.vcl
-	vinyladm vcl.use foobar
+	varnishadm vcl.load foobar varnish-live.vcl
+	varnishadm vcl.use foobar
 
 For a few minutes our website was a bit slower (because of the
 extra Paris-Denmark hop), but there was never any interruption.

@@ -6,13 +6,13 @@ server s1 {
 	rxreq
 	txresp -body asdf
 	rxreq
-	expect req.http.X-Vinyl == 1005
+	expect req.http.X-Varnish == 1005
 	txresp -bodylen 1048000
 	rxreq
 	txresp -body ASDF
 } -start
 
-vinyl v1 -arg "-srxbuf=malloc,1m -smain=malloc,1m" -vcl+backend {
+varnish v1 -arg "-srxbuf=malloc,1m -smain=malloc,1m" -vcl+backend {
 	import vtc;
 	sub vcl_recv {
 		if (req.url == "/1") {
@@ -28,14 +28,14 @@ vinyl v1 -arg "-srxbuf=malloc,1m -smain=malloc,1m" -vcl+backend {
 	}
 }
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.reset h2_initial_window_size"
-vinyl v1 -cliok "param.reset h2_rx_window_low_water"
-vinyl v1 -cliok "param.set h2_rxbuf_storage rxbuf"
-vinyl v1 -cliok "param.set vsl_mask +ExpKill"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.reset h2_initial_window_size"
+varnish v1 -cliok "param.reset h2_rx_window_low_water"
+varnish v1 -cliok "param.set h2_rxbuf_storage rxbuf"
+varnish v1 -cliok "param.set vsl_mask +ExpKill"
+varnish v1 -cliok "param.set debug +syncvsl"
 
-vinyl v1 -start
+varnish v1 -start
 
 client c1 {
 	stream 1 {
@@ -46,18 +46,18 @@ client c1 {
 	} -start
 } -start
 
-vinyl v1 -expect SM?.rxbuf.g_bytes >= 2048
-vinyl v1 -expect SM?.Transient.g_bytes == 0
-vinyl v1 -expect MAIN.n_lru_nuked == 0
+varnish v1 -expect SM?.rxbuf.g_bytes >= 2048
+varnish v1 -expect SM?.Transient.g_bytes == 0
+varnish v1 -expect MAIN.n_lru_nuked == 0
 
 barrier b1 sync
 client c1 -wait
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect SM?.rxbuf.g_bytes == 0
-vinyl v1 -expect SM?.Transient.g_bytes == 0
-vinyl v1 -expect MAIN.n_lru_nuked == 0
+varnish v1 -expect SM?.rxbuf.g_bytes == 0
+varnish v1 -expect SM?.Transient.g_bytes == 0
+varnish v1 -expect MAIN.n_lru_nuked == 0
 
 client c2 {
 	txreq -url /2
@@ -66,10 +66,10 @@ client c2 {
 	expect resp.bodylen == 1048000
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect SM?.rxbuf.g_bytes >= 1048000
-vinyl v1 -expect MAIN.n_lru_nuked == 0
+varnish v1 -expect SM?.rxbuf.g_bytes >= 1048000
+varnish v1 -expect MAIN.n_lru_nuked == 0
 
 logexpect l1 -v v1 -g raw -q "Expkill ~ LRU" {
 	expect * * Expkill xid=1005
@@ -86,15 +86,15 @@ client c3 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect SM?.rxbuf.g_bytes >= 2048
-vinyl v1 -expect SM?.rxbuf.g_bytes < 3000
-vinyl v1 -expect SM?.Transient.g_bytes == 0
-vinyl v1 -expect MAIN.n_lru_nuked == 1
+varnish v1 -expect SM?.rxbuf.g_bytes >= 2048
+varnish v1 -expect SM?.rxbuf.g_bytes < 3000
+varnish v1 -expect SM?.Transient.g_bytes == 0
+varnish v1 -expect MAIN.n_lru_nuked == 1
 
 barrier b1 sync
 client c3 -wait
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect SM?.rxbuf.g_bytes == 0
-vinyl v1 -expect SM?.Transient.g_bytes == 0
+varnish v1 -expect SM?.rxbuf.g_bytes == 0
+varnish v1 -expect SM?.Transient.g_bytes == 0

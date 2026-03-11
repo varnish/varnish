@@ -13,13 +13,13 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-p thread_pools=1" -vcl+backend {} -start
-vinyl v1 -cliok "param.set timeout_linger 0.5"
+varnish v1 -arg "-p thread_pools=1" -vcl+backend {} -start
+varnish v1 -cliok "param.set timeout_linger 0.5"
 
-vinyl v1 -expect WAITER.pool0.conns == 0
-vinyl v1 -expect WAITER.pool0.remclose == 0
-vinyl v1 -expect WAITER.pool0.timeout == 0
-vinyl v1 -expect WAITER.pool0.action == 0
+varnish v1 -expect WAITER.pool0.conns == 0
+varnish v1 -expect WAITER.pool0.remclose == 0
+varnish v1 -expect WAITER.pool0.timeout == 0
+varnish v1 -expect WAITER.pool0.action == 0
 
 client c1 {
 	txreq
@@ -42,20 +42,20 @@ barrier b1 sync
 
 # client c1: conns
 # server s1: remclose
-vinyl v1 -expect WAITER.pool0.conns == 1
-vinyl v1 -expect WAITER.pool0.remclose == 1
-vinyl v1 -expect WAITER.pool0.timeout == 0
-vinyl v1 -expect WAITER.pool0.action == 0
+varnish v1 -expect WAITER.pool0.conns == 1
+varnish v1 -expect WAITER.pool0.remclose == 1
+varnish v1 -expect WAITER.pool0.timeout == 0
+varnish v1 -expect WAITER.pool0.action == 0
 
 barrier b2 sync
 client c1 -wait
 
 # client c1: action
 # server s1: remclose
-vinyl v1 -expect WAITER.pool0.conns == 0
-vinyl v1 -expect WAITER.pool0.remclose == 1
-vinyl v1 -expect WAITER.pool0.timeout == 0
-vinyl v1 -expect WAITER.pool0.action == 1
+varnish v1 -expect WAITER.pool0.conns == 0
+varnish v1 -expect WAITER.pool0.remclose == 1
+varnish v1 -expect WAITER.pool0.timeout == 0
+varnish v1 -expect WAITER.pool0.action == 1
 
 client c2 {
 	txreq
@@ -89,10 +89,10 @@ barrier b3 sync
 # client c2: conns
 # client c3: conns
 # server s1: remclose
-vinyl v1 -expect WAITER.pool0.conns == 2
-vinyl v1 -expect WAITER.pool0.remclose == 1
-vinyl v1 -expect WAITER.pool0.timeout == 0
-vinyl v1 -expect WAITER.pool0.action == 1
+varnish v1 -expect WAITER.pool0.conns == 2
+varnish v1 -expect WAITER.pool0.remclose == 1
+varnish v1 -expect WAITER.pool0.timeout == 0
+varnish v1 -expect WAITER.pool0.action == 1
 
 barrier b4 sync
 client c2 -wait
@@ -102,7 +102,7 @@ client c3 -wait
 # client c2: remclose
 # client c3: remclose
 # server s1: remclose
-vinyl v1 -expect WAITER.pool0.conns == 0
-vinyl v1 -expect WAITER.pool0.remclose == 3
-vinyl v1 -expect WAITER.pool0.timeout == 0
-vinyl v1 -expect WAITER.pool0.action == 1
+varnish v1 -expect WAITER.pool0.conns == 0
+varnish v1 -expect WAITER.pool0.remclose == 3
+varnish v1 -expect WAITER.pool0.timeout == 0
+varnish v1 -expect WAITER.pool0.action == 1

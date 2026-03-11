@@ -8,7 +8,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import debug;
 	sub vcl_recv {
 		# vxid 1009, 1018, 1020, 1022
@@ -116,8 +116,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 1
-vinyl v1 -expect sc_vcl_failure == 1
+varnish v1 -expect vcl_fail == 1
+varnish v1 -expect sc_vcl_failure == 1
 
 #######################################################################
 # Fail in vcl_recv, vcl_synth restarts successfully
@@ -137,9 +137,9 @@ client c1 {
 	expect resp.reason == "OK"
 } -run
 
-vinyl v1 -expect vcl_fail == 2
+varnish v1 -expect vcl_fail == 2
 # NB: This is correct, req->doclose = SC_VCL_FAILURE latches
-vinyl v1 -expect sc_vcl_failure == 2
+varnish v1 -expect sc_vcl_failure == 2
 
 #######################################################################
 # Fail in vcl_synth
@@ -157,8 +157,8 @@ client c1 {
 	expect_close
 } -run
 
-vinyl v1 -expect vcl_fail == 3
-vinyl v1 -expect sc_vcl_failure == 3
+varnish v1 -expect vcl_fail == 3
+varnish v1 -expect sc_vcl_failure == 3
 
 #######################################################################
 # Fail in vcl_hash
@@ -176,8 +176,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 4
-vinyl v1 -expect sc_vcl_failure == 4
+varnish v1 -expect vcl_fail == 4
+varnish v1 -expect sc_vcl_failure == 4
 
 #######################################################################
 # Fail in vcl_pipe
@@ -193,7 +193,7 @@ logexpect l1012 -v v1 -g vxid -q "vxid == 1012" {
 	expect 0 =	BereqHeader	{^User-Agent: c1}
 	expect 0 =	BereqHeader	{^X-Forwarded-For: }
 	expect 0 =	BereqHeader	{^Via: }
-	expect 0 =	BereqHeader	{^X-Vinyl: 1011}
+	expect 0 =	BereqHeader	{^X-Varnish: 1011}
 	expect 0 =	BereqHeader	{^Connection: close}
 	expect 0 =	BereqAcct	{^0 0 0 0 0 0}
 	expect 0 =	End
@@ -233,8 +233,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 5
-vinyl v1 -expect sc_vcl_failure == 5
+varnish v1 -expect vcl_fail == 5
+varnish v1 -expect sc_vcl_failure == 5
 
 #######################################################################
 # Fail in vcl_pass, no handling in vcl_synth
@@ -252,8 +252,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 6
-vinyl v1 -expect sc_vcl_failure == 6
+varnish v1 -expect vcl_fail == 6
+varnish v1 -expect sc_vcl_failure == 6
 
 #######################################################################
 # Fail in vcl_purge
@@ -271,8 +271,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 7
-vinyl v1 -expect sc_vcl_failure == 7
+varnish v1 -expect vcl_fail == 7
+varnish v1 -expect sc_vcl_failure == 7
 
 #######################################################################
 # Fail in vcl_miss
@@ -290,8 +290,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 8
-vinyl v1 -expect sc_vcl_failure == 8
+varnish v1 -expect vcl_fail == 8
+varnish v1 -expect sc_vcl_failure == 8
 
 #######################################################################
 # Fail in vcl_hit
@@ -309,8 +309,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 9
-vinyl v1 -expect sc_vcl_failure == 9
+varnish v1 -expect vcl_fail == 9
+varnish v1 -expect sc_vcl_failure == 9
 
 #######################################################################
 # Fail in vcl_deliver
@@ -328,8 +328,8 @@ client c1 {
 	expect resp.reason == "VCL failed"
 } -run
 
-vinyl v1 -expect vcl_fail == 10
-vinyl v1 -expect sc_vcl_failure == 10
+varnish v1 -expect vcl_fail == 10
+varnish v1 -expect sc_vcl_failure == 10
 
 #######################################################################
 #wait for all client side logexpects

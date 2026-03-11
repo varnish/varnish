@@ -16,7 +16,7 @@ Unix domain sockets as listen addresses
 
 The ``varnishd -a`` command-line argument now has this form, where the
 ``address`` may be a Unix domain socket, identified as such when it
-begins with ``/`` (see varnishd :ref:`ref-vinyld-options`)::
+begins with ``/`` (see varnishd :ref:`ref-varnishd-options`)::
 
   -a [name=][address][:port][,PROTO][,user=<user>][,group=<group>][,mode=<mode>]
 
@@ -90,7 +90,7 @@ backend.
 
 The path of a socket file may also be specified in the
 ``varnishd -b`` command-line option (see varnishd
-:ref:`ref-vinyld-options`)::
+:ref:`ref-varnishd-options`)::
 
   $ varnishd -b /path/to/backend.sock
 
@@ -161,7 +161,7 @@ request was received.
 
 ``local.socket`` is the name provided in the ``-a`` command-line
 argument for the current listener, which defaults to ``a0``, ``a1``
-and so on (see varnishd :ref:`ref-vinyld-options`).
+and so on (see varnishd :ref:`ref-varnishd-options`).
 
 ``local.endpoint`` is the value of the ``address[:port]`` or ``path``
 field provided as the ``-a`` value for the current listener, exactly
@@ -696,13 +696,13 @@ of what you will be able to do once VIP 20 is completed.
 Other changes
 =============
 
-* ``vinyld(1)``:
+* ``varnishd(1)``:
 
   * The ``umem`` storage allocator, which was removed as of Varnish
     5.1, has been restored and is now the default on a system where
     ``libumem`` is available (SunOS and descendants).
 
-* ``vinyllog(1)``:
+* ``varnishlog(1)``:
 
   * Added a third field to the ``ReqStart`` log record that contains the
     name of the listener address over which the request was received, see
@@ -734,13 +734,13 @@ Other changes
     They can be turned on with the ``protocol`` flag of the varnishd
     :ref:`ref_param_debug` parameter (``-p debug=+protocol``).
 
-* ``vinylstat(1)``
+* ``varnishstat(1)``
 
   * Added the counter ``cache_hit_grace`` -- how often objects in the
     cache were hit when their TTL had expired, but they were still
     in grace.
 
-* ``vinylncsa(1)``
+* ``varnishncsa(1)``
 
   * The ``%h`` formatter (remote host) gets its value from
     ``ReqStart`` for client requests and ``BackendStart`` for backend
@@ -771,7 +771,7 @@ Other changes
     tags for log entries whose payloads may contain control or binary
     characters.
 
-* ``vinyltest(1)`` and ``vtc(7)``:
+* ``varnishtest(1)`` and ``vtc(7)``:
 
   * The ``client -connect`` and ``server -listen`` commands in vtc
     scripts now allow Unix domain sockets as addresses, recognized
@@ -790,7 +790,7 @@ Other changes
 
     To test a Varnish instance listening at a UDS, just use the
     ``varnish -arg`` command with the appropriate settings for the
-    ``-a`` command line argument, see :ref:`vinyld(1)`.
+    ``-a`` command line argument, see :ref:`varnishd(1)`.
 
     The ``varnish -vcl+backend`` command now works to include backend
     definitions for server objects that are listening at UDS. Backend

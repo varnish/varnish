@@ -9,7 +9,7 @@ server s1 -listen "${tmpdir}/s1.sock" {
 	barrier b1 sync
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl" -vcl+backend {
+varnish v1 -cliok "param.set debug +syncvsl" -vcl+backend {
 
 } -start
 

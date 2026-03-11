@@ -69,9 +69,9 @@
 	)
 
 #define VUT_OPT_n							\
-	VOPT("n:", "[-n <workdir>]", "vinyl working directory",	\
-	     "Specify the vinyl working directory of the instance "	\
-	     "to attach to. See :ref:`vinyld(1)` ``-n`` option "	\
+	VOPT("n:", "[-n <workdir>]", "varnish working directory",	\
+	     "Specify the varnish working directory of the instance "	\
+	     "to attach to. See :ref:`varnishd(1)` ``-n`` option "	\
 	     "documentation for additional information and defaults."	\
 	)
 
@@ -93,7 +93,7 @@
 #define VUT_OPT_r							\
 	VOPT("r:", "[-r <filename>]", "Binary file input",		\
 	    "Read log in binary file format from this file. The file"	\
-	    " can be created with ``vinyllog -w filename``. If the"	\
+	    " can be created with ``varnishlog -w filename``. If the"	\
 	    " filename is -, logs are read from the standard input."	\
 	    " and cannot work as a daemon."				\
 	)
@@ -106,6 +106,6 @@
 	    " attempted only once and will fail immediately if"		\
 	    " unsuccessful. If set to \"off\", the connection will not"	\
 	    " fail, allowing the utility to start and wait"		\
-	    " indefinitely for the `vinyld` instance to appear. "	\
+	    " indefinitely for the Varnish instance to appear. "	\
 	    " Defaults to 5 seconds."					\
 	)

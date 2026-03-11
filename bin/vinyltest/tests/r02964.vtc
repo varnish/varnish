@@ -11,7 +11,7 @@ server s1 {
 	txresp -hdr "HFP: True" -bodylen 65550
 } -start
 
-vinyl v1 -arg "-s Transient=default" -vcl+backend {
+varnish v1 -arg "-s Transient=default" -vcl+backend {
 	sub vcl_recv {
 		if (req.restarts > 0) {
 			return (synth(200));
@@ -50,5 +50,5 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect SM?.Transient.c_bytes > 0
-vinyl v1 -expect SM?.Transient.g_bytes < 2000
+varnish v1 -expect SM?.Transient.c_bytes > 0
+varnish v1 -expect SM?.Transient.g_bytes < 2000

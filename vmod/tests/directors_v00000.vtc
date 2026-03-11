@@ -1,6 +1,6 @@
 vtest "execute backend.list -p[j] on builtin directors"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import directors;
 	import std;
 
@@ -46,7 +46,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -cli "backend.list"
-vinyl v1 -cli "backend.list -p"
-vinyl v1 -clijson "backend.list -j"
-vinyl v1 -clijson "backend.list -pj"
+varnish v1 -cli "backend.list"
+varnish v1 -cli "backend.list -p"
+varnish v1 -clijson "backend.list -j"
+varnish v1 -clijson "backend.list -pj"

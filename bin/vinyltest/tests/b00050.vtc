@@ -5,7 +5,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-p thread_pools=1" -vcl+backend { } -start
+varnish v1 -arg "-p thread_pools=1" -vcl+backend { } -start
 
 logexpect l1 -v v1 -q "vxid == 1001" {
 	expect 0 1001 Begin "req 1000 rxreq"
@@ -21,41 +21,41 @@ logexpect l1 -wait
 # vxid only supports integer operations
 
 shell -err -expect "Expected vxid operator got '~'" {
-	vinyllog -n ${v1_name} -d -q 'vxid ~ 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid ~ 1001'
 }
 
 shell -err -expect "Expected vxid operator got '!~'" {
-	vinyllog -n ${v1_name} -d -q 'vxid !~ 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid !~ 1001'
 }
 
 shell -err -expect "Expected vxid operator got 'eq'" {
-	vinyllog -n ${v1_name} -d -q 'vxid eq 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid eq 1001'
 }
 
 shell -err -expect "Expected vxid operator got 'ne'" {
-	vinyllog -n ${v1_name} -d -q 'vxid ne 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid ne 1001'
 }
 
 # vxid only supports integer operands
 
 shell -err -expect "Expected integer got '1001.5'" {
-	vinyllog -n ${v1_name} -d -q 'vxid != 1001.5'
+	varnishlog -n ${v1_name} -d -q 'vxid != 1001.5'
 }
 
 # vxid doesn't support taglist selection
 
 shell -err -expect "Unexpected taglist selection for vxid" {
-	vinyllog -n ${v1_name} -d -q 'vxid[1] >= 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid[1] >= 1001'
 }
 
 shell -err -expect "Unexpected taglist selection for vxid" {
-	vinyllog -n ${v1_name} -d -q '{1}vxid <= 1001'
+	varnishlog -n ${v1_name} -d -q '{1}vxid <= 1001'
 }
 
 shell -err -expect "Unexpected taglist selection for vxid" {
-	vinyllog -n ${v1_name} -d -q 'vxid,Link > 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid,Link > 1001'
 }
 
 shell -err -expect "Unexpected taglist selection for vxid" {
-	vinyllog -n ${v1_name} -d -q 'vxid,vxid < 1001'
+	varnishlog -n ${v1_name} -d -q 'vxid,vxid < 1001'
 }

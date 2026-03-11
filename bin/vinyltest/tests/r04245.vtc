@@ -12,7 +12,7 @@ server s1 {
 	txresp -bodylen 42
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
     sub vcl_recv {
 	if (req.method == "HEAD") {
 	    set req.http.X-Fetch-Method = "HEAD";

@@ -10,8 +10,8 @@ server s1 {
 	txresp -body "include"
 } -start
 
-vinyl v1 -cliok "param.set feature +esi_disable_xml_check"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set feature +esi_disable_xml_check"
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {

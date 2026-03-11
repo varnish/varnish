@@ -941,7 +941,6 @@ Varnish Cache 7.5.0 (2024-03-18)
 
 .. _CVE-2023-44487: https://nvd.nist.gov/vuln/detail/CVE-2023-44487
 
-<<<<<<< HEAD
 .. _4036: https://github.com/varnishcache/varnish-cache/issues/4036
 .. _3984: https://github.com/varnishcache/varnish-cache/issues/3984
 .. _3995: https://github.com/varnishcache/varnish-cache/issues/3995
@@ -952,18 +951,6 @@ Varnish Cache 7.5.0 (2024-03-18)
 .. _3998: https://github.com/varnishcache/varnish-cache/pull/3998
 .. _3999: https://github.com/varnishcache/varnish-cache/pull/3999
 .. _VSV00014: https://varnish-cache.org/security/VSV00014.html
-=======
-.. _4036: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4036
-.. _3984: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/3984
-.. _3995: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/3995
-.. _3996: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/3996
-.. _4022: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4022
-.. _3563: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/3563
-.. _3997: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/3997
-.. _3998: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/3998
-.. _3999: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/3999
-.. _VSV00014: https://vinyl-cache.org/security/VSV00014.html
->>>>>>> c6177579f6 (Start s/varnish/vinyl/'ing documentation)
 
 ================================
 Varnish Cache 7.4.0 (2023-09-15)
@@ -1378,17 +1365,10 @@ Varnish Cache 7.2.0 (2022-09-15)
 * A regression in the transport code led MAIN.client_req to be incremented
   for requests coming back from the waiting list, it was fixed.  (3841_)
 
-<<<<<<< HEAD
 .. _3830: https://github.com/varnishcache/varnish-cache/issues/3830
 .. _3841: https://github.com/varnishcache/varnish-cache/pull/3841
 .. _3846: https://github.com/varnishcache/varnish-cache/issues/3846
 .. _VSV00009: https://varnish-cache.org/security/VSV00009.html
-=======
-.. _3830: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/3830
-.. _3841: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/3841
-.. _3846: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/3846
-.. _VSV00009: https://vinyl-cache.org/security/VSV00009.html
->>>>>>> c6177579f6 (Start s/varnish/vinyl/'ing documentation)
 
 ================================
 Varnish Cache 7.1.0 (2022-03-15)

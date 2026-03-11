@@ -38,7 +38,7 @@ server s2 {
 	txresp -body {<INCL>}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		if (bereq.url != "bar") {
 			set bereq.backend = s2;
@@ -52,8 +52,8 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +esi_chop"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +esi_chop"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 logexpect l1 -v v1 -g vxid -q "vxid == 1002" {
 	expect * * Fetch_Body
@@ -75,6 +75,6 @@ client c1 {
 
 logexpect l1 -wait
 
-vinyl v1 -expect esi_errors == 5
-vinyl v1 -expect esi_warnings == 1
-vinyl v1 -expect MAIN.s_resp_bodybytes == 65856
+varnish v1 -expect esi_errors == 5
+varnish v1 -expect esi_warnings == 1
+varnish v1 -expect MAIN.s_resp_bodybytes == 65856

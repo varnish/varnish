@@ -1,6 +1,6 @@
 vtest "Check set resp.body in vcl_synth"
 
-vinyl v1 -arg "-sTransient=debug,lessspace" -vcl {
+varnish v1 -arg "-sTransient=debug,lessspace" -vcl {
 	backend foo {
 		.host = "${bad_backend}";
 	}
@@ -23,4 +23,4 @@ client c1 {
 	expect resp.body == "Custom vcl_synth's body"
 } -run
 
-vinyl v1 -expect s_synth == 1
+varnish v1 -expect s_synth == 1

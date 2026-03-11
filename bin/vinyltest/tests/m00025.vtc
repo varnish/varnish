@@ -1,6 +1,6 @@
 vtest "Pass probe definitions to VMODs"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 
 	backend be { .host = "${localhost}"; }

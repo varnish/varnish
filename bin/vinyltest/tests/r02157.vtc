@@ -5,13 +5,13 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 # 64 chars vlc name, 64 chars backend name
-vinyl v1 -cliok { vcl.inline abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789 "vcl 4.0; backend abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789 {.host = \"${localhost}\"; .port = \"${s1_port}\";} " }
+varnish v1 -cliok { vcl.inline abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789 "vcl 4.0; backend abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789 {.host = \"${localhost}\"; .port = \"${s1_port}\";} " }
 
 # 127 chars vlc name, 1 char backend name
-vinyl v1 -cliok { vcl.inline abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678 "vcl 4.0; backend a {.host = \"${localhost}\"; .port = \"${s1_port}\";} " }
+varnish v1 -cliok { vcl.inline abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678 "vcl 4.0; backend a {.host = \"${localhost}\"; .port = \"${s1_port}\";} " }
 
 client c1 {
 	txreq

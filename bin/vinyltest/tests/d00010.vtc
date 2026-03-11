@@ -18,7 +18,7 @@ server s2 {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 
 	backend dummy { .host = "${bad_backend}"; }
@@ -37,7 +37,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -expect MAIN.n_backend == 2
+varnish v1 -expect MAIN.n_backend == 2
 
 client c1 {
 	txreq -url "/foo"
@@ -58,5 +58,5 @@ client c2 {
 
 client c1 -wait
 
-vinyl v1 -cli backend.list
+varnish v1 -cli backend.list
 #varnish v1 -expect MAIN.n_backend == 2

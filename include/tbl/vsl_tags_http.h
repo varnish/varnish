@@ -33,7 +33,7 @@
  *
  * Specifically FIRST, UNSET and LOST entries must be last, in that order.
  *
- * See bin/vinyld/cache/cache_http.c::http_VSLH() for the other side.
+ * See bin/varnishd/cache/cache_http.c::http_VSLH() for the other side.
  *
  * Arguments:
  *	Tag-Name

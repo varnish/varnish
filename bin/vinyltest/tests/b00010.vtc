@@ -5,7 +5,7 @@ server s1 {
 	txresp -hdr "Connection: close" -body "012345\n"
 } -start
 
-vinyl v1 -arg "-h simple_list" -vcl+backend {} -start
+varnish v1 -arg "-h simple_list" -vcl+backend {} -start
 
 client c1 {
 	txreq -url "/"
@@ -14,5 +14,5 @@ client c1 {
 	txreq -url "/"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1003 1002"
+	expect resp.http.X-Varnish == "1003 1002"
 } -run

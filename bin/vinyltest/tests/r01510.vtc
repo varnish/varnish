@@ -1,6 +1,6 @@
 vtest "Duplicate object names"
 
-vinyl v1 -errvcl {Instance 'first' redefined.} {
+varnish v1 -errvcl {Instance 'first' redefined.} {
 	import debug;
 	sub vcl_init {
 		new first = debug.obj("FOO");
@@ -8,7 +8,7 @@ vinyl v1 -errvcl {Instance 'first' redefined.} {
 	}
 }
 
-vinyl v1 -errvcl {Name 'first' already defined.} {
+varnish v1 -errvcl {Name 'first' already defined.} {
 	import debug;
 
 	backend first { .host = "${localhost}"; }

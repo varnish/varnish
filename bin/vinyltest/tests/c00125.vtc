@@ -33,10 +33,10 @@ server s1 {
 	txresp -hdr "Cache-Control: no-cache"
 } -start
 
-vinyl v1 -cliok "param.set default_grace 1h"
-vinyl v1 -cliok "param.set thread_pools 1"
-vinyl v1 -cliok "param.set debug +syncvsl,+waitinglist"
-vinyl v1 -vcl+backend {
+varnish v1 -cliok "param.set default_grace 1h"
+varnish v1 -cliok "param.set thread_pools 1"
+varnish v1 -cliok "param.set debug +syncvsl,+waitinglist"
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.http.bgfetch = bereq.is_bgfetch;
 	}
@@ -62,7 +62,7 @@ client c1 {
 	txreq -url "/stale-hit"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == 1001
+	expect resp.http.X-Varnish == 1001
 	expect resp.http.obj-hits == 0
 	expect resp.http.obj-ttl < 0
 } -start
@@ -73,50 +73,50 @@ client c2 {
 	txreq -url "/stale-hit"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1004 1002"
+	expect resp.http.X-Varnish == "1004 1002"
 	expect resp.http.obj-hits == 1
 	expect resp.http.obj-ttl < 0
 } -start
 
-vinyl v1 -expect busy_sleep == 1
+varnish v1 -expect busy_sleep == 1
 barrier b2 sync
 
 client c1 -wait
 client c2 -wait
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect cache_miss == 1
-vinyl v1 -expect cache_hit == 1
-vinyl v1 -expect cache_hit_grace == 0
-vinyl v1 -expect s_bgfetch == 0
+varnish v1 -expect cache_miss == 1
+varnish v1 -expect cache_hit == 1
+varnish v1 -expect cache_hit_grace == 0
+varnish v1 -expect s_bgfetch == 0
 
 client c3 {
 	txreq -url "/stale-hit"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1006 1002"
+	expect resp.http.X-Varnish == "1006 1002"
 	expect resp.http.obj-hits == 2
 	expect resp.http.obj-ttl < 0
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect cache_miss == 1
-vinyl v1 -expect cache_hit == 2
-vinyl v1 -expect cache_hit_grace == 1
-vinyl v1 -expect s_bgfetch == 1
+varnish v1 -expect cache_miss == 1
+varnish v1 -expect cache_hit == 2
+varnish v1 -expect cache_hit_grace == 1
+varnish v1 -expect s_bgfetch == 1
 
 # The only way for a plain no-cache to be hit is to have a non-zero keep.
-vinyl v1 -cliok "param.set default_ttl 0"
-vinyl v1 -cliok "param.set default_grace 0"
-vinyl v1 -cliok "param.set default_keep 1h"
+varnish v1 -cliok "param.set default_ttl 0"
+varnish v1 -cliok "param.set default_grace 0"
+varnish v1 -cliok "param.set default_keep 1h"
 
 client c4 {
 	txreq -url "/no-cache-hit"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == 1009
+	expect resp.http.X-Varnish == 1009
 	expect resp.http.obj-hits == 0
 	expect resp.http.obj-ttl <= 0
 } -start
@@ -127,30 +127,30 @@ client c5 {
 	txreq -url "/no-cache-hit"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == "1012 1010"
+	expect resp.http.X-Varnish == "1012 1010"
 	expect resp.http.obj-hits == 1
 	expect resp.http.obj-ttl <= 0
 } -start
 
-vinyl v1 -expect busy_sleep == 2
+varnish v1 -expect busy_sleep == 2
 barrier b4 sync
 
 client c4 -wait
 client c5 -wait
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect cache_miss == 2
-vinyl v1 -expect cache_hit == 3
-vinyl v1 -expect cache_hit_grace == 1
-vinyl v1 -expect s_bgfetch == 1
+varnish v1 -expect cache_miss == 2
+varnish v1 -expect cache_hit == 3
+varnish v1 -expect cache_hit_grace == 1
+varnish v1 -expect s_bgfetch == 1
 
 # No hit when not on the waiting list
 client c6 {
 	txreq -url "/no-cache-hit"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.X-Vinyl == 1014
+	expect resp.http.X-Varnish == 1014
 	expect resp.http.obj-hits == 0
 	expect resp.http.obj-ttl <= 0
 } -run

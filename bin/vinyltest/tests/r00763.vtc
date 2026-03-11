@@ -7,7 +7,7 @@ server s1 {
 	txresp -hdr "Vary:: foo" -hdr "Foo: bar" -bodylen 8
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	txreq

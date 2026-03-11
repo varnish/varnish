@@ -19,11 +19,11 @@ server s1 {
 	expect req.url == /5
 } -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
-vinyl v1 -cliok "param.set debug +h2_nocheck"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +h2_nocheck"
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
 client c1 {
 	stream 0 {
@@ -59,7 +59,7 @@ client c1 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
 client c1 {
 	stream 3 {
@@ -91,4 +91,4 @@ client c1 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup

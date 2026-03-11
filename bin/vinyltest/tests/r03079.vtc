@@ -6,16 +6,16 @@ server s1 {
 	rxreq
 	expect req.url == "/hello/world"
 	expect req.http.host == helloworld
-	txresp -hdr "x-powered-by: vinyltest"
+	txresp -hdr "x-powered-by: varnishtest"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
 		set bereq.url += "/world";
 		set bereq.http.host += "world";
 	}
 	sub vcl_backend_response {
-		set beresp.http.x-powered-by += bereq.http.X-Vinyl;
+		set beresp.http.x-powered-by += bereq.http.X-Varnish;
 	}
 } -start
 
@@ -23,12 +23,12 @@ client c1 {
 	txreq -url "/hello" -hdr "host: hello"
 	rxresp
 	expect resp.status == 200
-	expect resp.http.x-powered-by == vinyltest1002
+	expect resp.http.x-powered-by == varnishtest1002
 } -run
 
 # set BODY [+]= STRINGS|BLOB;
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import blob;
 	backend be none;
 	sub vcl_recv {

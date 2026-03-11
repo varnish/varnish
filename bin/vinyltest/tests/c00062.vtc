@@ -12,7 +12,7 @@ server s1 {
 	barrier b2 sync
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl" -vcl+backend {
+varnish v1 -cliok "param.set debug +syncvsl" -vcl+backend {
 
 } -start
 

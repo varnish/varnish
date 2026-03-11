@@ -8,7 +8,7 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 
 	sub vcl_recv {
@@ -20,7 +20,7 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq

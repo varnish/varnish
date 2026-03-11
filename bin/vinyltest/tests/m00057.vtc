@@ -8,7 +8,7 @@ server s1 {
 	txresp -hdr "version: 2"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import purge;
 
 	sub vcl_hit {

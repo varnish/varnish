@@ -1,6 +1,6 @@
 vtest "#1212 - Vmod with HEADER argument given a STRING asserts the VCL compiler"
 
-vinyl v1 -errvcl {Expression has type STRING, expected HEADER} {
+varnish v1 -errvcl {Expression has type STRING, expected HEADER} {
 	import std;
 	backend b { .host = "${localhost}"; }
 	sub vcl_recv {

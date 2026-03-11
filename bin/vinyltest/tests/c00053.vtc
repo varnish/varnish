@@ -7,20 +7,20 @@ server s1 {
 
 shell "echo > ${tmpdir}/_.c00053"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	include "${tmpdir}/_.c00053";
 }
 
-vinyl v1 -cliok "param.set vcc_feature -unsafe_path"
+varnish v1 -cliok "param.set vcc_feature -unsafe_path"
 
-vinyl v1 -errvcl {' is unsafe} {
+varnish v1 -errvcl {' is unsafe} {
 	backend default { .host = "${s1_sock}"; }
 	include "${tmpdir}/_.c00053";
 }
 
-vinyl v1 -cliok "param.set vcl_path ${tmpdir}"
+varnish v1 -cliok "param.set vcl_path ${tmpdir}"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	include "_.c00053";
 }
 
@@ -28,9 +28,9 @@ shell "rm -f ${tmpdir}/_.c00053"
 
 # Testing of include +glob
 
-vinyl v1 -cliok "param.set vcc_feature +unsafe_path"
+varnish v1 -cliok "param.set vcc_feature +unsafe_path"
 
-vinyl v1 -errvcl "glob pattern matched no files." {
+varnish v1 -errvcl "glob pattern matched no files." {
 	vcl 4.0;
 
 	include +glob "${tmpdir}/Q*.vcl";
@@ -42,7 +42,7 @@ shell {
 	echo 'vcl 4.0; backend default { .host = "0:0"; } include +glob "./sub_*.vcl";' > ${tmpdir}/top.vcl
 }
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	include +glob "${tmpdir}/sub_*.vcl";
 } -start
 
@@ -53,13 +53,13 @@ client c1 {
 	expect resp.http.bar == bar
 } -run
 
-vinyl v1 -errvcl {needs absolute filename of including file.} {
+varnish v1 -errvcl {needs absolute filename of including file.} {
 	include +glob "./sub_*.vcl";
 	backend default none;
 }
 
-vinyl v1 -cliok "vcl.load foo ${tmpdir}/top.vcl"
-vinyl v1 -cliok "vcl.use foo"
+varnish v1 -cliok "vcl.load foo ${tmpdir}/top.vcl"
+varnish v1 -cliok "vcl.use foo"
 
 client c1 {
 	txreq
@@ -68,7 +68,7 @@ client c1 {
 	expect resp.http.bar == bar
 } -run
 
-vinyl v1 -errvcl "+glob can only be used with absolute paths or relative paths starting with './'" {
+varnish v1 -errvcl "+glob can only be used with absolute paths or relative paths starting with './'" {
 	include +glob "sub_*.vcl";
 	backend default none;
 }

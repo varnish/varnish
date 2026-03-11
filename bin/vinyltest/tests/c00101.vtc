@@ -8,7 +8,7 @@ server s1 -repeat 2 -keepalive {
 	}
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub backend_response_filter {
 		set beresp.http.filter0 = beresp.filters;
 		set beresp.do_esi = true;

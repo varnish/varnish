@@ -5,7 +5,7 @@ SUBDIRS = include lib bin vmod etc doc man contrib
 TESTS = tools/magic_check.sh
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = vinylapi.pc
+pkgconfig_DATA = varnishapi.pc
 
 m4dir = $(datadir)/aclocal
 m4_DATA = vinyl.m4 vinyl-legacy.m4
@@ -22,7 +22,7 @@ EXTRA_DIST = \
 	README.md \
 	LICENSE \
 	autogen.sh \
-	vinylapi.pc.in \
+	varnishapi.pc.in \
 	vinyl.m4 \
 	vinyl-legacy.m4 \
 	vsc.am \

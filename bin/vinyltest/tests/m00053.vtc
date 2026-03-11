@@ -1,6 +1,6 @@
 vtest "VCL_SUB type basics"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 	import debug;
 
@@ -172,7 +172,7 @@ client c6 {
 	expect resp.status == 503
 } -start
 
-vinyl v1 -errvcl {Impossible Subroutine('<vcl.inline>' Line 8 Pos 13)} {
+varnish v1 -errvcl {Impossible Subroutine('<vcl.inline>' Line 8 Pos 13)} {
 	import std;
 	import debug;
 
@@ -197,7 +197,7 @@ client c4 -wait
 client c5 -wait
 client c6 -wait
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	backend b None;
 
@@ -241,7 +241,7 @@ client c2 {
 client c1 -wait
 client c2 -wait
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import debug;
 	import std;
 

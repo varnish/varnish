@@ -38,8 +38,8 @@ _*
 /m4/lt~obsolete.m4
 /missing
 /stamp-h1
-/vinylapi.pc
-/vinylapi-uninstalled.pc
+/varnishapi.pc
+/varnishapi-uninstalled.pc
 TAGS
 tags
 cscope.*out
@@ -89,19 +89,20 @@ cscope.*out
 /man/*.3
 /man/*.7
 /doc/sphinx/include
-/bin/vinyladm/vinyladm
-/bin/vinyld/vinyld
-/bin/vinylhist/vinylhist
-/bin/vinyllog/vinyllog
-/bin/vinylncsa/vinylncsa
-/bin/vinylstat/vinylstat
-/bin/vinylstat/vinylstat_help_gen
-/bin/vinylstat/vinylstat_curses_help.c
+/bin/varnishlog-json/varnishlog-json
+/bin/vinyladm/varnishadm
+/bin/vinyld/varnishd
+/bin/vinylhist/varnishhist
+/bin/vinyllog/varnishlog
+/bin/vinylncsa/varnishncsa
+/bin/vinylstat/varnishstat
+/bin/vinylstat/varnishstat_help_gen
+/bin/vinylstat/varnishstat_curses_help.c
 /bin/varnishstat/vsc2rst
 /bin/vinyltest/teken_state.h
-/bin/vinyltest/vinyltest
+/bin/vinyltest/varnishtest
 /bin/vinyltest/vtest
-/bin/vinyltop/vinyltop
+/bin/vinyltop/varnishtop
 
 # Doc-stuff generated from xml
 /doc/*.html
@@ -147,7 +148,7 @@ cscope.*out
 /myproject.tgz
 
 # Source artifact
-/vinyl-cache-trunk.tar.gz
+/varnish-cache-trunk.tar.gz
 
 # Witness droppings
 witness.dot

@@ -30,7 +30,7 @@
  *
  */
 
-/* from libvinyl/subproc.c */
+/* from libvarnish/subproc.c */
 typedef void vsub_func_f(void*);
 
 unsigned VSUB_run(struct vsb *, vsub_func_f *, void *priv, const char *name,

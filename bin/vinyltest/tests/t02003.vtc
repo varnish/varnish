@@ -5,10 +5,10 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {} -start
 
-vinyl v1 -cliok "param.set feature +http2"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 #######################################################################
 # Test Even stream numbers
@@ -26,12 +26,12 @@ client c1 {
 	stream 0 -wait
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test reverse order stream numbers
@@ -51,12 +51,12 @@ client c2 {
 	stream 0 -wait
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test WINDOW_UPDATE error conditions
@@ -113,12 +113,12 @@ client c5 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test PING error conditions
@@ -150,12 +150,12 @@ client c8 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test PUSH_PROMISE error conditions
@@ -188,12 +188,12 @@ client c10 {
 	} -start
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test RST_STREAM error conditions
@@ -275,12 +275,12 @@ client c15 {
 } -run
 
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test SETTING error conditions
@@ -324,12 +324,12 @@ client c19 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test GOAWAY error conditions
@@ -352,12 +352,12 @@ client c21 {
 } -run
 
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test HEADERS error conditions
@@ -459,12 +459,12 @@ client c28 {
 	expect_close
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test CONTINUATION error conditions
@@ -523,12 +523,12 @@ client c32 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 
 #######################################################################
 # Test DATA error conditions
@@ -556,10 +556,10 @@ client c34 {
 	} -run
 } -run
 
-vinyl v1 -vsl_catchup
+varnish v1 -vsl_catchup
 
-vinyl v1 -expect MEMPOOL.req0.live == 0
-vinyl v1 -expect MEMPOOL.req1.live == 0
-vinyl v1 -expect MEMPOOL.sess0.live == 0
-vinyl v1 -expect MEMPOOL.sess1.live == 0
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
 

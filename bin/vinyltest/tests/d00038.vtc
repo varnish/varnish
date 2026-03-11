@@ -10,7 +10,7 @@ server s2 -listen "${tmpdir}/s2.sock" {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import std;
 	import debug;
 	import vtc;
@@ -37,7 +37,7 @@ vinyl v1 -vcl {
 	}
 } -start
 
-vinyl v1 -expect MAIN.n_backend == 1
+varnish v1 -expect MAIN.n_backend == 1
 
 client c1 {
 	txreq
@@ -58,4 +58,4 @@ client c1 -start
 client c2 -run
 client c1 -wait
 
-vinyl v1 -cli backend.list
+varnish v1 -cli backend.list

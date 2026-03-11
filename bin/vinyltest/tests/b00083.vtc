@@ -13,7 +13,7 @@ server s2 {
 	txresp
 } -start
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s1 {
 	    .host = "${s1_sock}";
 	}
@@ -21,27 +21,27 @@ vinyl v1 -vcl {
 
 # The waiter depend on the backend_idle_timeout for when to give up and
 # close the connection, so bump it up a bit.
-vinyl v1 -cliok "param.set backend_idle_timeout 120"
+varnish v1 -cliok "param.set backend_idle_timeout 120"
 
 # The shutdown is done on the CLI thread, and it blocks until the waiter has
 # killed the connection. So bump cli_timeout up as well
-vinyl v1 -cliok "param.set cli_timeout 120"
+varnish v1 -cliok "param.set cli_timeout 120"
 
 client c1 {
 	txreq -url "/"
 	rxresp
 } -run
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend s2 {
 	    .host = "${s2_sock}";
 	}
 }
 
-vinyl v1 -cliok "vcl.use vcl2"
-vinyl v1 -cliok "vcl.discard vcl1"
+varnish v1 -cliok "vcl.use vcl2"
+varnish v1 -cliok "vcl.discard vcl1"
 
-vinyl v1 -expect n_backend == 1
-vinyl v1 -expect backend_conn == 1
-vinyl v1 -expect backend_reuse == 0
-vinyl v1 -expect backend_recycle == 1
+varnish v1 -expect n_backend == 1
+varnish v1 -expect backend_conn == 1
+varnish v1 -expect backend_reuse == 0
+varnish v1 -expect backend_recycle == 1

@@ -5,19 +5,19 @@ vtest "test startup_timeout vs. stevedore init / open"
 
 ####
 # startup_timeout used, delay in stevedore init
-vinyl v1 -arg "-sdebug=debug,dinit=5s -pstartup_timeout=3s -pcli_timeout=2s" \
+varnish v1 -arg "-sdebug=debug,dinit=5s -pstartup_timeout=3s -pcli_timeout=2s" \
 	-arg "-p feature=+no_coredump" \
 	-vcl "backend none none;" \
 	-expectexit 0x40
-vinyl v1 -cliexpect \
+varnish v1 -cliexpect \
 	"Child failed on launch within startup_timeout=3.00s" \
 	"start"
 # v1 registers a panic on some systems, but not others
-shell {vinyladm -n ${v1_name} panic.clear || true }
-vinyl v1 -wait
+shell {varnishadm -n ${v1_name} panic.clear || true }
+varnish v1 -wait
 
 
-process p1 { vinyld \
+process p1 { varnishd \
 	-sdebug=debug,dinit=5s \
 	-pstartup_timeout=3s -pcli_timeout=2s \
 	-n ${tmpdir}/p1 -a :0 -b none 2>&1
@@ -29,18 +29,18 @@ shell {grep -q "Child failed on launch within startup_timeout=3.00s" ${p1_out}}
 ####
 # cli_timeout used, delay in stevedore open
 
-vinyl v2 -arg "-sdebug=debug,dopen=5s -pstartup_timeout=2s -pcli_timeout=3s" \
+varnish v2 -arg "-sdebug=debug,dopen=5s -pstartup_timeout=2s -pcli_timeout=3s" \
 	-arg "-p feature=+no_coredump" \
 	-vcl "backend none none;" \
 	-expectexit 0x40
-vinyl v2 -cliexpect \
+varnish v2 -cliexpect \
 	"launch within cli_timeout=3.00s .tip: set startup_" \
 	"start"
 # "time for the big quit"
-vinyl v2 -cliok "panic.clear"
-vinyl v2 -wait
+varnish v2 -cliok "panic.clear"
+varnish v2 -wait
 
-process p2 { vinyld \
+process p2 { varnishd \
 	-sdebug=debug,dopen=5s \
 	-pstartup_timeout=2s -pcli_timeout=3s \
 	-n ${tmpdir}/p2 -a :0 -b none

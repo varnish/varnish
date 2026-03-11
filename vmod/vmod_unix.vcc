@@ -1,5 +1,5 @@
 #-
-# This document is licensed under the same conditions as Vinyl Cache itself.
+# This document is licensed under the same conditions as Varnish Cache itself.
 # See LICENSE for details.
 #
 # SPDX-License-Identifier: BSD-2-Clause
@@ -15,7 +15,7 @@ DESCRIPTION
 
 This VMOD provides information about the credentials of the peer
 process (user and group of the process owner) that is connected to a
-Vinyl Cache listener via a Unix domain socket, if the platform supports
+Varnish Cache listener via a Unix domain socket, if the platform supports
 it.
 
 Examples::
@@ -57,7 +57,7 @@ one of the following:
 * `getpeerucred(3C)` (SunOS and descendants)
 
 On SunOS and friends, the ``PRIV_PROC_INFO`` privilege set is added to
-the `vinyld` child process while the VMOD is loaded, see
+the `varnishd` child process while the VMOD is loaded, see
 `setppriv(2)`.
 
 On most platforms, the value returned is the effective user or group
@@ -115,7 +115,7 @@ All functions in this VMOD are subject to the following constraints:
 SEE ALSO
 ========
 
-* :ref:`vinyld(1)`
+* :ref:`varnishd(1)`
 * :ref:`vcl(7)`
 * `getpeereid(3)`
 * `getsockopt(2)`

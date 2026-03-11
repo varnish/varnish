@@ -5,17 +5,17 @@ server s1 {
 	txresp
 } -start
 
-vinyl v1 -arg "-p vcl_cooldown=1" -vcl+backend {
+varnish v1 -arg "-p vcl_cooldown=1" -vcl+backend {
 } -start
 
-vinyl v1 -expect VBE.vcl1.s1.happy >= 0
+varnish v1 -expect VBE.vcl1.s1.happy >= 0
 
-vinyl v1 -cliok {vcl.inline vcl2 "vcl 4.0; backend s1 {.host = \"${s1_addr}\"; .port = \"${s1_port}\"; }"}
+varnish v1 -cliok {vcl.inline vcl2 "vcl 4.0; backend s1 {.host = \"${s1_addr}\"; .port = \"${s1_port}\"; }"}
 
-vinyl v1 -expect VBE.vcl2.s1.happy >= 0
+varnish v1 -expect VBE.vcl2.s1.happy >= 0
 
 delay 5
 
-vinyl v1 -vsc VBE.*
+varnish v1 -vsc VBE.*
 
-vinyl v1 -expect !VBE.vcl2.s1.happy
+varnish v1 -expect !VBE.vcl2.s1.happy

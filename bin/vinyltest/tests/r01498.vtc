@@ -1,6 +1,6 @@
 vtest "backend name VCC crash"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	vcl 4.0;
 	import directors;
 	backend s1 {

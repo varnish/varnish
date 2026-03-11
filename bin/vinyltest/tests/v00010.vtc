@@ -24,10 +24,10 @@ server s1 {
 	txresp -hdr "Foo: foo" -body "abcdef\n"
 } -start
 
-vinyl v1 -arg "-sdefault,1m"
-vinyl v1 -cliok "param.set feature +no_coredump"
+varnish v1 -arg "-sdefault,1m"
+varnish v1 -cliok "param.set feature +no_coredump"
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import vtc;
 	import debug;
 
@@ -48,10 +48,10 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "stop"
-vinyl v1 -cliok "start"
-vinyl v1 -wait-running
-vinyl v1 -expect MGT.child_panic == 0
+varnish v1 -cliok "stop"
+varnish v1 -cliok "start"
+varnish v1 -wait-running
+varnish v1 -expect MGT.child_panic == 0
 
 client c1 {
 	txreq -url "/"
@@ -60,14 +60,14 @@ client c1 {
 	# Don't expect answer, the server crashed.
 } -run
 
-vinyl v1 -wait-stopped
-vinyl v1 -cliok "panic.show"
-vinyl v1 -clijson "panic.show -j"
-vinyl v1 -cliok "panic.clear"
-vinyl v1 -expect MGT.child_panic == 1
-vinyl v1 -clierr 300 "panic.clear"
-vinyl v1 -cliok "start"
-vinyl v1 -wait-running
+varnish v1 -wait-stopped
+varnish v1 -cliok "panic.show"
+varnish v1 -clijson "panic.show -j"
+varnish v1 -cliok "panic.clear"
+varnish v1 -expect MGT.child_panic == 1
+varnish v1 -clierr 300 "panic.clear"
+varnish v1 -cliok "start"
+varnish v1 -wait-running
 barrier b1 sync
 
 client c1 {
@@ -77,14 +77,14 @@ client c1 {
 	# Don't expect answer, the server crashed.
 } -run
 
-vinyl v1 -wait-stopped
-vinyl v1 -cliok "panic.show"
-vinyl v1 -clijson "panic.show -j"
-vinyl v1 -cliok "panic.clear -z"
-vinyl v1 -expect MGT.child_panic == 0
-vinyl v1 -clierr 300 "panic.clear"
-vinyl v1 -cliok "start"
-vinyl v1 -wait-running
+varnish v1 -wait-stopped
+varnish v1 -cliok "panic.show"
+varnish v1 -clijson "panic.show -j"
+varnish v1 -cliok "panic.clear -z"
+varnish v1 -expect MGT.child_panic == 0
+varnish v1 -clierr 300 "panic.clear"
+varnish v1 -cliok "start"
+varnish v1 -wait-running
 barrier b2 sync
 
 client c1 {
@@ -93,5 +93,5 @@ client c1 {
 	expect resp.http.foo == "foo"
 } -run
 
-vinyl v1 -cliok "panic.clear -z"
-vinyl v1 -expectexit 0x40
+varnish v1 -cliok "panic.clear -z"
+varnish v1 -expectexit 0x40

@@ -1,9 +1,9 @@
-vtest "vinyllog write vsl to stdout"
+vtest "varnishlog write vsl to stdout"
 
 feature cmd "command -v gzip"
 feature cmd "command -v gunzip"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	backend be none;
 } -start
 
@@ -13,6 +13,6 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-shell {vinyllog -d -w - -n ${v1_name} | gzip >vsl.gz}
+shell {varnishlog -d -w - -n ${v1_name} | gzip >vsl.gz}
 shell {ls -l}
-shell -match "RespStatus +503" {gunzip < vsl.gz | vinyllog -r -}
+shell -match "RespStatus +503" {gunzip < vsl.gz | varnishlog -r -}

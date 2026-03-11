@@ -5,9 +5,9 @@
 
 .. _reference-index:
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-The Vinyl Cache Reference Manual
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The Varnish Reference Manual
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 .. _reference-vcl:
 
@@ -17,7 +17,7 @@ The VCL language
 .. toctree::
 	:maxdepth: 1
 
-	VCL - The Vinyl Configuration Language <vcl>
+	VCL - The Varnish Configuration Language <vcl>
 	VCL Variables <vcl-var>
 	VCL Steps <vcl-step>
 	VCL backend configuration <vcl-backend>
@@ -49,8 +49,8 @@ The CLI interface
 .. toctree::
 	:maxdepth: 1
 
-	VinylAdm - Control program for Vinyl Cache <vinyladm>
-	CLI - The commands Vinyl Cache understands <vinyl-cli>
+	VarnishAdm - Control program for Varnish <varnishadm>
+	CLI - The commands varnish understands <varnish-cli>
 
 Logging and monitoring
 ----------------------
@@ -58,14 +58,13 @@ Logging and monitoring
 .. toctree::
 	:maxdepth: 1
 
-	VSL - The log records Vinyl Cache generates <vsl>
+	VSL - The log records Varnish generates <vsl>
 	VSLQ - Filter/Query expressions for VSL <vsl-query>
 	VarnishLog - Logging raw VSL <varnishlog>
-	VinylLog - Logging raw VSL <vinyllog>
-	VarnishLog-JSON - Logging in JSON format <varnishlog-json>
-	VinylNCSA - Logging in NCSA format <vinylncsa>
-	VinylHist - Realtime response histogram display <vinylhist>
-	VinylTop - Realtime activity display <vinyltop>
+	VarnishNCSA - Logging in NCSA format <varnishncsa>
+	VarnishLog-JSON - Structured logging <varnishlog-json>
+	VarnishHist - Realtime response histogram display <varnishhist>
+	VarnishTop - Realtime activity display <varnishtop>
 
 Counters and statistics
 -----------------------
@@ -73,25 +72,25 @@ Counters and statistics
 .. toctree::
 	:maxdepth: 1
 
-	VSC - The statistics Vinyl Cache collects <vinyl-counters>
-	VinylStat - Watching and logging statistics <vinylstat>
+	VSC - The statistics Varnish collects <varnish-counters>
+	VarnishStat - Watching and logging statistics <varnishstat>
 
-The Vinyld program
-------------------
+The Varnishd program
+--------------------
 
 .. toctree::
 	:maxdepth: 1
 
-	VinylD - The program which does the actual work <vinyld>
+	VarnishD - The program which does the actual work <varnishd>
 
-Vinyltest
----------
+Varnishtest
+-----------
 
 .. toctree::
 	:maxdepth: 1
 
 	VTC - Language for writing test cases <vtc>
-	VinylTest - execute test cases <vinyltest>
+	VarnishTest - execute test cases <varnishtest>
 	vmod_vtc.rst
 
 For Developers & DevOps
@@ -102,14 +101,14 @@ For Developers & DevOps
 
 	Shell tricks <shell_tricks>
 	VMODS - Extensions to VCL <vmod>
-	VEXT - Vinyl Cache Extensions <vext>
+	VEXT - Varnish Extensions <vext>
 	VSM - Shared memory use <vsm>
 	VDIR - Backends & Directors <directors>
 	VCLI - CLI protocol API <cli_protocol>
 
 .. Vmod_debug ?
 
-.. Libvinylapi
+.. Libvarnishapi
 
 .. VRT
 

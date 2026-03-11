@@ -1,9 +1,9 @@
 AC_PREREQ([2.69])
 AC_COPYRIGHT([Copyright (c) 2006 Verdens Gang AS
-Copyright (c) 2006-2025 Varnish Software
+Copyright (c) 2006-2024 Varnish Software
 Copyright 2010-2025 UPLEX - Nils Goroll Systemoptimierung])
 AC_REVISION([$Id$])
-AC_INIT([Vinyl Cache], [trunk], [vinyl-dev@vinyl-cache.org], [vinyl-cache])
+AC_INIT([Varnish Cache], [trunk], [opensource@varnish-software.com], [varnish-cache])
 AC_CONFIG_SRCDIR(include/miniobj.h)
 if ! test -f "${srcdir}/bin/vinyltest/vtest2/src/vtc_main.c" ; then
   AC_MSG_ERROR([vtest2 seems to be missing, use "git clone --recursive" or "git submodule update --init"])
@@ -948,8 +948,8 @@ AC_CONFIG_FILES([
     lib/libvcc/Makefile
     lib/libvgz/Makefile
     man/Makefile
-    vinylapi.pc
-    vinylapi-uninstalled.pc
+    varnishapi.pc
+    varnishapi-uninstalled.pc
     vmod/Makefile
 ])
 

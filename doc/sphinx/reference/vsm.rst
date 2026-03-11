@@ -52,7 +52,7 @@ Inside the varnishd (worker) process, we use mutexes to guarantee
 consistency, both with respect to allocations, log entries and stats
 counters.
 
-We do not want a vinylncsa trying to push data through a stalled
+We do not want a varnishncsa trying to push data through a stalled
 ssh connection to stall the delivery of content, so readers like
 that are purely read-only, they do not get to affect the varnishd
 process and that means no locks for them.

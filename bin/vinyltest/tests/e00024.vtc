@@ -59,7 +59,7 @@ server s1 {
 
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	sub vcl_backend_response {
 		if (bereq.url == "/") {
 			set beresp.do_esi = true;
@@ -67,9 +67,9 @@ vinyl v1 -vcl+backend {
 	}
 } -start
 
-vinyl v1 -cliok "param.set http_gzip_support true"
-vinyl v1 -cliok "param.set debug +esi_chop"
-vinyl v1 -cliok "param.set debug +syncvsl"
+varnish v1 -cliok "param.set http_gzip_support true"
+varnish v1 -cliok "param.set debug +esi_chop"
+varnish v1 -cliok "param.set debug +syncvsl"
 
 client c1 {
 	txreq -hdr "Accept-Encoding: gzip"
@@ -86,4 +86,4 @@ client c1 {
 	expect resp.bodylen == 252
 } -run
 
-vinyl v1 -expect esi_errors == 0
+varnish v1 -expect esi_errors == 0

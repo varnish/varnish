@@ -1,6 +1,6 @@
 vtest "Vary handling out of workspace"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import vtc;
 
 	backend be none;

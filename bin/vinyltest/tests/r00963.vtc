@@ -8,10 +8,10 @@ server s1 {
 	txresp -bodylen 10
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 } -start
 
-vinyl v1 -cliok "param.set rush_exponent 2"
+varnish v1 -cliok "param.set rush_exponent 2"
 
 client c1 {
 	txreq
