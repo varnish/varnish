@@ -54,6 +54,110 @@ Varnish-Cache NEXT (2026-03-15)
 
 * Added vmod ``math``.
 
+.. _4452: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4452
+
+* Fixed a bug in VCC where using ``false``/``true`` as a value for ``VCL_BOOL``
+  would result in a C-compiler error under certain platforms. (`4452`_)
+
+.. _4438: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4438
+
+* Request methods are now represented as a bitmap in struct http, which allows
+  turning method evaluations as simple bitwise operations instead of string
+  comparisons. (`4438`_)
+
+.. _4340: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4340
+
+* For requests having no request body, Content-length header will now only be
+  unset when the request method is one of: ``GET``, ``HEAD``, ``DELETE``,
+  ``OPTIONS``, ``TRACE``. Otherwise, a Content-length with value 0 will be set. (`4340`_)
+
+.. _4422: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4422
+
+* Added vmod ``math``. (`4422`_)
+
+.. _4427: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4427
+
+* ``vmod_std`` has a new ``.rfc_ttl()`` to re-calculate the object timers
+  (``beresp.ttl``, ``beresp.grace`` and ``beresp.keep``) based on the current
+  state of ``beresp`` as if it had been processed by core code before
+  ``vcl_backend_response`` was called. This does not change
+  ``beresp.uncacheable`` (`4427`_)
+
+.. _4419: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4419
+
+* VEXTs can now be loaded by specifying their basename as `-E<name>`. When <name>
+  is not a path (does not contain /), a search in ``vmod_path`` is conducted for
+  ``libvmod_<name>.so``. (`4419`_)
+
+.. _4421: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4421
+
+* New ``unused`` VCL keyword to mark symbols as intentionally unused, which
+  prevents errors about them being unused during VCL compilation. This gives
+  finer grained control compared to the ``-err_unref`` VCC feature, which disables
+  the error globally for all symbols. (`4421`_)
+
+.. _4418: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4418
+
+* Improved VCL comparison for probes, backends and ACLs that could lead to C-compiler
+  errors in the past. (`4418`_)
+
+.. _4415a: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4415
+
+* Fixed probes comparison in VCC which used to wrongly convert operands to string
+  before performing the comparison. (`4415a`_)
+
+.. _4409: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4409
+
+* Receiving SIGTERM in the management process is no longer logged as an error,
+  but rather as an INFO log record. (`4409`_)
+
+.. _4007: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4007
+
+* The ``BackendOpen`` VSL tag now also logs Connection age and Connection reuses
+  when relevant. These can be useful when trubleshooting idle timeout from the
+  backend. (`4007`_)
+
+.. _4415: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4415
+
+* Fixed a VCC bug where VCL would refuse to compile when a probe was never
+  referenced, even when ``'vcc_feature=-err_unref'`` was set. (`4415`_)
+
+.. _4416: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4416
+
+* A new ``bereq.retry_connect`` variable was added to VCL to control whether
+  ``vinyld`` will make a second attempt to connect to the backend if a first
+  connection reuse attempt failed. This can be useful to prevent undesired
+  retries of potentially non-idempotent requests. Setting to ``false`` means
+  that no retries will be made. However, setting this to ``true`` does not
+  guarantee that a retry will always be attempted, as there are other factors
+  involved in the decision (ex: a request body not being cached). This parameter
+  only affects automatic retries triggered by connection reuse failures and does
+  not affect VCL retries. (`4416`_)
+
+.. _4354: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4354
+
+* The ACL's ``+fold`` feature can now be followed with an optional ``(-report)``
+  to not output folding-related warnings during VCL compilation.
+
+* Fixed a VCC bug where a number expressed in scientific notation could trigger
+  an assertion failure.
+
+.. _4402: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4402
+
+* Fixed data race between BOC state and objcore flags that could result in a
+  panic under certain conditions. (`4402`_)
+
+.. _4399: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4399
+
+* The response reason when the stale object is not a valid object for refresh
+  has been made more descriptive to make it easier to differentiate between the
+  failure cases in the logs. (`4399`_)
+
+* A conditional GET for object revalidation is now demoted to a regular fetch
+  if the stale object being revalidated gets invalidated (e.g. by a ban or
+  purge) while the backend request is in progress. This also applies to
+  retries. (`4399`_)
+
 .. _4389: https://github.com/varnishcache/varnish-cache/issues/4389
 
 * ``req.ttl`` has been renamed to ``req.max_age`` for clarity, with ``req.ttl``
