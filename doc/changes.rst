@@ -101,10 +101,10 @@ Varnish-Cache NEXT (2026-03-15)
 * Improved VCL comparison for probes, backends and ACLs that could lead to C-compiler
   errors in the past. (`4418`_)
 
-.. _4415a: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4415
+.. _4417: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4417
 
 * Fixed probes comparison in VCC which used to wrongly convert operands to string
-  before performing the comparison. (`4415a`_)
+  before performing the comparison. (`4417`_)
 
 .. _4409: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4409
 
