@@ -5,7 +5,7 @@ Upgrading to Vinyl 9.0
 %%%%%%%%%%%%%%%%%%%%%%
 
 This document only lists breaking changes that you should be aware of when
-upgrading from Vinyl 8.x to 9.0. For a complete list of changes,
+upgrading from varnish 8.x to vinyl 9.0. For a complete list of changes,
 please refer to the `change log`_ or :ref:`whatsnew_changes_9.0`.
 
 .. _change log: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst
