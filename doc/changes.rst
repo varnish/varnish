@@ -41,6 +41,8 @@ Varnish-Cache NEXT (2026-03-15)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+* VCL variable ``beresp.storage_hint`` no longer exists.
+
 * ``VSL_Setup()`` has been replaced with ``VSL_Init()`` to initialize caller-provided
   space as a vsl buffer and ``VSL_Alloc()`` to allocate the default
   ``vsl_buffer`` on the heap.

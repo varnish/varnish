@@ -1,13 +1,13 @@
 .. _whatsnew_changes_9.0:
 
-%%%%%%%%%%%%%%%%%%%%
-Changes in Vinyl 9.0
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+Changes in Vinyl Cache 9.0
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 For information about updating your current Varnish deployment to the
 new version, see :ref:`whatsnew_upgrading_9.0`.
 
-A more detailed and technical account of changes in Vinyl, with
+A more detailed and technical account of changes in Vinyl Cache, with
 links to issues that have been fixed and pull requests that have been
 merged, may be found in the `change log`_.
 
@@ -47,12 +47,12 @@ The ``req.ttl`` variable has been renamed to ``req.max_age`` for clarity.
 ``req.ttl`` is retained as an alias but is now deprecated and will be removed
 in a future version.
 
-A new ``bereq.retry_connect`` variable has been added to control whether Vinyl
-will make a second attempt to connect to the backend if a first connection
-reuse attempt failed. This can be useful to prevent undesired retries of
-potentially non-idempotent requests. Setting to ``false`` means no retries will
-be made. This parameter only affects automatic retries triggered by connection
-reuse failures and does not affect VCL retries.
+A new ``bereq.retry_connect`` variable has been added to control whether
+``vinyld`` will make a second attempt to connect to the backend if a first
+connection reuse attempt failed. This can be useful to prevent undesired retries
+of potentially non-idempotent requests. Setting to ``false`` means no retries
+will be made. This parameter only affects automatic retries triggered by
+connection reuse failures and does not affect VCL retries.
 
 Other changes to VCL
 ~~~~~~~~~~~~~~~~~~~~
