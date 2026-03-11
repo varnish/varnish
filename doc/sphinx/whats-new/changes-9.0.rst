@@ -2,14 +2,14 @@
 updates for changes in the development branch. For changes in the
 released versions of Varnish, see:** :ref:`whats-new-index`
 
-.. _whatsnew_changes_CURRENT:
+.. _whatsnew_changes_9.0:
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Changes in Vinyl **$NEXT_RELEASE**
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+Changes in Vinyl 9.0
+%%%%%%%%%%%%%%%%%%%%
 
 For information about updating your current Varnish deployment to the
-new version, see :ref:`whatsnew_upgrading_CURRENT`.
+new version, see :ref:`whatsnew_upgrading_9.0`.
 
 A more detailed and technical account of changes in Vinyl, with
 links to issues that have been fixed and pull requests that have been

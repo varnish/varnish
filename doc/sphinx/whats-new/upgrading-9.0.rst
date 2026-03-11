@@ -2,11 +2,11 @@
 updates for changes in the development branch. For changes in the
 released versions of Varnish, see:** :ref:`whats-new-index`
 
-.. _whatsnew_upgrading_CURRENT:
+.. _whatsnew_upgrading_9.0:
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Upgrading to Vinyl **$NEXT_RELEASE**
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+Upgrading to Vinyl 9.0
+%%%%%%%%%%%%%%%%%%%%%%
 
 **XXX: how to upgrade from previous deployments to this
 version. Limited to work that has to be done for an upgrade, new
