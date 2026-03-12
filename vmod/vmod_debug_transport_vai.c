@@ -190,7 +190,7 @@ vdpio_reluctant_fini(struct vdp_ctx *vdc, void **priv)
 	//
 	// This a is cheap and wrong (for real code) way to wait for any pending
 	// notification task to complete - but after all this is vmod_debug
-	VTIM_sleep(reluctant_delay);
+	VTIM_sleep(reluctant_delay * 10);
 }
 
 static const struct vdp vdp_reluctant = {
