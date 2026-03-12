@@ -226,7 +226,7 @@ HTTP_Init(void)
 
 	vsb = VSB_new_auto();
 	AN(vsb);
-	VSB_printf(vsb, "1.1 %s (Varnish/" PACKAGE_BRANCH ")",
+	VSB_printf(vsb, "1.1 %s (Vinyl-Cache/" PACKAGE_BRANCH ")",
 	    heritage.identity);
 	AZ(VSB_finish(vsb));
 	REPLACE(via_hdr, VSB_data(vsb));

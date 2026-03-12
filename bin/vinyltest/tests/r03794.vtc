@@ -3,7 +3,7 @@ vtest "Append configurable Via header"
 server s1 {
 	rxreq
 	expect req.http.via == \
-		"1.1 v2 (Varnish/${pkg_branch}), 1.1 v1 (Varnish/${pkg_branch})"
+		"1.1 v2 (Vinyl-Cache/${pkg_branch}), 1.1 v1 (Vinyl-Cache/${pkg_branch})"
 	txresp
 } -start
 
@@ -19,5 +19,5 @@ client c1 -connect ${v2_sock} {
 	txreq
 	rxresp
 	expect resp.http.via == \
-		"1.1 v1 (Varnish/${pkg_branch}), 1.1 v2 (Varnish/${pkg_branch})"
+		"1.1 v1 (Vinyl-Cache/${pkg_branch}), 1.1 v2 (Vinyl-Cache/${pkg_branch})"
 } -run
