@@ -450,8 +450,7 @@ vjs_setuid(void)
 		AZ(setppriv(PRIV_OFF, PRIV_EFFECTIVE, vjs_proc_setid));
 		AZ(setppriv(PRIV_OFF, PRIV_PERMITTED, vjs_proc_setid));
 	} else {
-		MGT_Complain(C_SECURITY,
-		    "Privilege %s missing, will not change uid/gid",
+		MGT_Complain(C_SECURITY, "%s missing, uid/gid unchanged",
 		    PRIV_PROC_SETID);
 	}
 }
