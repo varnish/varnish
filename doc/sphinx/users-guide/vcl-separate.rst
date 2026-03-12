@@ -14,7 +14,7 @@ a separate VCL files for separate vhosts or any other distinct
 subset of requests.
 
 Assume that we want to handle ``varnish.org`` with one VCL file
-and ``varnish-cache.org`` with another VCL file.
+and ``vinyl-cache.org`` with another VCL file.
 
 First load the two VCL files::
 
@@ -45,10 +45,10 @@ request::
 	if (req.http.host ~ "\.?varnish\.org$") {
 	    return (vcl(l_vo));
 	}
-	if (req.http.host ~ "\.?varnish-cache\.org$") {
+	if (req.http.host ~ "\.?vinyl-cache\.org$") {
 	    return (vcl(l_vc));
 	}
-	return (synth(302, "http://varnish-cache.org"));
+	return (synth(302, "http://vinyl-cache.org"));
     }
 
     sub vcl_synth {

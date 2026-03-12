@@ -96,7 +96,7 @@ GUI or a hole in your firewall.
 The tester sends a report to the project server with ssh(1), and
 the reporter, which is just 750 lines of python code, ingests and
 digests the report and spits out some `pidgin HTML
-<http://varnish-cache.org/vtest/>`_ with the information I actually
+<http://vinyl-cache.org/vtest/>`_ with the information I actually
 want to see.
 
 And just like with the varnishtest program before it, once I

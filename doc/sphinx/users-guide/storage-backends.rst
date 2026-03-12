@@ -25,7 +25,7 @@ objects, the rule of thumb is *n* x ``transit_buffer``.
 
 Storage backends are also called stevedores.
 
-.. _vmods: https://www.varnish-cache.org/vmods
+.. _vmods: https://www.vinyl-cache.org/vmods
 
 Besides the built-in storage backends, separately distributed extensions exist,
 
