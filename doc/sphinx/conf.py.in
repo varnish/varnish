@@ -47,8 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Vinyl Cache Project'
-copyright = u'2016-2026, The Varnish Cache and Vinyl Cache Contributors. Vinyl Cache Logo & Mascot: CC-BY 4.0 Rhubarbe.design'
-author = u'The Varnish Cache and Vinyl Cache Contributors'
+copyright = u'2016-2026, The Vinyl Cache Cache and Vinyl Cache Contributors. Vinyl Cache Logo & Mascot: CC-BY 4.0 Rhubarbe.design'
+author = u'The Vinyl Cache Cache and Vinyl Cache Contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -225,7 +225,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'VinylCache.tex', u'Vinyl Cache Administrator documentation',
-   u'The Varnish Cache and Vinyl Cache Contributors', 'manual'),
+   u'The Vinyl Cache Cache and Vinyl Cache Contributors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
