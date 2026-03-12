@@ -237,8 +237,8 @@ static const uint8_t h2_500_resp[] = {
 	// content-length 0
 	0x1f, 0x0d, 0x01, 0x30,
 
-	// server Varnish
-	0x1f, 0x27, 0x07, 'V', 'a', 'r', 'n', 'i', 's', 'h',
+	// server Vinyl-Cache
+	0x1f, 0x27, 0x0b, 'V', 'i', 'n', 'y', 'l', '-', 'C', 'a', 'c', 'h', 'e'
 };
 
 static void

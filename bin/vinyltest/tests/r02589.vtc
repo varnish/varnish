@@ -24,7 +24,7 @@ client c1 {
 		rxresp
 		expect resp.status == 500
 		expect resp.http.content-length == 0
-		expect resp.http.server == "Varnish"
+		expect resp.http.server == "Vinyl-Cache"
 	} -run
 } -run
 
