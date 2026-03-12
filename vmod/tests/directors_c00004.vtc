@@ -117,3 +117,7 @@ client c1 {
 	rxresp
 	expect resp.body == "xiuFi3Pe"
 } -run
+
+server s1 -wait
+server s2 -wait
+server s3 -wait

@@ -20,3 +20,5 @@ client c1 {
 	expect resp.status == 200
 	expect resp.bodylen == 4
 } -run
+
+server s1 -wait
