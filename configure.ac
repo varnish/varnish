@@ -1,7 +1,8 @@
 AC_PREREQ([2.69])
 AC_COPYRIGHT([Copyright (c) 2006 Verdens Gang AS
-Copyright (c) 2006-2024 Varnish Software
-Copyright 2010-2025 UPLEX - Nils Goroll Systemoptimierung])
+Copyright (c) 2006-2026 Varnish Software
+Copyright 2010-2026 UPLEX - Nils Goroll Systemoptimierung
+Copyright 2026 The Vinyl Cache Project])
 AC_REVISION([$Id$])
 AC_INIT([Varnish Cache], [trunk], [opensource@varnish-software.com], [varnish-cache])
 AC_CONFIG_SRCDIR(include/miniobj.h)
