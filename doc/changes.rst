@@ -41,7 +41,18 @@ Varnish-Cache NEXT (2026-03-15)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
-* VCL variable ``beresp.storage_hint`` no longer exists.
+* The VCL variable ``beresp.storage_hint`` no longer exists.
+
+* The VAI interface gained
+
+  - the ``IOV_NIL`` macro to return leases once delivery has reached a certain
+    point,
+
+  - the ``viov_take()`` function to transfer ownership of byte ranges from one
+    ``viov`` to another and
+
+  - ``ObjVAInotify()`` / ``VDPIO_Notify()`` to allow filters to return
+    ``-EAGAIN`` and notify for delivery resumption at a later point.
 
 * ``VSL_Setup()`` has been replaced with ``VSL_Init()`` to initialize caller-provided
   space as a vsl buffer and ``VSL_Alloc()`` to allocate the default
@@ -75,6 +86,15 @@ Varnish-Cache NEXT (2026-03-15)
 
 * Added vmod ``math``. (`4422`_)
 
+  This adds all mathematical functions, macros and constants from ``math.h``
+  like ``sqrt()`` , ``exp()``, ``pow()`` or ``log()`` (just to name a few
+  prominent ones) as well as
+
+  - ``math.approx()`` implementing a notion of "approximately equal"
+
+  - ``math.strfromd()`` for REAL formatting without the limitations of the
+    built-in formatter
+
 .. _4427: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4427
 
 * ``vmod_std`` has a new ``.rfc_ttl()`` to re-calculate the object timers
@@ -91,10 +111,10 @@ Varnish-Cache NEXT (2026-03-15)
 
 .. _4421: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4421
 
-* New ``unused`` VCL keyword to mark symbols as intentionally unused, which
-  prevents errors about them being unused during VCL compilation. This gives
-  finer grained control compared to the ``-err_unref`` VCC feature, which disables
-  the error globally for all symbols. (`4421`_)
+* The new ``unused`` VCL keyword has been added to mark symbols as intentionally
+  unused, which prevents errors about them being unused during VCL compilation.
+  This gives finer grained control compared to the ``-err_unref`` VCC feature,
+  which disables the error globally for all symbols. (`4421`_)
 
 .. _4418: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4418
 
@@ -127,10 +147,10 @@ Varnish-Cache NEXT (2026-03-15)
 * A new ``bereq.retry_connect`` variable was added to VCL to control whether
   ``vinyld`` will make a second attempt to connect to the backend if a first
   connection reuse attempt failed. This can be useful to prevent undesired
-  retries of potentially non-idempotent requests. Setting to ``false`` means
-  that no retries will be made. However, setting this to ``true`` does not
+  retries of potentially non-idempotent requests. Setting this to ``false`` means
+  that no retries will be made. However, setting it to ``true`` does not
   guarantee that a retry will always be attempted, as there are other factors
-  involved in the decision (ex: a request body not being cached). This parameter
+  involved in the decision (e.g. a request body not being cached). This parameter
   only affects automatic retries triggered by connection reuse failures and does
   not affect VCL retries. (`4416`_)
 
