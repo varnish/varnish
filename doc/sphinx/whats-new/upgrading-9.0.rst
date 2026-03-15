@@ -1,30 +1,16 @@
 .. _whatsnew_upgrading_9.0:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Upgrading to Vinyl Cache 9.0
+Upgrading to Varnish Cache 9.0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 This document only lists breaking changes that you should be aware of when
-upgrading from varnish 8.x to vinyl 9.0. For a complete list of changes,
-please refer to the `change log`_ or :ref:`whatsnew_changes_9.0`.
+upgrading from Varnish Cache 8.x to Varnish Cache 9.0. For a complete list of
+changes, please refer to the `change log`_ and :ref:`whatsnew_changes_9.0`.
 
-.. _change log: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/doc/changes.rst
+.. _change log: https://github.com/varnish/varnish/blob/main/doc/changes.rst
 
-Name change
-===========
-
-As you `may have noticed`_, the project name has been changed from "Varnish Cache"
-to "Vinyl Cache", and this is the first release under the new name. All binaries,
-documentation, and other references have been updated to reflect this change.
-Starting from this release, the main binary is now ``vinyld`` instead of ``varnishd``.
-Similarly, all VUTs were renamed accordingly (``vinyllog``, ``vinylncsa``.. etc).
-
-Besides this cosmetic change, there are no functional changes related to the name change,
-and the upgrade process should be as usual.
-
-.. _`may have noticed`: https://vinyl-cache.org/#years-old-and-it-is-time-to-get-serious-er
-
-vinyld
+varnishd
 ======
 
 VCL variable ``beresp.storage_hint`` removed
@@ -38,7 +24,7 @@ VCL variable ``req.ttl`` deprecated
 
 The ``req.ttl`` variable has been renamed to ``req.max_age`` for clarity.
 ``req.ttl`` is retained as an alias and continues to work, but is now deprecated
-and will be removed in a future version of Vinyl Cache. You should update your
+and will be removed in a future version of Varnish Cache. You should update your
 VCL to use ``req.max_age`` instead.
 
 Content-Length handling for requests without body
