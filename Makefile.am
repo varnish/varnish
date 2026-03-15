@@ -43,8 +43,9 @@ AM_DISTCHECK_CONFIGURE_FLAGS += --with-unwind
 endif
 
 install-data-local:
-	$(install_sh) -d -m 0755 $(DESTDIR)$(localstatedir)/vinyl
-
+	if test "${VINYL_STATE_DIR}" = "$(DESTDIR)$(localstatedir)/vinyl-cache" ; then \
+		$(install_sh) -d -m 0755 "${VINYL_STATE_DIR}"; \
+	fi
 
 distclean-local:
 	-find . '(' -name '*.gcda' -o -name '*.gcda' ')' -exec rm '{}' ';'

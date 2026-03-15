@@ -652,7 +652,7 @@ fi
 if test "${localstatedir}" = '${prefix}/var' ; then
    VINYL_STATE_DIR='/var/run'
 else
-   VINYL_STATE_DIR='${localstatedir}/vinyl'
+   VINYL_STATE_DIR='${localstatedir}/vinyl-cache'
 fi
 AC_SUBST(VINYL_STATE_DIR)
 
