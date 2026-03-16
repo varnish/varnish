@@ -76,8 +76,8 @@ VCS_String(const char *which)
 		    ")"
 		    "\n"
 		    "Copyright (c) 2006 Verdens Gang AS\n"
-		    "Copyright (c) 2006-2025 Varnish Software\n"
-		    "Copyright 2010-2025 UPLEX - Nils Goroll Systemoptimierung\n"
+		    "Copyright (c) 2006-2026 Varnish Software\n"
+		    "Copyright 2010-2026 UPLEX - Nils Goroll Systemoptimierung\n"
 		);
 	default:
 		WRONG("Wrong argument to VCS_String");
