@@ -1023,8 +1023,8 @@
 
 	Number of requests for which an absolute form request target (e.g.
 	http://example.com/ or https://example.com/) was handled. The https://
-	scheme handled unless the feature ``https_scheme`` is disabled (see RUN
-	TIME PARAMETERS in `vinyld(1)`).
+	scheme is handled unless the feature ``https_scheme`` is disabled (see
+	RUN TIME PARAMETERS in `vinyld(1)`).
 
 	See also ReqTarget in `vsl(7)`. This counter is approximately correct.
 
