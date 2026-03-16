@@ -358,16 +358,21 @@ table.docutils {
   border: 2px solid var(--color-table-border);
 }
 
-/* Sponsors sidebar */
+/* Follow and sponsors sidebar */
 
-.sidebar-tree + div {
+.sidebar-scroll > div:not(.sidebar-tree) {
 	margin-top: calc(2 * var(--sidebar-tree-space-above));
+	margin-bottom: calc(3* var(--sidebar-tree-space-above));
 	padding-inline: var(--sidebar-item-spacing-horizontal);
-	font-family: var(--font-stack--headings);
 	font-size: .8em;
+	text-wrap: balance;
 }
 
-.sidebar-tree + div img {
+.sidebar-scroll > div:not(.sidebar-tree):has(img) {
+	font-family: var(--font-stack--headings);
+}
+
+.sidebar-scroll > div:not(.sidebar-tree):has(img) img {
 	margin-bottom: 1.5em;
 }
 
