@@ -1,8 +1,8 @@
 .. _whatsnew_upgrading_9.0:
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Upgrading to Varnish Cache 9.0
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 This document only lists breaking changes that you should be aware of when
 upgrading from Varnish Cache 8.x to Varnish Cache 9.0. For a complete list of

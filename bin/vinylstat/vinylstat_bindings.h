@@ -69,7 +69,7 @@ BINDING_KEY('d', "d",)
 BINDING(UNSEEN,
     "\tToggle between showing and hiding unseen counters. Unseen\n"
     "\tcounters are those that has been zero for the entire runtime\n"
-    "\tof vinylstat. Defaults to hide unseen counters."
+    "\tof varnishstat. Defaults to hide unseen counters."
 )
 
 BINDING_KEY('r', "r",)

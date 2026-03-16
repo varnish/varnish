@@ -57,7 +57,7 @@
 
 struct varnish {
 	unsigned		magic;
-#define VARNISH_MAGIC		0x208cd8e4
+#define VARNISH_MAGIC		0x4e8dc802
 	char			*me;
 	char			*name;
 	struct vtclog		*vl;

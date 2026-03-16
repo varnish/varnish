@@ -16,10 +16,10 @@ process p1 -log {
 
 shell {
 	# wait for startup vcl.load to complete
-	vinyladm -n ${tmpdir}/t ping ||
-	vinyladm -n ${tmpdir}/t ping ||
-	vinyladm -n ${tmpdir}/t ping ||
-	vinyladm -n ${tmpdir}/t ping
+	varnishadm -n ${tmpdir}/t ping ||
+	varnishadm -n ${tmpdir}/t ping ||
+	varnishadm -n ${tmpdir}/t ping ||
+	varnishadm -n ${tmpdir}/t ping
 }
 
 process p1 -screen_dump

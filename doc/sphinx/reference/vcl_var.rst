@@ -920,7 +920,7 @@ bereq.retry_connect
 	Writable from: backend
 
 	Default: ``true``.
-	Controls whether `vinyld` will make a second attempt to connect to the
+	Controls whether `varnishd` will make a second attempt to connect to the
 	backend if a first connection reuse attempt failed. Setting to ``false``
 	means that no retries will be made. However, setting this to ``true``
 	does not guarantee that a retry will always be attempted, as there are

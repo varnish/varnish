@@ -52,15 +52,15 @@ AS_VAR_IF([$1], [""], [$5], [$4])dnl
 ])
 ])
 
-# VINYL_VMOD_INCLUDE_DIR([])
+# VARNISH_VMOD_INCLUDE_DIR([])
 # ----------------------------
 
-AC_DEFUN([VINYL_VMOD_INCLUDES],
+AC_DEFUN([VARNISH_VMOD_INCLUDES],
 [
 m4_pattern_forbid([^_?VARNISH[A-Z_]+$])
-m4_pattern_allow([^VINYL_VMOD(_INCLUDE_DIR|TOOL)$])
+m4_pattern_allow([^VARNISH_VMOD(_INCLUDE_DIR|TOOL)$])
 # Check for pkg-config
-PKG_CHECK_EXISTS([vinylapi],[],[
+PKG_CHECK_EXISTS([varnishapi],[],[
 	if test -z "$PKG_CONFIG"; then
 		AC_MSG_FAILURE(
 [The pkg-config script could not be found or is too old.  Make sure it
@@ -70,53 +70,53 @@ path to pkg-config.
 To get pkg-config, see <http://www.freedesktop.org/wiki/Software/pkg-config/>.])
 	else
 		AC_MSG_FAILURE(
-[pkg-config was unable to locate the vinylapi configuration data.
+[pkg-config was unable to locate the varnishapi configuration data.
 
 Please check config.log or adjust the PKG_CONFIG_PATH environment
 variable if you installed software in a non-standard prefix.])
 	fi
 ])
 
-VINYL_PKG_GET_VAR([VAPI_INCLUDE_DIR], [pkgincludedir])
+VARNISH_PKG_GET_VAR([VAPI_INCLUDE_DIR], [pkgincludedir])
 _CPPFLAGS="$CPPFLAGS"
 VMOD_INCLUDES="-I$VAPI_INCLUDE_DIR"
 CPPFLAGS="$VMOD_INCLUDES $CPPFLAGS"
 AC_CHECK_HEADERS([vsha256.h cache/cache.h])
 CPPFLAGS="$_CPPFLAGS"
 AC_SUBST([VMOD_INCLUDES])
-])# VINYL_VMOD_INCLUDE_DIR
+])# VARNISH_VMOD_INCLUDE_DIR
 
-# VINYL_VMOD_DIR([])
+# VARNISH_VMOD_DIR([])
 # --------------------
 
-AC_DEFUN([VINYL_VMOD_DIR],
+AC_DEFUN([VARNISH_VMOD_DIR],
 [
-VINYL_PKG_GET_VAR([VMOD_DIR], [vmoddir])
+VARNISH_PKG_GET_VAR([VMOD_DIR], [vmoddir])
 AC_SUBST([VMOD_DIR])
 ])
 
-# VINYL_VMODTOOL([])
+# VARNISH_VMODTOOL([])
 # --------------------
 
-AC_DEFUN([VINYL_VMODTOOL],
+AC_DEFUN([VARNISH_VMODTOOL],
 [
 AC_CHECK_PROGS(PYTHON, [python3.10 python3.9 python3.8 python3.7 python3.6 dnl
  python3.5 python3.4 python3 python, "no"])
 if test "x$PYTHON" = "xno"; then
   AC_MSG_ERROR([Python >= 3.4 is needed to build, please install python.])
 fi
-VINYL_PKG_GET_VAR([VMODTOOL], [vmodtool])
+VARNISH_PKG_GET_VAR([VMODTOOL], [vmodtool])
 AC_SUBST([VMODTOOL])
 ])
 
-# VINYL_PKG_GET_VAR([VARIABLE, PC_VAR_NAME])
+# VARNISH_PKG_GET_VAR([VARIABLE, PC_VAR_NAME])
 # -------------------------------
 
-AC_DEFUN([VINYL_PKG_GET_VAR],
+AC_DEFUN([VARNISH_PKG_GET_VAR],
 [
 # Uses internal function for now..
 pkg_failed=no
-_PKG_CONFIG([$1], [variable=][$2], [vinylapi])
+_PKG_CONFIG([$1], [variable=][$2], [varnishapi])
 if test "$pkg_failed" = "yes"; then
    AC_MSG_FAILURE([$2][ not defined, too old Varnish?])
 fi

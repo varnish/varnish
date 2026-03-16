@@ -77,19 +77,22 @@ varnishtest_LDADD = \
 		$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 		$(top_builddir)/lib/libvinyl/libvarnish.la \
 		$(top_builddir)/lib/libvgz/libvgz.la \
-		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl
+		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
+		${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
 
 varnishtest_CFLAGS = \
 		-DVTEST_WITH_VTC_LOGEXPECT \
 		-DVTEST_WITH_VTC_VINYL \
 		-DVTEST_WITH_VTC_VARNISH \
 		-DVTEST_WITH_VTC_VSM \
-		-DTOP_BUILDDIR='"${top_builddir}"'
+		-DTOP_BUILDDIR='"${top_builddir}"' \
+		${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
 
-EXTRA_DIST = $(srcdir)/vtest2/src/../tests/*.vtc \
-	$(top_srcdir)/bin/varnishtest/tests/*.vtc \
-	$(top_srcdir)/bin/varnishtest/tests/common.pem \
-	$(top_srcdir)/bin/varnishtest/tests/README \
+EXTRA_DIST = \
+	tests/*.vtc \
+	tests/common.pem \
+	tests/README \
+	vtest2/tests/*.vtc \
 	vtest2/src/gensequences \
 	vtest2/src/sequences \
 	vtest2/src/teken.3 \

@@ -81,7 +81,7 @@
 	:oneliner:	Session accept failures: other
 
 	Detailed reason for sess_fail: neither of the above, see
-	SessError log (vinyllog -g raw -i SessError).
+	SessError log (varnishlog -g raw -i SessError).
 
 .. vinyl_vsc:: client_req_400
 	:group: wrk
@@ -128,7 +128,7 @@
 	:oneliner:	Cache hits for pass.
 
 	Count of hits for pass. A cache hit for pass indicates that
-	Vinyl Cache is going to pass the request to the backend and
+	Varnish is going to pass the request to the backend and
 	this decision has been cached in it self. This counts how
 	many times the cached decision is being used.
 
@@ -137,7 +137,7 @@
 	:oneliner:	Cache hits for miss.
 
 	Count of hits for miss. A cache hit for miss indicates that
-	Vinyl Cache is going to proceed as for a cache miss without
+	Varnish is going to proceed as for a cache miss without
 	request coalescing, and this decision has been cached. This
 	counts how many times the cached decision is being used.
 
@@ -1003,7 +1003,7 @@
 .. vinyl_vsc:: n_test_gunzip
 	:oneliner:	Test gunzip operations
 
-	Those operations occur when Vinyl Cache receives a compressed
+	Those operations occur when Varnish receives a compressed
 	object from a backend. They are done to verify the gzip
 	stream while it's inserted in storage.
 
@@ -1024,7 +1024,7 @@
 	Number of requests for which an absolute form request target (e.g.
 	http://example.com/ or https://example.com/) was handled. The https://
 	scheme is handled unless the feature ``https_scheme`` is disabled (see
-	RUN TIME PARAMETERS in `vinyld(1)`).
+	RUN TIME PARAMETERS in `varnishd(1)`).
 
 	See also ReqTarget in `vsl(7)`. This counter is approximately correct.
 

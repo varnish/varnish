@@ -10,7 +10,7 @@
 -efunc(662, be32dec_vect)	// Possible creation of out-of-bounds pointer
 -efunc(670, VSHA256_Update)	// Possible access beyond array for function '___',
 
--dVINYL_STATE_DIR="foo"
+-dVARNISH_STATE_DIR="foo"
 
 --emacro((835),VBH_NOIDX)
 --emacro((835),O_CLOEXEC)

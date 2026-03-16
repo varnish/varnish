@@ -305,7 +305,7 @@
  *	VRT_AddVFP() added
  *	VRT_RemoveVFP() added
  * 7.0 (2018-03-15)
- *	lots of stuff moved from cache.h to cache_vinyld.h
+ *	lots of stuff moved from cache.h to cache_varnishd.h
  *	   (ie: from "$Abi vrt" to "$Abi strict")
  *	VCL_INT and VCL_BYTES are always 64 bits.
  *	path field added to struct vrt_backend

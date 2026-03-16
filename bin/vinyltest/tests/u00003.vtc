@@ -118,10 +118,10 @@ shell -err -match "Usage: .*varnishncsa <options>" \
 shell -match {^${localhost} 100
 ${localhost} 0$} \
 	{varnishncsa -n ${v1_name} -b -d -F "%{Host}i %b"}
-# -b with VINYL_DEFAULT_N
+# -b with VARNISH_DEFAULT_N
 shell -match {^${localhost} 100
 ${localhost} 0$} \
-	{VINYL_DEFAULT_N="${v1_name}" varnishncsa -b -d -F "%{Host}i %b"}
+	{VARNISH_DEFAULT_N="${v1_name}" varnishncsa -b -d -F "%{Host}i %b"}
 # -c
 shell -match {^${localhost} 100
 ${localhost} \d+
@@ -143,9 +143,9 @@ shell -match {^100 \d+ HTTP/1.1 (?:\d+.\d+.\d+.\d+|[a-f0-9:]+) \d+ - - GET 0 \d+
 shell -match {^\d+.\d{6} miss miss c 1001 quuz
 \d+.\d{6} miss synth c 1003\s
 \d+.\d{6} miss pipe c 1005\s$} \
-	{varnishncsa -n ${v1_name} -d -F "%{Vinyl:time_firstbyte}x \
-%{Vinyl:hitmiss}x %{Vinyl:handling}x %{Vinyl:side}x \
-%{Vinyl:vxid}x %{VCL_Log:quux}x"}
+	{varnishncsa -n ${v1_name} -d -F "%{Varnish:time_firstbyte}x \
+%{Varnish:hitmiss}x %{Varnish:handling}x %{Varnish:side}x \
+%{Varnish:vxid}x %{VCL_Log:quux}x"}
 
 # %{VSL:..}x
 shell -match {^req (\d+) rxreq \1 \d{10}\.\d{6} (\d+\.\d{6}) \d+\.\d{6} \2 - -
@@ -164,7 +164,7 @@ shell -match {^\{\d{4}-\d{2}-\d{2}\}T\{\d{2}:\d{2}:\d{2}\} \{\{\d{4}-\d{2}-\d{2}
 process p1 -stop -screen-dump
 process p1 -expect-text 1 0 {/1?foo=bar HTTP/1.1" 200 100 "-" "-"}
 process p1 -expect-text 1 0 { - user [}
-process p1 -expect-text 2 0 {/1?foo=bar HTTP/1.1" 404 246 "-" "-"}
+process p1 -expect-text 2 0 {/1?foo=bar HTTP/1.1" 404 248 "-" "-"}
 process p1 -expect-text 3 0 {/2 HTTP/1.1" - - "-" "-"}
 
 process p2 {varnishncsa -t 5 -n nonexistent} -start
@@ -192,7 +192,7 @@ shell {
 		varnishncsa -n ${v1_name} -d -k 1 -F "%{User-Agent}i"
 	) >def_then_ua.txt
 	varnishncsa -n ${v1_name} -d -k 1 >def_with_ua.txt \
-		-F "%{Vinyl:default_format}x\n%{User-Agent}i"
+		-F "%{Varnish:default_format}x\n%{User-Agent}i"
 	diff -u def_then_ua.txt def_with_ua.txt
 }
 

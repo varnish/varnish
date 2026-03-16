@@ -99,6 +99,6 @@ hit /hit
 pass /pass
 synth /synth
 EOF
-	varnishncsa -d -n ${v1_name} -F "%{Vinyl:handling}x %U" >have
+	varnishncsa -d -n ${v1_name} -F "%{Varnish:handling}x %U" >have
 	diff -u expect have
 }

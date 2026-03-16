@@ -8,7 +8,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = varnishapi.pc
 
 m4dir = $(datadir)/aclocal
-m4_DATA = vinyl.m4 vinyl-legacy.m4
+m4_DATA = varnish.m4 varnish-legacy.m4
 
 CLEANFILES = \
 	cscope.in.out \
@@ -23,8 +23,8 @@ EXTRA_DIST = \
 	LICENSE \
 	autogen.sh \
 	varnishapi.pc.in \
-	vinyl.m4 \
-	vinyl-legacy.m4 \
+	varnish.m4 \
+	varnish-legacy.m4 \
 	vsc.am \
 	vtc.am \
 	wflags.py
@@ -43,8 +43,8 @@ AM_DISTCHECK_CONFIGURE_FLAGS += --with-unwind
 endif
 
 install-data-local:
-	if test "${VINYL_STATE_DIR}" = "$(DESTDIR)$(localstatedir)/vinyl-cache" ; then \
-		$(install_sh) -d -m 0755 "${VINYL_STATE_DIR}"; \
+	if test "${VARNISH_STATE_DIR}" = "$(DESTDIR)$(localstatedir)/vinyl-cache" ; then \
+		$(install_sh) -d -m 0755 "${VARNISH_STATE_DIR}"; \
 	fi
 
 distclean-local:

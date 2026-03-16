@@ -15,8 +15,8 @@ vmoddir=${libdir}/@PACKAGE@/vmods
 vmodtool=${pkgdatadir}/vmodtool.py
 vsctool=${pkgdatadir}/vsctool.py
 
-Name: VinylAPI
-Description: Vinyl Cache API
+Name: VarnishAPI
+Description: Varnish API
 Version: @PACKAGE_VERSION@
 Cflags: -I${pkgincludedir}
-Libs: -L${libdir} -lvinylapi
+Libs: -L${libdir} -lvarnishapi

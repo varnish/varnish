@@ -1,8 +1,8 @@
 .. _whatsnew_changes_9.0:
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Changes in Varnish Cache 9.0
-%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 This version is released under a new name, which implies a number of relevant
 changes to Varnish Cache deployments. We strongly recommend to read
@@ -15,10 +15,10 @@ merged, may be found in the `change log`_.
 .. _change log: https://github.com/varnish/varnish/blob/main/doc/changes.rst
 
 varnishd
-======
+========
 
 Other changes in varnishd
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~==~~~~~~~~~~~~~~~~~~
 
 Varnish Extensions (VEXTs) can now be loaded by specifying their basename as
 ``-E<name>``. When ``<name>`` is not a path (does not contain ``/``), a search

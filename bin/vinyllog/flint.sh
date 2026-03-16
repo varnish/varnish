@@ -5,7 +5,7 @@
 # See LICENSE file for full text of license
 
 FLOPS='
-	-DVINYL_STATE_DIR=\"foo\"
+	-DVARNISH_STATE_DIR=\"foo\"
 	*.c
 	../../lib/libvinylapi/flint.lnt
 	../../lib/libvinylapi/*.c

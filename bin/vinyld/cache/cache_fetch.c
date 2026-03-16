@@ -1006,7 +1006,7 @@ vbf_stp_error(struct worker *wrk, struct busyobj *bo)
 		    "Backend fetch failed");
 
 	http_TimeHeader(bo->beresp, "Date: ", now);
-	http_SetHeader(bo->beresp, "Server: Vinyl-Cache");
+	http_SetHeader(bo->beresp, "Server: Varnish");
 
 	stale = bo->stale_oc;
 	oc->t_origin = now;

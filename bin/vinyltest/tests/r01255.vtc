@@ -157,7 +157,7 @@ client c3 {
 	expect resp.status == 400
 } -run
 
-vinyl v1 -expect MAIN.http1_absolute_form == 9
+varnish v1 -expect MAIN.http1_absolute_form == 9
 
 logexpect l1001 -wait
 logexpect l1003 -wait

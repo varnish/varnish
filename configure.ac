@@ -2,7 +2,7 @@ AC_PREREQ([2.69])
 AC_COPYRIGHT([Copyright (c) 2006 Verdens Gang AS
 Copyright (c) 2006-2026 Varnish Software
 Copyright 2010-2026 UPLEX - Nils Goroll Systemoptimierung
-Copyright 2026 The Vinyl Cache Project])
+Copyright 2026 The Varnish Cache Project])
 AC_REVISION([$Id$])
 AC_INIT([Varnish Cache], [trunk], [opensource@varnish-software.com], [varnish-cache])
 AC_CONFIG_SRCDIR(include/miniobj.h)
@@ -61,7 +61,7 @@ AC_ARG_WITH([rst2man],
     [no])])
 if test "x$RST2MAN" = "xno"; then
   AC_MSG_ERROR(
-    [rst2man is needed to build Vinyl Cache, please install python3-docutils.])
+    [rst2man is needed to build Varnish Cache, please install python3-docutils.])
 fi
 
 AC_ARG_WITH([sphinx-build],
@@ -72,7 +72,7 @@ AC_ARG_WITH([sphinx-build],
     [no])])
 if test "x$SPHINX" = "xno"; then
   AC_MSG_ERROR(
-    [sphinx-build is needed to build Vinyl Cache, please install python3-sphinx.])
+    [sphinx-build is needed to build Varnish Cache, please install python3-sphinx.])
 fi
 
 AC_ARG_WITH([rst2html],
@@ -92,16 +92,16 @@ AM_MISSING_PROG([DOT], [dot])
 AC_CHECK_PROGS([DOT], [dot])
 
 # Define VMOD flags
-_VINYL_VMOD_LDFLAGS
+_VARNISH_VMOD_LDFLAGS
 
 # Check for python.
-_VINYL_CHECK_PYTHON
+_VARNISH_CHECK_PYTHON
 
 # Check for libraries.
-_VINYL_SEARCH_LIBS(pthread, pthread_create, [thr pthread c_r])
-_VINYL_CHECK_LIB(dl, dlopen)
-_VINYL_CHECK_LIB(socket, socket)
-_VINYL_CHECK_LIB(nsl, getaddrinfo)
+_VARNISH_SEARCH_LIBS(pthread, pthread_create, [thr pthread c_r])
+_VARNISH_CHECK_LIB(dl, dlopen)
+_VARNISH_CHECK_LIB(socket, socket)
+_VARNISH_CHECK_LIB(nsl, getaddrinfo)
 
 AC_SUBST(NET_LIBS, "${SOCKET_LIBS} ${NSL_LIBS}")
 
@@ -524,14 +524,14 @@ AC_CHECK_DECL([SO_ACCEPTFILTER],
 
 AC_CHECK_DECL([SO_RCVTIMEO],
     [],
-    AC_MSG_ERROR([SO_RCVTIMEO is needed to build Vinyl Cache.]), [
+    AC_MSG_ERROR([SO_RCVTIMEO is needed to build Varnish Cache.]), [
         #include <sys/types.h>
         #include <sys/socket.h>
     ])
 
 AC_CHECK_DECL([SO_SNDTIMEO],
     [],
-    AC_MSG_ERROR([SO_SNDTIMEO is needed to build Vinyl Cache.]), [
+    AC_MSG_ERROR([SO_SNDTIMEO is needed to build Varnish Cache.]), [
         #include <sys/types.h>
         #include <sys/socket.h>
     ])
@@ -651,14 +651,14 @@ fi
 
 # Run-time directory
 if test "${localstatedir}" = '${prefix}/var' ; then
-   VINYL_STATE_DIR='/var/run'
+   VARNISH_STATE_DIR='/var/run'
 else
-   VINYL_STATE_DIR='${localstatedir}/vinyl-cache'
+   VARNISH_STATE_DIR='${localstatedir}/varnish'
 fi
-AC_SUBST(VINYL_STATE_DIR)
+AC_SUBST(VARNISH_STATE_DIR)
 
 # Default configuration directory.
-pkgsysconfdir='${sysconfdir}/vinyl'
+pkgsysconfdir='${sysconfdir}/varnish'
 AC_SUBST(pkgsysconfdir)
 
 # VMOD variables
@@ -907,7 +907,7 @@ AM_SUBST_NOTMAKE(VMOD_TESTS)
 
 AC_ARG_WITH([contrib],
 	[AS_HELP_STRING([--with-contrib],
-		[Build Vinyl Cache with external contributions.])])
+		[Build Varnish Cache with external contributions.])])
 
 AM_CONDITIONAL([WITH_CONTRIB], [test "$with_contrib" = yes])
 CONTRIB_TESTS="$(cd $srcdir/contrib && echo tests/*.vtc)"
@@ -916,7 +916,7 @@ AM_SUBST_NOTMAKE(CONTRIB_TESTS)
 
 AM_COND_IF([WITH_CONTRIB], [
 	AC_DEFINE([WITH_CONTRIB], [1],
-		[Define to 1 when Vinyl Cache is built with contributions.])
+		[Define to 1 when Varnish Cache is built with contributions.])
 ])
 
 # Make sure this include dir exists

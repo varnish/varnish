@@ -233,7 +233,7 @@ Operations options
 -E extension
 
   Load the named extension. Extensions are modules (VMODs) which can modify
-  `vinyld` behavior outside VCL, for example by adding storage- or protocol
+  `varnishd` behavior outside VCL, for example by adding storage- or protocol
   implementations. Extensions are always also VMODs, even if they do not provide
   any functionality to VCL, but in most cases they will.
 
@@ -244,7 +244,7 @@ Operations options
   Otherwise, for `extention` ``ext``, a ``vmod_ext.so`` is searched for in
   ``vmod_path``.
 
-  ``vinyld`` startup fails if loading the extension fails for any reason.
+  ``varnishd`` startup fails if loading the extension fails for any reason.
 
 Tuning options
 --------------

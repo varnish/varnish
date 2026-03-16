@@ -34,7 +34,7 @@
  * Obtain log data from the shared memory log, order it by session ID, and
  * display it in Apache / NCSA combined log format.
  *
- * See doc/sphinx/reference/vinylncsa.rst for the supported format
+ * See doc/sphinx/reference/varnishncsa.rst for the supported format
  * specifiers.
  *
  */
@@ -86,7 +86,7 @@ enum e_frag {
 	F_O,			/* %O Bytes sent */
 	F_tstart,		/* Time start */
 	F_tend,			/* Time end */
-	F_ttfb,			/* %{Vinyl:time_firstbyte}x */
+	F_ttfb,			/* %{Varnish:time_firstbyte}x */
 	F_host,			/* Host header */
 	F_auth,			/* Authorization header */
 	F__MAX,
@@ -674,23 +674,23 @@ parse_x_format(char *buf)
 	long lval;
 	int slt;
 
-	if (!strcmp(buf, "Vinyl:time_firstbyte")) {
+	if (!strcmp(buf, "Varnish:time_firstbyte")) {
 		addf_fragment(&CTX.frag[F_ttfb], CTX.missing_int);
 		return;
 	}
-	if (!strcmp(buf, "Vinyl:hitmiss")) {
+	if (!strcmp(buf, "Varnish:hitmiss")) {
 		addf_strptr(&CTX.hitmiss);
 		return;
 	}
-	if (!strcmp(buf, "Vinyl:handling")) {
+	if (!strcmp(buf, "Varnish:handling")) {
 		addf_strptr(&CTX.handling);
 		return;
 	}
-	if (!strcmp(buf, "Vinyl:side")) {
+	if (!strcmp(buf, "Varnish:side")) {
 		addf_strptr(&CTX.side);
 		return;
 	}
-	if (!strcmp(buf, "Vinyl:vxid")) {
+	if (!strcmp(buf, "Varnish:vxid")) {
 		addf_int64(&CTX.vxid);
 		return;
 	}
@@ -743,7 +743,7 @@ parse_x_format(char *buf)
 		addf_vsl((enum VSL_tag_e)slt, lval, r);
 		return;
 	}
-	if (!strcmp(buf, "Vinyl:default_format")) {
+	if (!strcmp(buf, "Varnish:default_format")) {
 		parse_format(FORMAT);
 		return;
 	}

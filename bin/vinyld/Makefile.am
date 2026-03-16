@@ -187,7 +187,7 @@ nobase_pkginclude_HEADERS = \
 	cache/cache_backend.h \
 	cache/cache_director.h \
 	cache/cache_filter.h \
-	cache/cache_vinyld.h \
+	cache/cache_varnishd.h \
 	common/common_param.h \
 	waiter/waiter.h
 
@@ -197,9 +197,9 @@ AM_YFLAGS = -d
 
 varnishd_CFLAGS = \
 	-DNOT_IN_A_VMOD \
-	-DVINYL_STATE_DIR='"${VARNISH_STATE_DIR}"' \
-	-DVINYL_VMOD_DIR='"${vmoddir}"' \
-	-DVINYL_VCL_DIR='"${pkgsysconfdir}:${vcldir}"' \
+	-DVARNISH_STATE_DIR='"${VARNISH_STATE_DIR}"' \
+	-DVARNISH_VMOD_DIR='"${vmoddir}"' \
+	-DVARNISH_VCL_DIR='"${pkgsysconfdir}:${vcldir}"' \
 	${OPENSSL_CFLAGS}
 
 varnishd_LDFLAGS = -export-dynamic
@@ -272,7 +272,7 @@ builtin_vcl.c:	builtin.vcl
 	    -e 's/^/ "/' $(srcdir)/builtin.vcl >> $@
 	echo ';' >> $@
 
-EXTRA_DIST = builtin.vcl
+EXTRA_DIST = builtin.vcl cache/cache_vinyld.h
 
 vhp_hufdec.h: vhp_gen_hufdec
 	$(AM_V_GEN) ./vhp_gen_hufdec > vhp_hufdec.h_
@@ -280,10 +280,13 @@ vhp_hufdec.h: vhp_gen_hufdec
 
 DISTCLEANFILES = builtin_vcl.c
 
-BUILT_SOURCES	=	vhp_hufdec.h mgt/vtls_cfg/vtls_cfg_parser.h
+BUILT_SOURCES	=	vhp_hufdec.h mgt/vtls_cfg/vtls_cfg_parser.h cache/cache_varnishd.h
 DISTCLEANFILES	+=	vhp_hufdec.h
 
 EXTRA_DIST += \
 	mgt/vtls_cfg/vtls_cfg_lexer.c \
 	mgt/vtls_cfg/vtls_cfg_parser.c \
 	mgt/vtls_cfg/vtls_cfg_parser.h
+
+cache/cache_varnishd.h: cache/cache_vinyld.h
+	cp $^ $@

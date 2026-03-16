@@ -45,7 +45,7 @@ v1d_error(struct req *req, struct v1l **v1lp, const char *msg)
 {
 	static const char r_500[] =
 	    "HTTP/1.1 500 Internal Server Error\r\n"
-	    "Server: Vinyl-Cache\r\n"
+	    "Server: Varnish\r\n"
 	    "Connection: close\r\n\r\n";
 	uint64_t bytes;
 
