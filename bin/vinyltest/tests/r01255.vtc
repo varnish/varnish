@@ -1,4 +1,4 @@
-vtest "Test RFC2616 5.2 compliance"
+vtest "Test RFC9112 3.2 compliance"
 
 server s1 -repeat 8 {
 	rxreq
