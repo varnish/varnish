@@ -23,6 +23,7 @@ jobs:
             build-essential \
             ca-certificates \
             cpio \
+            furo \
             git \
             libedit-dev \
             libjemalloc-dev \
