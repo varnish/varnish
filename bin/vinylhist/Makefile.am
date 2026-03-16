@@ -13,5 +13,5 @@ varnishhist_SOURCES = \
 	vinylhist_profiles.h
 
 varnishhist_LDADD = \
-	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	-lm @CURSES_LIBS@ ${RT_LIBS} ${PTHREAD_LIBS}

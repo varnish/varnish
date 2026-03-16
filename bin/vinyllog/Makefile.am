@@ -11,5 +11,5 @@ varnishlog_SOURCES = \
 	vinyllog_options.h
 
 varnishlog_LDADD = \
-	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}

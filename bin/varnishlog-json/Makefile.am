@@ -13,5 +13,5 @@ varnishlog_json_SOURCES = \
 	cJSON.h
 
 varnishlog_json_LDADD = \
-	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}

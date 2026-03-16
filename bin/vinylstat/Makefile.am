@@ -29,8 +29,8 @@ varnishstat_curses_help.c: varnishstat_help_gen
 	@mv $@_ $@
 
 varnishstat_LDADD = \
-	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	@CURSES_LIBS@ ${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}
 
 varnishstat_help_gen_LDADD = \
-	$(top_builddir)/lib/libvinyl/libvinyl.la
+	$(top_builddir)/lib/libvinyl/libvarnish.la

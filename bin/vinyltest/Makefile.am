@@ -74,8 +74,8 @@ varnishtest_SOURCES = \
 		vtc_varnish.c
 
 varnishtest_LDADD = \
-		$(top_builddir)/lib/libvarnishapi/libvarnishapi.la \
-		$(top_builddir)/lib/libvarnish/libvarnish.la \
+		$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
+		$(top_builddir)/lib/libvinyl/libvarnish.la \
 		$(top_builddir)/lib/libvgz/libvgz.la \
 		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl
 

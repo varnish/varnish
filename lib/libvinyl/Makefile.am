@@ -8,13 +8,13 @@ AM_CPPFLAGS = \
 AM_CFLAGS   = $(AM_LT_CFLAGS)
 AM_LDFLAGS  = $(AM_LT_LDFLAGS)
 
-noinst_LTLIBRARIES = libvinyl.la
+noinst_LTLIBRARIES = libvarnish.la
 
-libvinyl_la_CFLAGS = \
+libvarnish_la_CFLAGS = \
 	-DVINYL_STATE_DIR='"${VINYL_STATE_DIR}"' \
 	$(AM_CFLAGS)
 
-libvinyl_la_SOURCES = \
+libvarnish_la_SOURCES = \
 	vbh.c \
 	vas.c \
 	vav.c \
@@ -46,11 +46,11 @@ libvinyl_la_SOURCES = \
 	vtim.c \
 	vus.c
 
-libvinyl_la_LIBADD = @PCRE2_LIBS@ $(LIBM)
+libvarnish_la_LIBADD = @PCRE2_LIBS@ $(LIBM)
 
 if WITH_UNWIND
-libvinyl_la_CFLAGS += -DUNW_LOCAL_ONLY $(LIBUNWIND_CFLAGS)
-libvinyl_la_LIBADD += $(LIBUNWIND_LIBS)
+libvarnish_la_CFLAGS += -DUNW_LOCAL_ONLY $(LIBUNWIND_CFLAGS)
+libvarnish_la_LIBADD += $(LIBUNWIND_LIBS)
 endif
 
 TESTS = \
@@ -67,32 +67,32 @@ noinst_PROGRAMS = ${TESTS}
 
 vav_test_SOURCES = vav.c
 vav_test_CFLAGS = $(AM_CFLAGS) -DTEST_DRIVER
-vav_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vav_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vbh_test_SOURCES	= vbh.c
 vbh_test_CFLAGS = $(AM_CFLAGS) -DTEST_DRIVER
-vbh_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vbh_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vct_test_SOURCES	= vct.c
 vct_test_CFLAGS = $(AM_CFLAGS) -DTEST_DRIVER
-vct_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vct_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vnum_c_test_SOURCES = vnum.c
 vnum_c_test_CFLAGS = $(AM_CFLAGS) -DNUM_C_TEST
-vnum_c_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vnum_c_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vjsn_test_SOURCES = vjsn.c
 vjsn_test_CFLAGS = $(AM_CFLAGS) -DVJSN_TEST
-vjsn_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vjsn_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vsb_test_SOURCES = vsb_test.c
 vsb_test_CFLAGS = $(AM_CFLAGS) -DVSB_TEST
-vsb_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vsb_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vte_test_SOURCES = vte.c
 vte_test_CFLAGS = $(AM_CFLAGS) -DTEST_DRIVER
-vte_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vte_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 
 vtim_test_SOURCES = vtim.c
 vtim_test_CFLAGS = $(AM_CFLAGS) -DTEST_DRIVER
-vtim_test_LDADD = $(AM_LDFLAGS) libvinyl.la
+vtim_test_LDADD = $(AM_LDFLAGS) libvarnish.la

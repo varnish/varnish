@@ -206,7 +206,7 @@ varnishd_LDFLAGS = -export-dynamic
 
 varnishd_LDADD = \
 	$(top_builddir)/lib/libvcc/libvcc.la \
-	$(top_builddir)/lib/libvinyl/libvinyl.la \
+	$(top_builddir)/lib/libvinyl/libvarnish.la \
 	$(top_builddir)/lib/libvsc/libvsc.la \
 	$(top_builddir)/lib/libvgz/libvgz.la \
 	@JEMALLOC_LDADD@ \
@@ -220,18 +220,18 @@ endif
 
 noinst_PROGRAMS = vhp_gen_hufdec
 vhp_gen_hufdec_SOURCES = hpack/vhp_gen_hufdec.c
-vhp_gen_hufdec_LDADD = $(top_builddir)/lib/libvinyl/libvinyl.la
+vhp_gen_hufdec_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
 
 TESTS = vhp_table_test
 noinst_PROGRAMS += vhp_table_test
 vhp_table_test_SOURCES = hpack/vhp_table.c
 vhp_table_test_CFLAGS = -DTABLE_TEST_DRIVER
-vhp_table_test_LDADD = $(top_builddir)/lib/libvinyl/libvinyl.la
+vhp_table_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
 
 TESTS += vhp_decode_test
 vhp_decode_test_SOURCES = hpack/vhp_decode.c hpack/vhp_table.c
 vhp_decode_test_CFLAGS = -DDECODE_TEST_DRIVER
-vhp_decode_test_LDADD = $(top_builddir)/lib/libvinyl/libvinyl.la
+vhp_decode_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
 
 noinst_PROGRAMS += esi_parse_fuzzer
 esi_parse_fuzzer_SOURCES = \
@@ -242,7 +242,7 @@ esi_parse_fuzzer_SOURCES = \
 esi_parse_fuzzer_CFLAGS = \
 	-DNOT_IN_A_VMOD -DENABLE_WORKSPACE_EMULATOR
 esi_parse_fuzzer_LDADD = \
-	$(top_builddir)/lib/libvinyl/libvinyl.la \
+	$(top_builddir)/lib/libvinyl/libvarnish.la \
 	$(top_builddir)/lib/libvgz/libvgz.la
 
 if ENABLE_OSS_FUZZ

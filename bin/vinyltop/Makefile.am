@@ -12,5 +12,5 @@ varnishtop_SOURCES = \
 	vinyltop_options.h
 
 varnishtop_LDADD = \
-	$(top_builddir)/lib/libvinylapi/libvinylapi.la \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	@CURSES_LIBS@ ${RT_LIBS} ${LIBM} ${PTHREAD_LIBS}
