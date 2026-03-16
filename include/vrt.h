@@ -46,7 +46,7 @@
 #  error "include vdef.h before vrt.h"
 #endif
 
-#define VRT_MAJOR_VERSION	22U
+#define VRT_MAJOR_VERSION	23U
 
 #define VRT_MINOR_VERSION	1U
 
@@ -57,7 +57,17 @@
  * Whenever something is deleted or changed in a way which is not
  * binary/load-time compatible, increment MAJOR version
  *
- * 22.1 (trunk)
+ * 23.0 (2026-03-16)
+ *	[cache.h] http_method_eq() added
+ *	[cache.h] http_method_among() added
+ *	[cache.h] http_SetWellKnownMethod() added
+ *	VRT_r_req_max_age() added
+ *	VRT_l_req_max_age() added
+ *	VRT_u_req_max_age() added
+ *	VRT_r_bereq_retry_connect() added
+ *	VRT_l_bereq_retry_connect() added
+ *	VRT_r_beresp_storage_hint() removed
+ *	VRT_l_beresp_storage_hint() removed
  *	"vcl_name" member added to vrt_backend_probe{}
  *	VRT_PROBE_string() added
  * 22.0 (2025-09-15)

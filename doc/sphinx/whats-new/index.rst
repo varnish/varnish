@@ -16,10 +16,6 @@ entail.
 Vinyl 9.0
 ---------
 
-**Note: These are working documents for a future release, with running
-updates for changes in the development branch. For changes in the
-released versions of Varnish, see the chapters listed below.**
-
 .. toctree::
    :maxdepth: 2
 

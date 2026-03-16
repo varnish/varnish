@@ -4,7 +4,7 @@ Copyright (c) 2006-2026 Varnish Software
 Copyright 2010-2026 UPLEX - Nils Goroll Systemoptimierung
 Copyright 2026 The Varnish Cache Project])
 AC_REVISION([$Id$])
-AC_INIT([Varnish Cache], [trunk], [opensource@varnish-software.com], [varnish-cache])
+AC_INIT([Varnish Cache], [9.0.0], [opensource@varnish-software.com], [varnish-cache])
 AC_CONFIG_SRCDIR(include/miniobj.h)
 if ! test -f "${srcdir}/bin/vinyltest/vtest2/src/vtc_main.c" ; then
   AC_MSG_ERROR([vtest2 seems to be missing, use "git clone --recursive" or "git submodule update --init"])

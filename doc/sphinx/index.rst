@@ -40,9 +40,9 @@ Conventions used in this manual include:
 Longer listings like example command output and VCL look like this::
 
     $ /opt/vinyl/sbin/vinyld -V
-    vinyld (vinyl-8.0.0 revision 1234567)
+    vinyld (vinyl-9.0.0 revision 1234567)
     Copyright (c) 2006 Verdens Gang AS
-    Copyright (c) 2006-2025 Varnish Software
+    Copyright (c) 2006-2026 Varnish Software
 
 
 .. For maintainers:
