@@ -179,21 +179,22 @@ Req_New(struct sess *sp, const struct req *preq)
 	ZERO_OBJ(req->vdc, sizeof *req->vdc);
 	p = (void*)PRNDUP(p + sizeof(*req->vdc));
 
-	req->htc = (void*)p;
-	INIT_OBJ(req->htc, HTTP_CONN_MAGIC);
-	req->htc->doclose = SC_NULL;
-	if (sp->tls != NULL)
-		req->htc->oper =
-		    VTLS_conn_oper_client(sp->tls, &req->htc->oper_priv);
-	else {
-		req->htc->oper = VCO_default;
-		req->htc->oper_priv = NULL;
-	}
-	p = (void*)PRNDUP(p + sizeof(*req->htc));
-
-	if (UNLIKELY(preq != NULL))
+	if (UNLIKELY(preq != NULL)) {
 		req->top = preq->top;
-	else {
+		req->htc = req->top->topreq->htc;
+	} else {
+		req->htc = (void*)p;
+		INIT_OBJ(req->htc, HTTP_CONN_MAGIC);
+		req->htc->doclose = SC_NULL;
+		if (sp->tls != NULL) {
+			req->htc->oper = VTLS_conn_oper_client(sp->tls,
+			    &req->htc->oper_priv);
+		} else {
+			req->htc->oper = VCO_default;
+			req->htc->oper_priv = NULL;
+		}
+		p = (void*)PRNDUP(p + sizeof(*req->htc));
+
 		req->top = (void*)p;
 		INIT_OBJ(req->top, REQTOP_MAGIC);
 		req->top->topreq = req;
@@ -323,8 +324,11 @@ Req_Cleanup(struct sess *sp, struct worker *wrk, struct req *req)
 	req->req_step = R_STP_TRANSPORT;
 	req->vcf = NULL;
 	req->doclose = SC_NULL;
-	req->htc->doclose = SC_NULL;
-	req->htc->body_status = NULL;
+
+	if (IS_TOPREQ(req)) {
+		req->htc->doclose = SC_NULL;
+		req->htc->body_status = NULL;
+	}
 
 	req->ws_req = 0;
 	if (WS_Overflowed(req->ws))
