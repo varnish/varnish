@@ -1,0 +1,42 @@
+varnishtest "HTTP/1 pipelining after a trip to the waiter"
+
+barrier b1 cond 2
+
+varnish v1 -vcl {
+	import vtc;
+
+	backend be none;
+
+	sub vcl_recv {
+		return (synth(200));
+	}
+
+	sub vcl_synth {
+		# Consume most of workspace_client, which should not
+		# interfere with pipelining also happening on the same
+		# workspace.
+		vtc.workspace_alloc(client, -512);
+	}
+} -start
+
+client c1 {
+	txreq -url "/linger"
+	rxresp
+	expect resp.status == 200
+
+	# Wait until the session goes to the waiter.
+	barrier b1 sync
+
+	txreq -url "/unwait"
+	txreq -url "/pipeline" -hdr "X-Pad: ${string,repeat,1500,A}"
+
+	loop 2 {
+		rxresp
+		expect resp.status == 200
+	}
+} -start
+
+varnish v1 -expect MAIN.sess_herd == 1
+barrier b1 sync
+
+client c1 -wait
