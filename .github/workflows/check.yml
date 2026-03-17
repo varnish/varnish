@@ -235,6 +235,7 @@ jobs:
                   libedit \
                   libxml2 \
                   ncurses \
+                  openssl \
                   sphinx-doc
           sudo pip3 install lxml --break-system-packages
 
