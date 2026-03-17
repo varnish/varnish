@@ -50,6 +50,9 @@ VSC_SRC = VSC_debug.vsc
 libvmod_debug_la_SOURCES += $(VSC_SRC)
 libvmod_debug_la_CFLAGS += -I$(top_srcdir)/lib/libvgz
 
+libvmod_tls_la_CFLAGS += $(OPENSSL_CFLAGS)
+libvmod_tls_la_LIBADD = $(OPENSSL_LIBS)
+
 BUILT_SOURCES = $(VSC_GEN)
 
 # Allow Vmod_wrong*_Data to be exported
