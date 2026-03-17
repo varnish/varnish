@@ -34,9 +34,9 @@ http://varnish-cache.org/docs/trunk/whats-new/index.html and via
 individual releases. These documents are updated as part of the
 release process.
 
-===============================
-Varnish-Cache NEXT (2026-03-15)
-===============================
+================================
+Varnish-Cache 9.0.0 (2026-03-15)
+================================
 
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
@@ -60,6 +60,13 @@ Varnish-Cache NEXT (2026-03-15)
   ``req.url`` would contain ``/?/foo``.
 
   (`VSV18`_)
+
+* `varnishlog-json` has been added to produce structured `JSON` logs.
+
+* TLS is now supported via `varnishd -A FILE` with `FILE` beting the path of a
+  `hitch`-like configuration file. It's also possible to use `varnishd -a
+  :443,https` and to use `varnishdadm tls.*` to dynamically configure the
+  certificates.
 
 * For requests to an absolute form URI, the host field is now required. Requests
   without a host field are rejected with a Status 400 error.
