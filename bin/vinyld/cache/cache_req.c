@@ -186,6 +186,7 @@ Req_New(struct sess *sp, const struct req *preq)
 		req->htc = (void*)p;
 		INIT_OBJ(req->htc, HTTP_CONN_MAGIC);
 		req->htc->doclose = SC_NULL;
+		req->htc->pipeline_snap = ws_pipeline_rollback;
 		if (sp->tls != NULL) {
 			req->htc->oper = VTLS_conn_oper_client(sp->tls,
 			    &req->htc->oper_priv);
