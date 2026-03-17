@@ -6,8 +6,7 @@ dist_vcc_DATA += vmod_tls.vcc
 libvmod_tls_la_SOURCES = \
 	vmod_tls.c
 
-libvmod_tls_la_CFLAGS = \
-	$(OPENSSL_CFLAGS)
+libvmod_tls_la_CFLAGS =
 
 vmodtoolargs_tls ?= --strict --boilerplate -o vcc_tls_if
 vmod_tls_symbols_regex ?= Vmod_tls_Data
@@ -17,9 +16,6 @@ libvmod_tls_la_LDFLAGS = \
 	$(AM_LDFLAGS) \
 	$(VMOD_LDFLAGS) \
 	-rpath $(vmoddir)
-
-libvmod_tls_la_LIBADD = \
-	$(OPENSSL_LIBS)
 
 nodist_libvmod_tls_la_SOURCES = vcc_tls_if.c vcc_tls_if.h
 
