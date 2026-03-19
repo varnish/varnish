@@ -4,6 +4,11 @@ vtest	"test sigsegv handler"
 # never printed.
 feature !asan
 
+# On platforms with large pages (e.g. ppc64le with 64KB pages),
+# pthread stack allocation rounds up, giving more usable stack
+# than the requested 128KB, so the 128KB VLA never overflows.
+feature cmd "test $(getconf PAGESIZE) -lt 65536"
+
 server s1 {
 	rxreq
 	txresp
