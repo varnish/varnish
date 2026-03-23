@@ -43,7 +43,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS += --with-unwind
 endif
 
 install-data-local:
-	$(install_sh) -d -m 0755 "${VARNISH_STATE_DIR}"
+	$(install_sh) -d -m 0755 "$(DESTDIR)/${VARNISH_STATE_DIR}"
 
 distclean-local:
 	-find . '(' -name '*.gcda' -o -name '*.gcda' ')' -exec rm '{}' ';'
