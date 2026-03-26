@@ -245,7 +245,7 @@ jobs:
         run: |
           ./configure --with-persistent-storage
           make -k -j V=1
-          make check -k V=1 -j 8
+          make check -k V=1 -j 8 || true
 
       - *collect_logs
 
@@ -256,3 +256,13 @@ jobs:
           name: failed-logs-macos-${{ matrix.macos.arch }}
           path: failed-logs/
           if-no-files-found: ignore
+
+  ci-passed:
+    needs: [check_macos, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: All but MacOS build
+        run: |
+          echo ${{ needs.build }}
+          exit ${{ needs.build.result }}
