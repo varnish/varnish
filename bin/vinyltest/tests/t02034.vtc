@@ -1,0 +1,31 @@
+vtest "H2 workspace overflow from pipelined data after PRISM"
+
+varnish v1 -cliok "param.set feature +http2"
+varnish v1 -vcl "backend be none;" -start
+
+client c1 {
+	send "PRI * HTTP/2.0\r\n\r\n"
+	delay 0.5
+	# Pipeline end of prism and h2 frames in a single write:
+	# - "SM\r\n\r\n"
+	# - SETTINGS(24)
+	# - WINDOW_UPDATE(4)
+	# - HEADERS(16384)
+	# - HEADERS(33552)
+	# - HEADERS(33552)
+	sendhex {
+		534d0d0a0d0a
+		000018040000000000
+		00010010000000020000000000030000006400040000ffff
+		000004080000000000
+		7fff0000
+		004000010400000001
+		${string,repeat,16384,00}
+		008310010500000003
+		${string,repeat,33552,00}
+		008310010500000005
+		${string,repeat,33552,00}
+	}
+} -run
+
+varnish v1 -expect MGT.child_panic == 0
