@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -42,7 +42,7 @@ jobs:
           make dist
 
       - name: Upload tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist-tarball
           path: varnish-*.tar.gz
@@ -78,7 +78,7 @@ jobs:
     steps:
       - &download_tarball
         name: Download tarball
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist-tarball
 
@@ -203,7 +203,7 @@ jobs:
 
       - name: Upload failed logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: failed-logs-${{ matrix.os.dist }}-${{ matrix.os.version }}-${{ matrix.arch.name }}
           path: failed-logs/
@@ -251,7 +251,7 @@ jobs:
 
       - name: Upload failed logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: failed-logs-macos-${{ matrix.macos.arch }}
           path: failed-logs/
