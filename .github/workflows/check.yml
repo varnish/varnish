@@ -213,6 +213,7 @@ jobs:
     name: Build and Check on MacOS (${{ matrix.macos.arch }})
     needs: make_dist
     runs-on: ${{ matrix.macos.runner }}
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -245,12 +246,11 @@ jobs:
         run: |
           ./configure --with-persistent-storage
           make -k -j V=1
-          make check -k V=1 -j 8 || true
+          make check -k V=1 -j 8
 
       - *collect_logs
 
       - name: Upload failed logs
-        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: failed-logs-macos-${{ matrix.macos.arch }}
