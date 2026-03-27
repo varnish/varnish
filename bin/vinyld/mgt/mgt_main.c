@@ -119,11 +119,12 @@ usage(void)
 	printf(FMT, "",
 	    "  default: \":80,HTTP\"");
 	printf(FMT, "  options:",
-	    "Proto can be \"PROXY\" or \"HTTP\" (default)");
+	    "Proto can be \"PROXY\", \"TLS\" or \"HTTP\" (default)");
 	printf(FMT, "    [,user=<u>][,group=<g>]",
 	    "user, group and mode set permissions for");
 	printf(FMT, "    [,mode=<m>]",
 	    "  a Unix domain socket.");
+	printf(FMT, "-A cfgfile", "Listen endpoint/TLS configuration file");
 	printf(FMT, "-b none", "No backend");
 	printf(FMT, "-b [addr[:port]|path]", "Backend address and port");
 	printf(FMT, "", "  or socket file path");
