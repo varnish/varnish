@@ -1251,7 +1251,6 @@ h2_rxstuff(struct h2_sess *h2)
 {
 	struct http_conn *htc;
 	enum htc_status_e hs;
-	size_t res;
 	ssize_t l;
 
 	CHECK_OBJ_NOTNULL(h2, H2_SESS_MAGIC);
@@ -1265,15 +1264,15 @@ h2_rxstuff(struct h2_sess *h2)
 	HTC_RxPipeline(htc, htc->rxbuf_b);
 	WS_Rollback(h2->ws, 0);
 	HTC_RxInit(htc, h2->ws);
-	res = WS_ReservationSize(h2->ws);
+	assert(htc->rxbuf_e <= htc->ws->r);
 
-	if (res == 0) {
-		WS_Release(htc->ws, 0);
+	if (htc->rxbuf_e == htc->ws->r) {
+		WS_ReleaseP(htc->ws, htc->rxbuf_b);
 		return (HTC_S_OVERFLOW);
 	}
 
 	l = htc->oper->nb_read(htc->oper_priv, *htc->rfd, htc->rxbuf_e,
-	    res, h2->deadline);
+	    htc->ws->r - htc->rxbuf_e, h2->deadline);
 	if (l < 0 && errno == EWOULDBLOCK)
 		hs = HTC_S_MORE;
 	else if (l < 0)
