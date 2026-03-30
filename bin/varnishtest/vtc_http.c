@@ -1081,8 +1081,6 @@ cmd_http_upgrade(CMD_ARGS)
 				"-hdr \"Connection: Upgrade\" "
 				"-hdr \"Upgrade: h2c\"\n", cmd, hp, vl);
 
-	b64_settings(hp, h);
-
 	parse_string("rxpri\n"
 			"stream 0 {\n"
 			"txsettings\n"
@@ -1091,6 +1089,9 @@ cmd_http_upgrade(CMD_ARGS)
 			"rxsettings\n"
 			"expect settings.ack == true\n"
 			"} -start\n", cmd, hp, vl);
+
+	b64_settings(hp, h);
+
 }
 
 /**********************************************************************
