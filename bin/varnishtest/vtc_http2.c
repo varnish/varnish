@@ -2741,7 +2741,7 @@ b64_settings(const struct http *hp, const char *s)
 		else
 			buf = "unknown";
 
-		if (v == 1) {
+		if (i == 1) { /* SETTINGS_HEADER_TABLE_SIZE */
 			enum hpk_result hrs;
 			if (hp->sfd) {
 				AN(hp->encctx);
