@@ -1,3 +1,8 @@
+..
+	Copyright (c) 2024,2026 Varnish Software AS
+	SPDX-License-Identifier: BSD-2-Clause
+	See LICENSE file for full text of license
+
 .. role:: ref(emphasis)
 
 .. _varnishlog-json(1):
@@ -6,116 +11,288 @@
 varnishlog-json
 ===============
 
------------------------------------
-Display Varnish logs in JSON format
------------------------------------
+----------------------------
+Display Varnish logs in JSON
+----------------------------
 
 :Manual section: 1
 
 SYNOPSIS
 ========
 
-.. include:: ../include/varnishlog-json_synopsis.rst
-varnishlog |synopsis|
+varnishlog-json [-a] [-b] [-c] [-C] [-d] [-D] [-E] [-g <probe|request|vxid>] [-h] [-i <taglist>] [-I <[taglist:]regex>] [-k <num>] [-L <limit>] [-n <workdir>] [-p] [-P <file>] [-Q <file>] [-q <query>] [-r <filename>] [-R <limit[/duration]>] [-t <seconds|off>] [-T <seconds>] [-V] [-w <filename>] [-x <taglist>] [-X <[taglist:]regex>] [--optstring]
 
 DESCRIPTION
 ===========
 
-``varnishlog-json`` is a log reader similar to ``varnishlog`` or
-``varnishncsa``, reading the varnishd(1) shared memory logs and presenting
-them in a standardized ``JSON`` format.
+The ``varnishlog-json`` utility reads and presents Varnish logs in JSON
+format. It can output newline-delimited JSON (NDJSON) or pretty-printed
+JSON.
 
-``varnishlog`` provides all the records pertaining to a transaction, which can
-be too much, while ``varnishncsa`` only presents the headers and data that were
-specifically targeted by its format string, making it easy to miss unplanned
-information. ``varnishlog-json`` tries to strike a balance between the too by
-offering a fixed ``JSON`` schema, capturing the request/response as it it sent
-to or received from the peer.
+Transactions are represented as seen by the remote party (client or
+backend). For backend transactions, any modifications to the backend
+request that happen after transmission are not shown. For client
+transactions, modifications to the request made by VCL before the
+response is delivered are not shown.
 
-For example, when reporting on a backend transaction, it will ignore modifications made to ``bereq`` after it was sent, and on the client side, it will ignore any changes the ``VCL`` makes to the request.
+ESI and backend transactions are excluded by default, matching
+``varnishlog`` behavior.
 
-Similar to how ``varnishncsa`` behaves, ``ESI`` and backend transactions are ignored by default.
+The following grouping modes are available with the ``-g`` option:
+
+* ``vxid`` - Group by VXID (default). Each transaction is output as a
+  single JSON object.
+
+* ``request`` - Group by request. Related transactions (e.g. a client
+  request and its backend fetches) are output as a JSON array.
+
+* ``probe`` - Display backend health probe results. Internally uses
+  raw grouping to collect probe data into structured JSON objects.
+
+OPTIONS
+=======
 
 The following options are available:
 
-.. include:: ../include/varnishlog-json_options.rst
+-a
 
-JSON STRUCTURE
-==============
+	When writing output to a file with the -w option, append to it
+	rather than overwrite it. This option has no effect without the
+	-w option.
 
-``varnishlog-json`` gets its data from the same source as ``varnishlog``, so
-it's important to understand which tags are used to produce the output. It can
-be particularly useful if you want to suppress part of the object using the
-``-i/-I/-x/-X`` arguments.
+-b
 
-We'll use ``typescript`` notation to describe the object shape:
+	Only display transactions and log records coming from backend
+	communication.
 
-::
+-c
 
-  {
-      req: {                                      // describes the request as seen by the remote (either client, or backend)
-          headers: Map<string, string>,           // keys (header names) are lowercase, this map is built using ReqHeader,
-                                                  // BereqHeader, RespUnset, and BerespUnset tags
-          method: string,                         // ReqMethod, BereqMethod
-          proto: string,                          // ReqProtocol, BereqProtocol
-          hdrBytes: number,                       // ReqAcct, BereqAcct
-          bodyBytes: number,                      // ^ same
-      },
-      resp: {                                     // describes the remote as seen by the remote
-          headers: Map<string, string>,           // keys (header names) are lowercase, uses ReqHeader,
-                                                  //   BereqHeader, RespUnset, and BerespUnset
-          set-cookie?: Array<string>,             // Set-Cookie headers
-          proto: string,                          // RespProtocol, BerespProtocol
-          status: number,                         // RespStatus, BerespStatus
-          reason: string,                         // RespReason, BerespReason,
-          hdrBytes: number,                       // ReqAcct, BereqAcct
-          bodyBytes: number,                      // ^ same
-      },
-      handling: "hit" | "miss" | "pass" |"pipe" |
-                "streaming-hit" | "fail" | "synth"
-                "abandon" | "fetch" | "error",    // how the request was handled, using VCL_call records, notably
-      timeline: Array<{name: string,
-                       timestamp: number}>        // Timestamp records
-      side: "backend" | "client",
-      id: string,                                 // the transaction's vxid
-      vcl: string                                 // VCL_use
-      client?: {                                  // ReqStar (client-side only)
-          rAddr: string,
-          rPort: number,
-          sock: string,
-      },
-      backend?: {                                 // BackendOpen (backend-side only)
-          name: string,                           // the name is simplified to the director name for udo/goto backends
-          rAddr: string,
-          rPort: number,
-          connReused: bool,
-      },
-      storage?: string,                           // Storage (backend-only)
-      errors?: Array<string>,                     // Error, VCL_Error, FetchError, if the VSL transaction was incomplete
-      logs: Array<string>,                        // VCL_Log
-      links: Array<{                              // Link
-          type: string,
-          id: string,
-          reason: string,
-      }>,
-  }
+	Only display transactions and log records coming from client
+	communication.
 
-If you use `-g request`, instead of one object per line, `varnishlog-json` will out an array of all objects in the group.
+-C
+
+	Do all regular expression and string matching caseless.
+
+-d
+
+	Process log records at the head of the log and exit.
+
+-D
+
+	Daemonize.
+
+-E
+
+	Display ESI transactions and other types of sub-requests. This
+	implies the -c option and includes other client transactions.
+
+-g <probe|request|vxid>
+
+	The grouping of transactions. The default is to group by
+	vxid.
+
+	In ``vxid`` mode, each transaction is output as an individual
+	JSON object.
+
+	In ``request`` mode, related transactions are grouped and output
+	as a JSON array.
+
+	In ``probe`` mode, backend health probe results are collected
+	and output as structured JSON objects.
+
+-h
+
+	Print program usage and exit.
+
+-i <taglist>
+
+	Include log records of these tags in output. Taglist is a
+	comma-separated list of tag globs. Multiple -i options may be
+	given.
+
+	If a tag include option is the first of any tag selection
+	options, all tags are first marked excluded.
+
+-I <[taglist:]regex>
+
+	Include by regex matching. Output only records matching taglist
+	and regular expression. Applies to any tag if taglist is absent.
+	Multiple -I options may be given.
+
+	If a tag include option is the first of any tag selection
+	options, all tags are first marked excluded.
+
+-k <num>
+
+	Process this number of matching log transactions before exiting.
+
+-L <limit>
+
+	Sets the upper limit of incomplete transactions kept before the
+	oldest transaction is force completed. A warning record is
+	synthesized when this happens. This setting keeps an upper bound
+	on the memory usage of running queries. Defaults to 1000
+	transactions.
+
+-n <workdir>
+
+	Specify the varnish working directory of the instance to attach
+	to. See :ref:`varnishd(1)` ``-n`` option documentation for
+	additional information and defaults.
+
+-p
+
+	Pretty-print transactions rather than using NDJSON.
+
+-P <file>
+
+	Write the process' PID to the specified file.
+
+-Q <file>
+
+	Specifies the file containing the VSL query to use. When
+	multiple -Q or -q options are specified, all queries are
+	considered as if the 'or' operator was used to combine them.
+
+-q <query>
+
+	Specifies the VSL query to use. When multiple -q or -Q options
+	are specified, all queries are considered as if the 'or'
+	operator was used to combine them.
+
+-r <filename>
+
+	Read log in binary file format from this file. The file can be
+	created with ``varnishlog -w filename``. If the filename is -,
+	logs are read from the standard input and cannot work as a
+	daemon.
+
+-R <limit[/duration]>
+
+	Restrict the output to the specified limit. Transactions
+	exceeding the limit will be suppressed. The limit is specified
+	as the maximum number of transactions (with respect to the
+	chosen grouping method) and an optional time period. If no
+	duration is specified, a default of ``s`` is used. The duration
+	field can be formatted as in VCL (e.g. ``-R 10/2m``) or as a
+	simple time period without the prefix (e.g. ``-R 5/m``).
+
+-t <seconds|off>
+
+	Timeout before returning error on initial VSM connection. If set
+	the VSM connection is retried every 0.5 seconds for this many
+	seconds. If zero the connection is attempted only once and will
+	fail immediately if unsuccessful. If set to "off", the
+	connection will not fail, allowing the utility to start and wait
+	indefinitely for the Varnish instance to appear. Defaults to 5
+	seconds.
+
+-T <seconds>
+
+	Sets the transaction timeout in seconds. This defines the
+	maximum number of seconds elapsed between a Begin tag and the
+	End tag. If the timeout expires, a warning record is synthesized
+	and the transaction is force completed. Defaults to 120 seconds.
+
+-V
+
+	Print version information and exit.
+
+-w <filename>
+
+	Redirect output to file. The file will be overwritten unless the
+	-a option was specified. If the application receives a SIGHUP in
+	daemon mode the file will be reopened allowing the old one to be
+	rotated away. This option is required when running in daemon
+	mode. If the filename is -, varnishlog-json writes to the
+	standard output and cannot work as a daemon.
+
+-x <taglist>
+
+	Exclude log records of these tags in output. Taglist is a
+	comma-separated list of tag globs. Multiple -x options may be
+	given.
+
+-X <[taglist:]regex>
+
+	Exclude by regex matching. Do not output records matching
+	taglist and regular expression. Applies to any tag if taglist is
+	absent. Multiple -X options may be given.
+
+--optstring
+	Print the optstring parameter to ``getopt(3)`` to help writing
+	wrapper scripts.
 
 SIGNALS
 =======
+
+* SIGHUP
+
+  Rotate the log file (see -w option) in daemon mode,
+  abort the loop and die gracefully when running in the foreground.
 
 * SIGUSR1
 
   Flush any outstanding transactions
 
+OUTPUT
+======
+
+By default ``varnishlog-json`` outputs one JSON object per line in
+NDJSON format. Each JSON object represents a transaction and contains
+request/response details, handling classification, timeline events,
+transaction IDs, and VCL information.
+
+When using ``-g request``, related transactions are grouped into JSON
+arrays.
+
+When using ``-p``, output is pretty-printed with indentation for
+readability.
+
+EXAMPLES
+========
+
+Display client transactions in real time::
+
+	varnishlog-json
+
+Display backend transactions with pretty-printing::
+
+	varnishlog-json -b -p
+
+Log client requests to a file in daemon mode::
+
+	varnishlog-json -D -w /var/log/varnish/json.log -P /run/varnishlog-json.pid
+
+Filter requests for a specific URL::
+
+	varnishlog-json -q 'ReqURL eq "/api/health"'
+
+Display request groups (client + related backend transactions)::
+
+	varnishlog-json -g request
+
+Display backend health probe results::
+
+	varnishlog-json -g probe
+
+Read from a binary log file::
+
+	varnishlog-json -r /var/log/varnish/raw.log
+
 SEE ALSO
 ========
+
 * :ref:`varnishd(1)`
-* :ref:`varnishhist(1)`
 * :ref:`varnishlog(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
-* :ref:`varnishtop(1)`
 * :ref:`vsl(7)`
 * :ref:`vsl-query(7)`
+
+COPYRIGHT
+=========
+
+This document is licensed under the same licence as Varnish
+itself. See LICENCE for details.
+
+* Copyright (c) 2024,2026 Varnish Software AS
