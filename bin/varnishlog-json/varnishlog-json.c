@@ -395,7 +395,7 @@ process_probe(struct VSL_data *vsl,
 	else
 		s = cJSON_PrintUnformatted(t);
 	AN(s);
-	printf("%s\n", s);
+	fprintf(CTX.fo, "%s\n", s);
 	free(s);
 	cJSON_Delete(t);
 
@@ -768,7 +768,7 @@ static int process_group(struct VSL_data *vsl,
 	else
 		s = cJSON_PrintUnformatted(obj);
 	AN(s);
-	printf("%s\n", s);
+	fprintf(CTX.fo, "%s\n", s);
 	free(s);
 	cJSON_Delete(transaction_array);
 
