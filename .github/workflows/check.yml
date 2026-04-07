@@ -203,6 +203,8 @@ jobs:
               cp "$logfile" failed-logs/"$logfile"
             fi
           done
+          echo find:
+          find failed-logs/
 
       - name: Upload failed logs
         if: always()
