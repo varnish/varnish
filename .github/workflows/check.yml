@@ -266,6 +266,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: All but MacOS build
-        run: |
-          echo ${{ needs.build }}
-          exit ${{ needs.build.result }}
+        if: needs.build.result != 'success'
+        run: exit 1
