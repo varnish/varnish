@@ -204,7 +204,7 @@ jobs:
             fi
           done
           echo find:
-          find failed-logs/
+          find failed-logs/ || true
 
       - name: Upload failed logs
         if: always()
