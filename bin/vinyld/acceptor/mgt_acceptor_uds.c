@@ -185,15 +185,13 @@ vca_uds_open(char **av, struct listen_arg *la, const char **err)
 		const char *val;
 
 		if (strchr(av[i], '=') == NULL) {
-			if (strcmp(av[i], "https") == 0 && la->tls == NULL) {
-				la->tls = TLS_Listener_Config();
-				AN(la->tls);
-				continue;
-			}
 			if (xp != NULL)
 				ARGV_ERR("Too many protocol sub-args"
 				    " in -a (%s)\n", av[i]);
-			xp = XPORT_Find(av[i]);
+			if (strcasecmp(av[i], "https") == 0)
+				xp = XPORT_Find("TLS");
+			else
+				xp = XPORT_Find(av[i]);
 			if (xp == NULL)
 				ARGV_ERR("Unknown protocol '%s'\n", av[i]);
 			continue;
@@ -254,6 +252,11 @@ vca_uds_open(char **av, struct listen_arg *la, const char **err)
 
 	AN(xp);
 	la->transport = xp;
+
+	if (la->transport == XPORT_Find("TLS") && la->tls == NULL) {
+		la->tls = TLS_Listener_Config();
+		AN(la->tls);
+	}
 
 	if (pwd != NULL || grp != NULL || mode != 0) {
 		ALLOC_OBJ(perms, UDS_PERMS_MAGIC);

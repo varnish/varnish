@@ -10,7 +10,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-a :0,https" -vcl+backend {} -start
+varnish v1 -arg "-a :0,tls" -vcl+backend {} -start
 
 # First load and rollback a default cert
 varnish v1 -cliok "tls.cert.load defaultcert ${topsrc}/etc/ca/bundle/example.com.pem -d"
