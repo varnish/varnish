@@ -4,7 +4,7 @@ varnishtest "Test TLS with empty config"
 
 feature tls
 
-varnish v1 -arg "-a :0,https" -vcl+backend {
+varnish v1 -arg "-a :0,TLS" -vcl+backend {
     backend be none;
 } -start
 
