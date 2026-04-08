@@ -25,7 +25,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -arg "-p pipe_timeout=5" -vcl+backend {
 	import tls;
 
 	sub vcl_recv {
