@@ -750,8 +750,7 @@ TLS_Config(const char *fn)
 		n = 0;
 		VTAILQ_FOREACH(ls, &heritage.socks, list) {
 			CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
-			if (ls->tls == NULL &&
-			    ls->transport == XPORT_Find("TLS") &&
+			if (ls->transport == XPORT_Find("TLS") &&
 			    strcmp(ls->name, fcfg->name) == 0) {
 				ls->tls = tls_local;
 				n++;
