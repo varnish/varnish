@@ -126,6 +126,8 @@ client c1 {
 varnish v1 -expect MAIN.http1_iovs_flush == 0
 
 # Increase number of headers on fetch side
+# NB: needs enough headers to overflow iovecs on 32-bit too,
+#     where sizeof(struct iovec) is half of 64-bit.
 varnish v1 -stop
 varnish v1 -vcl+backend {
 	sub vcl_backend_fetch {
@@ -149,6 +151,16 @@ varnish v1 -vcl+backend {
 		set bereq.http.hdr18 = "hdr";
 		set bereq.http.hdr19 = "hdr";
 		set bereq.http.hdr20 = "hdr";
+		set bereq.http.hdr21 = "hdr";
+		set bereq.http.hdr22 = "hdr";
+		set bereq.http.hdr23 = "hdr";
+		set bereq.http.hdr24 = "hdr";
+		set bereq.http.hdr25 = "hdr";
+		set bereq.http.hdr26 = "hdr";
+		set bereq.http.hdr27 = "hdr";
+		set bereq.http.hdr28 = "hdr";
+		set bereq.http.hdr29 = "hdr";
+		set bereq.http.hdr30 = "hdr";
 	}
 } -start
 
@@ -184,6 +196,16 @@ varnish v1 -vcl+backend {
 		set resp.http.hdr18 = "hdr";
 		set resp.http.hdr19 = "hdr";
 		set resp.http.hdr20 = "hdr";
+		set resp.http.hdr21 = "hdr";
+		set resp.http.hdr22 = "hdr";
+		set resp.http.hdr23 = "hdr";
+		set resp.http.hdr24 = "hdr";
+		set resp.http.hdr25 = "hdr";
+		set resp.http.hdr26 = "hdr";
+		set resp.http.hdr27 = "hdr";
+		set resp.http.hdr28 = "hdr";
+		set resp.http.hdr29 = "hdr";
+		set resp.http.hdr30 = "hdr";
 	}
 } -start
 
