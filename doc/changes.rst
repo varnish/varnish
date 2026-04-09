@@ -35,11 +35,15 @@ individual releases. These documents are updated as part of the
 release process.
 
 ================================
-Varnish-Cache 9.0.0 (2026-03-15)
+Varnish-Cache X.X.0 (unreleased)
 ================================
 
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
+
+================================
+Varnish-Cache 9.0.0 (2026-03-15)
+================================
 
 .. _VSV18: https://vinyl-cache.org/security/VSV00018.html
 
