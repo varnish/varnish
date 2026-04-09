@@ -92,6 +92,7 @@ EXTRA_DIST = \
 	tests/*.vtc \
 	tests/common.pem \
 	tests/README \
+	test_assets/*.bin \
 	vtest2/tests/*.vtc \
 	vtest2/src/gensequences \
 	vtest2/src/sequences \
