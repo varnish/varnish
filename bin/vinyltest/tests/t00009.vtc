@@ -40,6 +40,12 @@ logexpect l0 -v v1 -d 1 -g vxid {
        expect * * ReqStart "https$"
 } -run
 
+# Verify varnishncsa says https:// in %r for TLS
+shell -expect "https://${localhost}/" {
+       varnishncsa -n ${v1_name} -d -c -F "%r"
+}
+
+
 # bad servername specified
 logexpect l1 -v v1 -g raw {
 # changed from Enterprise: commented
