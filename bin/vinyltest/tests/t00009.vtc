@@ -1,0 +1,183 @@
+varnishtest "Test various SNI bits"
+
+# changed from Enterprise: commented
+#feature tls_client
+feature tls
+
+setenv SSL_CERT_FILE ${topsrc}/etc/ca/certs/ca.cert.pem
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+      pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/wildcard.example.com.pem"
+  pem-file = "${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+  sni-nomatch-abort = on
+EOF
+}
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+# no servername specified
+client c1 {
+	tls_handshake
+	expect tls.cert.subject == "example.com"
+	txreq
+	rxresp
+} -run
+
+# bad servername specified
+logexpect l1 -v v1 -g raw {
+# changed from Enterprise: commented
+#	expect * * Error {SNI lookup failed for "unknown", aborting handshake}
+} -start
+
+client c1  {
+	tls_config {
+		servername = unknown
+	}
+	tls_handshake
+	expect tls.failed == true
+} -run
+
+logexpect l1 -wait
+
+# global scope servername specified
+#
+# should be a failure, without match-global-certs specified.
+client c1  {
+	tls_config {
+		servername = cdn03.example.com
+	}
+	tls_handshake
+	expect tls.failed == true
+} -run
+
+varnish v1 -stop -cleanup
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+      pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+      match-global-certs = on
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/wildcard.example.com.pem"
+  pem-file = "${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+  sni-nomatch-abort = on
+EOF
+}
+
+varnish v2 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+# this should now be a match, with match-global-certs enabled.
+client c1 -connect "${v2_sock}"  {
+	tls_config {
+		servername = cdn03.example.com
+	}
+	tls_handshake
+	expect tls.cert.subject == "cdn01.example.com"
+} -run
+
+
+# wildcard match
+client c1 -connect "${v2_sock}"  {
+	tls_config {
+		servername = foo.wildcard.example.com
+	}
+	tls_handshake
+	expect tls.cert.subject == "wildcard.example.com"
+} -run
+
+
+# wildcard match failure
+client c1 -connect "${v2_sock}"  {
+	tls_config {
+		servername = foo.bar.wildcard.example.com
+	}
+	tls_handshake
+	expect tls.failed == true
+} -run
+
+varnish v2 -stop -cleanup
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/wildcard.example.com.pem"
+  pem-file = "${topsrc}/etc/ca/bundle/wildcard.example.com.pem" # duplicate
+  pem-file = "${topsrc}/etc/ca/bundle/cdnN.example.com.pem"
+  sni-nomatch-abort = on
+EOF
+}
+
+# changed from Enterprise: loaded->staged
+shell -err -expect "already staged" {
+	varnishd -p tls_err_dup_servername=on -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}
+}
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/no-san.example.com.pem"
+  pem-file = "${topsrc}/etc/ca/bundle/example.com.pem"
+  sni-nomatch-abort = on
+EOF
+}
+
+varnish v3 -arg "-A ${tmpdir}/vtls.cfg" -vcl+backend {} -start
+
+client c1 -connect "${v3_sock}" {
+	tls_config {
+		servername = "no-san.example.com"
+	}
+	tls_handshake
+	expect tls.cert.subject == "no-san.example.com"
+	expect tls.cert.subject_alt_names == ""
+} -run
+
+client c1 -connect "${v3_sock}" {
+	tls_config {
+		servername = "www.example.com"
+	}
+	tls_handshake
+	expect tls.cert.subject == "example.com"
+} -run
+
+varnish v3 -stop -cleanup
+
+shell {
+cat >vtls.cfg <<EOF
+  frontend = {
+      host = "${localhost}"
+      port = "0"
+  }
+
+  pem-file = "${topsrc}/etc/ca/bundle/no-san.example.com.pem"
+  pem-file = "${topsrc}/etc/ca/bundle/no-san.example.com.pem" # duplicate
+EOF
+}
+
+# changed from Enterprise: loaded->staged
+shell -err -expect "already staged" {
+	varnishd -p tls_err_dup_servername=on -b "${s1_sock}" -A ${tmpdir}/vtls.cfg -n ${tmpdir}
+}
