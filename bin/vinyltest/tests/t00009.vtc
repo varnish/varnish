@@ -35,6 +35,11 @@ client c1 {
 	rxresp
 } -run
 
+# Verify ReqStart scheme is "https"
+logexpect l0 -v v1 -d 1 -g vxid {
+       expect * * ReqStart "https$"
+} -run
+
 # bad servername specified
 logexpect l1 -v v1 -g raw {
 # changed from Enterprise: commented

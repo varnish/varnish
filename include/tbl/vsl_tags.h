@@ -324,14 +324,16 @@ SLTM(VCL_return, 0, "VCL method return value",
 )
 
 SLTM(ReqStart, 0, "Client request start",
-	"Start of request processing. Logs the client address, port number "
-	" and listener endpoint name (from the -a command-line argument).\n\n"
+	"Start of request processing. Logs the client address, port number"
+	", listener endpoint name (from the -a command-line argument)"
+	" and protocol scheme.\n\n"
 	"The format is::\n\n"
-	"\t%s %s %s\n"
-	"\t|  |  |\n"
-	"\t|  |  +-- Listener name (from -a)\n"
-	"\t|  +----- Client Port number (0 for Unix domain sockets)\n"
-	"\t+-------- Client IP4/6 address (0.0.0.0 for UDS)\n"
+	"\t%s %s %s %s\n"
+	"\t|  |  |  |\n"
+	"\t|  |  |  +- Protocol scheme (\"http\" or \"https\")\n"
+	"\t|  |  +---- Listener name (from -a)\n"
+	"\t|  +------- Client Port number (0 for Unix domain sockets)\n"
+	"\t+---------- Client IP4/6 address (0.0.0.0 for UDS)\n"
 	"\n"
 )
 
