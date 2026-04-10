@@ -89,6 +89,7 @@ enum e_frag {
 	F_ttfb,			/* %{Varnish:time_firstbyte}x */
 	F_host,			/* Host header */
 	F_auth,			/* Authorization header */
+	F_scheme,               /* http or https */
 	F__MAX,
 };
 
@@ -394,11 +395,16 @@ format_requestline(const struct format *format)
 	AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_m], "-"));
 	AZ(VSB_putc(CTX.vsb, ' '));
 	if (CTX.frag[F_host].gen == CTX.gen) {
-		if (strncmp(CTX.frag[F_host].b, "http://", 7))
-			AZ(VSB_cat(CTX.vsb, "http://"));
+		if (strncmp(CTX.frag[F_host].b, "http://", 7) &&
+		    strncmp(CTX.frag[F_host].b, "https://", 8)) {
+			AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_scheme], "http"));
+			AZ(VSB_cat(CTX.vsb, "://"));
+		}
 		AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_host], NULL));
-	} else
-		AZ(VSB_cat(CTX.vsb, "http://localhost"));
+	} else {
+		AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_scheme], "http"));
+		AZ(VSB_cat(CTX.vsb, "://localhost"));
+	}
 	AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_U], ""));
 	AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_q], ""));
 	AZ(VSB_putc(CTX.vsb, ' '));
@@ -1085,6 +1091,7 @@ dispatch_f(struct VSL_data *vsl, struct VSL_transaction * const pt[],
 			case SLT_ReqStart:
 				frag_fields(FMTPOL_INTERNAL, b, e,
 				    1, &CTX.frag[F_h],
+				    4, &CTX.frag[F_scheme],
 				    0, NULL);
 				break;
 			case SLT_BereqMethod:

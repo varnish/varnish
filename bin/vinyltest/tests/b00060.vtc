@@ -19,7 +19,7 @@ logexpect l1 -v v1 -d 1 -g session {
 
 logexpect l2 -v v1 -d 1 -g vxid {
 	expect * *	Begin		^req
-	expect * =	ReqStart	"^0.0.0.0 0 foo$"
+	expect * =	ReqStart	"^0.0.0.0 0 foo http$"
 } -run
 
 logexpect l3 -v v1 -d 1 -g vxid {

@@ -41,6 +41,15 @@ Varnish-Cache X.X.0 (unreleased)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+* ``ReqStart`` records in VSL gained a fourth field that will be either ``http``
+  or ``https`` depending on whether TLS was used by the client. Thanks to this:
+
+  * ``varnishncsa`` will now appropriately set the scheme to ``https`` in the
+    request line if TLS was used
+
+  * ``varnishlog-json`` transcribes this as a ``.client.proto`` field for
+    client-side transactions
+
 ================================
 Varnish-Cache 9.0.0 (2026-03-15)
 ================================

@@ -115,7 +115,8 @@ Req_LogStart(const struct worker *wrk, struct req *req)
 	CHECK_OBJ_NOTNULL(req->sp->listen_sock, LISTEN_SOCK_MAGIC);
 	endpname = req->sp->listen_sock->name;
 	AN(endpname);
-	VSLb(req->vsl, SLT_ReqStart, "%s %s %s", ci, cp, endpname);
+	VSLb(req->vsl, SLT_ReqStart, "%s %s %s %s", ci, cp, endpname,
+	    req->sp->tls != NULL ? "https" : "http");
 
 	return (ci);
 }

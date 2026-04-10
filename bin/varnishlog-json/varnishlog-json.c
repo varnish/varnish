@@ -700,6 +700,9 @@ case tag:					\
 			AN(cJSON_AddRawToObject(client, "rPort", VSB_data(CTX.vsb)));
 			AN(tok_get(&c));
 			AN(cJSON_AddStringToObject(client, "sock", VSB_data(CTX.vsb)));
+			if (tok_get(&c) > 0) {
+				AN(cJSON_AddStringToObject(client, "proto", VSB_data(CTX.vsb)));
+			}
 			break;
 
 		case SLT_End:

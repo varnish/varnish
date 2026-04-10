@@ -1,0 +1,14 @@
+varnishtest "varnishlog-json ReqStart http/https"
+
+feature cmd jq
+
+shell {
+	t() {
+		set -ex
+		varnishlog-json -r ${testdir}/../test_assets/$1  | jq -r ".client"
+		test "$(varnishlog-json -r ${testdir}/../test_assets/$1  | jq -r ".client.proto")" = "$2"
+	}
+
+	t log_ReqStart_3_fields.bin null
+	t log_ReqStart_4_fields.bin http
+}
