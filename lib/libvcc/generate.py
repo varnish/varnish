@@ -34,7 +34,7 @@
 
 import copy
 import sys
-from os.path import join
+import os.path
 
 stv_variables = (
     ('free_space', 'BYTES', "0", 'storage.<name>.free_space' ),
@@ -190,7 +190,7 @@ def main():
                     m -= 2
                 parse_subs(l[i][n-1:m], i)
 
-    parse_subs_doc(join(srcroot, "doc/sphinx/reference/vcl_step.rst"))
+    parse_subs_doc(os.path.join(srcroot, "doc/sphinx/reference/vcl_step.rst"))
 
     #######################################################################
     # Variables available in sessions
@@ -377,7 +377,7 @@ def main():
     VclType("STRINGS", "void", True)
     VclType("SUB", "void*", True)
 
-    with open(join(srcroot, "include/vrt.h"), encoding="utf8") as fi:
+    with open(os.path.join(srcroot, "include/vrt.h"), encoding="utf8") as fi:
         for i in fi:
             j = i.split()
             if len(j) < 3:
@@ -476,7 +476,7 @@ def main():
 
     def emit_file(fo, fd, bn):
         "Read a C-source file and spit out code that outputs it with VSB_cat()"
-        fn = join(fd, bn)
+        fn = os.path.join(fd, bn)
 
         with open(fn, encoding="utf8") as fi:
             fc = fi.read()
@@ -513,7 +513,7 @@ def main():
 
     polish_tokens(tokens)
 
-    with open(join(buildroot, "lib/libvcc/vcc_token_defs.h"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "lib/libvcc/vcc_token_defs.h"), "w", encoding="utf8") as fo:
 
         file_header(fo)
 
@@ -543,7 +543,7 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "include/tbl/vcl_returns.h"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "include/tbl/vcl_returns.h"), "w", encoding="utf8") as fo:
 
         file_header(fo)
 
@@ -577,7 +577,7 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "include/vcl.h"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "include/vcl.h"), "w", encoding="utf8") as fo:
 
         file_header(fo)
 
@@ -685,7 +685,7 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "include/tbl/vcl_context.h"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "include/tbl/vcl_context.h"), "w", encoding="utf8") as fo:
         file_header(fo)
 
         fo.write("/*lint -save -e525 -e539 */\n")
@@ -743,8 +743,8 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "include/vrt_obj.h"), "w", encoding="utf8") as fh:
-        with open(join(buildroot, "lib/libvcc/vcc_obj.c"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "include/vrt_obj.h"), "w", encoding="utf8") as fh:
+        with open(os.path.join(buildroot, "lib/libvcc/vcc_obj.c"), "w", encoding="utf8") as fo:
             file_header(fh)
             file_header(fo)
 
@@ -752,7 +752,7 @@ def main():
             fo.write('\nvoid\nvcc_Var_Init(struct vcc *tl)\n{\n\tstruct symbol *sym;\n')
 
             var_aliases = []
-            parse_var_doc(join(srcroot, "doc/sphinx/reference/vcl_var.rst"))
+            parse_var_doc(os.path.join(srcroot, "doc/sphinx/reference/vcl_var.rst"))
             for al in var_aliases:
                 fo.write(al)
             fo.write("}\n")
@@ -777,7 +777,7 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "lib/libvcc/vcc_fixed_token.c"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "lib/libvcc/vcc_fixed_token.c"), "w", encoding="utf8") as fo:
 
         file_header(fo)
         fo.write('\n#include "config.h"\n\n#include "vcc_compile.h"\n')
@@ -808,7 +808,7 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "lib/libvcc/vcc_types.h"), "w", encoding="utf8") as ft:
+    with open(os.path.join(buildroot, "lib/libvcc/vcc_types.h"), "w", encoding="utf8") as ft:
         file_header(ft)
 
         lint_start(ft)
@@ -820,7 +820,7 @@ def main():
 
     #######################################################################
 
-    with open(join(buildroot, "include/tbl/vrt_stv_var.h"), "w", encoding="utf8") as fo:
+    with open(os.path.join(buildroot, "include/tbl/vrt_stv_var.h"), "w", encoding="utf8") as fo:
 
         file_header(fo)
         lint_start(fo)
