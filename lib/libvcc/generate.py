@@ -28,11 +28,12 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-#
-# Generate various .c and .h files for the VCL compiler and the interfaces
-# for it.
 
-import copy
+'''
+   Generate various .c and .h files for the VCL compiler and the interfaces
+   for it.
+'''
+
 import sys
 import os.path
 
@@ -41,6 +42,17 @@ stv_variables = (
     ('used_space', 'BYTES', "0", 'storage.<name>.used_space' ),
     ('happy',      'BOOL',  "1", 'storage.<name>.happy' ),
 )
+
+def file_header(fo):
+    '''
+       Header for all generated C files
+    '''
+
+    fo.write('/*\n')
+    fo.write(' * NB:  This file is machine generated, DO NOT EDIT!\n')
+    fo.write(' *\n')
+    fo.write(' * Edit and run lib/libvcc/generate.py instead.\n')
+    fo.write(' */\n')
 
 def emit_strings(fo, what, *args):
     '''
@@ -99,6 +111,19 @@ def emit_strings(fo, what, *args):
         fo.write("\t);\n")
     fo.write('\tVSB_cat(sb, "\\n");\n')
 
+def emit_c_file(fo, fd, bn):
+    '''
+       Read a C-source file and spit out code that outputs it with VSB_cat()
+    '''
+
+    fn = os.path.join(fd, bn)
+
+    with open(fn, encoding="utf8") as fi:
+        fc = fi.read()
+
+    fo.write("\n\t/* %s */\n\n" % fn)
+    emit_strings(fo, bn, fc)
+
 def emit_lines(fo, *args):
     '''
        Split lines into file
@@ -107,11 +132,104 @@ def emit_lines(fo, *args):
     for i in args:
         fo.write(i + '\n')
 
+class Tokens():
+
+    '''
+       Everything related to VCL language tokens
+       -----------------------------------------
+    '''
+
+    tokens = {
+        "T_INC":        "++",
+        "T_DEC":        "--",
+        "T_CAND":       "&&",
+        "T_COR":        "||",
+        "T_LEQ":        "<=",
+        "T_EQ":         "==",
+        "T_NEQ":        "!=",
+        "T_GEQ":        ">=",
+        "T_SHR":        ">>",
+        "T_SHL":        "<<",
+        "T_INCR":       "+=",
+        "T_DECR":       "-=",
+        "T_MUL":        "*=",
+        "T_DIV":        "/=",
+        "T_NOMATCH":    "!~",
+
+        # Single char tokens, for convenience on one line
+        None:           "{}()*+-/%><=;!&.|~,",
+
+        # These have handwritten recognizers
+        "ID":           None,
+        "CNUM":         None,
+        "FNUM":         None,
+        "CSTR":         None,
+        "CSRC":         None,
+        "CBLOB":        None,
+
+        # End of token list
+        "EOI":      None,
+    }
+
+    def __init__(self):
+
+        # Expand single char tokens
+        st = self.tokens[None]
+        del self.tokens[None]
+        for i in st:
+            self.tokens["'" + i + "'"] = i
+
+    def emit_vcc_token_defs(self, fn):
+        '''
+           Emit #define values for the tokens
+        '''
+
+        with open(fn, "w", encoding="utf8") as fo:
+            file_header(fo)
+            for n, i in enumerate(sorted(i for i in self.tokens if i[0] != "'")):
+                assert n < 128
+                fo.write("#define\t%s %d\n" % (i, 128 + n))
+
+    def emit_vcl_tnames(self, fo):
+        '''
+           Emit the vcl_tnames (token->string) conversion array
+        '''
+
+        fo.write("\nconst char * const vcl_tnames[256] = {\n")
+        for i, j in sorted(self.tokens.items()):
+            if j is None or i[0] == "'":
+                fo.write("\t[%s] = \"%s\",\n" % (i, i))
+            else:
+                fo.write("\t[%s] = \"%s\",\n" % (i, j))
+        fo.write("};\n")
+
+    def emit_vcl_fixed_token(self, fo):
+        '''
+           Emit a function to recognize tokens in a string
+        '''
+
+        fo.write('#define M1()\tdo {*q = p + 1; return (p[0]); } while (0)\n')
+        fo.write('#define M2(c,t)\tdo {if (p[1] == (c)) { *q = p + 2; return (t); }} while (0)\n')
+
+        fo.write('\nunsigned\n')
+        fo.write('vcl_fixed_token(const char *p, const char **q)\n')
+        fo.write('{\n')
+        fo.write('\tswitch (p[0]) {\n')
+
+        last_initial = None
+        for i,j in sorted(((y, x) for x,y in self.tokens.items() if y)):
+            if i[0] != last_initial:
+                if last_initial:
+                    fo.write("\t\tM1();\n")
+                fo.write("\tcase '%s':\n" % i[0])
+                last_initial = i[0]
+            if len(i) == 2:
+                fo.write("\t\tM2('%s', %s);\n" % (i[1], j))
+        fo.write("\t\tM1();\n")
+        fo.write("\tdefault:\n\t\treturn (0);\n\t}\n}\n")
+
+
 def main():
-
-    #######################################################################
-    # These are our tokens
-
 
     srcroot = "../.."
     buildroot = "../.."
@@ -122,37 +240,7 @@ def main():
         print("Two arguments or none")
         exit(2)
 
-    tokens = {
-        "T_INC":    "++",
-        "T_DEC":    "--",
-        "T_CAND":       "&&",
-        "T_COR":    "||",
-        "T_LEQ":    "<=",
-        "T_EQ":     "==",
-        "T_NEQ":    "!=",
-        "T_GEQ":    ">=",
-        "T_SHR":    ">>",
-        "T_SHL":    "<<",
-        "T_INCR":       "+=",
-        "T_DECR":       "-=",
-        "T_MUL":    "*=",
-        "T_DIV":    "/=",
-        "T_NOMATCH":    "!~",
-
-        # Single char tokens, for convenience on one line
-        None:       "{}()*+-/%><=;!&.|~,",
-
-        # These have handwritten recognizers
-        "ID":       None,
-        "CNUM":     None,
-        "FNUM":     None,
-        "CSTR":     None,
-        "CSRC":     None,
-        "CBLOB":    None,
-
-        # End of token list
-        "EOI":      None,
-    }
+    tokens = Tokens()
 
     #######################################################################
     # Our methods and actions
@@ -397,112 +485,7 @@ def main():
     # Nothing is easily configurable below this line.
     #######################################################################
 
-
     #######################################################################
-    def emit_vcl_fixed_token(fo, tokens):
-        "Emit a function to recognize tokens in a string"
-        recog = []
-        emit = {}
-        for i in tokens:
-            j = tokens[i]
-            if j is not None:
-                recog.append(j)
-                emit[j] = i
-
-        recog.sort()
-        rrecog = copy.copy(recog)
-        rrecog.sort(key=lambda x: -len(x))
-
-        fo.write('#define M1()\tdo {*q = p + 1; return (p[0]); } while (0)\n')
-        fo.write('#define M2(c,t)\tdo {if (p[1] == (c)) { *q = p + 2; return (t); }} while (0)\n')
-
-        fo.write('\nunsigned\n')
-        fo.write('vcl_fixed_token(const char *p, const char **q)\n')
-        fo.write('{\n')
-        fo.write('\tswitch (p[0]) {\n')
-
-        last_initial = None
-        for i in recog:
-            if i[0] == last_initial:
-                continue
-            last_initial = i[0]
-            fo.write("\tcase '%s':\n" % last_initial)
-            need_ret = True
-            for j in rrecog:
-                if j[0] != last_initial:
-                    continue
-                if len(j) == 2:
-                    fo.write("\t\tM2('%s', %s);\n" % (j[1], emit[j]))
-                elif len(j) == 1:
-                    fo.write("\t\tM1();\n")
-                    need_ret = False
-                else:
-                    fo.write("\t\tif (")
-                    k = 1
-                    l = len(j)
-                    while k < l:
-                        fo.write("p[%d] == '%s'" % (k, j[k]))
-                        fo.write(" &&")
-                        if (k % 3) == 0:
-                            fo.write("\n\t\t    ")
-                        else:
-                            fo.write(" ")
-                        k += 1
-                    fo.write("!isvar(p[%d])) {\n" % l)
-                    fo.write("\t\t\t*q = p + %d;\n" % l)
-                    fo.write("\t\t\treturn (%s);\n" % emit[j])
-                    fo.write("\t\t}\n")
-            if need_ret:
-                fo.write("\t\treturn (0);\n")
-        fo.write("\tdefault:\n\t\treturn (0);\n\t}\n}\n")
-
-
-    #######################################################################
-    def emit_vcl_tnames(fo, tokens):
-        "Emit the vcl_tnames (token->string) conversion array"
-        fo.write("\nconst char * const vcl_tnames[256] = {\n")
-        l = list(tokens.keys())
-        l.sort()
-        for i in l:
-            j = tokens[i]
-            if j is None:
-                j = i
-            if i[0] == "'":
-                j = i
-            fo.write("\t[%s] = \"%s\",\n" % (i, j))
-        fo.write("};\n")
-
-
-
-    def emit_file(fo, fd, bn):
-        "Read a C-source file and spit out code that outputs it with VSB_cat()"
-        fn = os.path.join(fd, bn)
-
-        with open(fn, encoding="utf8") as fi:
-            fc = fi.read()
-
-        fo.write("\n\t/* %s */\n\n" % fn)
-        emit_strings(fo, bn, fc)
-
-    #######################################################################
-
-
-    def polish_tokens(tokens):
-        "Expand single char tokens"
-        st = tokens[None]
-        del tokens[None]
-        for i in st:
-            tokens["'" + i + "'"] = i
-
-
-    #######################################################################
-    def file_header(fo):
-        fo.write('/*\n')
-        fo.write(' * NB:  This file is machine generated, DO NOT EDIT!\n')
-        fo.write(' *\n')
-        fo.write(' * Edit and run lib/libvcc/generate.py instead.\n')
-        fo.write(' */\n')
-
     def lint_start(fo):
         fo.write('/*lint -save -e525 -e539 */\n\n')
 
@@ -511,19 +494,7 @@ def main():
 
     #######################################################################
 
-    polish_tokens(tokens)
-
-    with open(os.path.join(buildroot, "lib/libvcc/vcc_token_defs.h"), "w", encoding="utf8") as fo:
-
-        file_header(fo)
-
-        j = 128
-        for i in sorted(tokens.keys()):
-            if i[0] == "'":
-                continue
-            fo.write("#define\t%s %d\n" % (i, j))
-            j += 1
-            assert j < 256
+    tokens.emit_vcc_token_defs(os.path.join(buildroot, "lib/libvcc/vcc_token_defs.h"))
 
     #######################################################################
 
@@ -782,16 +753,16 @@ def main():
         file_header(fo)
         fo.write('\n#include "config.h"\n\n#include "vcc_compile.h"\n')
 
-        emit_vcl_fixed_token(fo, tokens)
-        emit_vcl_tnames(fo, tokens)
+        tokens.emit_vcl_fixed_token(fo)
+        tokens.emit_vcl_tnames(fo)
 
         fo.write('\nvoid\nvcl_output_lang_h(struct vsb *sb)\n{\n')
 
-        emit_file(fo, srcroot, "include/vdef.h")
-        emit_file(fo, srcroot, "include/vrt.h")
-        emit_file(fo, buildroot, "include/vcl.h")
-        emit_file(fo, buildroot, "include/vrt_obj.h")
-        emit_file(fo, srcroot, "include/vcc_interface.h")
+        emit_c_file(fo, srcroot, "include/vdef.h")
+        emit_c_file(fo, srcroot, "include/vrt.h")
+        emit_c_file(fo, buildroot, "include/vcl.h")
+        emit_c_file(fo, buildroot, "include/vrt_obj.h")
+        emit_c_file(fo, srcroot, "include/vcc_interface.h")
         emit_strings(
             fo,
             "vgc asserts (generate.py)",
