@@ -5,12 +5,14 @@
 
 .. _guide-storage:
 
+================
 Storage backends
-----------------
+================
 
 
+-----
 Intro
-~~~~~
+-----
 
 Varnish has pluggable storage backends. It can store data in various
 backends which can have different performance characteristics. The default
@@ -31,7 +33,7 @@ Besides the built-in storage backends, separately distributed extensions exist,
 which can be found on the `vmods`_ page by searching for "stevedore".
 
 Storage Selection
-~~~~~~~~~~~~~~~~~
+-----------------
 
 By default, Varnish will store short-lived and passed objects in a storage
 called `Transient`, described below.
@@ -39,8 +41,12 @@ called `Transient`, described below.
 For other objects, it will rotate between all the non-transient storages,
 unless the VCL variable `beresp.storage` is explicitly set.
 
+-------------------------
+Built in storage backends
+-------------------------
+
 default
-~~~~~~~
+-------
 
 syntax: default[,size]
 
@@ -48,7 +54,7 @@ The default storage backend is an alias to umem, where available, or
 malloc otherwise.
 
 malloc
-~~~~~~
+------
 
 syntax: malloc[,size]
 
@@ -89,7 +95,7 @@ depend on the operating system's ability to page effectively.
 .. _guide-storage_umem:
 
 umem
-~~~~
+----
 
 syntax: umem[,size]
 
@@ -137,7 +143,7 @@ be reconfigured once loaded.
 .. _libumem: http://dtrace.org/blogs/ahl/2004/07/13/number-11-of-20-libumem/
 
 file
-~~~~
+----
 
 syntax: file,path[,size[,granularity[,advice]]]
 
@@ -205,7 +211,7 @@ On Linux, large objects and rotational disk should benefit from
 "sequential".
 
 deprecated_persistent
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 syntax: deprecated_persistent,path,size {experimental}
 
@@ -240,8 +246,12 @@ the silo was offline will not be applied to the silo when it reenters
 the cache. Consequently enabling previously banned objects to
 reappear.
 
-Transient Storage
------------------
+---------------------
+Special Storage names
+---------------------
+
+Transient
+---------
 
 If you name any of your storage backend "Transient" it will be used
 for transient (short lived) objects. This includes the temporary
