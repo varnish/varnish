@@ -28,6 +28,7 @@ Storage backends are also called stevedores.
 .. _vmods: https://www.varnish-cache.org/vmods
 
 Besides the built-in storage backends, separately distributed extensions exist,
+which can be found on the `vmods`_ page by searching for "stevedore".
 
 Storage Selection
 ~~~~~~~~~~~~~~~~~
