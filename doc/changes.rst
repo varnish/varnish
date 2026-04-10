@@ -35,7 +35,7 @@ individual releases. These documents are updated as part of the
 release process.
 
 ================================
-Varnish-Cache X.X.0 (unreleased)
+Varnish-Cache NEXT (unreleased)
 ================================
 
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
@@ -49,6 +49,30 @@ Varnish-Cache X.X.0 (unreleased)
 
   * ``varnishlog-json`` transcribes this as a ``.client.proto`` field for
     client-side transactions
+
+================================
+Varnish-Cache 9.0.1 (2026-04-08)
+================================
+
+This is a security release fixing two Denial of Service vulnerabilities related to session pipelining for HTTP/1 and HTTP/2 sessions.
+
+Workspace overflow in HTTP/1 lingering sessions
+-----------------------------------------------
+
+A malicious client could send an HTTP/1 request, wait long enough until the session releases its worker thread (``timeout_linger``) and resume traffic before the session is closed (``timeout_idle``) sending more than one request at once to trigger a pipelining operation between requests.
+
+This vulnerability affecting Varnish Cache 9.0.0 emerged from a port of the Varnish Enterprise non-blocking architecture for HTTP/2. New code was needed to adapt to a more recent workspace API that formalizes the pipelining operation. In addition to the workspace change on the Varnish Cache side, other differences created merge conflicts, like partial support for trailers in Varnish Enterprise.
+
+The conflict resolution missed one code path configuring pipelining to perform a complete workspace rollback, losing the guarantee that prefetched data would fit inside `workspace_client` during the transition from one request to the next.
+
+This can result in a workspace overflow, triggering a panic and crashing the Varnish server.
+
+Workspace overflow in HTTP/2 sessions
+-------------------------------------
+
+Please refer to the public advisory for Varnish Enterprise.
+
+https://docs.varnish-software.com/security/VEV00002/
 
 ================================
 Varnish-Cache 9.0.0 (2026-03-15)

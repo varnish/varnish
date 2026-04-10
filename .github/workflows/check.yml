@@ -2,6 +2,10 @@ name: Compile and Check
 
 on:
   push:
+    branches:
+      - "*"
+    tags:
+      - varnish-*
   workflow_dispatch:
 
 jobs:
@@ -48,7 +52,65 @@ jobs:
           path: varnish-*.tar.gz
           retention-days: 1
 
+  release:
+    if: startsWith(github.event.ref, 'refs/tags/')
+    name: Create release
+    needs: make_dist
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - &download_tarball
+        name: Download tarball
+        uses: actions/download-artifact@v8
+        with:
+          name: dist-tarball
+
+      - name: Configure version matches tag
+        run: |
+          tar xzf varnish-*.tar.gz --strip 1
+          CONFIGURE_VERSION=$(./configure --version | awk 'NR == 1 {print $NF}')
+          echo "CONFIGURE_VERSION=$CONFIGURE_VERSION" >> "$GITHUB_ENV"
+          echo "configure version: $CONFIGURE_VERSION"
+          echo "tag: ${{ github.ref_name}}"
+          test ${{ github.ref_name}} = "varnish-$CONFIGURE_VERSION"
+
+      - name: Changelog section exists
+        run: |
+          echo "Making sure that there's a \"Varnish-Cache $CONFIGURE_VERSION (DATE)\" section in doc/changes.rst"
+          grep -E "Varnish-Cache $CONFIGURE_VERSION \([0-9]{4}-[0-9]{2}-[0-9]{2}\)" doc/changes.rst
+
+      - name: Extract release section
+        run: |
+          # I'm sure there's a sed one-liner for this...
+          awk -v "ver=$CONFIGURE_VERSION" '
+                            capture==1 && !/^====/{
+                              print $0
+                            }
+                            $1 == "Varnish-Cache" && $2 == ver {
+                              pre=1
+                            }
+                            /^=====/ {
+                              capture=pre;
+                              pre=0;
+                            }' doc/changes.rst | tee release.rst
+
+      - name: Markdownify release notes
+        uses: docker://pandoc/core:3.8
+        with:
+          args: release.rst -f rst -t markdown -o release.md
+
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat release.md
+          ls
+          gh release create -d -t $CONFIGURE_VERSION --verify-tag ${{ github.ref_name}} -F release.md varnish-*.tar.gz
+
   build:
+    if: ${{ ! startsWith(github.event.ref, 'refs/tags/') }}
     name: Build${{ matrix.os.check && ' and Check' || '' }} on ${{ matrix.os.dist }}:${{ matrix.os.version }} (${{ matrix.arch.name }})
     needs: make_dist
     runs-on: ubuntu-24.04${{ matrix.arch.suffix }}
@@ -76,11 +138,7 @@ jobs:
           - os: { dist: archlinux, version: latest, check: true }
             arch: { name: "arm", suffix: "-arm" }
     steps:
-      - &download_tarball
-        name: Download tarball
-        uses: actions/download-artifact@v8
-        with:
-          name: dist-tarball
+      - *download_tarball
 
       - &extract_tarball
         name: Extract tarball
@@ -217,6 +275,7 @@ jobs:
           if-no-files-found: ignore
 
   check_macos:
+    if: ${{ ! startsWith(github.event.ref, 'refs/tags/') }}
     name: Build and Check on MacOS (${{ matrix.macos.arch }})
     needs: make_dist
     runs-on: ${{ matrix.macos.runner }}
@@ -265,7 +324,7 @@ jobs:
 
   ci-passed:
     needs: [check_macos, build]
-    if: always()
+    if: ${{ ! startsWith(github.event.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
       - name: All but MacOS build
