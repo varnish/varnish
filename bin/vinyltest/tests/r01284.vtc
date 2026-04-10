@@ -39,17 +39,19 @@ varnish v1 -expect SM?.Transient.g_bytes > 1048000
 varnish v1 -expect SM?.Transient.g_space < 200
 
 client c1 {
-	# No space for this object (more than 256 bytes in headers). Don't wait
-	# for reply as Varnish will not send one due to Transient full.
+	# No space for this object (more than 256 bytes in headers).
+	# storage.Synth is unaffected
 	txreq -url "/obj2"
-	delay 1
+	rxresp
+	expect resp.status == 503
 } -run
 
 # Three failures, one for obj2, one for vcl_backend_error{}, one for synth objcore
-varnish v1 -expect SM?.Transient.c_fail == 3
+varnish v1 -expect SM?.Transient.c_fail == 2
+varnish v1 -expect SM?.Synth.c_fail == 0
 
 client c1 {
-	# Check that Varnish is still alive
+	# Check that varnishd is still alive
 	txreq -url "/obj1"
 	rxresp
 	expect resp.status == 200

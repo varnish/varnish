@@ -460,7 +460,7 @@ VRT_l_resp_storage(VRT_CTX, VCL_STEVEDORE stv)
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	if (stv == NULL)
-		stv = stv_transient;
+		stv = stv_synth;
 	if (! Resp_l_storage(ctx->req, stv))
 		VRT_fail(ctx, "Storage %s failed", stv->vclname);
 }

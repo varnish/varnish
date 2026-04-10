@@ -52,8 +52,9 @@ client c1 {
 	expect resp.status == 200
 
 	txreq -hdr "Accept-Encoding: gzip"
-	# no storage for synth either
-	expect_close
+	# storage.Synth unaffected
+	rxresp
+	expect resp.status == 503
 } -run
 
 logexpect l1 -wait

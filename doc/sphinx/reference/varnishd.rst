@@ -403,19 +403,29 @@ like so::
 
   set beresp.storage = storage.myStorage;
 
-A special *name* is ``Transient`` which is the default storage for
-uncacheable objects as resulting from a pass, hit-for-miss or
-hit-for-pass.
-
 If no ``-s`` options are given, the default is::
 
 	-s default,100m
 
-If no ``Transient`` storage is defined, the ``default`` storage is used as if
-defined as::
+Two special *name*\ s are:
+
+* ``Transient``, which is the default storage for uncacheable objects as
+  resulting from a pass, hit-for-miss or hit-for-pass.
+
+  If no ``Transient`` storage is defined, the ``default`` storage is used as if
+  defined as::
 
 	-s Transient=default
 
+* ``Synth``, which is the default storage for synthetic responses created in
+  ``vcl_synth {}``.
+
+  If no ``Synth`` storage is defined, the ``default`` storage is used as if
+  defined as::
+
+	-s Synth=default
+
+.. XXX change to synth ^^^
 
 Storage *kind*\ s (stevedores) can be provided by extensions. The following
 storage *kind*\ s and options are built in:

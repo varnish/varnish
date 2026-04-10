@@ -385,7 +385,7 @@ cnt_synth(struct worker *wrk, struct req *req)
 	szl = -1;
 
 	if (req->objcore != NULL ||
-	    Resp_l_storage(req, stv_transient)) {
+	    Resp_l_storage(req, stv_synth)) {
 		CHECK_OBJ_NOTNULL(req->objcore, OBJCORE_MAGIC);
 		body = VSB_data(synth_body);
 		szl = VSB_len(synth_body);
