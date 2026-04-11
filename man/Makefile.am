@@ -18,6 +18,7 @@ dist_man_MANS = \
 	varnishstat.1 \
 	varnishtest.1 \
 	vtc.7 \
+	varnishlog-json.1 \
 	varnishtop.1 \
 	vmod_cookie.3 \
 	vmod_directors.3 \
@@ -113,6 +114,9 @@ varnishtop.1: \
 	$(top_builddir)/doc/sphinx/include/varnishtop_options.rst \
 	$(top_builddir)/doc/sphinx/include/varnishtop_synopsis.rst
 	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishtop.rst $@
+
+varnishlog-json.1: $(top_builddir)/doc/sphinx/reference/varnishlog-json.rst
+	$(BUILD_MAN) $(top_builddir)/doc/sphinx/reference/varnishlog-json.rst $@
 
 varnishhist.1: \
 	$(top_builddir)/doc/sphinx/reference/varnishhist.rst \
