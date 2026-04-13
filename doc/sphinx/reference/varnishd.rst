@@ -411,8 +411,8 @@ If no ``-s`` options are given, the default is::
 
 	-s default,100m
 
-If no ``Transient`` storage is defined, the default is an unbound
-``default`` storage as if defined as::
+If no ``Transient`` storage is defined, the ``default`` storage is used as if
+defined as::
 
 	-s Transient=default
 
