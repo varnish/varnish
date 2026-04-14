@@ -87,14 +87,14 @@ client c13 {
 client c14 {
 	txreq -hdr "resp: foo, close"
 	rxresp
-	expect resp.http.Connection == close
+	expect resp.http.Connection == "foo, close"
 	expect_close
 } -start
 
 client c15 {
 	txreq -url /synth -hdr "resp: foo, close"
 	rxresp
-	expect resp.http.Connection == close
+	expect resp.http.Connection == "foo, close"
 	expect_close
 } -start
 
