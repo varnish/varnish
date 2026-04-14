@@ -208,8 +208,6 @@ deprecated_persistent
 
 syntax: deprecated_persistent,path,size {experimental}
 
-*Before using, read* :ref:`phk_persistent`\ *!*
-
 Persistent storage. Varnish will store objects in a file in a manner
 that will secure the survival of *most* of the objects in the event of
 a planned or unplanned shutdown of Varnish.

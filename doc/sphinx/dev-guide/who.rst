@@ -40,8 +40,6 @@ remembering what 'REST', 'CORS' and 'ALPN' means, and he flunked
 He does have 30+ years of experience in systems programming, and
 that seems useful too.
 
-PHK's `random outbursts </docs/trunk/phk/index.html>`_ has their own
-section in the Varnish documentation.
 
 Per Buer
 ~~~~~~~~
