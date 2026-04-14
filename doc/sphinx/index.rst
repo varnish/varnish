@@ -21,8 +21,7 @@ that you go through our tutorial - :ref:`tutorial-index`, and finally the
 If you need to find out how to use a specific Vinyl Cache tool, the
 :ref:`reference-index` contains detailed documentation over the tools. Changes
 from previous versions are located in the :ref:`whats-new-index` chapter. In
-closing, we have :ref:`phk`, a collection of blog posts from Poul-Henning Kamp
-related to Vinyl Cache and HTTP.
+closing, the :ref:`glossary` provides definitions of common terms.
 
 
 Conventions used in this manual include:
@@ -77,7 +76,6 @@ Longer listings like example command output and VCL look like this::
     vcl-design-patterns/index.rst
     whats-new/index.rst
     dev-guide/index.rst
-    phk/index.rst
     glossary/index.rst
 
 

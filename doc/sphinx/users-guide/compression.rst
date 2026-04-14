@@ -107,8 +107,3 @@ not do any of the header alterations documented above, handles `Vary:
 Accept-Encoding` like it would for any other `Vary` value and ignores
 `beresp.do_gzip` and `beresp.do_gunzip`.
 
-A random outburst
-~~~~~~~~~~~~~~~~~
-
-Poul-Henning Kamp has written :ref:`phk_gzip` which talks a bit more
-about how the implementation works.
