@@ -67,16 +67,7 @@ dbg_deliver(struct req *req, int sendbody)
 	CHECK_OBJ_ORNULL(req->boc, BOC_MAGIC);
 	CHECK_OBJ_NOTNULL(req->objcore, OBJCORE_MAGIC);
 
-	if (req->doclose == SC_NULL &&
-	    http_HdrIs(req->resp, H_Connection, "close")) {
-		req->doclose = SC_RESP_CLOSE;
-	} else if (req->doclose != SC_NULL) {
-		if (!http_HdrIs(req->resp, H_Connection, "close")) {
-			http_Unset(req->resp, H_Connection);
-			http_SetHeader(req->resp, "Connection: close");
-		}
-	} else if (!http_GetHdr(req->resp, H_Connection, NULL))
-		http_SetHeader(req->resp, "Connection: keep-alive");
+	req->doclose = http_EnsureConnection(req->resp, req->doclose);
 
 	CHECK_OBJ_NOTNULL(req->wrk, WORKER_MAGIC);
 

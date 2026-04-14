@@ -686,6 +686,7 @@ int HTTP_IterHdrPack(struct worker *, struct objcore *, const char **);
 	 for ((ptr) = NULL; HTTP_IterHdrPack(wrk, oc, &(ptr));)
 const char *HTTP_GetHdrPack(struct worker *, struct objcore *, hdr_t);
 stream_close_t http_DoConnection(struct http *hp, stream_close_t sc_close);
+stream_close_t http_EnsureConnection(struct http *hp, stream_close_t sc_close);
 int http_IsFiltered(const struct http *hp, unsigned u, unsigned how);
 void http_SetWellKnownMethod(struct http *hp);
 
