@@ -14,19 +14,20 @@ Varnish, and it is a pretty apt metafor::
 
        ┌─────────┐
        │ browser │
-       └─────────┘                                            ┌─────────┐
-                  \                                          ┌─────────┐│
-       ┌─────┐     ╔═════════╗    ┌─────┐    ┌─────────┐    ┌─────────┐│┘
-       │ app │ --- ║ Network ║ -- │ TLS │ -- │ Varnish │ -- │ Backend │┘
-       └─────┘     ╚═════════╝    └─────┘    └─────────┘    └─────────┘
+       └─────────┘                                     ┌─────────┐
+                  \                                   ┌─────────┐│
+       ┌─────┐     ╔═════════╗    ┌─────────┐        ┌─────────┐│┘
+       │ app │ --- ║ Network ║ -- │ Varnish │ ------ │ Backend │┘
+       └─────┘     ╚═════════╝    └─────────┘        └─────────┘
                    /
        ┌────────────┐
        │ API-client │
        └────────────┘
 
-The top layer of the sandwich, 'TLS' is responsible for handling
-the TLS ("https") encryption, which means it must have access to
-the cryptographic certificate which authenticates your website.
+Since version 9.0, Varnish handles TLS ("https") termination
+natively using the ``-A`` flag or by specifying ``https`` as the
+protocol on a listen address. In earlier versions, a separate TLS
+proxy was required in front of Varnish.
 
 The bottom layer of the sandwich are your webservers, CDNs,
 API-servers, business backend systems and all the other sources for

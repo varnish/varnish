@@ -22,6 +22,7 @@ SYNOPSIS
 
 varnishd
     [-a [name=][listen_address[,PROTO|,option=value,...]]
+    [-A cfgfile]
     [-b [host[:port]|path]]
     [-C]
     [-d]
@@ -78,8 +79,9 @@ Basic options
 
   Valid options depend on the acceptor type, see below.
 
-  PROTO can be "HTTP" (the default) or "PROXY".  Both version 1
-  and 2 of the proxy protocol can be used.
+  PROTO can be "HTTP" (the default), "PROXY" or "HTTPS".  Both version 1
+  and 2 of the proxy protocol can be used.  When "HTTPS" is specified,
+  the listener will accept TLS connections (see also ``-A`` below).
 
   Multiple -a arguments are allowed.
 
@@ -110,6 +112,20 @@ Basic options
   permissions of the socket file -- use names for user and group, and
   a 3-digit octal value for mode. These sub-arguments do not apply to
   abstract sockets.
+
+-A cfgfile
+
+  Load TLS configuration from the specified file. The file defines listen
+  endpoints and their TLS settings (certificates, protocols, ciphers).
+
+  When ``-A`` is used, Varnish terminates TLS natively without needing an
+  external TLS proxy.
+
+  Certificates can also be managed at runtime using the ``tls.cert.*``
+  family of CLI commands (see :ref:`varnish-cli(7)`).
+
+  An alternative to ``-A`` is to use ``-a`` with the ``HTTPS`` protocol,
+  for example ``-a :443,HTTPS``, and then load certificates via the CLI.
 
 -b <[host[:port]|path]>
 

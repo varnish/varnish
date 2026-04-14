@@ -17,8 +17,31 @@ merged, may be found in the `change log`_.
 varnishd
 ========
 
+Native TLS termination
+~~~~~~~~~~~~~~~~~~~~~~
+
+Varnish Cache 9.0 introduces native TLS termination support. This is a
+significant change: previous versions required an external TLS proxy in front
+of Varnish to handle HTTPS traffic.
+
+TLS can be configured in two ways:
+
+* Using a TLS configuration file::
+
+    varnishd -A /path/to/tls.conf
+
+* Using the ``https`` protocol on an accept address::
+
+    varnishd -a :443,https
+
+Certificates can also be managed at runtime using ``varnishadm tls.*``
+commands.
+
+With TLS enabled, the ``ReqStart`` VSL tag now includes a fourth field
+indicating whether ``http`` or ``https`` was used by the client.
+
 Other changes in varnishd
-~~~~~==~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Varnish Extensions (VEXTs) can now be loaded by specifying their basename as
 ``-E<name>``. When ``<name>`` is not a path (does not contain ``/``), a search
