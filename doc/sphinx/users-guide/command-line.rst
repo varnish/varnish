@@ -8,10 +8,10 @@
 Required command line arguments
 -------------------------------
 
-There only one command line argument you have to provide when starting Varnish,
-which is '-b' for where the backend server can be contacted.
+There is only one command line argument you have to provide when starting
+Varnish, which is '-b' for where the backend server can be contacted.
 
-'-a' is another argument which is likely to require adjustment.
+'-a' and '-A' are other arguments which are likely to require adjustment.
 
 If you have installed Varnish through using a provided operating system bound package,
 you will find the startup options here:
@@ -46,6 +46,22 @@ Here are some examples::
         -a uds=/my/path,PROXY,mode=666
         -a @abstract_socket
 
+To accept HTTPS traffic, use the ``HTTPS`` protocol::
+
+	-a :443,HTTPS
+
+Certificates are then managed at runtime using ``varnishadm tls.*`` commands.
+
+'-A' *cfgfile*
+^^^^^^^^^^^^^^
+
+The '-A' argument loads TLS configuration from a file, which defines listen
+endpoints and their TLS settings. This is an alternative to using '-a' with the
+``HTTPS`` protocol::
+
+	-A /etc/varnish/tls.conf
+
+See :ref:`varnishd(1)` for more details.
 
 '-f' *VCL-file* or '-b' *backend*
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

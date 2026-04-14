@@ -201,6 +201,13 @@ Varnish running on the same server/namespace can then use the
 The ``.authority`` attribute can be used to specify the `SNI`_ for the
 connection if it differs from ``.host``.
 
+.. note::
+
+   This proxy-based approach is useful when you need fine-grained control
+   over backend TLS settings per destination. For *client-side* TLS
+   termination (accepting HTTPS from clients), see the ``-A`` and
+   ``-a :port,HTTPS`` options documented in :ref:`varnishd(1)`.
+
 
 .. _users-guide-advanced_backend_servers-directors:
 
