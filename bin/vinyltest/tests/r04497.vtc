@@ -1,0 +1,92 @@
+vtest "connection header adjusted correctly"
+
+varnish v1 -vcl {
+	backend none none;
+
+	sub vcl_recv {
+		return (synth(200));
+	}
+	sub vcl_synth {
+		if (req.http.c) {
+			set resp.http.Connection = req.http.c;
+		}
+		set resp.body = "";
+		return (deliver);
+	}
+} -start
+
+# base case: no custom hdr
+client c1 {
+	txreq
+	rxresp
+	expect resp.http.Connection == "keep-alive"
+
+	txreq -hdr "Connection: close"
+	rxresp
+	expect resp.http.Connection == "close"
+	expect_close
+} -start
+
+# set header does not match'
+client c2 {
+	txreq -hdr "c: close, keep-alive"
+	rxresp
+	expect resp.http.Connection == "close"
+	expect_close
+} -start
+
+# custom header matches
+client c3 {
+	txreq -hdr "c: aa, keep-alive, bb"
+	rxresp
+	expect resp.http.Connection == "aa, keep-alive, bb"
+
+	txreq -hdr "c: aa, close, bb"
+	rxresp
+	expect resp.http.Connection == "aa, close, bb"
+	expect_close
+} -start
+
+# custom header needs
+client c4 {
+	txreq -hdr "c: aa, bb"
+	rxresp
+	expect resp.http.Connection == "aa, bb, keep-alive"
+
+	txreq -hdr "Connection: close" -hdr "c: aa, bb"
+	rxresp
+	expect resp.http.Connection == "aa, bb, close"
+	expect_close
+} -start
+
+# H10 with keep-alive
+client c5 {
+	txreq -proto "HTTP/1.0" -hdr "Connection: keep-alive"
+	rxresp
+	expect resp.http.Connection == "keep-alive"
+	txreq -proto "HTTP/1.0" -hdr "Connection: keep-alive"
+	rxresp
+} -start
+
+# H10 without keep-alive
+client c6 {
+	txreq -proto "HTTP/1.0"
+	rxresp
+	expect resp.http.Connection == "close"
+	expect_close
+} -start
+
+# H10 with sth else
+client c5 {
+	txreq -proto "HTTP/1.0" -hdr "Connection: foo"
+	rxresp
+	expect resp.http.Connection == "close"
+	expect_close
+} -start
+
+client c1 -wait
+client c2 -wait
+client c3 -wait
+client c4 -wait
+client c5 -wait
+client c6 -wait
