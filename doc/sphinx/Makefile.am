@@ -57,7 +57,6 @@ EXTRA_DIST = \
 	include \
 	index.rst \
 	installation \
-	phk \
 	tutorial \
 	reference \
 	users-guide \
