@@ -169,10 +169,14 @@ ESI includes with HTTPS protocol
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If ESI:include tags specify HTTPS protocol, it will be ignored
-by default, because Varnish has no way to fetch it with encryption.
-If you want Varnish to fetch them like it does anything else, set::
+by default. If you want Varnish to treat ``https://`` ESI includes
+the same as ``http://``, set::
 
    param.set feature +esi_ignore_https
+
+Note that this strips the scheme and fetches the include over the
+backend connection as configured in VCL (which may or may not use TLS,
+depending on your backend configuration).
 
 ESI on partial responses (206)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
