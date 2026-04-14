@@ -1,6 +1,7 @@
 /*-
  * Copyright (c) 2006 Verdens Gang AS
  * Copyright (c) 2006-2017 Varnish Software AS
+ * Copyright 2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Author: Poul-Henning Kamp <phk@phk.freebsd.dk>
@@ -1144,6 +1145,74 @@ http_DoConnection(struct http *hp, stream_close_t sc_close)
 	}
 	CHECK_OBJ_NOTNULL(retval, STREAM_CLOSE_MAGIC);
 	return (retval);
+}
+
+// Set the correct Connection header for closing or not
+// Existing Connection: close has precedence
+stream_close_t
+http_EnsureConnection(struct http *hp, stream_close_t sc_close)
+{
+	const char *h, *b, *e;
+	struct vsb vsb[1];
+	unsigned has_keep = 0, has_close = 0;
+	unsigned u, n = 0;
+
+	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
+	http_CollectHdr(hp, H_Connection);
+	if (!http_GetHdr(hp, H_Connection, &h)) {
+		if (sc_close == SC_NULL)
+			http_SetHeader(hp, "Connection: keep-alive");
+		else
+			http_SetHeader(hp, "Connection: close");
+		return (sc_close);
+	}
+
+	WS_VSB_new(vsb, hp->ws);
+	AN(h);
+	while (http_split(&h, NULL, ",", &b, &e)) {
+		u = pdiff(b, e);
+		if (u == 5 && http_hdr_at(b, "close", u)) {
+			has_close = 1;
+			continue;
+		}
+		if (u == 10 && http_hdr_at(b, "keep-alive", u)) {
+			has_keep = 1;
+			continue;
+		}
+		if (n++ == 0)
+			VSB_cat(vsb, "Connection: ");
+		else
+			VSB_cat(vsb, ", ");
+		VSB_bcat(vsb, b, u);
+	}
+	if (sc_close == SC_NULL && has_close)
+		sc_close = SC_RESP_CLOSE;
+	//lint -e{731} Boolean argument to equal/not equal
+	if (has_keep ^ has_close && (sc_close == SC_NULL) == (has_keep == 1)) {
+		// already correct
+		WS_Release(hp->ws, 0);
+		return (sc_close);
+	}
+	http_Unset(hp, H_Connection);
+	if (n == 0 && sc_close == SC_NULL) {
+		WS_Release(hp->ws, 0);
+		http_SetHeader(hp, "Connection: keep-alive");
+		return (sc_close);
+	}
+	if (n == 0) {
+		WS_Release(hp->ws, 0);
+		http_SetHeader(hp, "Connection: close");
+		return (sc_close);
+	}
+	if (sc_close == SC_NULL)
+		VSB_cat(vsb, ", keep-alive");
+	else
+		VSB_cat(vsb, ", close");
+	h = WS_VSB_finish(vsb, hp->ws, NULL);
+	if (h == NULL)
+		return (SC_OVERLOAD);
+	http_SetHeader(hp, h);
+	return (sc_close);
 }
 
 /*--------------------------------------------------------------------*/
