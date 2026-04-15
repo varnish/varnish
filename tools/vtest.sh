@@ -37,7 +37,7 @@ export MAKEFLAGS="${MAKEFLAGS:--j2}"
 
 # This temp directory must not be used by anything else.
 # Do *NOT* set this to /tmp
-export TMPDIR="${TMPDIR:-`pwd`/_vtest_tmp}"
+export TMPDIR="${TMPDIR:-`pwd`}/_vtest_tmp"
 
 # Message to be shown in result pages
 # Max 10 char of [A-Za-z0-9/. _-]
