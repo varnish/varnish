@@ -51,8 +51,6 @@ struct bssl_ctx {
 	SSL_CTX			*ctx;
 };
 
-static struct bssl_ctx	*bssl_ctx;
-
 void *
 BSSL_new_ssl_ctx(void)
 {
@@ -95,10 +93,6 @@ BSSL_Init(void)
 {
 
 	ASSERT_CLI();
-	AZ(bssl_ctx);
-
-	bssl_ctx = BSSL_new_ssl_ctx();
-	AN(bssl_ctx);
 }
 
 static void
@@ -140,14 +134,14 @@ bssl_vfy_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 
 struct vtls_sess *
 bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
-    unsigned ssl_flags, const char *ssl_sniname)
+    unsigned ssl_flags, const char *ssl_sniname, void *priv)
 {
+	struct bssl_ctx *bctx;
 	struct vtls_sess *tsp;
 	X509_VERIFY_PARAM *vpm;
 	int i;
 
-	CHECK_OBJ_NOTNULL(bssl_ctx, BSSL_CTX_MAGIC);
-	AN(bssl_ctx->ctx);
+	CAST_OBJ_NOTNULL(bctx, priv, BSSL_CTX_MAGIC);
 
 	assert(fd >= 0);
 	AN(ssl_flags & BSSL_F_ENABLE);
@@ -160,7 +154,7 @@ bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
 
 	(void)VTCP_nonblocking(fd);
 
-	tsp->ssl = SSL_new(bssl_ctx->ctx);
+	tsp->ssl = SSL_new(bctx->ctx);
 	if (tsp->ssl == NULL) {
 		VTLS_vsl_ssllog(tsp->log);
 		bssl_sess_free(&tsp);
@@ -224,7 +218,6 @@ bssl_vtp_fini(struct vtls_sess **ptsp)
 void
 bssl_vtp_begin(struct pool *pp, struct vtls_sess *tsp, struct vsl_log *vsl)
 {
-	CHECK_OBJ_NOTNULL(bssl_ctx, BSSL_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 	CHECK_OBJ_NOTNULL(tsp, VTLS_SESS_MAGIC);
 	AZ(tsp->buf);
@@ -237,7 +230,6 @@ bssl_vtp_begin(struct pool *pp, struct vtls_sess *tsp, struct vsl_log *vsl)
 void
 bssl_vtp_end(struct vtls_sess *tsp)
 {
-	CHECK_OBJ_NOTNULL(bssl_ctx, BSSL_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(tsp, VTLS_SESS_MAGIC);
 	AN(tsp->buf);
 	VTLS_buf_free(&tsp->buf);
