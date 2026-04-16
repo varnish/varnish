@@ -51,6 +51,8 @@ struct bssl_ctx {
 	SSL_CTX			*ctx;
 };
 
+static X509_STORE	*bssl_default_ca_store;
+
 void *
 BSSL_new_ssl_ctx(void)
 {
@@ -67,7 +69,8 @@ BSSL_new_ssl_ctx(void)
 	 */
 	(void)SSL_CTX_set_options(ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
 #endif
-	AN(SSL_CTX_set_default_verify_paths(ctx));
+	AN(bssl_default_ca_store);
+	SSL_CTX_set1_cert_store(ctx, bssl_default_ca_store);
 	(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 
 	ALLOC_OBJ(bctx, BSSL_CTX_MAGIC);
@@ -93,6 +96,10 @@ BSSL_Init(void)
 {
 
 	ASSERT_CLI();
+	AZ(bssl_default_ca_store);
+	bssl_default_ca_store = X509_STORE_new();
+	AN(bssl_default_ca_store);
+	AN(X509_STORE_set_default_paths(bssl_default_ca_store));
 }
 
 static void
