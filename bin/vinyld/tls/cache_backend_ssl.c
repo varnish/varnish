@@ -185,11 +185,9 @@ bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
 	else
 		SSL_set_verify(tsp->ssl, SSL_VERIFY_PEER, bssl_vfy_cb);
 
-	vpm = SSL_get0_param(tsp->ssl);
-	AN(vpm);
-	AN(X509_VERIFY_PARAM_set_flags(vpm, X509_V_FLAG_TRUSTED_FIRST));
-
 	if (ssl_flags & BSSL_F_VERIFY_HOST) {
+		vpm = SSL_get0_param(tsp->ssl);
+		AN(vpm);
 		AN(X509_VERIFY_PARAM_set1_host(vpm, ssl_sniname, 0));
 		X509_VERIFY_PARAM_set_hostflags(vpm,
 		    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT);
