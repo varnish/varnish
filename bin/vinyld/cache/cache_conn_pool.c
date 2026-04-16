@@ -945,7 +945,7 @@ vtp_bssl_init(const struct vrt_endpoint *vep)
 {
 
 	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
-	return (BSSL_new_ssl_ctx(vep->sslflags, vep->hosthdr));
+	return (BSSL_new_ssl_ctx(vep));
 }
 
 static void v_matchproto_(cp_fini_f)
@@ -1011,6 +1011,11 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident)
 				VSHA256_Update(cx, "HOST", 5); // include \0
 				VSHA256_Update(cx, vep->hosthdr,
 				    strlen(vep->hosthdr));
+			}
+			if (vep->ssl_ca_file != NULL) {
+				VSHA256_Update(cx, "CAF", 4);
+				VSHA256_Update(cx, vep->ssl_ca_file,
+				    strlen(vep->ssl_ca_file));
 			}
 		}
 	}

@@ -1172,6 +1172,7 @@ VRT_Endpoint_Clone(const struct vrt_endpoint * const vep)
 	struct suckaddr *sa;
 	size_t uds_len = 0;
 	size_t hosthdr_len = 0;
+	size_t ssl_ca_file_len = 0;
 	char *p, *e;
 
 	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
@@ -1187,6 +1188,10 @@ VRT_Endpoint_Clone(const struct vrt_endpoint * const vep)
 	if (vep->hosthdr != NULL) {
 		hosthdr_len = strlen(vep->hosthdr) + 1;
 		sz += hosthdr_len;
+	}
+	if (vep->ssl_ca_file != NULL) {
+		ssl_ca_file_len = strlen(vep->ssl_ca_file) + 1;
+		sz += ssl_ca_file_len;
 	}
 	if (vep->preamble != NULL && vep->preamble->len) {
 		sz += sizeof(*blob);
@@ -1231,6 +1236,11 @@ VRT_Endpoint_Clone(const struct vrt_endpoint * const vep)
 		memcpy(p, vep->hosthdr, hosthdr_len);
 		nvep->hosthdr = p;
 		p += hosthdr_len;
+	}
+	if (ssl_ca_file_len) {
+		memcpy(p, vep->ssl_ca_file, ssl_ca_file_len);
+		nvep->ssl_ca_file = p;
+		p += ssl_ca_file_len;
 	}
 	nvep->sslflags = vep->sslflags;
 	assert(p == e);
