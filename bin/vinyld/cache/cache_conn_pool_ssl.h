@@ -39,7 +39,7 @@ void *BSSL_new_ssl_ctx(void);
 void BSSL_free_ssl_ctx(void *ctx);
 
 struct vtls_sess *bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
-    unsigned ssl_flags, const char *ssl_sniname);
+    unsigned ssl_flags, const char *ssl_sniname, void *ssl_ctx);
 void bssl_vtp_fini(struct vtls_sess **ptsp);
 void bssl_vtp_begin(struct pool *pp, struct vtls_sess *tsp, struct vsl_log *vsl);
 void bssl_vtp_end(struct vtls_sess *tsp);
