@@ -898,7 +898,14 @@ VRT_new_backend_clustered(VRT_CTX, struct vsmw_cluster *vc,
 
 	AN(vep);
 	be->conn_pool = VCP_Ref(vep, vbe_proto_ident);
-	AN(be->conn_pool);
+	if (be->conn_pool == NULL) {
+		VRT_fail(ctx, "%s: Connection pool init failed",
+		    vrt->vcl_name);
+		VSC_vbe_Destroy(&be->vsc_seg);
+		free(be->endpoint);
+		FREE_OBJ(be);
+		return (NULL);
+	}
 
 	vbp = vrt->probe;
 	if (vbp == NULL)

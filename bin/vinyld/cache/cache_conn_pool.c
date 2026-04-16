@@ -86,6 +86,8 @@ typedef void cp_begin_f(struct pool *, struct pfd *, struct vsl_log *);
 typedef void cp_end_f(struct pfd *);
 typedef const struct vco *cp_oper_f(struct pfd *, void **);
 typedef void cp_name_f(const struct pfd *, char *, unsigned, char *, unsigned);
+typedef void *cp_init_f(const struct vrt_endpoint *);
+typedef void cp_fini_f(void *);
 
 struct cp_methods {
 	cp_open_f				*open;
@@ -95,6 +97,8 @@ struct cp_methods {
 	cp_oper_f				*oper;
 	cp_name_f				*local_name;
 	cp_name_f				*remote_name;
+	cp_init_f				*init;
+	cp_fini_f				*fini;
 };
 
 struct conn_pool {
@@ -102,6 +106,7 @@ struct conn_pool {
 #define CONN_POOL_MAGIC				0x85099bc3
 
 	const struct cp_methods			*methods;
+	void					*priv;
 
 	struct vrt_endpoint			*endpoint;
 	char					ident[VSHA256_DIGEST_LENGTH];
@@ -278,6 +283,8 @@ vcp_destroy(struct conn_pool **cpp)
 	AZ(cp->n_conn);
 	AZ(cp->n_kill);
 	Lck_Delete(&cp->mtx);
+	if (cp->methods->fini != NULL)
+		cp->methods->fini(cp->priv);
 	FREE_OBJ(cp->endpoint);
 	FREE_OBJ(cp);
 }
@@ -1009,6 +1016,14 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident)
 		cp->methods = &bssl_methods;
 	else
 		cp->methods = &vtp_methods;
+	if (cp->methods->init != NULL) {
+		cp->priv = cp->methods->init(vep);
+		if (cp->priv == NULL) {
+			FREE_OBJ(cp->endpoint);
+			FREE_OBJ(cp);
+			return (NULL);
+		}
+	}
 	Lck_New(&cp->mtx, lck_conn_pool);
 	VTAILQ_INIT(&cp->connlist);
 
