@@ -61,6 +61,8 @@ BSSL_new_ssl_ctx(const struct vrt_endpoint *vep)
 	struct bssl_ctx *bctx;
 	SSL_CTX *ctx;
 	X509_VERIFY_PARAM *vpm;
+	unsigned long e;
+	char buf[256];
 
 	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
 
@@ -74,8 +76,22 @@ BSSL_new_ssl_ctx(const struct vrt_endpoint *vep)
 	 */
 	(void)SSL_CTX_set_options(ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
 #endif
-	AN(bssl_default_ca_store);
-	SSL_CTX_set1_cert_store(ctx, bssl_default_ca_store);
+	if (vep->ssl_ca_file != NULL) {
+		if (!SSL_CTX_load_verify_locations(ctx, vep->ssl_ca_file,
+		    NULL)) {
+			while ((e = ERR_get_error())) {
+				ERR_error_string_n(e, buf, sizeof buf);
+				VSL(SLT_Error, NO_VXID,
+				    "ssl_ca_file %s: %s",
+				    vep->ssl_ca_file, buf);
+			}
+			SSL_CTX_free(ctx);
+			return (NULL);
+		}
+	} else {
+		AN(bssl_default_ca_store);
+		SSL_CTX_set1_cert_store(ctx, bssl_default_ca_store);
+	}
 
 	if (vep->sslflags & BSSL_F_NOVERIFY)
 		(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);

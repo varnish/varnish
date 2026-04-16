@@ -1012,6 +1012,11 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident)
 				VSHA256_Update(cx, vep->hosthdr,
 				    strlen(vep->hosthdr));
 			}
+			if (vep->ssl_ca_file != NULL) {
+				VSHA256_Update(cx, "CAF", 4);
+				VSHA256_Update(cx, vep->ssl_ca_file,
+				    strlen(vep->ssl_ca_file));
+			}
 		}
 	}
 	CHECK_OBJ_ORNULL(vep->preamble, VRT_BLOB_MAGIC);

@@ -391,6 +391,7 @@ vcc_ParseHostDef(struct vcc *tl, struct symbol *sym,
 	const struct token *t_preamble = NULL;
 	const struct token *t_ssl = NULL;
 	struct token *t_sni = NULL;
+	const struct token *t_ssl_ca_file = NULL;
 	struct token *t_verify_peer = NULL;
 	struct symbol *pb;
 	struct fld_spec *fs;
@@ -455,6 +456,7 @@ vcc_ParseHostDef(struct vcc *tl, struct symbol *sym,
 	    "?ssl_noverify",
 	    "?ssl_verify_peer",
 	    "?ssl_verify_host",
+	    "?ssl_ca_file",
 	    NULL);
 
 	tl->fb = VSB_new_auto();
@@ -689,6 +691,12 @@ vcc_ParseHostDef(struct vcc *tl, struct symbol *sym,
 				sslflags |= BSSL_F_VERIFY_HOST;
 			else
 				sslflags &= ~BSSL_F_VERIFY_HOST;
+		} else if (vcc_IdIs(t_field, "ssl_ca_file")) {
+			ExpectErr(tl, CSTR);
+			assert(tl->t->dec != NULL);
+			t_ssl_ca_file = tl->t;
+			vcc_NextToken(tl);
+			SkipToken(tl, ';');
 		} else {
 			ErrInternal(tl);
 			VSB_destroy(&tl->fb);
@@ -738,6 +746,11 @@ vcc_ParseHostDef(struct vcc *tl, struct symbol *sym,
 			    " without .ssl enabled\n");
 			vcc_ErrWhere(tl, t_ssl);
 		}
+		if (t_ssl_ca_file != NULL) {
+			VSB_cat(tl->sb, ".ssl_ca_file can not be used"
+			    " without .ssl enabled\n");
+			vcc_ErrWhere(tl, t_ssl_ca_file);
+		}
 		sslflags = 0;
 	}
 
@@ -774,6 +787,12 @@ vcc_ParseHostDef(struct vcc *tl, struct symbol *sym,
 			VSB_quote(vsb1, t_host->dec, -1, VSB_QUOTE_CSTR);
 		else
 			VSB_cat(vsb1, "\"0.0.0.0\"");
+		VSB_cat(vsb1, ",\n");
+	}
+
+	if (t_ssl_ca_file != NULL) {
+		VSB_cat(vsb1, "\t.ssl_ca_file = ");
+		VSB_quote(vsb1, t_ssl_ca_file->dec, -1, VSB_QUOTE_CSTR);
 		VSB_cat(vsb1, ",\n");
 	}
 
