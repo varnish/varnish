@@ -53,11 +53,14 @@ struct bssl_ctx {
 
 static X509_STORE	*bssl_default_ca_store;
 
+static int bssl_vfy_cb(int, X509_STORE_CTX *);
+
 void *
-BSSL_new_ssl_ctx(void)
+BSSL_new_ssl_ctx(unsigned sslflags, const char *hosthdr)
 {
 	struct bssl_ctx *bctx;
 	SSL_CTX *ctx;
+	X509_VERIFY_PARAM *vpm;
 
 	ctx = SSL_CTX_new(TLS_client_method());
 	if (ctx == NULL)
@@ -71,7 +74,20 @@ BSSL_new_ssl_ctx(void)
 #endif
 	AN(bssl_default_ca_store);
 	SSL_CTX_set1_cert_store(ctx, bssl_default_ca_store);
-	(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+
+	if (sslflags & BSSL_F_NOVERIFY)
+		(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+	else
+		(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER,
+		    bssl_vfy_cb);
+
+	if (sslflags & BSSL_F_VERIFY_HOST) {
+		vpm = SSL_CTX_get0_param(ctx);
+		AN(vpm);
+		AN(X509_VERIFY_PARAM_set1_host(vpm, hosthdr, 0));
+		X509_VERIFY_PARAM_set_hostflags(vpm,
+		    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT);
+	}
 
 	ALLOC_OBJ(bctx, BSSL_CTX_MAGIC);
 	AN(bctx);
@@ -145,7 +161,6 @@ bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
 {
 	struct bssl_ctx *bctx;
 	struct vtls_sess *tsp;
-	X509_VERIFY_PARAM *vpm;
 	int i;
 
 	CAST_OBJ_NOTNULL(bctx, priv, BSSL_CTX_MAGIC);
@@ -178,19 +193,6 @@ bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
 			bssl_sess_free(&tsp);
 			return (NULL);
 		}
-	}
-
-	if (ssl_flags & BSSL_F_NOVERIFY)
-		SSL_set_verify(tsp->ssl, SSL_VERIFY_NONE, NULL);
-	else
-		SSL_set_verify(tsp->ssl, SSL_VERIFY_PEER, bssl_vfy_cb);
-
-	if (ssl_flags & BSSL_F_VERIFY_HOST) {
-		vpm = SSL_get0_param(tsp->ssl);
-		AN(vpm);
-		AN(X509_VERIFY_PARAM_set1_host(vpm, ssl_sniname, 0));
-		X509_VERIFY_PARAM_set_hostflags(vpm,
-		    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT);
 	}
 
 	AN(SSL_set_fd(tsp->ssl, fd));

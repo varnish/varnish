@@ -941,13 +941,11 @@ vtp_bssl_oper(struct pfd *pfd, void **ppriv)
 }
 
 static void * v_matchproto_(cp_init_f)
-vtp_bssl_init(void)
+vtp_bssl_init(const struct vrt_endpoint *vep)
 {
-	void *p;
 
-	p = BSSL_new_ssl_ctx();
-	AN(p);
-	return (p);
+	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
+	return (BSSL_new_ssl_ctx(vep->sslflags, vep->hosthdr));
 }
 
 static void v_matchproto_(cp_fini_f)
