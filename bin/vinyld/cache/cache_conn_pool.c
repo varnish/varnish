@@ -886,7 +886,7 @@ vtp_bssl_open(const struct conn_pool *cp, vtim_dur tmo, VCL_IP *ap,
 
 	tsp = NULL;
 	if (tmo > 0)
-		tsp = bssl_vtp_init(s, tmo, vsl, vep->sslflags, vep->hosthdr);
+		tsp = bssl_sess_init(s, tmo, vsl, vep->sslflags, vep->hosthdr);
 
 	if (tsp == NULL) {
 		*ap = NULL;
