@@ -945,7 +945,7 @@ vtp_bssl_init(const struct vrt_endpoint *vep)
 {
 
 	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
-	return (BSSL_new_ssl_ctx(vep->sslflags, vep->hosthdr));
+	return (BSSL_new_ssl_ctx(vep));
 }
 
 static void v_matchproto_(cp_fini_f)
