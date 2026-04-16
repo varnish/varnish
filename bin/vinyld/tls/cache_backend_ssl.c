@@ -53,6 +53,43 @@ struct bssl_ctx {
 
 static struct bssl_ctx	*bssl_ctx;
 
+void *
+BSSL_new_ssl_ctx(void)
+{
+	struct bssl_ctx *bctx;
+	SSL_CTX *ctx;
+
+	ctx = SSL_CTX_new(TLS_client_method());
+	if (ctx == NULL)
+		return (NULL);
+#ifdef SSL_OP_IGNORE_UNEXPECTED_EOF
+	/*
+	 * Many backends close TCP without TLS close_notify.
+	 * Treat unexpected EOF as clean shutdown (OpenSSL 3.0+).
+	 */
+	(void)SSL_CTX_set_options(ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
+#endif
+	AN(SSL_CTX_set_default_verify_paths(ctx));
+	(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+
+	ALLOC_OBJ(bctx, BSSL_CTX_MAGIC);
+	AN(bctx);
+	bctx->ctx = ctx;
+	return (bctx);
+}
+
+void
+BSSL_free_ssl_ctx(void *p)
+{
+	struct bssl_ctx *bctx;
+
+	if (p == NULL)
+		return;
+	CAST_OBJ_NOTNULL(bctx, p, BSSL_CTX_MAGIC);
+	SSL_CTX_free(bctx->ctx);
+	FREE_OBJ(bctx);
+}
+
 void
 BSSL_Init(void)
 {
@@ -60,19 +97,8 @@ BSSL_Init(void)
 	ASSERT_CLI();
 	AZ(bssl_ctx);
 
-	ALLOC_OBJ(bssl_ctx, BSSL_CTX_MAGIC);
+	bssl_ctx = BSSL_new_ssl_ctx();
 	AN(bssl_ctx);
-	bssl_ctx->ctx = SSL_CTX_new(TLS_client_method());
-	AN(bssl_ctx->ctx);
-#ifdef SSL_OP_IGNORE_UNEXPECTED_EOF
-	/*
-	 * Many backends close TCP without TLS close_notify.
-	 * Treat unexpected EOF as clean shutdown (OpenSSL 3.0+).
-	 */
-	(void)SSL_CTX_set_options(bssl_ctx->ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
-#endif
-	AN(SSL_CTX_set_default_verify_paths(bssl_ctx->ctx));
-	(void)SSL_CTX_set_verify(bssl_ctx->ctx, SSL_VERIFY_PEER, NULL);
 }
 
 static void
