@@ -76,7 +76,7 @@ BSSL_Init(void)
 }
 
 static void
-bssl_vtp_free(struct vtls_sess **p_tsp)
+bssl_sess_free(struct vtls_sess **p_tsp)
 {
 	struct vtls_sess *tsp;
 
@@ -113,7 +113,7 @@ bssl_vfy_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 /*--------------------------------------------------------------------*/
 
 struct vtls_sess *
-bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
+bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
     unsigned ssl_flags, const char *ssl_sniname)
 {
 	struct vtls_sess *tsp;
@@ -137,7 +137,7 @@ bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
 	tsp->ssl = SSL_new(bssl_ctx->ctx);
 	if (tsp->ssl == NULL) {
 		VTLS_vsl_ssllog(tsp->log);
-		bssl_vtp_free(&tsp);
+		bssl_sess_free(&tsp);
 		return (NULL);
 	}
 
@@ -148,7 +148,7 @@ bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
 		i = SSL_set_tlsext_host_name(tsp->ssl, TRUST_ME(ssl_sniname));
 		if (!i) {
 			VTLS_vsl_sslerr(tsp->log, tsp->ssl, i);
-			bssl_vtp_free(&tsp);
+			bssl_sess_free(&tsp);
 			return (NULL);
 		}
 	}
@@ -172,7 +172,7 @@ bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
 	SSL_set_connect_state(tsp->ssl);
 
 	if (VTLS_do_handshake(tsp, fd, tmo)) {
-		bssl_vtp_free(&tsp);
+		bssl_sess_free(&tsp);
 		return (NULL);
 	}
 
@@ -190,7 +190,7 @@ bssl_vtp_fini(struct vtls_sess **ptsp)
 
 	TAKE_OBJ_NOTNULL(tsp, ptsp, VTLS_SESS_MAGIC);
 	AZ(tsp->log->vsl);
-	bssl_vtp_free(&tsp);
+	bssl_sess_free(&tsp);
 	AZ(tsp);
 	VTLS_flush_errors();
 }

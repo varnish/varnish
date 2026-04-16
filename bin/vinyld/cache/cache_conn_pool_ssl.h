@@ -36,7 +36,7 @@ struct vsl_log;
 
 void BSSL_Init(void);
 
-struct vtls_sess *bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
+struct vtls_sess *bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
     unsigned ssl_flags, const char *ssl_sniname);
 void bssl_vtp_fini(struct vtls_sess **ptsp);
 void bssl_vtp_begin(struct pool *pp, struct vtls_sess *tsp, struct vsl_log *vsl);
