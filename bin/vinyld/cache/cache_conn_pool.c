@@ -893,7 +893,8 @@ vtp_bssl_open(const struct conn_pool *cp, vtim_dur tmo, VCL_IP *ap,
 
 	tsp = NULL;
 	if (tmo > 0)
-		tsp = bssl_sess_init(s, tmo, vsl, vep->sslflags, vep->hosthdr);
+		tsp = bssl_sess_init(s, tmo, vsl, vep->sslflags,
+		    vep->hosthdr, cp->priv);
 
 	if (tsp == NULL) {
 		*ap = NULL;
@@ -939,6 +940,23 @@ vtp_bssl_oper(struct pfd *pfd, void **ppriv)
 	return (VTLS_conn_oper_backend(pfd->tls, ppriv));
 }
 
+static void * v_matchproto_(cp_init_f)
+vtp_bssl_init(void)
+{
+	void *p;
+
+	p = BSSL_new_ssl_ctx();
+	AN(p);
+	return (p);
+}
+
+static void v_matchproto_(cp_fini_f)
+vtp_bssl_fini(void *p)
+{
+
+	BSSL_free_ssl_ctx(p);
+}
+
 static const struct cp_methods bssl_methods = {
 	.open = vtp_bssl_open,
 	.close = vtp_bssl_close,
@@ -947,6 +965,8 @@ static const struct cp_methods bssl_methods = {
 	.oper = vtp_bssl_oper,
 	.local_name = vtp_local_name,	/* Borrow from VTP */
 	.remote_name = vtp_remote_name,	/* Borrow from VTP */
+	.init = vtp_bssl_init,
+	.fini = vtp_bssl_fini,
 };
 
 /*--------------------------------------------------------------------
