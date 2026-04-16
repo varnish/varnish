@@ -35,7 +35,7 @@ struct vtls_sess;
 struct vsl_log;
 
 void BSSL_Init(void);
-void *BSSL_new_ssl_ctx(void);
+void *BSSL_new_ssl_ctx(unsigned sslflags, const char *hosthdr);
 void BSSL_free_ssl_ctx(void *ctx);
 
 struct vtls_sess *bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
