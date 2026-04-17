@@ -891,28 +891,30 @@ VRT_Rollback(VRT_CTX, VCL_HTTP hp)
 VCL_VOID
 VRT_synth_strands(VRT_CTX, VCL_STRANDS s)
 {
-	struct vsb *vsb;
-	int i;
+	int i, hasnull = 0;
+	const char * const s_null = "(null)";
 
-	CAST_OBJ_NOTNULL(vsb, ctx->specific, VSB_MAGIC);
 	CHECK_OBJ_NOTNULL(s, STRANDS_MAGIC);
 	for (i = 0; i < s->n; i++) {
 		if (s->p[i] != NULL)
-			VSB_cat(vsb, s->p[i]);
-		else
-			VSB_cat(vsb, "(null)");
+			continue;
+		s->p[i] = s_null;
+		hasnull = 1;
+	}
+
+	VRT_l_resp_body(ctx, LBODY_ADD_STRING, NULL, s);
+	if (hasnull == 0)
+		return;
+	for (i = 0; i < s->n; i++) {
+		if (s->p[i] == s_null)
+			s->p[i] = NULL;
 	}
 }
 
 VCL_VOID
 VRT_synth_blob(VRT_CTX, VCL_BLOB b)
 {
-	struct vsb *vsb;
-	CAST_OBJ_NOTNULL(vsb, ctx->specific, VSB_MAGIC);
-
-	CHECK_OBJ_NOTNULL(b, VRT_BLOB_MAGIC);
-	if (b->len > 0 && b->blob != NULL)
-		VSB_bcat(vsb, b->blob, b->len);
+	VRT_l_resp_body(ctx, LBODY_SET_BLOB, NULL, b);
 }
 
 VCL_VOID
