@@ -371,10 +371,6 @@ cnt_synth(struct worker *wrk, struct req *req)
 	}
 	assert(wrk->vpi->handling == VCL_RET_DELIVER);
 
-	http_Unset(req->resp, H_Content_Length);
-	http_PrintfHeader(req->resp, "Content-Length: %zd",
-	    VSB_len(synth_body));
-
 	// also happens in cnt_transmit, but we need req->doclose earlier for VRB_Ignore
 	if (req->doclose == SC_NULL)
 		req->doclose = http_DoConnection(req->http, SC_REQ_CLOSE);
