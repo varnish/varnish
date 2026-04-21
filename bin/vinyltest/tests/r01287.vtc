@@ -1,4 +1,4 @@
-vtest "#1287 - check NULL as first pointer to VRT_synth_page"
+vtest "#1287 - check NULL as input to resp.body"
 
 server s1 {
 } -start
@@ -8,7 +8,7 @@ varnish v1 -vcl+backend {
 		return (synth(200, "OK"));
 	}
 	sub vcl_synth {
-		synthetic(resp.http.blank);
+		set resp.body = resp.http.blank;
 		return (deliver);
 	}
 } -start
@@ -17,5 +17,5 @@ client c1 {
 	txreq
 	rxresp
 	expect resp.status == 200
-	expect resp.body == "(null)"
+	expect resp.body == ""
 } -run

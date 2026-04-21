@@ -36,9 +36,9 @@ varnish v1 -vcl {
 	}
 	sub vcl_synth {
 		if (req.url ~ "synth") {
-			synthetic("hello");
+			set resp.body = "hello";
 			if (req.url ~ "add") {
-				synthetic("world");
+				set resp.body += "world";
 			}
 		}
 		if (req.url ~ "string") {
