@@ -59,6 +59,10 @@
  *
  * 22.2 (trunk)
  *	struct vrt_endpoint.ssl_ca_file added
+ *	VRT_synth_strands() removed
+ *	VRT_synth_blob() removed
+ *	VRT_synth_page() removed
+ *	VRT_Stv() removed
  * 22.1
  *	"vcl_name" member added to vrt_backend_probe{}
  *	VRT_PROBE_string() added
@@ -832,10 +836,6 @@ VCL_VOID VRT_hashdata(VRT_CTX, VCL_STRANDS);
 
 VCL_VOID VRT_Rollback(VRT_CTX, VCL_HTTP);
 
-/* Synthetic pages */
-VCL_VOID VRT_synth_strands(VRT_CTX, VCL_STRANDS);
-VCL_VOID VRT_synth_blob(VRT_CTX, VCL_BLOB);
-
 /***********************************************************************
  * VDI - Director API
  */
@@ -941,10 +941,3 @@ void VRT_VCL_Allow_Cold(struct vclref **);
 
 struct vclref * VRT_VCL_Prevent_Discard(VRT_CTX, const char *);
 void VRT_VCL_Allow_Discard(struct vclref **);
-
-/***********************************************************************
- * Deprecated interfaces, do not use, they will disappear at some point.
- */
-
-VCL_VOID VRT_synth_page(VRT_CTX, VCL_STRANDS);
-int VRT_Stv(const char *nm);
