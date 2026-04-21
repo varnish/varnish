@@ -104,6 +104,30 @@ smd_max_extend(struct worker *wrk, struct objcore *oc, ssize_t l)
 	SML_methods.objextend(wrk, oc, l);
 }
 
+/* full storage can't get space, can't alloc objects */
+static int v_matchproto_(objgetspace_f)
+smd_full_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
+    uint8_t **ptr)
+{
+	(void)wrk;
+	(void)oc;
+	(void)sz;
+	(void)ptr;
+
+	return (0);
+}
+static int v_matchproto_(storage_allocobj_f)
+smd_full_allocobj(struct worker *wrk, const struct stevedore *stv,
+    struct objcore *oc, unsigned len)
+{
+	(void)wrk;
+	(void)stv;
+	(void)oc;
+	(void)len;
+
+	return (0);
+}
+
 #define dur_arg(a, s, d)					\
 	(! strncmp((a), (s), strlen(s))				\
 	 && (d = VNUM_duration(a + strlen(s))) != nan(""))
@@ -141,6 +165,7 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 {
 	struct obj_methods *methods;
 	objgetspace_f *getspace = NULL;
+	storage_allocobj_f *allocobj = NULL;
 	const char *ident;
 	int i, ac = 0;
 	size_t nac;
@@ -169,6 +194,16 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	for (i = 0; i < aac; i++) {
 		a = aav[i];
 		if (a != NULL) {
+			if (! strcmp(a, "full")) {
+				if (getspace != NULL) {
+					ARGV_ERR("-s%s conflicting options\n",
+					    smd_stevedore.name);
+				}
+				getspace = smd_full_getspace;
+				AZ(allocobj);
+				allocobj = smd_full_allocobj;
+				continue;
+			}
 			if (! strcmp(a, "lessspace")) {
 				if (getspace != NULL) {
 					ARGV_ERR("-s%s conflicting options\n",
@@ -204,6 +239,8 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 
 	if (getspace != NULL)
 		methods->objgetspace = getspace;
+	if (allocobj != NULL)
+		parent->allocobj = allocobj;
 
 	sma_stevedore.init(parent, ac, av);
 	free(av);

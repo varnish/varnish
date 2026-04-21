@@ -1,20 +1,9 @@
 vtest "Reading resp.storage null deref when Synth storage exhausted"
 
-server s1 {
-	rxreq
-	expect req.url == "/fill"
-	txresp -bodylen 1048290
-} -start
-
-varnish v1 -arg "-p nuke_limit=0" -arg "-sSynth=default,1m" -vcl+backend {
+varnish v1 -arg "-sSynth=debug,full" -vcl+backend {
+	backend none none;
 	sub vcl_recv {
-		if (req.url == "/synth") {
-			return (synth(200));
-		}
-	}
-	sub vcl_backend_response {
-		set beresp.do_stream = false;
-		set beresp.storage = storage.Synth;
+		return (synth(200));
 	}
 	sub vcl_synth {
 		set resp.http.X-Storage = resp.storage;
@@ -23,16 +12,8 @@ varnish v1 -arg "-p nuke_limit=0" -arg "-sSynth=default,1m" -vcl+backend {
 	}
 } -start
 
-client c1 {
-	txreq -url "/fill"
-	rxresp
-	expect resp.status == 200
-} -run
-
-varnish v1 -expect SMA.Synth.g_space < 200
-
 client c2 {
-	txreq -url "/synth"
+	txreq
 	rxresp
 	expect resp.status == 500
 } -run
