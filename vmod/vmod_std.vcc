@@ -200,7 +200,7 @@ For binary files, use std.blobread() instead.
 
 Example::
 
-	synthetic("Response was served by " + std.fileread("/etc/hostname"));
+	set resp.body = "Response was served by " + std.fileread("/etc/hostname");
 
 Consider that the entire contents of the file appear in the string
 that is returned, including newlines that may result in invalid
