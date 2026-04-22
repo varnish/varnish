@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2019, 2021 Varnish Software AS
+# Copyright (c) 2019-2026 Varnish Software AS
 # All rights reserved.
 #
 # Author: Dridi Boukelmoune <dridi.boukelmoune@gmail.com>
