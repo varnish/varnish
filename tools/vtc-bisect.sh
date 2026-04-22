@@ -53,8 +53,9 @@ usage() {
 
 	Environment variables:
 
-	CONFIGURE_OPTS : additional options for the configure script
-	MAKE_OPTS      : additional options for make(1) executions
+	CONFIGURE_OPTS   : additional options for the configure script
+	MAKE_OPTS        : additional options for make(1) executions
+	VARNISHTEST_OPTS : additional options for varnishtest executions
 
 	When <file> is empty or missing, bisect.vtc is expected to be found
 	at the root of the git repository. The current source tree is used
@@ -78,6 +79,8 @@ build() {
 }
 
 run() {
+	set +e
+
 	if build
 	then
 		# ignore unfortunate build-time modifications of srcdir
@@ -87,12 +90,10 @@ run() {
 		exit 125
 	fi
 
-	if [ -n "$INVERSE" ]
-	then
-		! bin/varnishtest/varnishtest -i "$VTC_FILE"
-	else
-		bin/varnishtest/varnishtest -i "$VTC_FILE"
-	fi
+	bin/varnishtest/varnishtest -i ${VARNISHTEST_OPTS:-} -- "$VTC_FILE"
+	TEST_RESULT=$?
+
+	test "$TEST_RESULT" ${INVERSE:+!}= 0
 	exit $?
 }
 
