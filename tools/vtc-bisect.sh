@@ -66,9 +66,19 @@ usage() {
 	This is useful to track a bug that was fixed without being noticed.
 
 	This script is expected to run from the root of the git repository
-	as well.
+	as well. The working copy may be dirty, in which case it will be
+	stashed and reapplied at each step, but it may prevent git-bisect
+	from checking a commit out if the dirty diff conflicts.
 	EOF
 	exit $#
+}
+
+stash() {
+	if $BISECT_DIRTY
+	then
+		git stash push -q
+		git stash apply -q
+	fi
 }
 
 build() {
@@ -78,20 +88,27 @@ build() {
 	}
 }
 
+clean() {
+	# ignore unfortunate build-time modifications of srcdir
+	git checkout -- .
+	$BISECT_DIRTY && git stash pop -q
+}
+
 run() {
 	set +e
 
-	if build
+	stash
+
+	if ! build
 	then
-		# ignore unfortunate build-time modifications of srcdir
-		git checkout -- .
-	else
-		git checkout -- .
-		exit 125
+		clean
+		exit 125 # tell git-bisect this commit cannot be tested
 	fi
 
 	bin/varnishtest/varnishtest -i ${VARNISHTEST_OPTS:-} -- "$VTC_FILE"
 	TEST_RESULT=$?
+
+	clean
 
 	test "$TEST_RESULT" ${INVERSE:+!}= 0
 	exit $?
@@ -99,6 +116,7 @@ run() {
 
 BISECT_GOOD=
 BISECT_BAD=
+BISECT_DIRTY=true
 MAKE_JOBS=
 INVERSE=
 RUN_MODE=false
@@ -125,6 +143,12 @@ test $# -eq 1 && VTC_FILE=$1
 BISECT_BAD=${BISECT_BAD:-HEAD}
 MAKE_JOBS=${MAKE_JOBS:-8}
 VTC_FILE=${VTC_FILE:-bisect.vtc}
+
+if git diff --quiet && git diff --quiet --cached
+then
+	# Unknown files are ignored on purpose, it would catch bisect.vtc
+	BISECT_DIRTY=false
+fi
 
 # run mode short circuit
 "$RUN_MODE" && run
