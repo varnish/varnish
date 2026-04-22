@@ -158,7 +158,8 @@ test -n "$BISECT_GOOD" || BISECT_GOOD=$(git describe --abbrev=0 "$BISECT_BAD")
 # bisect mode
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
-readonly TMP_DIR=$(mktemp -d)
+TMP_DIR=$(mktemp -d)
+readonly TMP_DIR
 
 trap 'rm -rf $TMP_DIR' EXIT
 
