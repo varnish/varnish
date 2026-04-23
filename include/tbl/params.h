@@ -1918,14 +1918,24 @@ PARAM_STRING(
 	/* priv */	&mgt_vcl_path,
 	/* def */	VARNISH_VCL_DIR,
 	/* descr */
-	"Directory (or colon separated list of directories) "
-	"from which relative VCL filenames (vcl.load and "
-	"include) are to be found.  By default Varnish searches "
-	"VCL files in both the system configuration and shared "
-	"data directories to allow packages to drop their VCL "
-	"files in a standard location where relative includes "
-	"would work. Includes using +glob cannot be searched "
-	"in vcl_path.",
+	"Directory (or colon separated list of directories) from "
+	"which relative VCL filenames (vcl.load and include) are "
+	"to be found.  Includes using +glob cannot be searched "
+	"in vcl_path.\n\n"
+	"The actual default value of vcl_path depends on the build "
+	"configuration.  It offers standardized directories for VCL "
+	"installation for packages and operators.\n\n"
+	"In the second component ${datadir} expands to a directory "
+	"like /usr/share for packaged VCL.  This is where a VMOD or "
+	"VEXT may install companion VCL, available directly as a "
+	"relative include.\n\n"
+	"In the first component ${sysconfdir} expands to a directory "
+	"like /etc for operations.  This is where system administrators "
+	"may install VCL files.\n\n"
+	"If a VCL file installed under ${datadir}/varnish/vcl must be "
+	"locally patched, a file with the same name can be created "
+	"under ${sysconfdir}/varnish to override it without interfering "
+	"with the package that installed the original one.",
 	/* flags */	BUILD_OPTIONS,
 	/* dyn_min_reason */	NULL,
 	/* dyn_max_reason */	NULL,
