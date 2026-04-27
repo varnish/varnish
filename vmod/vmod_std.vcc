@@ -45,7 +45,7 @@ Numeric functions
 
 $Function REAL random(REAL lo, REAL hi)
 
-Returns a random real number from the unique distribution between *lo*
+Returns a random real number from the uniform distribution between *lo*
 (inclusive) and *hi* (exclusive), in other words, from the half-closed,
 half-open interval [*lo*, *hi*).
 
