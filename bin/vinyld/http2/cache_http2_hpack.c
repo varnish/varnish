@@ -292,6 +292,7 @@ h2h_decode_hdr_init(struct h2_sess *h2, struct h2_req *r2)
 	else
 		d->limit = cache_param->h2_max_header_list_size;
 
+	//  d->limit < cache_param->http_req_size
 	if (d->limit < h2->local_settings.max_header_list_size)
 		d->limit = INT64_MAX;
 }
