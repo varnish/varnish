@@ -359,6 +359,12 @@ V1F_Setup_Fetch(struct vfp_ctx *vfc, struct http_conn *htc)
 	CHECK_OBJ_NOTNULL(vfc, VFP_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(htc, HTTP_CONN_MAGIC);
 
+	AN(htc->ws);
+	AZ(htc->ws->r);
+
+	AZ(htc->rxbuf_b);
+	AZ(htc->rxbuf_e);
+
 	if (htc->body_status == BS_EOF) {
 		assert(htc->content_length == -1);
 		vfe = VFP_Push(vfc, &v1f_eof);

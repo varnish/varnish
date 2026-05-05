@@ -261,6 +261,8 @@ V1F_FetchRespHdr(struct busyobj *bo)
 
 	i = HTTP1_DissectResponse(htc, hp, bo->bereq);
 	bo->acct.beresp_hdrbytes += htc->rxbuf_e - htc->rxbuf_b;
+	htc->rxbuf_b = NULL;
+	htc->rxbuf_e = NULL;
 	if (i) {
 		VSLb(bo->vsl, SLT_FetchError, "http format error");
 		htc->doclose = SC_RX_JUNK;
