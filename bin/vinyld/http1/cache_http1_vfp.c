@@ -119,7 +119,248 @@ v1f_rxbuf_read(const struct vfp_ctx *vc, struct http_conn *htc)
 
 #ifdef TEST_DRIVER
 
+/*--------------------------------------------------------------------
+ * Parse a chunk tail in the pipeline and return status as appropriate
+ */
+struct pct { const char *msg; };
+
+static struct pct pct_more[]	= {{"tail more"}};
+static struct pct pct_nonl[]	= {{"chunked tail no NL"}};
+
+// the unused parameter is to simplify the macro calling different parsers
+static struct pct *
+v1f_parse_chunked_tail(char *b, const char *e, void *unused, char **nextp)
+{
+	AN(b);
+	AN(e);
+	(void)unused;
+	AN(nextp);
+
+	if (b == e)
+		return (pct_more);
+	if (*b == '\r')
+		b++;
+	if (b == e)
+		return (pct_more);
+	if (*b != '\n')
+		return (pct_nonl);
+	b++;
+
+	*nextp = b;
+	return (NULL);
+}
+
+
+/*--------------------------------------------------------------------
+ * Parse a chunk header in the pipeline and return status as appropriate
+ */
+
+struct pch { const char *msg; };
+
+static struct pch pch_more[]	= {{"more"}};
+static struct pch pch_nonhex[]	= {{"chunked header non-hex"}};
+static struct pch pch_nonl[]	= {{"chunked header no NL"}};
+static struct pch pch_syntax[]	= {{"chunked header number syntax"}}; // can't happen?
+static struct pch pch_large[]	= {{"bogusly large chunk size"}};
+
+static struct pch *
+v1f_parse_chunked_hdr(char *b, const char *e, ssize_t *szp, char **nextp)
+{
+	char *hb, *he, *q, s;
+	uintmax_t cll;
+	ssize_t cl;
+
+	AN(b);
+	AN(e);
+	AN(szp);
+	AN(nextp);
+
+	/* Skip leading whitespace */
+	while (b < e && vct_isows(*b))
+		b++;
+	if (b == e)
+		return (pch_more);
+	if (!vct_ishex(*b))
+		return (pch_nonhex);
+	/* Skip leading zeros */
+	while (b < e - 1 && b[0] == '0' && b[1] == '0')
+		b++;
+	if (b == e)
+		return (pch_more);
+	hb = b;
+	/* Collect hex digits */
+	while (b < e && vct_ishex(*b))
+		b++;
+	if (b == e)
+		return (pch_more);
+	he = b;
+	/* Skip trailing whitespace.
+	 * XXX extension support missing https://httpwg.org/specs/rfc9112.html#chunked.extension
+	 */
+	while (b < e && vct_isows(*b))
+		b++;
+	if (b == e)
+		return (pch_more);
+	if (*b == '\r')
+		b++;
+	if (b == e)
+		return (pch_more);
+	if (*b != '\n')
+		return (pch_nonl);
+	b++;
+
+	errno = 0;
+	s = *he;
+	*he = '\0';
+	cll = strtoumax(hb, &q, 16);
+	// restore original for debug-/testability
+	*he = s;
+
+	if (q == NULL || q != he)
+		return (pch_syntax);
+
+	cl = (ssize_t)cll;
+	if (cl < 0 || (uintmax_t)cl != cll)
+		return (pch_large);
+
+	// for a number larger than ULLONG_MAX, strtoumax() returns
+	// ULLONG_MAX and sets errno to ERANGE. We catch this with the above
+	// check already, but assert that we really do
+	AZ(errno);
+
+	*szp = cl;
+	*nextp = b;
+	return (NULL);
+}
+
+#include <stdlib.h>
 #include <stdio.h>
+
+// positive test cases have three constituents, we permutate all of them
+static const char *t_ok_pre[] = {
+	"",
+	" ",
+	"\t",
+	" \t0",
+	"00"
+};
+
+static const uintmax_t t_ok_sz[] = {
+	0,
+	1,
+	0xa,
+	0x10,
+	0xaffe,
+	SSIZE_MAX
+};
+
+static const char *t_ok_post[] = {
+	"\r\n",
+	"\n",
+	" \r\n",
+	" \t\n",
+};
+
+static const char *t_ok_next[] = {
+	"",
+	"\r\n",
+	"\n",
+	"GET",
+	"\r\n01234567",
+};
+
+struct pch_neg {
+	struct pch *r;
+	const char *hdr;
+};
+
+// negative tests
+static struct pch_neg t_neg[] = {
+	{pch_more, ""},
+	{pch_more, "\t "},
+
+	{pch_nonhex, "x"},
+	{pch_nonhex, " x"},
+	{pch_nonhex, "\n"},
+	{pch_nonhex, "\r"},
+
+	{pch_more, "000"},
+	{pch_more, "affe"},
+	{pch_more, " a\r"},
+
+	{pch_nonl, " a\rx"},
+	{pch_nonl, " ax"},
+
+	{pch_large, "8000000000000000\r\n"},
+	{pch_large, "800000000000000000000000\r\n"},
+};
+
+// tail
+static const char *t_ok_tail[] = {
+	"\r\n",
+	"\n",
+};
+
+static const char *t_ok_tail_next[] = {
+	"",
+	"0123",
+};
+
+struct pct_neg {
+	struct pct *r;
+	const char *hdr;
+};
+
+static struct pct_neg t_neg_tail[] = {
+	{pct_more, "\r"},
+	{pct_nonl, "\rx"},
+};
+
+
+static void
+t_parse_chunked_hdr(char *b, char *e,
+    const struct pch *r_exp, ssize_t sz_exp, const char *next_exp)
+{
+	const struct pch *r;
+	char *next = NULL;
+	ssize_t sz = -1;
+	r = v1f_parse_chunked_hdr(b, e, &sz, &next);
+#ifdef DEBUG
+	printf("r = %s, sz = 0x%zx, n = %s\n", r ? r->msg : "NULL", sz,
+	    next ? next : "NULL");
+#endif
+	assert(r == r_exp);
+	assert(sz == sz_exp);
+	assert(next == next_exp);
+}
+
+static void
+t_parse_chunked_hdr_err(char *b, char *e, const struct pch *err)
+{
+	t_parse_chunked_hdr(b, e, err, -1, NULL);
+}
+
+static void
+t_parse_chunked_hdr_ok(char *b, char *e,
+    ssize_t sz_exp, const char *next_exp)
+{
+	t_parse_chunked_hdr(b, e, NULL, sz_exp, next_exp);
+}
+
+static void
+t_parse_chunked_tail(char *b, char *e,
+    const struct pct *r_exp, const char *next_exp)
+{
+	const struct pct *r;
+	char *next = NULL;
+	r = v1f_parse_chunked_tail(b, e, NULL, &next);
+#ifdef DEBUG
+	printf("r = %s, n = %s\n", r ? r->msg : "NULL",
+	    next ? next : "NULL");
+#endif
+	assert(r == r_exp);
+	assert(next == next_exp);
+}
 
 void
 VSLbs(struct vsl_log *vsl, enum VSL_tag_e tag, const struct strands *s)
@@ -201,6 +442,73 @@ main(int argc, char *argv[])
 
 	printf("-- rxbuf_read\n");
 	t_rxbuf_read();
+
+	printf("-- head postitive test permutations\n");
+	// avoid nested loops
+	unsigned n_ok = vcountof(t_ok_pre) * vcountof(t_ok_sz) *
+	    vcountof(t_ok_post) * vcountof(t_ok_next);
+	char buf[80];
+	for (unsigned n = 0; n < n_ok; n++) {
+		unsigned n_pre = n % vcountof(t_ok_pre);
+		unsigned n_sz = n / vcountof(t_ok_pre);
+		unsigned n_post = n_sz / vcountof(t_ok_sz);
+		unsigned n_next = n_post / vcountof(t_ok_post);
+		n_sz %= vcountof(t_ok_sz);
+		n_post %= vcountof(t_ok_post);
+		assert(n_next < vcountof(t_ok_next));
+
+#ifdef DEBUG
+		printf("n_next=%u n_post=%u n_sz=%u n_pre=%u\n",
+		    n_next, n_post, n_sz, n_pre);
+#endif
+		bprintf(buf, "%s%jx%s%s", t_ok_pre[n_pre], t_ok_sz[n_sz],
+		    t_ok_post[n_post], t_ok_next[n_next]);
+
+		char *ee = buf + strlen(buf) - strlen(t_ok_next[n_next]);
+
+		for (char *e = buf; e < ee; e++)
+			t_parse_chunked_hdr_err(buf, e, pch_more);
+
+		t_parse_chunked_hdr_ok(buf, ee, t_ok_sz[n_sz], ee);
+	}
+
+	printf("-- head negative tests\n");
+	for (struct pch_neg *neg = t_neg; neg < t_neg + vcountof(t_neg); neg++) {
+		size_t l = strlen(neg->hdr);
+		assert(l < sizeof buf);
+
+		memcpy(buf, neg->hdr, l + 1);
+		char *e = buf + l;
+
+		t_parse_chunked_hdr_err(buf, e, neg->r);
+	}
+
+	printf("-- tail postitive test permutations\n");
+	n_ok = vcountof(t_ok_tail) * vcountof(t_ok_tail_next);
+	for (unsigned n = 0; n < n_ok; n++) {
+		unsigned n_tail = n % vcountof(t_ok_tail);
+		unsigned n_next = n / vcountof(t_ok_tail_next);
+		assert(n_next < vcountof(t_ok_tail_next));
+
+		bprintf(buf, "%s%s", t_ok_tail[n_tail], t_ok_tail_next[n_next]);
+		char *ee = buf + strlen(buf) - strlen(t_ok_tail_next[n_next]);
+
+		for (char *e = buf; e < ee; e++)
+			t_parse_chunked_tail(buf, e, pct_more, NULL);
+
+		t_parse_chunked_tail(buf, ee, NULL, ee);
+	}
+
+	printf("-- tail negative tests\n");
+	for (struct pct_neg *neg = t_neg_tail; neg < t_neg_tail + vcountof(t_neg_tail); neg++) {
+		size_t l = strlen(neg->hdr);
+		assert(l < sizeof buf);
+
+		memcpy(buf, neg->hdr, l + 1);
+		char *e = buf + l;
+
+		t_parse_chunked_tail(buf, e, neg->r, NULL);
+	}
 
 	printf("OK\n");
 	return (0);
