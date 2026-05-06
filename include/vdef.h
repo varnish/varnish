@@ -243,3 +243,19 @@ typedef struct {
 #define Tlen(t)		(pdiff((t).b, (t).e))
 #define Tstr(s)		(/*lint -e(446)*/ (txt){(s), (s) + strlen(s)})
 #define Tstreq(t, s)	(Tlen(t) == strlen(s) && !strncmp((t).b, (s), Tlen(t)))
+
+/**********************************************************************
+ * various optinal built-ins
+ *
+ * https://clang.llvm.org/docs/LanguageExtensions.html#builtin-functions
+ *
+ */
+#ifndef __has_builtin
+#  define __has_builtin(x) 0
+#endif
+
+#if __has_builtin(__builtin_memcmp)
+#  define vmemcmp(s1, s2, n) __builtin_memcmp(s1, s2, n)
+#else
+#  define vmemcmp(s1, s2, n) memcmp(s1, s2, n)
+#endif
