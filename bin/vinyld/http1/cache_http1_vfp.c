@@ -540,8 +540,42 @@ main(int argc, char *argv[])
  * Read up to len bytes, returning pipelined data first.
  */
 
+enum ahead {
+	NO_READ_AHEAD,
+	READ_AHEAD
+};
+
 static ssize_t
-v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
+v1f_readahead(struct http_conn *htc, unsigned char *p, ssize_t len)
+{
+	struct iovec iov[2];
+	ssize_t i;
+
+	AZ(htc->pipeline_b);
+	if (htc->rxbuf_b == NULL && v1f_rxbuf_init(htc)) {
+		errno = ENOMEM;
+		return (-ENOMEM);
+	}
+	AN(htc->rxbuf_b);
+
+	iov[0].iov_base = p;
+	iov[0].iov_len = len;
+	iov[1].iov_base = htc->rxbuf_b;
+	iov[1].iov_len = pdiff(htc->rxbuf_b, htc->rxbuf_e);
+
+	i = readv(*htc->rfd, iov, vcountof(iov));
+	if (i <= len)
+		return (i);
+	i -= len;
+	htc->pipeline_b = htc->rxbuf_b;
+	htc->pipeline_e = htc->rxbuf_b + i;
+
+	return (len);
+}
+
+static ssize_t
+v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len,
+    enum ahead ahead)
 {
 	ssize_t l;
 	unsigned char *p;
@@ -567,10 +601,15 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
 	if (len > 0) {
 		do {
 			errno = 0;
-			i = htc->oper->read(htc->oper_priv, *htc->rfd, p, len);
+			if (ahead == READ_AHEAD && htc->oper == VCO_default)
+				i = v1f_readahead(htc, p, len);
+			else
+				i = htc->oper->read(htc->oper_priv, *htc->rfd, p, len);
 		} while (i < 0 && errno == EINTR);
 		if (i < 0) {
-			VCO_Assert(htc->oper, i);
+			if (ahead == NO_READ_AHEAD || htc->oper != VCO_default ||
+			    i != -ENOMEM)
+				VCO_Assert(htc->oper, i);
 			VSLbs(vc->wrk->vsl, SLT_FetchError,
 			    TOSTRAND(VAS_errtxt(errno)));
 			return (i);
@@ -659,37 +698,6 @@ v1f_chunked_hdr(struct vfp_ctx *vc, struct http_conn *htc, ssize_t *szp)
 #undef CHUNKED_PARSER
 
 /*--------------------------------------------------------------------
- * Check if data is available
- */
-
-static int
-v1f_poll(const struct http_conn *htc)
-{
-	struct pollfd pfd[1];
-	int r;
-
-	CHECK_OBJ_NOTNULL(htc, HTTP_CONN_MAGIC);
-
-	if (htc->pipeline_b)
-		return (1);
-
-	pfd->fd = *htc->rfd;
-	pfd->events = POLLIN;
-
-	r = poll(pfd, 1, 0);
-	if (r < 0) {
-		assert(errno == EINTR);
-		return (0);
-	}
-	if (r == 0)
-		return (0);
-	assert(r == 1);
-	assert(pfd->revents & POLLIN);
-	return (1);
-}
-
-
-/*--------------------------------------------------------------------
  * Read a chunked HTTP object.
  *
  */
@@ -716,9 +724,11 @@ v1f_chunked_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *ptr,
 			return (vfps);
 	}
 	if (vfe->priv2 > 0) {
-		if (vfe->priv2 < l)
+		if (vfe->priv2 <= l) {
 			l = vfe->priv2;
-		lr = v1f_read(vc, htc, ptr, l);
+			lr = v1f_read(vc, htc, ptr, l, READ_AHEAD);
+		} else
+			lr = v1f_read(vc, htc, ptr, l, NO_READ_AHEAD);
 		if (lr <= 0)
 			return (VFP_Error(vc, "chunked insufficient bytes"));
 		*lp = lr;
@@ -732,13 +742,17 @@ v1f_chunked_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *ptr,
 		if (vfps != VFP_OK)
 			return (vfps);
 
-		/* only if some data of the next chunk header is available, read
-		 * it to check if we can return VFP_END */
-		if (! v1f_poll(htc))
+		/* opportunistically check for next chunk header read ahead */
+		if (! htc->pipeline_b)
 			return (VFP_OK);
-		vfps = v1f_chunked_hdr(vc, htc, &vfe->priv2);
-		if (vfps != VFP_OK)
-			return (vfps);
+
+		const struct pch *r = v1f_parse_chunked_hdr(
+		    htc->pipeline_b, htc->pipeline_e,
+		    &vfe->priv2, &htc->pipeline_b);
+		if (r == pch_more)
+			return (VFP_OK);
+		if (r != NULL)
+			return (VFP_Error(vc, "%s", r->msg));
 		if (vfe->priv2 != 0)
 			return (VFP_OK);
 	}
@@ -774,7 +788,7 @@ v1f_straight_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *p,
 	if (vfe->priv2 == 0) // XXX: Optimize Content-Len: 0 out earlier
 		return (VFP_END);
 	l = vmin(l, vfe->priv2);
-	lr = v1f_read(vc, htc, p, l);
+	lr = v1f_read(vc, htc, p, l, NO_READ_AHEAD);
 	if (lr <= 0)
 		return (VFP_Error(vc, "straight insufficient bytes"));
 	*lp = lr;
@@ -806,7 +820,7 @@ v1f_eof_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *p, ssize_t *lp)
 
 	l = *lp;
 	*lp = 0;
-	lr = v1f_read(vc, htc, p, l);
+	lr = v1f_read(vc, htc, p, l, NO_READ_AHEAD);
 	if (lr < 0)
 		return (VFP_Error(vc, "eof socket fail"));
 	if (lr == 0) {
