@@ -191,7 +191,7 @@ v1f_chunked_hdr(struct vfp_ctx *vc, struct http_conn *htc, ssize_t *szp)
  */
 
 static int
-v1f_poll(struct http_conn *htc)
+v1f_poll(const struct http_conn *htc)
 {
 	struct pollfd pfd[1];
 	int r;
