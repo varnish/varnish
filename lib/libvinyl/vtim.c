@@ -136,7 +136,7 @@ VTIM_mono(void)
 	struct timespec ts;
 
 	AZ(clock_gettime(CLOCK_MONOTONIC, &ts));
-	return (ts.tv_sec + 1e-9 * ts.tv_nsec);
+	return (ts_vtim(ts));
 #endif
 }
 
@@ -147,12 +147,12 @@ VTIM_real(void)
 	struct timespec ts;
 
 	AZ(clock_gettime(CLOCK_REALTIME, &ts));
-	return (ts.tv_sec + 1e-9 * ts.tv_nsec);
+	return (ts_vtim(ts));
 #else
 	struct timeval tv;
 
 	AZ(gettimeofday(&tv, NULL));
-	return (tv.tv_sec + 1e-6 * tv.tv_usec);
+	return (tv_vtim(tv));
 #endif
 }
 

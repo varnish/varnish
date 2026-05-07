@@ -42,3 +42,5 @@ struct timespec VTIM_timespec(vtim_dur t);
 struct timeval VTIM_timeval(vtim_dur t);
 struct timeval VTIM_timeval_sock(vtim_dur t);
 int VTIM_poll_tmo(vtim_dur);
+#define tv_vtim(tv) ((tv).tv_sec + 1e-6 * (tv).tv_usec)
+#define ts_vtim(ts) ((ts).tv_sec + 1e-9 * (ts).tv_nsec)
