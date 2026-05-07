@@ -18,9 +18,46 @@ server s1 {
 	send "00000004\r\n1234\r\n"
 	chunked "1234"
 	chunked ""
+
+	# read ahead of exactly 32 bytes chunked header (see v1f_rxbuf_init)
+	rxreq
+	expect req.url == "/32_1st"
+	send "HTTP/1.1 200 OK\r\nTransfer-encoding: chunked\r\n\r\n0000000000000000000000000000004\n1234\n"
+	chunkedlen 0
+
+	rxreq
+	expect req.url == "/32_2nd"
+	send "HTTP/1.1 200 OK\r\n"
+	send "Transfer-encoding: chunked\r\n"
+	send "\r\n"
+	chunkedlen 32768
+	send "0000000000000000000000000000004\n1234\n"
+	chunkedlen 0
+
+	# overlong chunk header read ahead after headers
+	rxreq
+	expect req.url == "/bazz"
+	send "HTTP/1.1 200 OK\r\n"
+	send "Transfer-encoding: chunked\r\n"
+	send "\r\n"
+	send "00000000000000000000000000000000000004"
+
+	accept
+	# overlong chunk header after first chunk
+	rxreq
+	expect req.url == "/bazz2"
+	send "HTTP/1.1 200 OK\r\n"
+	send "Transfer-encoding: chunked\r\n"
+	send "\r\n"
+	chunkedlen 32768
+	send "00000000000000000000000000000000000004"
 } -start
 
-varnish v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {
+	sub vcl_backend_response {
+		set beresp.do_stream = false;
+	}
+} -start
 
 client c1 {
 	txreq -url "/bar"
@@ -31,4 +68,20 @@ client c1 {
 	rxresp
 	expect resp.status == 200
 	expect resp.bodylen == "8"
+	txreq -url "/32_1st"
+	rxresp
+	expect resp.status == 200
+	expect resp.bodylen == "4"
+	txreq -url "/32_2nd"
+	rxresp
+	expect resp.status == 200
+	expect resp.bodylen == "32772"
+
+	txreq -url "/bazz"
+	rxresp
+	expect resp.status == 503
+
+	txreq -url "/bazz2"
+	rxresp
+	expect resp.status == 503
 } -run

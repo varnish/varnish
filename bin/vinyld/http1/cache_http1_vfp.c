@@ -48,8 +48,9 @@
 #include "vct.h"
 #include "vtcp.h"
 
+static const unsigned max_chunked_hdr = 32;	// adjust b00007.vtc if changed
+
 #ifndef TEST_DRIVER
-static const unsigned max_chunked_hdr = 32;
 static ssize_t
 v1f_rxbuf_init(struct http_conn *htc)
 {
@@ -70,7 +71,7 @@ v1f_rxbuf_init(struct http_conn *htc)
  * continue reading after it
  */
 static ssize_t
-v1f_rxbuf_read(const struct vfp_ctx *vc, struct http_conn *htc)
+v1f_rxbuf_read(struct http_conn *htc)
 {
 	ssize_t i;
 	size_t sz;
@@ -90,8 +91,11 @@ v1f_rxbuf_read(const struct vfp_ctx *vc, struct http_conn *htc)
 	else {
 		AN(htc->pipeline_e);
 		i = pdiff(htc->pipeline_b, htc->pipeline_e);
-		if (i == sz)
-			return (0);
+		if (i >= sz) {
+			// VTCP_Check(): can not originate from read()
+			errno = ENOBUFS;
+			return (-1);
+		}
 		assert(i >= 0);
 		assert((size_t)i < sz);
 		memmove(htc->rxbuf_b, htc->pipeline_b, i);
@@ -100,15 +104,12 @@ v1f_rxbuf_read(const struct vfp_ctx *vc, struct http_conn *htc)
 		p = htc->pipeline_e;
 		sz -= i;
 	}
-
 	do {
 		errno = 0;
 		i = htc->oper->read(htc->oper_priv, *htc->rfd, p, sz);
 	} while (i < 0 && errno == EINTR);
 	if (i < 0) {
 		VCO_Assert(htc->oper, i);
-		VSLbs(vc->wrk->vsl, SLT_FetchError,
-		    TOSTRAND(VAS_errtxt(errno)));
 		return (i);
 	}
 	htc->pipeline_e = p + i;
@@ -116,8 +117,6 @@ v1f_rxbuf_read(const struct vfp_ctx *vc, struct http_conn *htc)
 		 htc->pipeline_b = htc->pipeline_e = NULL;
 	return (i);
 }
-
-#ifdef TEST_DRIVER
 
 /*--------------------------------------------------------------------
  * Parse a chunk tail in the pipeline and return status as appropriate
@@ -162,9 +161,10 @@ static struct pch pch_nonhex[]	= {{"chunked header non-hex"}};
 static struct pch pch_nonl[]	= {{"chunked header no NL"}};
 static struct pch pch_syntax[]	= {{"chunked header number syntax"}}; // can't happen?
 static struct pch pch_large[]	= {{"bogusly large chunk size"}};
+static struct pch pch_toolong[]	= {{"chunked header too long"}};
 
 static struct pch *
-v1f_parse_chunked_hdr(char *b, const char *e, ssize_t *szp, char **nextp)
+v1f_parse_chunked_hdr_i(char *b, const char *e, ssize_t *szp, char **nextp)
 {
 	char *hb, *he, *q, s;
 	uintmax_t cll;
@@ -232,6 +232,25 @@ v1f_parse_chunked_hdr(char *b, const char *e, ssize_t *szp, char **nextp)
 	*nextp = b;
 	return (NULL);
 }
+
+// length check outside the actual parser for clarity
+static struct pch *
+v1f_parse_chunked_hdr(char *b, const char *e, ssize_t *szp, char **nextp)
+{
+	static struct pch *r;
+	const char *ee;
+
+	ee = vmin_t(const char *, e, b + max_chunked_hdr);
+
+	r = v1f_parse_chunked_hdr_i(b, ee, szp, nextp);
+
+	if (r == pch_more && e != ee)
+		return (pch_toolong);
+
+	return (r);
+}
+
+#ifdef TEST_DRIVER
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -390,7 +409,7 @@ static const struct vco t_vco = {
 
 /*
 static ssize_t
-v1f_rxbuf_read(const struct vfp_ctx *vc, struct http_conn *htc);
+v1f_rxbuf_read(struct http_conn *htc);
 */
 static void
 t_rxbuf_read(void) {
@@ -413,7 +432,7 @@ t_rxbuf_read(void) {
 	for (i = 0; i < strlen(data); i++) {
 		r = write(fd[1], data + i, 1);
 		assert(r == 1);
-		r = v1f_rxbuf_read(NULL, htc);
+		r = v1f_rxbuf_read(htc);
 		assert(r == 1);
 		size_t av = pdiff(htc->pipeline_b, htc->pipeline_e);
 		assert(av == i + 1);
@@ -428,7 +447,9 @@ t_rxbuf_read(void) {
 
 	}
 	// buffer is now full
-	AZ(v1f_rxbuf_read(NULL, htc));
+	r = v1f_rxbuf_read(htc);
+	assert(r == -1);
+	assert(errno == ENOBUFS);
 
 	close(fd[0]);
 	close(fd[1]);
@@ -531,19 +552,6 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
 	assert(len > 0);
 	l = 0;
 	p = d;
-	// XXX temp v1f_chunked_hdr caller signal
-	if (len == 1 && htc->pipeline_b == NULL && htc->rxbuf_b == NULL) {
-		i = v1f_rxbuf_init(htc);
-		if (i) {
-			VSLb(vc->wrk->vsl, SLT_FetchError, "No workspace for rxbuf");
-			return (i);
-		}
-	}
-	if (len == 1 && htc->pipeline_b == NULL && htc->rxbuf_b != NULL) {
-		i = v1f_rxbuf_read(vc, htc);
-		if (i < 0)
-			return (i);
-	}
 	i = 0;
 	if (htc->pipeline_b) {
 		l = htc->pipeline_e - htc->pipeline_b;
@@ -576,94 +584,79 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
 	return (i + l);
 }
 
-
-/*--------------------------------------------------------------------
- * read (CR)?LF at the end of a chunk
- */
 static enum vfp_status
-v1f_chunk_end(struct vfp_ctx *vc, struct http_conn *htc)
+v1f_ok(struct http_conn *htc)
 {
-	char c;
-
-	if (v1f_read(vc, htc, &c, 1) <= 0)
-		return (VFP_Error(vc, "chunked read err"));
-	if (c == '\r' && v1f_read(vc, htc, &c, 1) <= 0)
-		return (VFP_Error(vc, "chunked read err"));
-	if (c != '\n')
-		return (VFP_Error(vc, "chunked tail no NL"));
+	if ((htc)->pipeline_b == (htc)->pipeline_e)
+		(htc)->pipeline_b = (htc)->pipeline_e = NULL;
 	return (VFP_OK);
 }
 
 
 /*--------------------------------------------------------------------
- * Parse a chunk header and, for VFP_OK, return size in a pointer
+ * Call parser on pipeline:
+ * - If pipeline filled, try to return a parse result without reading
+ * - else read until either the rxbuf is filled, or we have a parse
  *
- * XXX: Reading one byte at a time is pretty pessimal.
+ * this is a macro because the code for calling the head and tail parser is
+ * _almost_ (but not quite) identical
+ */
+
+#define CHUNKED_PARSER(vc, htc, func, func_arg, more, what)			\
+										\
+	ssize_t sz;								\
+										\
+	if ((htc)->pipeline_b) {						\
+		r = func((htc)->pipeline_b, (htc)->pipeline_e,			\
+			func_arg, &(htc)->pipeline_b);				\
+		if (r == NULL)							\
+			return (v1f_ok(htc));					\
+		if (r != more)							\
+			return (VFP_Error(vc, "%s", r->msg));			\
+	}									\
+	if ((htc)->rxbuf_b == NULL && v1f_rxbuf_init(htc) != 0)			\
+		return (VFP_Error(vc, "No workspace for rxbuf"));		\
+	while ((sz = v1f_rxbuf_read(htc)) > 0) {				\
+		r = func((htc)->pipeline_b, (htc)->pipeline_e,			\
+		    func_arg, &(htc)->pipeline_b);				\
+		if (r == NULL)							\
+			return (v1f_ok(htc));					\
+		if (r == more)							\
+			continue;						\
+		VSLb((vc)->wrk->vsl, SLT_Debug, "%.*s",				\
+		    (int)pdiff((htc)->pipeline_b, (htc)->pipeline_e),		\
+		    (htc)->pipeline_b);						\
+		return (VFP_Error(vc, "%s", r->msg));				\
+	}									\
+	if (sz == 0)								\
+		return (VFP_Error(vc, "chunked " what " EOF"));			\
+	assert(sz < 0);								\
+	VSLbs(vc->wrk->vsl, SLT_FetchError, TOSTRAND(VAS_errtxt(errno)));	\
+	return (VFP_Error(vc, "^^^ error reading chunk " what));
+
+/*--------------------------------------------------------------------
+ * read (CR)?LF at the end of a chunk
+ */
+
+static enum vfp_status
+v1f_chunk_end(struct vfp_ctx *vc, struct http_conn *htc)
+{
+	const struct pct *r;
+	CHUNKED_PARSER(vc, htc, v1f_parse_chunked_tail, NULL, pct_more, "tail")
+}
+
+/*--------------------------------------------------------------------
+ * Parse a chunk header and, for VFP_OK, return size in a pointer
  */
 
 static enum vfp_status
 v1f_chunked_hdr(struct vfp_ctx *vc, struct http_conn *htc, ssize_t *szp)
 {
-	char buf[20];		/* XXX: 20 is arbitrary */
-	unsigned u;
-	uintmax_t cll;
-	ssize_t cl, lr;
-	char *q;
-
-	CHECK_OBJ_NOTNULL(vc, VFP_CTX_MAGIC);
-	CHECK_OBJ_NOTNULL(htc, HTTP_CONN_MAGIC);
-	AN(szp);
-	assert(*szp == -1);
-
-	/* Skip leading whitespace */
-	do {
-		lr = v1f_read(vc, htc, buf, 1);
-		if (lr <= 0)
-			return (VFP_Error(vc, "chunked read err"));
-	} while (vct_isows(buf[0]));
-
-	if (!vct_ishex(buf[0]))
-		return (VFP_Error(vc, "chunked header non-hex"));
-
-	/* Collect hex digits, skipping leading zeros */
-	for (u = 1; u < sizeof buf; u++) {
-		do {
-			lr = v1f_read(vc, htc, buf + u, 1);
-			if (lr <= 0)
-				return (VFP_Error(vc, "chunked read err"));
-		} while (u == 1 && buf[0] == '0' && buf[u] == '0');
-		if (!vct_ishex(buf[u]))
-			break;
-	}
-
-	if (u >= sizeof buf)
-		return (VFP_Error(vc, "chunked header too long"));
-
-	/* Skip trailing white space */
-	while (vct_isows(buf[u])) {
-		lr = v1f_read(vc, htc, buf + u, 1);
-		if (lr <= 0)
-			return (VFP_Error(vc, "chunked read err"));
-	}
-
-	if (buf[u] == '\r' && v1f_read(vc, htc, buf + u, 1) <= 0)
-		return (VFP_Error(vc, "chunked read err"));
-	if (buf[u] != '\n')
-		return (VFP_Error(vc, "chunked header no NL"));
-
-	buf[u] = '\0';
-
-	cll = strtoumax(buf, &q, 16);
-	if (q == NULL || *q != '\0')
-		return (VFP_Error(vc, "chunked header number syntax"));
-	cl = (ssize_t)cll;
-	if (cl < 0 || (uintmax_t)cl != cll)
-		return (VFP_Error(vc, "bogusly large chunk size"));
-
-	*szp = cl;
-	return (VFP_OK);
+	const struct pch *r;
+	CHUNKED_PARSER(vc, htc, v1f_parse_chunked_hdr, szp, pch_more, "header")
 }
 
+#undef CHUNKED_PARSER
 
 /*--------------------------------------------------------------------
  * Check if data is available
