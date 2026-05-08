@@ -6,7 +6,7 @@ We prefer patches as [pull requests](https://github.com/varnish/varnish/compare/
 
 Please use [issues](https://github.com/varnish/varnish/issues/new/choose) for bug reports.
 
-Our main project communication is through our the [Varnsih discord Channel](https://discord.com/invite/EuwdvbZR6d).
+Our main project communication is through the [Varnish discord Channel](https://discord.com/invite/EuwdvbZR6d).
 You can use it to ask about code, configuration, potential bugs, etc.
 
 ## General process
