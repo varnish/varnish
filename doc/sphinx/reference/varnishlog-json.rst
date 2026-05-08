@@ -1,3 +1,8 @@
+..
+	Copyright (c) 2024,2026 Varnish Software AS
+	SPDX-License-Identifier: BSD-2-Clause
+	See LICENSE file for full text of license
+
 .. role:: ref(emphasis)
 
 .. _varnishlog-json(1):
@@ -6,9 +11,9 @@
 varnishlog-json
 ===============
 
------------------------------------
-Display Varnish logs in JSON format
------------------------------------
+----------------------------
+Display Varnish logs in JSON
+----------------------------
 
 :Manual section: 1
 
@@ -16,25 +21,37 @@ SYNOPSIS
 ========
 
 .. include:: ../include/varnishlog-json_synopsis.rst
-varnishlog |synopsis|
+varnishlog-json |synopsis|
 
 DESCRIPTION
 ===========
 
-``varnishlog-json`` is a log reader similar to ``varnishlog`` or
-``varnishncsa``, reading the varnishd(1) shared memory logs and presenting
-them in a standardized ``JSON`` format.
+The ``varnishlog-json`` utility reads and presents Varnish logs in JSON
+format. It can output newline-delimited JSON (NDJSON) or pretty-printed
+JSON.
 
-``varnishlog`` provides all the records pertaining to a transaction, which can
-be too much, while ``varnishncsa`` only presents the headers and data that were
-specifically targeted by its format string, making it easy to miss unplanned
-information. ``varnishlog-json`` tries to strike a balance between the too by
-offering a fixed ``JSON`` schema, capturing the request/response as it it sent
-to or received from the peer.
+Transactions are represented as seen by the remote party (client or
+backend). For backend transactions, any modifications to the backend
+request that happen after transmission are not shown. For client
+transactions, modifications to the request made by VCL before the
+response is delivered are not shown.
 
-For example, when reporting on a backend transaction, it will ignore modifications made to ``bereq`` after it was sent, and on the client side, it will ignore any changes the ``VCL`` makes to the request.
+ESI and backend transactions are excluded by default, matching
+``varnishlog`` behavior.
 
-Similar to how ``varnishncsa`` behaves, ``ESI`` and backend transactions are ignored by default.
+The following grouping modes are available with the ``-g`` option:
+
+* ``vxid`` - Group by VXID (default). Each transaction is output as a
+  single JSON object.
+
+* ``request`` - Group by request. Related transactions (e.g. a client
+  request and its backend fetches) are output as a JSON array.
+
+* ``probe`` - Display backend health probe results. Internally uses
+  raw grouping to collect probe data into structured JSON objects.
+
+OPTIONS
+=======
 
 The following options are available:
 
@@ -100,22 +117,78 @@ We'll use ``typescript`` notation to describe the object shape:
       }>,
   }
 
-If you use `-g request`, instead of one object per line, `varnishlog-json` will out an array of all objects in the group.
+If you use ``-g request``, instead of one object per line, ``varnishlog-json``
+will output an array of all objects in the group.
 
 SIGNALS
 =======
+
+* SIGHUP
+
+  Rotate the log file (see -w option) in daemon mode,
+  abort the loop and die gracefully when running in the foreground.
 
 * SIGUSR1
 
   Flush any outstanding transactions
 
+OUTPUT
+======
+
+By default ``varnishlog-json`` outputs one JSON object per line in
+NDJSON format. Each JSON object represents a transaction and contains
+request/response details, handling classification, timeline events,
+transaction IDs, and VCL information.
+
+When using ``-g request``, related transactions are grouped into JSON
+arrays.
+
+When using ``-p``, output is pretty-printed with indentation for
+readability.
+
+EXAMPLES
+========
+
+Display client transactions in real time::
+
+	varnishlog-json
+
+Display backend transactions with pretty-printing::
+
+	varnishlog-json -b -p
+
+Log client requests to a file in daemon mode::
+
+	varnishlog-json -D -w /var/log/varnish/json.log -P /run/varnishlog-json.pid
+
+Filter requests for a specific URL::
+
+	varnishlog-json -q 'ReqURL eq "/api/health"'
+
+Display request groups (client + related backend transactions)::
+
+	varnishlog-json -g request
+
+Display backend health probe results::
+
+	varnishlog-json -g probe
+
+Read from a binary log file::
+
+	varnishlog-json -r /var/log/varnish/raw.log
+
 SEE ALSO
 ========
+
 * :ref:`varnishd(1)`
-* :ref:`varnishhist(1)`
 * :ref:`varnishlog(1)`
-* :ref:`varnishncsa(1)`
-* :ref:`varnishstat(1)`
-* :ref:`varnishtop(1)`
 * :ref:`vsl(7)`
 * :ref:`vsl-query(7)`
+
+COPYRIGHT
+=========
+
+This document is licensed under the same licence as Varnish
+itself. See LICENCE for details.
+
+* Copyright (c) 2024,2026 Varnish Software AS
