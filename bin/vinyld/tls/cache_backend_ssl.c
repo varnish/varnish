@@ -51,32 +51,75 @@ struct bssl_ctx {
 	SSL_CTX			*ctx;
 };
 
-static struct bssl_ctx	*bssl_ctx;
+static X509_STORE	*bssl_default_ca_store;
+
+static int bssl_vfy_cb(int, X509_STORE_CTX *);
+
+void *
+BSSL_new_ssl_ctx(unsigned sslflags, const char *hosthdr)
+{
+	struct bssl_ctx *bctx;
+	SSL_CTX *ctx;
+	X509_VERIFY_PARAM *vpm;
+
+	ctx = SSL_CTX_new(TLS_client_method());
+	if (ctx == NULL)
+		return (NULL);
+#ifdef SSL_OP_IGNORE_UNEXPECTED_EOF
+	/*
+	 * Many backends close TCP without TLS close_notify.
+	 * Treat unexpected EOF as clean shutdown (OpenSSL 3.0+).
+	 */
+	(void)SSL_CTX_set_options(ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
+#endif
+	AN(bssl_default_ca_store);
+	SSL_CTX_set1_cert_store(ctx, bssl_default_ca_store);
+
+	if (sslflags & BSSL_F_NOVERIFY)
+		(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+	else
+		(void)SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER,
+		    bssl_vfy_cb);
+
+	if (sslflags & BSSL_F_VERIFY_HOST) {
+		vpm = SSL_CTX_get0_param(ctx);
+		AN(vpm);
+		AN(X509_VERIFY_PARAM_set1_host(vpm, hosthdr, 0));
+		X509_VERIFY_PARAM_set_hostflags(vpm,
+		    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT);
+	}
+
+	ALLOC_OBJ(bctx, BSSL_CTX_MAGIC);
+	AN(bctx);
+	bctx->ctx = ctx;
+	return (bctx);
+}
+
+void
+BSSL_free_ssl_ctx(void *p)
+{
+	struct bssl_ctx *bctx;
+
+	if (p == NULL)
+		return;
+	CAST_OBJ_NOTNULL(bctx, p, BSSL_CTX_MAGIC);
+	SSL_CTX_free(bctx->ctx);
+	FREE_OBJ(bctx);
+}
 
 void
 BSSL_Init(void)
 {
 
 	ASSERT_CLI();
-	AZ(bssl_ctx);
-
-	ALLOC_OBJ(bssl_ctx, BSSL_CTX_MAGIC);
-	AN(bssl_ctx);
-	bssl_ctx->ctx = SSL_CTX_new(TLS_client_method());
-	AN(bssl_ctx->ctx);
-#ifdef SSL_OP_IGNORE_UNEXPECTED_EOF
-	/*
-	 * Many backends close TCP without TLS close_notify.
-	 * Treat unexpected EOF as clean shutdown (OpenSSL 3.0+).
-	 */
-	(void)SSL_CTX_set_options(bssl_ctx->ctx, SSL_OP_IGNORE_UNEXPECTED_EOF);
-#endif
-	AN(SSL_CTX_set_default_verify_paths(bssl_ctx->ctx));
-	(void)SSL_CTX_set_verify(bssl_ctx->ctx, SSL_VERIFY_PEER, NULL);
+	AZ(bssl_default_ca_store);
+	bssl_default_ca_store = X509_STORE_new();
+	AN(bssl_default_ca_store);
+	AN(X509_STORE_set_default_paths(bssl_default_ca_store));
 }
 
 static void
-bssl_vtp_free(struct vtls_sess **p_tsp)
+bssl_sess_free(struct vtls_sess **p_tsp)
 {
 	struct vtls_sess *tsp;
 
@@ -113,15 +156,14 @@ bssl_vfy_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 /*--------------------------------------------------------------------*/
 
 struct vtls_sess *
-bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
-    unsigned ssl_flags, const char *ssl_sniname)
+bssl_sess_init(int fd, double tmo, struct vsl_log *vsl,
+    unsigned ssl_flags, const char *ssl_sniname, void *priv)
 {
+	struct bssl_ctx *bctx;
 	struct vtls_sess *tsp;
-	X509_VERIFY_PARAM *vpm;
 	int i;
 
-	CHECK_OBJ_NOTNULL(bssl_ctx, BSSL_CTX_MAGIC);
-	AN(bssl_ctx->ctx);
+	CAST_OBJ_NOTNULL(bctx, priv, BSSL_CTX_MAGIC);
 
 	assert(fd >= 0);
 	AN(ssl_flags & BSSL_F_ENABLE);
@@ -134,10 +176,10 @@ bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
 
 	(void)VTCP_nonblocking(fd);
 
-	tsp->ssl = SSL_new(bssl_ctx->ctx);
+	tsp->ssl = SSL_new(bctx->ctx);
 	if (tsp->ssl == NULL) {
 		VTLS_vsl_ssllog(tsp->log);
-		bssl_vtp_free(&tsp);
+		bssl_sess_free(&tsp);
 		return (NULL);
 	}
 
@@ -148,31 +190,16 @@ bssl_vtp_init(int fd, double tmo, struct vsl_log *vsl,
 		i = SSL_set_tlsext_host_name(tsp->ssl, TRUST_ME(ssl_sniname));
 		if (!i) {
 			VTLS_vsl_sslerr(tsp->log, tsp->ssl, i);
-			bssl_vtp_free(&tsp);
+			bssl_sess_free(&tsp);
 			return (NULL);
 		}
-	}
-
-	if (ssl_flags & BSSL_F_NOVERIFY)
-		SSL_set_verify(tsp->ssl, SSL_VERIFY_NONE, NULL);
-	else
-		SSL_set_verify(tsp->ssl, SSL_VERIFY_PEER, bssl_vfy_cb);
-
-	vpm = SSL_get0_param(tsp->ssl);
-	AN(vpm);
-	AN(X509_VERIFY_PARAM_set_flags(vpm, X509_V_FLAG_TRUSTED_FIRST));
-
-	if (ssl_flags & BSSL_F_VERIFY_HOST) {
-		AN(X509_VERIFY_PARAM_set1_host(vpm, ssl_sniname, 0));
-		X509_VERIFY_PARAM_set_hostflags(vpm,
-		    X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT);
 	}
 
 	AN(SSL_set_fd(tsp->ssl, fd));
 	SSL_set_connect_state(tsp->ssl);
 
 	if (VTLS_do_handshake(tsp, fd, tmo)) {
-		bssl_vtp_free(&tsp);
+		bssl_sess_free(&tsp);
 		return (NULL);
 	}
 
@@ -190,7 +217,7 @@ bssl_vtp_fini(struct vtls_sess **ptsp)
 
 	TAKE_OBJ_NOTNULL(tsp, ptsp, VTLS_SESS_MAGIC);
 	AZ(tsp->log->vsl);
-	bssl_vtp_free(&tsp);
+	bssl_sess_free(&tsp);
 	AZ(tsp);
 	VTLS_flush_errors();
 }
@@ -198,7 +225,6 @@ bssl_vtp_fini(struct vtls_sess **ptsp)
 void
 bssl_vtp_begin(struct pool *pp, struct vtls_sess *tsp, struct vsl_log *vsl)
 {
-	CHECK_OBJ_NOTNULL(bssl_ctx, BSSL_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 	CHECK_OBJ_NOTNULL(tsp, VTLS_SESS_MAGIC);
 	AZ(tsp->buf);
@@ -211,7 +237,6 @@ bssl_vtp_begin(struct pool *pp, struct vtls_sess *tsp, struct vsl_log *vsl)
 void
 bssl_vtp_end(struct vtls_sess *tsp)
 {
-	CHECK_OBJ_NOTNULL(bssl_ctx, BSSL_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(tsp, VTLS_SESS_MAGIC);
 	AN(tsp->buf);
 	VTLS_buf_free(&tsp->buf);

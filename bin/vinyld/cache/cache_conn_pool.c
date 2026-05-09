@@ -86,6 +86,8 @@ typedef void cp_begin_f(struct pool *, struct pfd *, struct vsl_log *);
 typedef void cp_end_f(struct pfd *);
 typedef const struct vco *cp_oper_f(struct pfd *, void **);
 typedef void cp_name_f(const struct pfd *, char *, unsigned, char *, unsigned);
+typedef void *cp_init_f(const struct vrt_endpoint *);
+typedef void cp_fini_f(void *);
 
 struct cp_methods {
 	cp_open_f				*open;
@@ -95,6 +97,8 @@ struct cp_methods {
 	cp_oper_f				*oper;
 	cp_name_f				*local_name;
 	cp_name_f				*remote_name;
+	cp_init_f				*init;
+	cp_fini_f				*fini;
 };
 
 struct conn_pool {
@@ -102,6 +106,7 @@ struct conn_pool {
 #define CONN_POOL_MAGIC				0x85099bc3
 
 	const struct cp_methods			*methods;
+	void					*priv;
 
 	struct vrt_endpoint			*endpoint;
 	char					ident[VSHA256_DIGEST_LENGTH];
@@ -278,6 +283,8 @@ vcp_destroy(struct conn_pool **cpp)
 	AZ(cp->n_conn);
 	AZ(cp->n_kill);
 	Lck_Delete(&cp->mtx);
+	if (cp->methods->fini != NULL)
+		cp->methods->fini(cp->priv);
 	FREE_OBJ(cp->endpoint);
 	FREE_OBJ(cp);
 }
@@ -886,7 +893,8 @@ vtp_bssl_open(const struct conn_pool *cp, vtim_dur tmo, VCL_IP *ap,
 
 	tsp = NULL;
 	if (tmo > 0)
-		tsp = bssl_vtp_init(s, tmo, vsl, vep->sslflags, vep->hosthdr);
+		tsp = bssl_sess_init(s, tmo, vsl, vep->sslflags,
+		    vep->hosthdr, cp->priv);
 
 	if (tsp == NULL) {
 		*ap = NULL;
@@ -932,6 +940,21 @@ vtp_bssl_oper(struct pfd *pfd, void **ppriv)
 	return (VTLS_conn_oper_backend(pfd->tls, ppriv));
 }
 
+static void * v_matchproto_(cp_init_f)
+vtp_bssl_init(const struct vrt_endpoint *vep)
+{
+
+	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
+	return (BSSL_new_ssl_ctx(vep->sslflags, vep->hosthdr));
+}
+
+static void v_matchproto_(cp_fini_f)
+vtp_bssl_fini(void *p)
+{
+
+	BSSL_free_ssl_ctx(p);
+}
+
 static const struct cp_methods bssl_methods = {
 	.open = vtp_bssl_open,
 	.close = vtp_bssl_close,
@@ -940,6 +963,8 @@ static const struct cp_methods bssl_methods = {
 	.oper = vtp_bssl_oper,
 	.local_name = vtp_local_name,	/* Borrow from VTP */
 	.remote_name = vtp_remote_name,	/* Borrow from VTP */
+	.init = vtp_bssl_init,
+	.fini = vtp_bssl_fini,
 };
 
 /*--------------------------------------------------------------------
@@ -1009,6 +1034,14 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident)
 		cp->methods = &bssl_methods;
 	else
 		cp->methods = &vtp_methods;
+	if (cp->methods->init != NULL) {
+		cp->priv = cp->methods->init(vep);
+		if (cp->priv == NULL) {
+			FREE_OBJ(cp->endpoint);
+			FREE_OBJ(cp);
+			return (NULL);
+		}
+	}
 	Lck_New(&cp->mtx, lck_conn_pool);
 	VTAILQ_INIT(&cp->connlist);
 
