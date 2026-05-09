@@ -334,6 +334,7 @@ HSH_Insert(struct worker *wrk, const void *digest, struct objcore *oc,
 	/* Mark object busy and insert (precreated) objcore in
 	   objecthead. The new object inherits our objhead reference. */
 	oc->objhead = oh;
+	oc->flags |= OC_F_BUSY;
 	VTAILQ_INSERT_TAIL(&oh->objcs, oc, hsh_list);
 	EXP_RefNewObjcore(oc);
 	Lck_Unlock(&oh->mtx);
@@ -344,6 +345,7 @@ HSH_Insert(struct worker *wrk, const void *digest, struct objcore *oc,
 	/* Move the object first in the oh list, unbusy it and run the
 	   waitinglist if necessary */
 	Lck_Lock(&oh->mtx);
+	oc->flags &= ~OC_F_BUSY;
 	VTAILQ_REMOVE(&oh->objcs, oc, hsh_list);
 	VTAILQ_INSERT_HEAD(&oh->objcs, oc, hsh_list);
 	if (!VTAILQ_EMPTY(&oh->waitinglist))
