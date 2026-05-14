@@ -13,7 +13,7 @@ changes, please refer to the `change log`_ and :ref:`whatsnew_changes_9.0`.
 varnishd
 ========
 
-.. _VSV00018: https://vinyl-cache.org/security/VSV00018.html
+.. _VSV00018: https://varnish-cache.org/security/VSV00018.html
 
 `VSV00018`_
 ~~~~~~~~~~~

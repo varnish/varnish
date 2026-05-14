@@ -78,7 +78,7 @@ https://docs.varnish-software.com/security/VEV00002/
 Varnish-Cache 9.0.0 (2026-03-15)
 ================================
 
-.. _VSV18: https://vinyl-cache.org/security/VSV00018.html
+.. _VSV18: https://varnish-cache.org/security/VSV00018.html
 
 * The handling of HTTP/1.1 requests to an "absolute form" URI has been fixed to
   also cover the case where the absolute form has an empty path component:
@@ -96,7 +96,7 @@ Varnish-Cache 9.0.0 (2026-03-15)
   ``req.url`` gets normalized by addition of the leading slash. For the example,
   ``req.url`` would contain ``/?/foo``.
 
-  ([VSV18](https://vinyl-cache.org/security/VSV00018.html))
+  ([VSV18](https://varnish-cache.org/security/VSV00018.html))
 
 * `varnishlog-json` has been added to produce structured `JSON` logs.
 
@@ -113,7 +113,7 @@ Varnish-Cache 9.0.0 (2026-03-15)
   additional check is applied, but ``CONNECT`` is not allowed by default. For
   ``OPTIONS``, ``*`` is also allowed.
 
-* The ``ReqTarget`` Vinyl Shared Log (VSL) Tag has been added to log the
+* The ``ReqTarget`` Varnish Shared Log (VSL) Tag has been added to log the
   original request target before any handling of absolute form URIs. To preserve
   the existing log format and ordering, the tag is marked by default. It can be
   unmasked by adding ``+ReqTarget`` to the ``vsl_mask`` parameter.
@@ -150,17 +150,17 @@ Varnish-Cache 9.0.0 (2026-03-15)
 * Added vmod ``math``.
 
 * Fixed a bug in VCC where using ``false``/``true`` as a value for ``VCL_BOOL``
-  would result in a C-compiler error under certain platforms. ([4452](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4452))
+  would result in a C-compiler error under certain platforms. ([4452](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4452))
 
 * Request methods are now represented as a bitmap in struct http, which allows
   turning method evaluations as simple bitwise operations instead of string
-  comparisons. ([4438](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4438))
+  comparisons. ([4438](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4438))
 
 * For requests having no request body, Content-length header will now only be
   unset when the request method is one of: ``GET``, ``HEAD``, ``DELETE``,
-  ``OPTIONS``, ``TRACE``. Otherwise, a Content-length with value 0 will be set. ([4340](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4340))
+  ``OPTIONS``, ``TRACE``. Otherwise, a Content-length with value 0 will be set. ([4340](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4340))
 
-* Added vmod ``math``. ([4422](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4422))
+* Added vmod ``math``. ([4422](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4422))
 
   This adds all mathematical functions, macros and constants from ``math.h``
   like ``sqrt()`` , ``exp()``, ``pow()`` or ``log()`` (just to name a few
@@ -175,32 +175,32 @@ Varnish-Cache 9.0.0 (2026-03-15)
   (``beresp.ttl``, ``beresp.grace`` and ``beresp.keep``) based on the current
   state of ``beresp`` as if it had been processed by core code before
   ``vcl_backend_response`` was called. This does not change
-  ``beresp.uncacheable`` ([4427](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4427))
+  ``beresp.uncacheable`` ([4427](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4427))
 
 * VEXTs can now be loaded by specifying their basename as `-E<name>`. When <name>
   is not a path (does not contain /), a search in ``vmod_path`` is conducted for
-  ``libvmod_<name>.so``. ([4419](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4419))
+  ``libvmod_<name>.so``. ([4419](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4419))
 
 * The new ``unused`` VCL keyword has been added to mark symbols as intentionally
   unused, which prevents errors about them being unused during VCL compilation.
   This gives finer grained control compared to the ``-err_unref`` VCC feature,
-  which disables the error globally for all symbols. ([4421](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4421))
+  which disables the error globally for all symbols. ([4421](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4421))
 
 * Improved VCL comparison for probes, backends and ACLs that could lead to C-compiler
-  errors in the past. ([4418](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4418))
+  errors in the past. ([4418](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4418))
 
 * Fixed probes comparison in VCC which used to wrongly convert operands to string
-  before performing the comparison. ([4417](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4417))
+  before performing the comparison. ([4417](https://code.varnish-cache.org/varnish-cache/varnish-cache/issues/4417))
 
 * Receiving SIGTERM in the management process is no longer logged as an error,
-  but rather as an INFO log record. ([4409](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4409))
+  but rather as an INFO log record. ([4409](https://code.varnish-cache.org/varnish-cache/varnish-cache/issues/4409))
 
 * The ``BackendOpen`` VSL tag now also logs Connection age and Connection reuses
   when relevant. These can be useful when trubleshooting idle timeout from the
-  backend. ([4007](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4007))
+  backend. ([4007](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4007))
 
 * Fixed a VCC bug where VCL would refuse to compile when a probe was never
-  referenced, even when ``'vcc_feature=-err_unref'`` was set. ([4415](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4415))
+  referenced, even when ``'vcc_feature=-err_unref'`` was set. ([4415](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4415))
 
 * A new ``bereq.retry_connect`` variable was added to VCL to control whether
   ``varnishd`` will make a second attempt to connect to the backend if a first
@@ -210,7 +210,7 @@ Varnish-Cache 9.0.0 (2026-03-15)
   guarantee that a retry will always be attempted, as there are other factors
   involved in the decision (e.g. a request body not being cached). This parameter
   only affects automatic retries triggered by connection reuse failures and does
-  not affect VCL retries. ([4416](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4416))
+  not affect VCL retries. ([4416](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4416))
 
 * The ACL's ``+fold`` feature can now be followed with an optional ``(-report)``
   to not output folding-related warnings during VCL compilation.
@@ -219,16 +219,16 @@ Varnish-Cache 9.0.0 (2026-03-15)
   an assertion failure.
 
 * Fixed data race between BOC state and objcore flags that could result in a
-  panic under certain conditions. ([4402](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4402))
+  panic under certain conditions. ([4402](https://code.varnish-cache.org/varnish-cache/varnish-cache/pulls/4402))
 
 * The response reason when the stale object is not a valid object for refresh
   has been made more descriptive to make it easier to differentiate between the
-  failure cases in the logs. ([4399](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4399))
+  failure cases in the logs. ([4399](https://code.varnish-cache.org/varnish-cache/varnish-cache/issues/4399))
 
 * A conditional GET for object revalidation is now demoted to a regular fetch
   if the stale object being revalidated gets invalidated (e.g. by a ban or
   purge) while the backend request is in progress. This also applies to
-  retries. ([4399](https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4399))
+  retries. ([4399](https://code.varnish-cache.org/varnish-cache/varnish-cache/issues/4399))
 
 * ``req.ttl`` has been renamed to ``req.max_age`` for clarity, with ``req.ttl``
   being retained as an alias. ``req.ttl`` is now deprecated, but no warning is
@@ -400,7 +400,7 @@ Varnish-Cache 8.0.0 (2025-09-15)
 * Deprecated aliases for parameters can no longer be set read only, it should
   instead be done directly on the parameters they point to.
 
-.. _VSV00016: https://vinyl-cache.org/security/VSV00016.html
+.. _VSV00016: https://varnish-cache.org/security/VSV00016.html
 
 *  We now check for CRLF after chunked body in HTTP/1. (VSV00016_)
 
@@ -458,7 +458,7 @@ Varnish-Cache 8.0.0 (2025-09-15)
 Varnish-Cache 7.7 (2025-03-17)
 ==============================
 
-.. _VSV00015: https://vinyl-cache.org/security/VSV00015.html
+.. _VSV00015: https://varnish-cache.org/security/VSV00015.html
 
 * The client connection is now always closed when a malformed request
   is received. (VSV00015_)
@@ -1044,13 +1044,13 @@ Varnish Cache 7.5.0 (2024-03-18)
   quoted arguments like ``"help"`` were rejected.
 
 * The ``vcl_req_reset`` feature (controllable through the ``feature``
-  parameter, see `vinyld(1)`) has been added and enabled by default
+  parameter, see `varnishd(1)`) has been added and enabled by default
   to terminate client side VCL processing early when the client is
   gone.
 
   *req_reset* events trigger a VCL failure and are reported to
   `vsl(7)` as ``Timestamp: Reset`` and accounted to ``main.req_reset``
-  in `vsc` as visible through ``vinylstat(1)``.
+  in `vsc` as visible through ``varnishstat(1)``.
 
   In particular, this feature is used to reduce resource consumption
   of HTTP/2 "rapid reset" attacks (see below).
@@ -1091,7 +1091,7 @@ Varnish Cache 7.5.0 (2024-03-18)
   * Sessions closed due to rapid reset rate limiting are reported as
     ``SessClose RAPID_RESET`` in `vsl(7)` and accounted to
     ``main.sc_rapid_reset`` in `vsc` as visible through
-    ``vinylstat(1)``.
+    ``varnishstat(1)``.
 
 * The ``cli_limit`` parameter default has been increased from 48KB to
   64KB.
@@ -2279,7 +2279,7 @@ Varnish Cache 6.6.0 (2021-03-15)
 
   See `VMOD - Varnish Modules`_ in the Reference Manual.
 
-.. _VMOD - Varnish Modules: https://vinyl-cache.org/docs/trunk/reference/vmod.html
+.. _VMOD - Varnish Modules: https://varnish-cache.org/docs/trunk/reference/vmod.html
 
   VMOD functions can also return the ``VCL_SUB`` data type for calls
   from VCL as in ``call vmod.returning_sub();``.

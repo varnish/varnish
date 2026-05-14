@@ -5,8 +5,8 @@
 
 .. _install-doc:
 
-Installing Vinyl Cache
-======================
+Installing Varnish Cache
+========================
 
 .. no section heading here.
 
@@ -27,8 +27,8 @@ is highly operating system specific:
 	install_openbsd
 	install_redhat
 
-Compiling Vinyl Cache from source
-=================================
+Compiling Varnish Cache from source
+===================================
 
 If there are no binary packages available for your system, or if you
 want to compile Varnish from source for other reasons:
