@@ -130,7 +130,7 @@ Basic options
 -b <[host[:port]|path]>
 
   Use the specified host as backend server. If port is not specified,
-  the default is 8080.
+  the default is 80 (http).
 
   If the value of ``-b`` begins with ``/``, it is interpreted as the
   absolute path of a Unix domain socket to which Varnish connects. In
