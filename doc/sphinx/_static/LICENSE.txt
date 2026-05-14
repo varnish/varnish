@@ -1,4 +1,4 @@
-Vinyl Cache Logo & Mascot: CC-BY 4.0 Rhubarbe.design
+Varnish Cache Logo & Mascot: CC-BY 4.0 Rhubarbe.design
 
 Creative Commons Attribution 4.0 International
 
