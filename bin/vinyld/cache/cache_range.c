@@ -58,7 +58,7 @@ vrg_range_fini(struct vdp_ctx *vdc, void **priv)
 	if (vrg_priv->req->resp_len >= 0 &&
 	    vrg_priv->range_off < vrg_priv->range_high) {
 		Req_Fail(vrg_priv->req, SC_RANGE_SHORT);
-		vrg_priv->req->vdc->retval = -1;
+		vdc->retval = -1;
 	}
 	/* struct on ws, no need to free */
 	return (0);
