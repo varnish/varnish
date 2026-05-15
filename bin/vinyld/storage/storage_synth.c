@@ -32,6 +32,8 @@
  * data
  */
 
+/*lint -e801 */
+
 #include "config.h"
 
 #include <stdlib.h>
