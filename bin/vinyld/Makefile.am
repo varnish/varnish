@@ -258,6 +258,25 @@ else
 esi_parse_fuzzer_CFLAGS += -DTEST_DRIVER
 endif
 
+lib_LTLIBRARIES = libvdpio_test.la
+
+libvdpio_test_la_SOURCES = \
+	cache/cache_ws.c \
+	cache/cache_ws_common.c \
+	cache/cache_deliver_proc.c \
+	cache/cache_vdpio_mock.c
+libvdpio_test_la_CFLAGS = -DNOT_IN_A_VMOD -DVDPIO_TEST_DRIVER
+libvdpio_test_la_LIBADD = \
+	$(top_builddir)/lib/libvinyl/libvarnish.la \
+	$(top_builddir)/lib/libvgz/libvgz.la \
+	@JEMALLOC_LDADD@ \
+	${DL_LIBS} ${PTHREAD_LIBS} ${NET_LIBS} ${RT_LIBS} ${LIBM}
+
+TESTS += vdpio_main_test
+vdpio_main_test_SOURCES = cache/cache_vdpio_mock.c
+vdpio_main_test_CFLAGS = -DNOT_IN_A_VMOD -DVDPIO_MAIN_TEST_DRIVER
+vdpio_main_test_LDADD = libvdpio_test.la
+
 noinst_PROGRAMS += $(TESTS)
 
 #
