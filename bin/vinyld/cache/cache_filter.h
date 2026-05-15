@@ -252,6 +252,7 @@ iovec_collect(struct iovec *buf, struct iovec *out, size_t l)
 	if (out->iov_base == NULL)
 		out->iov_base = buf->iov_base;
 	assert((char *)out->iov_base + out->iov_len == buf->iov_base);
+	assert(buf->iov_len >= l);
 	out->iov_len += l;
 	buf->iov_base = (char *)buf->iov_base + l;
 	buf->iov_len -= l;
