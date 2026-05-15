@@ -22,7 +22,7 @@ FLOPS="${CLOPS}"'
 	cache/cache_vdpio_mock.c
 ' ../../tools/flint_skel.sh $*
 
-for f in cache/cache_gzip.c ; do
+for f in cache/cache_gzip.c cache/cache_range.c ; do
 	FLOPS="${CLOPS} ${f}" \
 	../../tools/flint_skel.sh $*
 done

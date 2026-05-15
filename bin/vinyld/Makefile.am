@@ -282,6 +282,11 @@ vdpio_gzip_test_SOURCES = cache/cache_gzip.c
 vdpio_gzip_test_CFLAGS = -DNOT_IN_A_VMOD -DVDPIO_TEST_DRIVER
 vdpio_gzip_test_LDADD = libvdpio_test.la
 
+TESTS += vdpio_range_test
+vdpio_range_test_SOURCES = cache/cache_range.c
+vdpio_range_test_CFLAGS = -DNOT_IN_A_VMOD -DVDPIO_TEST_DRIVER
+vdpio_range_test_LDADD = libvdpio_test.la
+
 noinst_PROGRAMS += $(TESTS)
 
 #

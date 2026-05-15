@@ -29,6 +29,8 @@
  * SUCH DAMAGE.
  */
 
+//lint --e{801}
+
 #include "config.h"
 
 #include "cache_int.h"
@@ -238,6 +240,16 @@ vrg_range_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 }
 
 static int v_matchproto_(vdpio_init_f)
+vrg_range_io_init(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
+{
+	int r = vrg_range_init(ctx, vdc, priv);
+
+	if (r == 0)
+		return (capacity);
+	return (-1);
+}
+
+static int v_matchproto_(vdpio_init_f)
 vrg_range_io_upgrade(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
 {
 
@@ -262,12 +274,14 @@ vrg_range_io_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 
 	CAST_OBJ_NOTNULL(vrg_priv, this->priv, VRG_PRIV_MAGIC);
 
+	this->calls++;
+
 	if (vrg_priv->range_off >= vrg_priv->range_high) {
 		out->flags |= VSCARAB_F_END;
 		return (0);
 	}
-	if (out->capacity == out->used)
-		return (0);
+	// vdpio_pull*() guarantees
+	assert(out->used < out->capacity);
 
 	// ensure we do not pull more than we can return
 	VSCARAB_LOCAL(in, out->capacity - out->used);
@@ -276,10 +290,11 @@ vrg_range_io_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 		r = vdpio_pull(vdc, this, in);
 		out->flags |= in->flags;
 		if (r <= 0)
-			return (r);
+			goto out;
 		l = vrg_priv->range_low - vrg_priv->range_off;
 		VSCARAB_FOREACH(v, in) {
 			ll = vmin(l, (ssize_t)v->iov.iov_len);
+			this->bytes_in += ll;
 			v->iov.iov_base = (char *)v->iov.iov_base + ll;
 			v->iov.iov_len -= ll;
 			l -= ll;
@@ -303,7 +318,7 @@ vrg_range_io_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 		r = vdpio_pull(vdc, this, in);
 		out->flags |= in->flags;
 		if (r <= 0)
-			return (r);
+			goto out;
 	}
 
 	AN(in->used);
@@ -311,6 +326,7 @@ vrg_range_io_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 	r = 0;
 	l = vrg_priv->range_high - vrg_priv->range_off;
 	VSCARAB_FOREACH(v, in) {
+		this->bytes_in += v->iov.iov_len;
 		vrg_priv->range_off += (ssize_t)v->iov.iov_len;
 		ll = vmin(l, (ssize_t)v->iov.iov_len);
 		v->iov.iov_len = ll;
@@ -324,6 +340,11 @@ vrg_range_io_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 	}
 	if (vrg_priv->range_off >= vrg_priv->range_high)
 		out->flags |= VSCARAB_F_END;
+	return (r);
+
+    out:
+	assert(r <= 0);
+	vdpio_return_vscarab(vdc, in);
 	return (r);
 }
 
@@ -339,10 +360,124 @@ const struct vdp VDP_range = {
 	.bytes =	vrg_range_bytes,
 	.fini =		vrg_range_fini,
 
+	.io_init =	vrg_range_io_init,
 	.io_upgrade =	vrg_range_io_upgrade,
 	.io_lease =	vrg_range_io_lease,
 	.io_fini =	vrg_range_io_fini,
 };
+
+#ifdef VDPIO_TEST_DRIVER
+#include <stdio.h>
+#include <stdlib.h>
+#include "vdpio_test.h"
+#include "vfil.h"
+
+// the vdpio test does not care about headers, they are tested in vtcs
+void
+http_PrintfHeader(struct http *to, const char *fmt, ...)
+{
+	(void)to;
+	(void)fmt;
+}
+
+int
+http_GetHdr(const struct http *hp, hdr_t t, const char **ptr)
+{
+	(void)hp;
+	(void)t;
+	(void)ptr;
+	return (0);
+}
+
+static ssize_t t_lo, t_hi;
+const char *
+http_GetRange(const struct http *hp, ssize_t *lo, ssize_t *hi, ssize_t len)
+{
+	(void)hp;
+	AN(lo);
+	AN(hi);
+	(void)len;
+	*lo = t_lo;
+	*hi = t_hi;
+	return (NULL);
+}
+
+void
+Req_Fail(struct req *req, stream_close_t reason)
+{
+	(void)req;
+	(void)reason;
+}
+
+const struct stream_close SC_RANGE_SHORT[1];
+
+void
+http_PutResponse(struct http *to, const char *proto, uint16_t status,
+    const char *response)
+{
+	(void)to;
+	(void)proto;
+	(void)status;
+	(void)response;
+}
+
+ssize_t
+http_GetContentLength(struct http *hp)
+{
+	(void)hp;
+	return (42);
+}
+
+uint16_t
+http_GetStatus(const struct http *hp)
+{
+	(void)hp;
+	return (200);
+}
+
+ssize_t
+http_GetContentRange(const struct http *hp, ssize_t *lo, ssize_t *hi)
+{
+	(void)hp;
+	(void)lo;
+	(void)hi;
+	return (42);
+}
+
+int
+main(int argc, char *const *argv)
+{
+	char *data;
+
+	VFLA_LOCAL(vdpio_test, t, VDPIO_TEST_MAGIC, tc, 2);
+	t->vdp = &VDP_range;
+
+	AN(argc);
+
+	data = VFIL_readfile(NULL, argv[0], &t->datasz);
+	AN(data);
+	t->data = data;
+
+#define RGT(name, lo, hi) do {			\
+	printf("%s:\n", name);			\
+	t_lo = (lo);				\
+	t_hi = (hi);				\
+	t->expect = data + t_lo;		\
+	t->expectsz = (t_hi - t_lo) + 1;	\
+	AZ(vdpio_mock(t));			\
+} while(0)
+
+	RGT("1st quarter", 0, t->datasz / 4 - 1);
+	RGT("2nd quarter", t->datasz / 4, t->datasz / 2 - 1);
+	RGT("last byte", t->datasz - 1, t->datasz -1);
+
+	// injection is in first quarter, so can not test
+	t->no_injection = 1;
+	RGT("first byte", 0, 0);
+
+	free(data);
+}
+#endif
 
 /*--------------------------------------------------------------------*/
 
