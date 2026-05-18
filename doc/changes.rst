@@ -42,6 +42,15 @@ Varnish-Cache 9.0.x (unreleased)
    (new to old)
 
 ================================
+Varnish-Cache 9.0.3 (2026-05-18)
+================================
+
+.. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
+
+* A deficiency in HTTP/2 request parsing has been fixed by properly comparing
+  pseudo-header names instead of doing a prefix match. (VSV00019_)
+
+================================
 Varnish-Cache 9.0.2 (2026-05-13)
 ================================
 
