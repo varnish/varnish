@@ -27,6 +27,15 @@ individual releases. These documents are updated as part of the
 release process.
 
 =================================
+Varnish-Cache 6.0.18 (2026-05-18)
+=================================
+
+.. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
+
+* A deficiency in HTTP/2 request parsing has been fixed by properly comparing
+  pseudo-header names instead of doing a prefix match. (VSV00019_)
+
+=================================
 Varnish-Cache 6.0.17 (2026-03-16)
 =================================
 
