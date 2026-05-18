@@ -35,11 +35,20 @@ individual releases. These documents are updated as part of the
 release process.
 
 ================================
-Varnish-Cache 8.0.1 (2026-03-16)
+Varnish-Cache 8.0.2 (2026-05-18)
 ================================
 
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
+
+.. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
+
+* A deficiency in HTTP/2 request parsing has been fixed by properly comparing
+  pseudo-header names instead of doing a prefix match. (VSV00019_)
+
+================================
+Varnish-Cache 8.0.1 (2026-03-16)
+================================
 
 .. _VSV00018: https://vinyl-cache.org/security/VSV00018.html
 
