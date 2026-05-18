@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-/*lint -e801 */
+/*lint --e{801} */
 
 #include "config.h"
 

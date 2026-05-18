@@ -170,7 +170,7 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	int i, ac = 0;
 	size_t nac;
 	vtim_dur d, dinit = 0.0;
-	char **av;	//lint -e429
+	char **av;	//lint !e429
 	char *a;
 
 	if (count++ > 0)
