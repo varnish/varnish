@@ -41,6 +41,11 @@ Varnish-Cache NEXT (unreleased)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+.. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
+
+* A deficiency in HTTP/2 request parsing has been fixed by properly comparing
+  pseudo-header names instead of doing a prefix match. (VSV00019_)
+
 * ``ReqStart`` records in VSL gained a fourth field that will be either ``http``
   or ``https`` depending on whether TLS was used by the client. Thanks to this:
 
