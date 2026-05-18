@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
-        with:
-          submodules: true
 
       - name: Install dependencies
         run: |
@@ -38,6 +36,10 @@ jobs:
             libunwind-dev \
             pkg-config \
             python3-sphinx
+
+      - name: Get submodules
+        run: |
+          git submodule update --init
 
       - name: Build distribution tarball
         run: |
