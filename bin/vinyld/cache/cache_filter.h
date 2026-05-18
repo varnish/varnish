@@ -317,28 +317,46 @@ void vdpio_return_vscarab(const struct vdp_ctx *vdc, struct vscarab *scarab)
 }
 
 /*
- * return used up iovs (len == 0)
+ * return _leading_ used up iovs (len == 0)
  * move remaining to the beginning of the scarab
+ *
+ * this does not touch iovs after a non-empty iov, to support
+ * "return this lease only after iovs before have been processed" semantics
+ *
+ * should be called after a scarab has been partly consumed
  */
+
 static inline void
 vdpio_consolidate_vscarab(const struct vdp_ctx *vdc, struct vscarab *scarab)
 {
-	struct viov *v, *w;
+	struct viov *v;
+	unsigned removed;
 
 	VSCARAB_CHECK_NOTNULL(scarab);
-	w = &scarab->s[0];
-	VSCARAB_FOREACH(v, scarab) {
-		if (v->iov.iov_len == 0) {
-			AN(v->iov.iov_base);
-			vdpio_return_lease(vdc, v->lease);
-			continue;
-		}
 
-		if (v != w)
-			*w = *v;
-		w++;
+	if (scarab->used == 0 || scarab->s[0].iov.iov_len > 0)
+		return;
+
+	VSCARAB_FOREACH(v, scarab) {
+		if (v->iov.iov_len > 0)
+			break;
+		AN(v->iov.iov_base);
+		vdpio_return_lease(vdc, v->lease);
 	}
-	scarab->used = w - &scarab->s[0];
+	if (v == NULL) {
+		// all returned
+		scarab->used = 0;
+		// preserve flags
+		memset(scarab->s, 0, scarab->capacity * sizeof *v);
+		return;
+	}
+	assert(scarab->s < v);
+	removed = v - scarab->s;
+	assert(removed < scarab->used);
+	scarab->used -= removed;
+
+	memmove(scarab->s, v, scarab->used * sizeof(*v));
+	memset(scarab->s + scarab->used, 0, (scarab->capacity - scarab->used) * sizeof *v);
 }
 
 // Lifecycle management in cache_deliver_proc.c
