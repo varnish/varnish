@@ -285,7 +285,7 @@ typedef struct {
 #define Tcheck(t)	do { (void)pdiff((t).b, (t).e); } while (0)
 #define Tlen(t)		(pdiff((t).b, (t).e))
 #define Tstr(s)		(/*lint -e(446)*/ (txt){(s), (s) + strlen(s)})
-#define Tstrcmp(t, s)	(strncmp((t).b, (s), Tlen(t)))
+#define Tstreq(t, s)	(Tlen(t) == strlen(s) && !vmemcmp((t).b, (s), Tlen(t)))
 #define Tforeach(c, t)	for ((c) = (t).b; (c) < (t).e; (c)++)
 
 /* #3020 dummy definitions until PR is merged*/
