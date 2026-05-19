@@ -852,7 +852,7 @@ struct vscarab {
 // the additional VLA buf declaration avoids
 // "Variable-sized object may not be initialized"
 #define VFLA_LOCAL_(type, name, mag, fam, cap, bufname)				\
-	char bufname[VFLA_SIZE(type, fam, cap)];				\
+	uintptr_t bufname[(VFLA_SIZE(type, fam, cap) + sizeof(uintptr_t) -1) / sizeof(uintptr_t)]; \
 	struct type *name = (void *)bufname;					\
 	VFLA_INIT(type, name, mag, fam, cap)
 #define VFLA_LOCAL(type, name, mag, fam, cap)					\
