@@ -27,6 +27,9 @@ PERSISTENT=--with-persistent-storage
 if [ `uname -m` = "s390x" ] ; then
 	# ASLR makes this impossible
 	PERSISTENT=
+elif [ `uname -p` = "aarch64c" ] ; then
+	# CHERI(Morello)
+	PERSISTENT=
 fi
 
 rm -f $SRCDIR/configure
