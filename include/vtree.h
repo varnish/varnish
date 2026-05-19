@@ -74,6 +74,11 @@
  * The maximum height of a rank-balanced tree is 2lg (n+1).
  */
 
+#ifndef __CHERI__
+#  define __no_subobject_bounds /* */
+#  define ptraddr_t uintptr_t
+#endif
+
 #define VSPLAY_HEAD(name, type)						\
 struct name {								\
 	struct type *sph_root; /* root of the tree */			\
@@ -88,8 +93,8 @@ struct name {								\
 
 #define VSPLAY_ENTRY(type)						\
 struct {								\
-	struct type *spe_left; /* left element */			\
-	struct type *spe_right; /* right element */			\
+	struct type *spe_left __no_subobject_bounds; /* left element */	\
+	struct type *spe_right __no_subobject_bounds; /* right element */ \
 }
 
 #define VSPLAY_LEFT(elm, field)		(elm)->field.spe_left
@@ -322,7 +327,7 @@ struct name {								\
 
 #define VRBT_ENTRY(type)						\
 struct {								\
-	struct type *rbe_link[3];					\
+	struct type *rbe_link[3] __no_subobject_bounds;			\
 }
 
 /*
@@ -334,10 +339,10 @@ struct {								\
  */
 #define _VRBT_LINK(elm, dir, field)	(elm)->field.rbe_link[dir]
 #define _VRBT_UP(elm, field)		_VRBT_LINK(elm, 0, field)
-#define _VRBT_L				((uintptr_t)1)
-#define _VRBT_R				((uintptr_t)2)
-#define _VRBT_LR			((uintptr_t)3)
-#define _VRBT_BITS(elm)			((uintptr_t)elm)
+#define _VRBT_L				((ptraddr_t)1)
+#define _VRBT_R				((ptraddr_t)2)
+#define _VRBT_LR			((ptraddr_t)3)
+#define _VRBT_BITS(elm)			((ptraddr_t)elm)
 #define _VRBT_BITSUP(elm, field)	_VRBT_BITS(_VRBT_UP(elm, field))
 #define _VRBT_PTR_OP(elm, op, dir)	((__typeof(elm))		\
 					((uintptr_t)(elm) op (dir)))
@@ -353,7 +358,7 @@ struct {								\
 
 #define VRBT_SET_PARENT(dst, src, field) do {				\
 	_VRBT_UP(dst, field) = (__typeof(src))((uintptr_t)src |		\
-	    (_VRBT_BITSUP(dst, field) & _VRBT_LR));			\
+	    (ptraddr_t)(_VRBT_BITSUP(dst, field) & _VRBT_LR));		\
 } while (/*CONSTCOND*/ 0)
 
 #define VRBT_SET(elm, parent, field) do {				\
@@ -543,8 +548,8 @@ name##_VRBT_INSERT_COLOR(struct name *head,				\
 	 * when a value has been assigned to 'child' in the previous    \
 	 * one.								\
 	 */								\
-	struct type *child = NULL, *child_up, *gpar;				\
-	uintptr_t elmdir, sibdir;					\
+	struct type *child = NULL, *child_up, *gpar;			\
+	ptraddr_t elmdir, sibdir;					\
 									\
 	do {								\
 		/* the rank of the tree rooted at elm grew */		\
@@ -650,7 +655,7 @@ name##_VRBT_REMOVE_COLOR(struct name *head,				\
     struct type *parent, struct type *elm)				\
 {									\
 	struct type *gpar, *sib, *up;					\
-	uintptr_t elmdir, sibdir;					\
+	ptraddr_t elmdir, sibdir;					\
 									\
 	if (VRBT_RIGHT(parent, field) == elm &&				\
 	    VRBT_LEFT(parent, field) == elm) {				\
