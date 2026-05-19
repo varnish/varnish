@@ -548,7 +548,7 @@ sml_ai_return_buffers(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 {
 	struct storage *st;
 	struct sml_hdl *hdl;
-	uint64_t *p;
+	uintptr_t *p;
 
 	(void) wrk;
 	CAST_VAI_HDL_NOTNULL(hdl, vhdl, SML_HDL_MAGIC);
@@ -570,7 +570,7 @@ sml_ai_return(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 {
 	struct storage *st;
 	struct sml_hdl *hdl;
-	uint64_t *p;
+	uintptr_t *p;
 
 	(void) wrk;
 	CAST_VAI_HDL_NOTNULL(hdl, vhdl, SML_HDL_MAGIC);
