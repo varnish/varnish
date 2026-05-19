@@ -220,7 +220,7 @@ static void v_matchproto_(vai_return_f)
 ssy_ai_return(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 {
 	struct ssy_hdl *hdl;
-	uint64_t *p;
+	uintptr_t *p;
 
 	(void) wrk;
 	CAST_VAI_HDL_NOTNULL(hdl, vhdl, SSY_HDL_MAGIC);
