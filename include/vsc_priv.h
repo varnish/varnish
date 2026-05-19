@@ -44,5 +44,5 @@
 struct vsc_head {
 	volatile int		ready;
 	uint64_t		body_offset;
-	uintptr_t		doc_id;
+	uintmax_t		doc_id;
 };
