@@ -851,6 +851,7 @@ struct vscarab {
 // declare, allocate and initialize a local VFLA
 // the additional VLA buf declaration avoids
 // "Variable-sized object may not be initialized"
+//lint -emacro(413, VFLA_LOCAL_)
 #define VFLA_LOCAL_(type, name, mag, fam, cap, bufname)				\
 	uintptr_t bufname[(VFLA_SIZE(type, fam, cap) + sizeof(uintptr_t) -1) / sizeof(uintptr_t)]; \
 	struct type *name = (void *)bufname;					\
