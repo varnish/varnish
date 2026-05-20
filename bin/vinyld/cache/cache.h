@@ -808,6 +808,12 @@ struct viov {
  */
 #define IOV_NIL ((struct iovec){.iov_base = TRUST_ME(0x42), .iov_len = 0})
 
+/*
+ * rules for vscarabs:
+ * used marks the portion of the s array which is in use
+ * used viovs must not have a NULL iov_base, use IOV_NIL
+ * free viovs must be all zero (lease=0, iov_base=NULL, iov_len=0)
+ */
 struct vscarab {
 	unsigned	magic;
 #define VSCARAB_MAGIC	0x05ca7ab0
