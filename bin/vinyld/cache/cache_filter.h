@@ -222,6 +222,9 @@ vdpio_pull(struct vdp_ctx *vdc, struct vdp_entry *vdpe, struct vscarab *scarab)
 
 	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
 
+	if (scarab->used == scarab->capacity)
+		return (0);
+
 	if (vdpe == NULL)
 		vdpe = VTAILQ_LAST(&vdc->vdp, vdp_entry_s);
 	else {
