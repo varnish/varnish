@@ -195,7 +195,6 @@ xyzzy_vdp_chunked_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 	AN(vdc->clen);
 	AN(priv);
 
-	http_Unset(vdc->hp, H_Content_Length);
 	*vdc->clen = -1;
 
 	return (1);

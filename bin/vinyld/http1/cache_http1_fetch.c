@@ -124,10 +124,11 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 	}
 
 
-	// XXX H_Content_Length TODO, coming up in follow up commit with testing
 	assert(cl >= -1);
-	if (cl < 0)
+	if (cl < 0) {
+		http_Unset(hp, H_Content_Length);
 		http_ForceHeader(hp, H_Transfer_Encoding, "chunked");
+	}
 
 	VTCP_blocking(*htc->rfd);	/* XXX: we should timeout instead */
 	hdrbytes = HTTP1_Write(v1l, hp, HTTP1_Req);
