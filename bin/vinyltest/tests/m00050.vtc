@@ -1,0 +1,102 @@
+vtest "bereq.body change body length from chunked to fixed"
+
+server s1 -repeat 2 {
+	rxreq
+	expect req.http.Content-Length == "0"
+	expect req.http.Transfer-Encoding == <undef>
+	expect req.body == ""
+	txresp
+
+	rxreq
+	expect req.http.Content-Length == <undef>
+	expect req.http.Transfer-Encoding == "chunked"
+	expect req.body == ""
+	txresp
+} -start
+
+server s2 -repeat 2 {
+	rxreq
+	expect req.http.Content-Length == "3"
+	expect req.http.Transfer-Encoding == <undef>
+	expect req.body == "foo"
+	txresp
+
+	rxreq
+	expect req.http.Content-Length == <undef>
+	expect req.http.Transfer-Encoding == "chunked"
+	expect req.body == "foo"
+	txresp
+} -start
+
+varnish v1 -vcl+backend {
+	import debug;
+	import std;
+
+	sub vcl_recv {
+		if (req.http.cached) {
+			std.cache_req_body(1KB);
+		}
+	}
+
+	sub vcl_backend_fetch {
+		if (bereq.http.body) {
+			debug.body_string(bereq.http.body);
+			set bereq.backend = s2;
+		}
+		set bereq.filters = "debug.string";
+		if (bereq.http.chunked) {
+			set bereq.filters += " debug.chunked";
+		}
+		set bereq.filters += " debug.pedantic";
+	}
+} -start
+
+client c1 {
+	txreq -req POST -nolen -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -nolen -hdr "chunked: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -nolen -hdr "cached: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -nolen -hdr "cached: 1" -hdr "chunked: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -hdr "body: foo" -nolen -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -hdr "body: foo" -nolen -hdr "chunked: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -hdr "body: foo" -nolen -hdr "cached: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -hdr "body: foo" -nolen -hdr "cached: 1" -hdr "chunked: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunkedlen 0
+	rxresp
+	expect resp.status == 200
+} -run

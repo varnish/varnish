@@ -789,6 +789,76 @@ static const struct vdp xyzzy_vdp_awshog = {
 	.init  = xyzzy_awshog_init
 };
 
+/**********************************************************************
+ * send a fixed string
+ */
+
+static const void * const string_priv_id = &string_priv_id;
+
+static int v_matchproto_(vdp_init_f)
+xyzzy_string_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
+{
+	struct vmod_priv *p;
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
+	CHECK_OBJ_ORNULL(vdc->oc, OBJCORE_MAGIC);
+	CHECK_OBJ_NOTNULL(vdc->hp, HTTP_MAGIC);
+	AN(vdc->clen);
+
+	AN(priv);
+	p = VRT_priv_task_get(ctx, string_priv_id);
+	if (p == NULL || p->priv == NULL) {
+		*priv = TRUST_ME("");
+		*vdc->clen = 0;
+		return (0);
+	}
+	AN(p->priv);
+	*priv = p->priv;
+	*vdc->clen = strlen(*priv);
+	return (0);
+}
+
+static int v_matchproto_(vdp_bytes_f)
+xyzzy_string_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
+    const void *ptr, ssize_t len)
+{
+
+	(void)act;
+	AN(priv);
+	(void)ptr;
+	(void)len;
+	return (VDP_bytes(vdc, VDP_END, *priv, strlen(*priv)));
+}
+
+static int v_matchproto_(vdp_fini_f)
+xyzzy_string_fini(struct vdp_ctx *vdc, void **priv)
+{
+	(void)vdc;
+	AN(priv);
+	*priv = NULL;
+	return (0);
+}
+
+static const struct vdp xyzzy_vdp_string = {
+	.name  = "debug.string",
+	.init  = xyzzy_string_init,
+	.bytes = xyzzy_string_bytes,
+	.fini = xyzzy_string_fini,
+};
+
+VCL_VOID v_matchproto_(td_xyzzy_debug_body_string)
+xyzzy_body_string(VRT_CTX, VCL_STRING s)
+{
+	struct vmod_priv *p;
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	p = VRT_priv_task(ctx, string_priv_id);
+	if (p == NULL)
+		return;
+	p->priv = TRUST_ME(s);
+}
+
 void
 debug_add_filters(VRT_CTX)
 {
@@ -800,6 +870,7 @@ debug_add_filters(VRT_CTX)
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_chkcrc32));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_chklen));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_awshog));
+	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_string));
 }
 
 void
@@ -813,4 +884,5 @@ debug_remove_filters(VRT_CTX)
 	VRT_RemoveFilter(ctx, NULL, &xyzzy_vdp_chkcrc32);
 	VRT_RemoveFilter(ctx, NULL, &xyzzy_vdp_chklen);
 	VRT_RemoveFilter(ctx, NULL, &xyzzy_vdp_awshog);
+	VRT_RemoveFilter(ctx, NULL, &xyzzy_vdp_string);
 }
