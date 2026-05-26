@@ -792,10 +792,10 @@ static const struct vdp xyzzy_vdp_awshog = {
 void
 debug_add_filters(VRT_CTX)
 {
+	AZ(VRT_AddFilter(ctx, &xyzzy_vfp_slow, &xyzzy_vdp_slow));
 	AZ(VRT_AddFilter(ctx, &xyzzy_vfp_rot13, &xyzzy_vdp_rot13));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_pedantic));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_chunked));
-	AZ(VRT_AddFilter(ctx, &xyzzy_vfp_slow, &xyzzy_vdp_slow));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_chksha256));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_chkcrc32));
 	AZ(VRT_AddFilter(ctx, NULL, &xyzzy_vdp_chklen));
