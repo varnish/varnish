@@ -138,9 +138,13 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 
 	if (bo->bereq_body != NULL) {
 		AZ(bo->req);
-		assert(cl >= 0);
+		assert(cl != 0);
+		if (cl < 0)
+			V1L_Chunked(v1l);
 		(void)ObjIterate(bo->wrk, bo->bereq_body,
 		    vdc, VDP_ObjIterate, 0);
+		if (cl < 0)
+			V1L_EndChunk(v1l);
 	} else if (bo->req != NULL &&
 	    bo->req->req_body_status != BS_NONE) {
 		if (cl < 0)
