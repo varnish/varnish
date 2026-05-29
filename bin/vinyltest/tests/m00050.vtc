@@ -54,11 +54,39 @@ varnish v1 -vcl+backend {
 client c1 {
 	txreq -req POST -nolen -hdr "Transfer-Encoding: chunked"
 	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
 	chunkedlen 0
 	rxresp
 	expect resp.status == 200
 
 	txreq -req POST -nolen -hdr "chunked: 1" -hdr "Transfer-Encoding: chunked"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
+	chunked "Ponto Facto, Caesar Transit!"
 	chunked "Ponto Facto, Caesar Transit!"
 	chunkedlen 0
 	rxresp
