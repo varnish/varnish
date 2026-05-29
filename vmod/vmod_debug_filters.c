@@ -822,12 +822,18 @@ static int v_matchproto_(vdp_bytes_f)
 xyzzy_string_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
     const void *ptr, ssize_t len)
 {
+	int r;
 
 	(void)act;
 	AN(priv);
 	(void)ptr;
 	(void)len;
-	return (VDP_bytes(vdc, VDP_END, *priv, strlen(*priv)));
+
+	r = VDP_bytes(vdc, VDP_END, *priv, strlen(*priv));
+	if (r != 0)
+		return (r);
+	// only to be called once
+	return (1);
 }
 
 static int v_matchproto_(vdp_fini_f)
