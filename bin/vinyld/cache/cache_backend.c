@@ -212,8 +212,8 @@ vbe_close_acct(const struct pfd *pfd, struct VSC_vbe *vsc,
 		return;							\
 	}
 #include "tbl/sess_close.h"
-
-	WRONG("Wrong event in vbe_close_acct");
+	else
+		WRONG("Wrong event in vbe_close_acct");
 }
 
 static void v_matchproto_(vdi_finish_f)
