@@ -931,7 +931,6 @@ VRT_r_sess_xid(VRT_CTX)
  * req fields
  */
 
-#define VREQW0(field)
 #define VREQWreq(field)							\
 VCL_VOID								\
 VRT_l_req_##field(VRT_CTX, VCL_BOOL a)					\
@@ -941,7 +940,6 @@ VRT_l_req_##field(VRT_CTX, VCL_BOOL a)					\
 	ctx->req->field = a ? 1 : 0;					\
 }
 
-#define VREQR0(field)
 #define VREQRreq(field)							\
 VCL_BOOL								\
 VRT_r_req_##field(VRT_CTX)						\
@@ -950,6 +948,9 @@ VRT_r_req_##field(VRT_CTX)						\
 	CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);				\
 	return (ctx->req->field);					\
 }
+
+#define VREQW0(field)
+#define VREQR0(field)
 
 #define REQ_FLAG(l, r, w, d) \
 	VREQR##r(l) \
