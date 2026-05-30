@@ -1834,6 +1834,7 @@ resp.do_esi	``VCL >= 4.1``
 
 	It is a VCL error to use resp.do_esi after setting resp.filters.
 
+.. _resp.esi_include_onerror:
 
 resp.esi_include_onerror
 
