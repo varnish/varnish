@@ -212,10 +212,12 @@ VRT_r_beresp_##field(VRT_CTX)						\
 
 /*--------------------------------------------------------------------
  * bereq bool-fields
+ *
+ * for macro compatiblity with the client side, r is "req" for bereq
  */
 
 #define VBEREQR0(field, str)
-#define VBEREQR1(field, str)						\
+#define VBEREQRreq(field, str)						\
 VCL_BOOL								\
 VRT_r_bereq_##field(VRT_CTX)						\
 {									\
@@ -229,7 +231,7 @@ VRT_r_bereq_##field(VRT_CTX)						\
 #include "tbl/bereq_flags.h"
 
 #undef VBEREQR0
-#undef VBEREQR1
+#undef VBEREQRreq
 /*--------------------------------------------------------------------*/
 
 VCL_BOOL
@@ -930,7 +932,7 @@ VRT_r_sess_xid(VRT_CTX)
  */
 
 #define VREQW0(field)
-#define VREQW1(field)							\
+#define VREQWreq(field)							\
 VCL_VOID								\
 VRT_l_req_##field(VRT_CTX, VCL_BOOL a)					\
 {									\
@@ -940,7 +942,7 @@ VRT_l_req_##field(VRT_CTX, VCL_BOOL a)					\
 }
 
 #define VREQR0(field)
-#define VREQR1(field)							\
+#define VREQRreq(field)							\
 VCL_BOOL								\
 VRT_r_req_##field(VRT_CTX)						\
 {									\
