@@ -145,7 +145,7 @@ LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 	if (data[0] & 0x8f)
 		flags.esi_ignore_https = 1;
 	if (size > 1 && data[1] & 0x8f)
-		BSET(__cache_param.feature_bits, FEATURE_ESI_DISABLE_XML_CHECK);
+		flags.esi_disable_xml_check = 1;
 	if (size > 2 && data[2] & 0x8f)
 		BSET(__cache_param.feature_bits, FEATURE_ESI_IGNORE_OTHER_ELEMENTS);
 	if (size > 3 && data[3] & 0x8f)

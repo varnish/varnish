@@ -35,6 +35,7 @@
  * esi flags: defaults inherited from feature flag
  *
  * lower, feature, doc */
+BERESP_ESI_FLAG(esi_disable_xml_check, FEATURE_ESI_DISABLE_XML_CHECK, "")
 BERESP_ESI_FLAG(esi_ignore_https, FEATURE_ESI_IGNORE_HTTPS, "")
 #undef BERESP_ESI_FLAG
 

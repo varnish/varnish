@@ -1171,6 +1171,21 @@ beresp.do_stream
 	This variable has no effect if beresp.do_esi is true or when
 	the response body is empty.
 
+.. _beresp.esi_disable_xml_check:
+
+beresp.esi_disable_xml_check
+
+	Type: BOOL
+
+	Readable from: vcl_backend_response
+
+	Writable from: vcl_backend_response
+
+	Default: feature esi_disable_xml_check
+
+	Allow ESI processing on non-XML ESI bodies
+
+
 .. _beresp.esi_ignore_https:
 
 beresp.esi_ignore_https
