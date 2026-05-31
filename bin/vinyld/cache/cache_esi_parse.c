@@ -702,7 +702,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 		 */
 
 		} else if (vep->state == VEP_NOTMYTAG) {
-			if (FEATURE(FEATURE_ESI_IGNORE_OTHER_ELEMENTS)) {
+			if (vep->flags.esi_ignore_other_elements) {
 				p++;
 				vep->state = VEP_NEXTTAG;
 			} else {
