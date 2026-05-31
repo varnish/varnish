@@ -659,7 +659,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 				vep->state = VEP_BOM;
 		} else if (vep->state == VEP_BOM) {
 			vep_mark_skip(vep, p);
-			if (FEATURE(FEATURE_ESI_DISABLE_XML_CHECK))
+			if (vep->flags.esi_disable_xml_check)
 				vep->state = VEP_NEXTTAG;
 			else
 				vep->state = VEP_TESTXML;
