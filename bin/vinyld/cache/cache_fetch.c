@@ -66,6 +66,14 @@ FETCH_STEPS
 
 static hdr_t const H_X_Varnish = HDR("X-Varnish");
 
+static void
+init_esi_flags(struct busyobj *bo) {
+	CHECK_OBJ_NOTNULL(bo, BUSYOBJ_MAGIC);
+#define BERESP_ESI_FLAG(lower, feature, doc) \
+	bo->lower = FEATURE(feature);
+#include "tbl/beresp_esi_flags.h"
+}
+
 /*--------------------------------------------------------------------
  * Allocate an object, with fall-back to Transient.
  * XXX: This somewhat overlaps the stuff in stevedore.c
@@ -338,6 +346,7 @@ vbf_stp_retry(struct worker *wrk, struct busyobj *bo)
 	bo->between_bytes_timeout = NAN;
 	if (bo->htc != NULL)
 		bo->htc->doclose = SC_NULL;
+	init_esi_flags(bo);
 
 	// XXX: BereqEnd + BereqAcct ?
 	VSL_ChgId(bo->vsl, "bereq", "retry", VXID_Get(wrk, VSL_BACKENDMARKER));
@@ -1198,6 +1207,8 @@ VBF_Fetch(struct worker *wrk, struct req *req, struct objcore *oc,
 	bo = VBO_GetBusyObj(wrk, req);
 	CHECK_OBJ_NOTNULL(bo, BUSYOBJ_MAGIC);
 	AN(bo->vcl);
+
+	init_esi_flags(bo);
 
 	boc = HSH_RefBoc(oc);
 	CHECK_OBJ_NOTNULL(boc, BOC_MAGIC);
