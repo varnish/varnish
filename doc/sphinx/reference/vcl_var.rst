@@ -1200,6 +1200,18 @@ beresp.esi_ignore_https
 
 	Whether to convert ``<esi:include src\"https://...`` to ``http://...``
 
+beresp.esi_ignore_other_elements
+
+	Type: BOOL
+
+	Readable from: vcl_backend_response
+
+	Writable from: vcl_backend_response
+
+	Default: feature esi_ignore_other_elements
+
+        Ignore XML syntax errors in ESI bodies.
+
 .. _beresp.filters:
 
 beresp.filters
