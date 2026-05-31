@@ -129,6 +129,7 @@ LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 	struct vep_state *vep;
 	struct vsb *vsb;
 	txt hd[HTTP_HDR_URL + 1];
+	struct vep_flags flags = {0};
 	char ws_buf[1024];
 
 	if (size < 1)
@@ -142,7 +143,7 @@ LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 	memset(&__cache_param, 0, sizeof(__cache_param));
 #define BSET(b, no) (b)[(no) >> 3] |= (0x80 >> ((no) & 7))
 	if (data[0] & 0x8f)
-		BSET(__cache_param.feature_bits, FEATURE_ESI_IGNORE_HTTPS);
+		flags.esi_ignore_https = 1;
 	if (size > 1 && data[1] & 0x8f)
 		BSET(__cache_param.feature_bits, FEATURE_ESI_DISABLE_XML_CHECK);
 	if (size > 2 && data[2] & 0x8f)
@@ -172,7 +173,8 @@ LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 	vc->wrk = wrk;
 	vc->resp = resp;
 
-	vep = VEP_Init(vc, req, NULL, NULL);
+	vep = VEP_Init(vc, req, NULL, NULL, flags);
+
 	AN(vep);
 	VEP_Parse(vep, (const char *)data, size);
 	vsb = VEP_Finish(vep);

@@ -59,6 +59,9 @@ enum vep_mark { VERBATIM = 0, SKIP };
 struct vep_state {
 	unsigned		magic;
 #define VEP_MAGIC		0x55cb9b82
+	// flags from bereq
+	struct vep_flags	flags;
+
 	struct vsb		*vsb;
 
 	const char		*url;
@@ -531,7 +534,7 @@ vep_do_include(struct vep_state *vep, enum dowhat what)
 		VSB_printf(vep->vsb, "%c", incl);
 		VSB_printf(vep->vsb, "Host: %.*s%c", (int)(p-h), h, 0);
 	} else if (l > 8 && !memcmp(p, "https://", 8)) {
-		if (!FEATURE(FEATURE_ESI_IGNORE_HTTPS)) {
+		if (!vep->flags.esi_ignore_https) {
 			vep_warn(vep,
 			    "ESI 1.0 <esi:include> with https:// ignored");
 			vep->state = VEP_TAGERROR;
@@ -1065,7 +1068,7 @@ vep_default_cb(struct vfp_ctx *vc, void *priv, ssize_t l, enum vgz_flag flg)
 
 struct vep_state *
 VEP_Init(struct vfp_ctx *vc, const struct http *req, vep_callback_t *cb,
-    void *cb_priv)
+    void *cb_priv, struct vep_flags flags)
 {
 	struct vep_state *vep;
 
@@ -1079,6 +1082,7 @@ VEP_Init(struct vfp_ctx *vc, const struct http *req, vep_callback_t *cb,
 	}
 
 	INIT_OBJ(vep, VEP_MAGIC);
+	vep->flags = flags;
 	vep->url = req->hd[HTTP_HDR_URL].b;
 	vep->vc = vc;
 	vep->vsb = VSB_new_auto();

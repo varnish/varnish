@@ -36,10 +36,13 @@
  *
  * lower, vcl_r, vcl_w, filters, doc */
 BERESP_FLAG(do_esi,		1, 1, 1, "")
-BERESP_FLAG(do_gzip,	1, 1, 1, "")
-BERESP_FLAG(do_gunzip,	1, 1, 1, "")
-BERESP_FLAG(do_stream,	1, 1, 0, "")
-BERESP_FLAG(was_304,	1, 0, 0, "")
+BERESP_FLAG(do_gzip,		1, 1, 1, "")
+BERESP_FLAG(do_gunzip,		1, 1, 1, "")
+BERESP_FLAG(do_stream,		1, 1, 0, "")
+BERESP_FLAG(was_304,		1, 0, 0, "")
+#define BERESP_ESI_FLAG(lower, feature, doc) \
+BERESP_FLAG(lower,		1, 1, 0, doc)
+#include "tbl/beresp_esi_flags.h"
 #undef BERESP_FLAG
 
 /*lint -restore */
