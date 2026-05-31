@@ -38,6 +38,7 @@
 BERESP_ESI_FLAG(esi_disable_xml_check, FEATURE_ESI_DISABLE_XML_CHECK, "")
 BERESP_ESI_FLAG(esi_ignore_https, FEATURE_ESI_IGNORE_HTTPS, "")
 BERESP_ESI_FLAG(esi_ignore_other_elements, FEATURE_ESI_IGNORE_OTHER_ELEMENTS, "")
+BERESP_ESI_FLAG(esi_remove_bom, FEATURE_ESI_REMOVE_BOM, "")
 #undef BERESP_ESI_FLAG
 
 /*lint -restore */

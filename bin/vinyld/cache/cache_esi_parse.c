@@ -651,7 +651,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 		 */
 
 		if (vep->state == VEP_START) {
-			if (FEATURE(FEATURE_ESI_REMOVE_BOM) &&
+			if (vep->flags.esi_remove_bom &&
 			    *p == (char)0xeb) {
 				vep->match = vep_match_bom;
 				vep->state = VEP_MATCH;
