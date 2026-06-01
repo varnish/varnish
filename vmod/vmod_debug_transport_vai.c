@@ -392,8 +392,8 @@ dbg_vai_notify_init(struct dbg_vai_notify *sn)
 {
 
 	INIT_OBJ(sn, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_init(&sn->mtx, NULL));
-	AZ(pthread_cond_init(&sn->cond, NULL));
+	PTOK(pthread_mutex_init(&sn->mtx, NULL));
+	PTOK(pthread_cond_init(&sn->cond, NULL));
 }
 
 static void
@@ -401,8 +401,8 @@ dbg_vai_notify_fini(struct dbg_vai_notify *sn)
 {
 
 	CHECK_OBJ_NOTNULL(sn, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_destroy(&sn->mtx));
-	AZ(pthread_cond_destroy(&sn->cond));
+	PTOK(pthread_mutex_destroy(&sn->mtx));
+	PTOK(pthread_cond_destroy(&sn->cond));
 }
 
 static void v_matchproto_(vai_notify_cb)
@@ -412,10 +412,10 @@ dbg_vai_notify(vai_hdl hdl, void *priv)
 
 	(void) hdl;
 	CAST_OBJ_NOTNULL(sn, priv, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_lock(&sn->mtx));
+	PTOK(pthread_mutex_lock(&sn->mtx));
 	sn->hasmore = 1;
-	AZ(pthread_cond_signal(&sn->cond));
-	AZ(pthread_mutex_unlock(&sn->mtx));
+	PTOK(pthread_cond_signal(&sn->cond));
+	PTOK(pthread_mutex_unlock(&sn->mtx));
 
 }
 
@@ -424,12 +424,12 @@ dbg_vai_notify_wait(struct dbg_vai_notify *sn)
 {
 
 	CHECK_OBJ_NOTNULL(sn, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_lock(&sn->mtx));
+	PTOK(pthread_mutex_lock(&sn->mtx));
 	while (sn->hasmore == 0)
-		AZ(pthread_cond_wait(&sn->cond, &sn->mtx));
+		PTOK(pthread_cond_wait(&sn->cond, &sn->mtx));
 	AN(sn->hasmore);
 	sn->hasmore = 0;
-	AZ(pthread_mutex_unlock(&sn->mtx));
+	PTOK(pthread_mutex_unlock(&sn->mtx));
 }
 
 static void

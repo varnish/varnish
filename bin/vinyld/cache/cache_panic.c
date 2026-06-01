@@ -696,7 +696,7 @@ pan_ic(const char *func, const char *file, int line, const char *cond,
 
 	assert (VSB_len(pan_vsb) == 0);
 
-	AZ(pthread_setspecific(panic_key, pan_vsb));
+	PTOK(pthread_setspecific(panic_key, pan_vsb));
 
 	/*
 	 * should we trigger a SIGSEGV while handling a panic, our sigsegv
