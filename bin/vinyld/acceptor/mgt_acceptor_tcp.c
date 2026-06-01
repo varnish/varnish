@@ -99,7 +99,7 @@ vca_tcp_open_cb(void *priv, const struct suckaddr *sa)
 	CAST_OBJ_NOTNULL(la, priv, LISTEN_ARG_MAGIC);
 
 	VTAILQ_FOREACH(ls, &TCP_acceptor.socks, vcalist) {
-		CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
+		CHECK_OBJ(ls, LISTEN_SOCK_MAGIC);
 
 		if (!VSA_Compare(sa, ls->addr))
 			ARGV_ERR("-a arguments %s and %s have same address\n",
