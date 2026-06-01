@@ -276,11 +276,11 @@ vsc_fill_point(const struct vsc *vsc, const struct vsc_seg *seg,
 	AN(vt);
 	assert(vjsn_is_string(vt));
 
-	if (!strcmp(vt->value, "counter")) {
+	if (!vstrcmp(vt->value, "counter")) {
 		point->point.semantics = 'c';
-	} else if (!strcmp(vt->value, "gauge")) {
+	} else if (!vstrcmp(vt->value, "gauge")) {
 		point->point.semantics = 'g';
-	} else if (!strcmp(vt->value, "bitmap")) {
+	} else if (!vstrcmp(vt->value, "bitmap")) {
 		point->point.semantics = 'b';
 	} else {
 		point->point.semantics = '?';
@@ -290,13 +290,13 @@ vsc_fill_point(const struct vsc *vsc, const struct vsc_seg *seg,
 	AN(vt);
 	assert(vjsn_is_string(vt));
 
-	if (!strcmp(vt->value, "integer")) {
+	if (!vstrcmp(vt->value, "integer")) {
 		point->point.format = 'i';
-	} else if (!strcmp(vt->value, "bytes")) {
+	} else if (!vstrcmp(vt->value, "bytes")) {
 		point->point.format = 'B';
-	} else if (!strcmp(vt->value, "bitmap")) {
+	} else if (!vstrcmp(vt->value, "bitmap")) {
 		point->point.format = 'b';
-	} else if (!strcmp(vt->value, "duration")) {
+	} else if (!vstrcmp(vt->value, "duration")) {
 		point->point.format = 'd';
 	} else {
 		point->point.format = '?';
@@ -306,11 +306,11 @@ vsc_fill_point(const struct vsc *vsc, const struct vsc_seg *seg,
 	AN(vt);
 	assert(vjsn_is_string(vt));
 
-	if (!strcmp(vt->value, "info"))  {
+	if (!vstrcmp(vt->value, "info"))  {
 		point->point.level = &levels[info];
-	} else if (!strcmp(vt->value, "diag")) {
+	} else if (!vstrcmp(vt->value, "diag")) {
 		point->point.level = &levels[diag];
-	} else if (!strcmp(vt->value, "debug")) {
+	} else if (!vstrcmp(vt->value, "debug")) {
 		point->point.level = &levels[debug];
 	} else {
 		WRONG("Illegal level");
@@ -560,9 +560,9 @@ VSC_Iter(struct vsc *vsc, struct vsm *vsm, VSC_iter_f *fiter, void *priv)
 	sp = VTAILQ_FIRST(&vsc->segs);
 	VSM_FOREACH(&ifantom, vsm) {
 		AN(ifantom.category);
-		if (!strcmp(ifantom.category, VSC_CLASS))
+		if (!vstrcmp(ifantom.category, VSC_CLASS))
 			type = VSC_SEG_COUNTERS;
-		else if (!strcmp(ifantom.category, VSC_DOC_CLASS))
+		else if (!vstrcmp(ifantom.category, VSC_DOC_CLASS))
 			type = VSC_SEG_DOCS;
 		else {
 			/* Not one of the categories we care about */
@@ -572,7 +572,7 @@ VSC_Iter(struct vsc *vsc, struct vsm *vsm, VSC_iter_f *fiter, void *priv)
 		while (sp != NULL) {
 			CHECK_OBJ_NOTNULL(sp, VSC_SEG_MAGIC);
 			if (VSM_StillValid(vsm, sp->fantom) == VSM_valid &&
-			    !strcmp(ifantom.ident, sp->fantom->ident)) {
+			    !vstrcmp(ifantom.ident, sp->fantom->ident)) {
 				/* sp matches the expected value */
 				break;
 			}

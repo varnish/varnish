@@ -336,7 +336,7 @@ smp_valid_silo(struct smp_sc *sc)
 		return (i);
 
 	si = sc->ident;
-	if (strcmp(si->ident, SMP_IDENT_STRING))
+	if (vstrcmp(si->ident, SMP_IDENT_STRING))
 		return (12);
 	if (si->byte_order != 0x12345678)
 		return (13);

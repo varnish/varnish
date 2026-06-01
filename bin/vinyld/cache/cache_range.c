@@ -163,7 +163,7 @@ vrg_ifrange(struct req *req)
 		if ((e[0] == 'W' && e[1] == '/'))	// rfc7232,l,547,548
 			return (0);
 		/* XXX: should we also have http_etag_cmp() ? */
-		return (strcmp(p, e) == 0);		// rfc7232,l,548,548
+		return (vstrcmp(p, e) == 0);		// rfc7232,l,548,548
 	}
 
 	/* assume date, strong check [RFC7232 2.2.2 p7] */

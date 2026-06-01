@@ -213,7 +213,7 @@ vcc_sym_in_tab(struct vcc *tl, struct symtab *st,
 		if (kind == SYM_NONE && kind == sym->kind &&
 		    sym->wildcard == NULL)
 			continue;
-		if (tl->syntax < VCL_41 && strcmp(sym->name, "default") &&
+		if (tl->syntax < VCL_41 && vstrcmp(sym->name, "default") &&
 		     kind != SYM_NONE && kind != sym->kind &&
 		     sym->wildcard == NULL)
 			continue;

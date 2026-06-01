@@ -192,7 +192,7 @@ STV_open(void)
 		AN(stv->vclname);
 		if (stv->open != NULL)
 			stv->open(stv);
-		if (!strcmp(stv->ident, mgt_stv_h2_rxbuf))
+		if (!vstrcmp(stv->ident, mgt_stv_h2_rxbuf))
 			stv_h2_rxbuf = stv;
 	}
 	AN(stv_h2_rxbuf);
@@ -278,7 +278,7 @@ stv_find(const char *nm)
 	struct stevedore *stv;
 
 	STV_Foreach(stv)
-		if (!strcmp(stv->ident, nm))
+		if (!vstrcmp(stv->ident, nm))
 			return (stv);
 	return (NULL);
 }

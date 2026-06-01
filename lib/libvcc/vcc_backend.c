@@ -592,7 +592,7 @@ vcc_ParseHostDef(struct vcc *tl, struct symbol *sym,
 			AN(via->rname);
 
 			if (via->extra != NULL) {
-				AZ(strcmp(via->extra, "via"));
+				AZ(vstrcmp(via->extra, "via"));
 				VSB_cat(tl->sb,
 					"Cannot stack .via backends at\n");
 				vcc_ErrWhere(tl, tl->t);

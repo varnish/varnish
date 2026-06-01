@@ -119,7 +119,7 @@ vca_uds_open_cb(void *priv, const struct sockaddr_un *uds)
 	VTAILQ_FOREACH(ls, &UDS_acceptor.socks, vcalist) {
 		CHECK_OBJ(ls, LISTEN_SOCK_MAGIC);
 
-		if (strcmp(ls->endpoint, la->endpoint) == 0)
+		if (vstrcmp(ls->endpoint, la->endpoint) == 0)
 			ARGV_ERR("-a arguments %s and %s have same address\n",
 			    ls->endpoint, la->endpoint);
 	}

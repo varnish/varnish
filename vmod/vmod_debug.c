@@ -83,16 +83,16 @@ xyzzy_author(VRT_CTX, VCL_ENUM person, VCL_ENUM someone)
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	if (person == VENUM(phk))
 		return ("Poul-Henning");
-	assert(strcmp(person, "phk"));
+	assert(vstrcmp(person, "phk"));
 	if (person == VENUM(des))
 		return ("Dag-Erling");
-	assert(strcmp(person, "des"));
+	assert(vstrcmp(person, "des"));
 	if (person == VENUM(kristian))
 		return ("Kristian");
-	assert(strcmp(person, "kristian"));
+	assert(vstrcmp(person, "kristian"));
 	if (person == VENUM(mithrandir))
 		return ("Tollef");
-	assert(strcmp(person, "mithrandir"));
+	assert(vstrcmp(person, "mithrandir"));
 	WRONG("Illegal VMOD enum");
 }
 
@@ -133,7 +133,7 @@ xyzzy_test_priv_call(VRT_CTX, struct vmod_priv *priv)
 		priv->methods = xyzzy_test_priv_call_methods;
 	} else {
 		assert(priv->methods == xyzzy_test_priv_call_methods);
-		assert(!strcmp(priv->priv, "BAR"));
+		assert(!vstrcmp(priv->priv, "BAR"));
 	}
 }
 
@@ -1273,7 +1273,7 @@ resolve_cb(void *priv, const struct suckaddr *sa)
 	CHECK_OBJ_NOTNULL(p->vsb, VSB_MAGIC);
 	AN(sa);
 	VTCP_name(sa, abuf, sizeof abuf, pbuf, sizeof pbuf);
-	if (p->fail_port != NULL && !strcmp(p->fail_port, pbuf)) {
+	if (p->fail_port != NULL && !vstrcmp(p->fail_port, pbuf)) {
 		*(p->errp) = "bad port";
 		return (-1);
 	}

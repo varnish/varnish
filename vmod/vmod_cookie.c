@@ -154,7 +154,7 @@ find_cookie(const struct vmod_cookie *vcp, VCL_STRING name)
 
 	VTAILQ_FOREACH(cookie, &vcp->cookielist, list) {
 		CHECK_OBJ_NOTNULL(cookie, VMOD_COOKIE_ENTRY_MAGIC);
-		if (!strcmp(cookie->name, name))
+		if (!vstrcmp(cookie->name, name))
 			break;
 	}
 	return (cookie);
@@ -331,7 +331,7 @@ filter_cookies(struct vmod_priv *priv, VCL_STRING list_s,
 		matched = 0;
 
 		VTAILQ_FOREACH(mlentry, &matchlist_head, list) {
-			if (strcmp(cookieptr->name, mlentry->name) == 0) {
+			if (vstrcmp(cookieptr->name, mlentry->name) == 0) {
 				matched = 1;
 				break;
 			}

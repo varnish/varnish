@@ -121,7 +121,7 @@ vca_tcp_sockopt_init(void)
 
 #define SET_VAL(nm, so, fld, val)					\
 	do {								\
-		if (!strcmp(#nm, so->strname)) {			\
+		if (!vstrcmp(#nm, so->strname)) {			\
 			assert(so->sz == sizeof so->arg->fld);		\
 			so->arg->fld = (val);				\
 		}							\
@@ -129,7 +129,7 @@ vca_tcp_sockopt_init(void)
 
 #define NEW_VAL(nm, so, fld, val)					\
 	do {								\
-		if (!strcmp(#nm, so->strname)) {			\
+		if (!vstrcmp(#nm, so->strname)) {			\
 			sz = sizeof tmp.fld;				\
 			assert(so->sz == sz);				\
 			tmp.fld = (val);				\

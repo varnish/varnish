@@ -188,7 +188,7 @@ wait_stopped(const struct vinyl *v)
 		if (st != CLIS_OK)
 			vinyl_fatal(v,
 			    "CLI status command failed: %u %s", st, r);
-		if (!strcmp(r, "Child in state stopped")) {
+		if (!vstrcmp(r, "Child in state stopped")) {
 			free(r);
 			break;
 		}
@@ -213,10 +213,10 @@ wait_running(const struct vinyl *v)
 		if (st != CLIS_OK)
 			vinyl_fatal(v,
 			    "CLI status command failed: %u %s", st, r);
-		if (!strcmp(r, "Child in state stopped"))
+		if (!vstrcmp(r, "Child in state stopped"))
 			vinyl_fatal(v,
 			    "Child stopped before running: %u %s", st, r);
-		if (!strcmp(r, "Child in state running")) {
+		if (!vstrcmp(r, "Child in state running")) {
 			free(r);
 			r = NULL;
 			st = vinyl_ask_cli(v, "debug.listen_address", &r);
@@ -645,7 +645,7 @@ vinyl_listen(const struct vinyl *v, char *la)
 			first = 0;
 		}
 
-		if (!strcmp(n, n2))
+		if (!vstrcmp(n, n2))
 			continue;
 
 		bprintf(m, "%s_addr", n);
@@ -936,11 +936,11 @@ do_stat_dump_cb(void *priv, const struct VSC_point * const pt)
 	dp = priv;
 	v = dp->v;
 
-	if (strcmp(pt->ctype, "uint64_t"))
+	if (vstrcmp(pt->ctype, "uint64_t"))
 		return (0);
 	u = VSC_Value(pt);
 
-	if (strcmp(dp->arg, "*")) {
+	if (vstrcmp(dp->arg, "*")) {
 		if (fnmatch(dp->arg, pt->name, 0))
 			return (0);
 	}
@@ -998,7 +998,7 @@ do_expect_cb(void *priv, const struct VSC_point * const pt)
 		return (0);
 
 	if (!sp->lhs.good && stat_match(sp->lhs.pattern, pt->name) == 0) {
-		AZ(strcmp(pt->ctype, "uint64_t"));
+		AZ(vstrcmp(pt->ctype, "uint64_t"));
 		AN(pt->ptr);
 		sp->lhs.val = VSC_Value(pt);
 		sp->lhs.good = 1;
@@ -1008,7 +1008,7 @@ do_expect_cb(void *priv, const struct VSC_point * const pt)
 		sp->rhs.good = 1;
 	} else if (!sp->rhs.good &&
 	    stat_match(sp->rhs.pattern, pt->name) == 0) {
-		AZ(strcmp(pt->ctype, "uint64_t"));
+		AZ(vstrcmp(pt->ctype, "uint64_t"));
 		AN(pt->ptr);
 		sp->rhs.val = VSC_Value(pt);
 		sp->rhs.good = 1;
@@ -1259,7 +1259,7 @@ cmd_vinyl(CMD_ARGS)
 
 	VTC_CHECK_NAME(vl, av[0], "Vinyl", 'v');
 	VTAILQ_FOREACH(v, &vinyles, list)
-		if (!strcmp(v->name, av[0]))
+		if (!vstrcmp(v->name, av[0]))
 			break;
 	if (v == NULL) {
 		v = vinyl_new(av[0]);
@@ -1272,7 +1272,7 @@ cmd_vinyl(CMD_ARGS)
 	for (; *av != NULL; av++) {
 		if (vtc_error)
 			break;
-		if (!strcmp(*av, "-arg")) {
+		if (!vstrcmp(*av, "-arg")) {
 			AN(av[1]);
 			AZ(v->pid);
 			VSB_cat(v->args, " ");
@@ -1282,25 +1282,25 @@ cmd_vinyl(CMD_ARGS)
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-cleanup")) {
+		if (!vstrcmp(*av, "-cleanup")) {
 			AZ(av[1]);
 			vinyl_cleanup(v);
 			continue;
 		}
-		if (!strcmp(*av, "-cli")) {
+		if (!vstrcmp(*av, "-cli")) {
 			AN(av[1]);
 			vinyl_cli(v, av[1], 0, NULL, 0);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-clierr")) {
+		if (!vstrcmp(*av, "-clierr")) {
 			AN(av[1]);
 			AN(av[2]);
 			vinyl_cli(v, av[2], atoi(av[1]), NULL, 0);
 			av += 2;
 			continue;
 		}
-		if (!strcmp(*av, "-cliexpect")) {
+		if (!vstrcmp(*av, "-cliexpect")) {
 			int neg = 0;
 
 			AN(av[1]);
@@ -1314,19 +1314,19 @@ cmd_vinyl(CMD_ARGS)
 			av += 2;
 			continue;
 		}
-		if (!strcmp(*av, "-clijson")) {
+		if (!vstrcmp(*av, "-clijson")) {
 			AN(av[1]);
 			vinyl_cli_json(v, av[1]);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-cliok")) {
+		if (!vstrcmp(*av, "-cliok")) {
 			AN(av[1]);
 			vinyl_cli(v, av[1], (unsigned)CLIS_OK, NULL, 0);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-errvcl")) {
+		if (!vstrcmp(*av, "-errvcl")) {
 			char *r = NULL;
 			AN(av[1]);
 			AN(av[2]);
@@ -1343,76 +1343,76 @@ cmd_vinyl(CMD_ARGS)
 			av += 2;
 			continue;
 		}
-		if (!strcmp(*av, "-expect")) {
+		if (!vstrcmp(*av, "-expect")) {
 			av++;
 			vinyl_expect(v, av);
 			av += 2;
 			continue;
 		}
-		if (!strcmp(*av, "-expectexit")) {
+		if (!vstrcmp(*av, "-expectexit")) {
 			v->expect_exit = strtoul(av[1], NULL, 0);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-jail")) {
+		if (!vstrcmp(*av, "-jail")) {
 			AN(av[1]);
 			AZ(v->pid);
 			REPLACE(v->jail, av[1]);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-proto")) {
+		if (!vstrcmp(*av, "-proto")) {
 			AN(av[1]);
 			AZ(v->pid);
 			REPLACE(v->proto, av[1]);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-start")) {
+		if (!vstrcmp(*av, "-start")) {
 			vinyl_start(v);
 			continue;
 		}
-		if (!strcmp(*av, "-stop")) {
+		if (!vstrcmp(*av, "-stop")) {
 			vinyl_stop(v);
 			continue;
 		}
-		if (!strcmp(*av, "-syntax")) {
+		if (!vstrcmp(*av, "-syntax")) {
 			AN(av[1]);
 			v->syntax = strtod(av[1], NULL);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-vcl")) {
+		if (!vstrcmp(*av, "-vcl")) {
 			AN(av[1]);
 			vinyl_vcl(v, av[1], 0, NULL);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-vcl+backend")) {
+		if (!vstrcmp(*av, "-vcl+backend")) {
 			AN(av[1]);
 			vinyl_vclbackend(v, av[1]);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-vsc")) {
+		if (!vstrcmp(*av, "-vsc")) {
 			AN(av[1]);
 			vinyl_vsc(v, av[1]);
 			av++;
 			continue;
 		}
-		if (!strcmp(*av, "-wait-stopped")) {
+		if (!vstrcmp(*av, "-wait-stopped")) {
 			wait_stopped(v);
 			continue;
 		}
-		if (!strcmp(*av, "-wait-running")) {
+		if (!vstrcmp(*av, "-wait-running")) {
 			wait_running(v);
 			continue;
 		}
-		if (!strcmp(*av, "-wait")) {
+		if (!vstrcmp(*av, "-wait")) {
 			vinyl_wait(v);
 			continue;
 		}
-		if (!strcmp(*av, "-vsl_catchup")) {
+		if (!vstrcmp(*av, "-vsl_catchup")) {
 			vsl_catchup(v);
 			continue;
 		}

@@ -381,7 +381,7 @@ main(int argc, char **argv)
 	assert(vte->f_maxsz[1] == 3);
 	assert(vte->f_maxsz[2] == 8);
 
-	if (strcmp(VSB_data(vsb), test_fmt)) {
+	if (vstrcmp(VSB_data(vsb), test_fmt)) {
 		fprintf(stderr,
 		    "Error: VTE output mismatch\n"
 		    "<<<<<<<\n"

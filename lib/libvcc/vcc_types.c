@@ -259,7 +259,7 @@ vcc_type_t
 VCC_Type(const char *p)
 {
 
-#define VCC_TYPE(UC, lc)	if (!strcmp(p, #UC)) return (UC);
+#define VCC_TYPE(UC, lc)	if (!vstrcmp(p, #UC)) return (UC);
 #include "vcc_types.h"
 	return (NULL);
 }

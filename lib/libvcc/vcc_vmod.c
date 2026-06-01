@@ -155,7 +155,7 @@ vcc_ParseJSON(const struct vcc *tl, const char *jsn, struct vmod_import *vim)
 	AN(vv3);
 	if (!vjsn_is_string(vv3))
 		return ("Not string[2]");
-	if (strcmp(vv3->value, "$VMOD"))
+	if (vstrcmp(vv3->value, "$VMOD"))
 		return ("Not $VMOD[3]");
 
 	vv3 = VTAILQ_NEXT(vv3, list);
@@ -199,7 +199,7 @@ vcc_ParseJSON(const struct vcc *tl, const char *jsn, struct vmod_import *vim)
 
 
 	if (vim->major == 0 && vim->minor == 0 &&
-	    strcmp(vim->abi, VMOD_ABI_Version)) {
+	    vstrcmp(vim->abi, VMOD_ABI_Version)) {
 		VSB_printf(tl->sb, "Incompatible VMOD %.*s\n", PF(vim->t_mod));
 		VSB_printf(tl->sb, "\tFile name: %s\n", vim->path);
 		VSB_printf(tl->sb, "\tABI mismatch, expected <%s>, got <%s>\n",
@@ -225,7 +225,7 @@ vcc_ParseJSON(const struct vcc *tl, const char *jsn, struct vmod_import *vim)
 		assert(vjsn_is_string(vv3));
 		assert(vv3->value[0] == '$');
 #define STANZA(UU, ll, ss) \
-    if (!strcmp(vv3->value, "$" #UU)) {vim->n_##ll++; continue;}
+    if (!vstrcmp(vv3->value, "$" #UU)) {vim->n_##ll++; continue;}
 		STANZA_TBL
 #undef STANZA
 		return ("Unknown metadata stanza.");
@@ -261,9 +261,9 @@ vcc_VmodLoad(struct vcc *tl, struct vmod_import *vim)
 		return (-1);
 
 	VTAILQ_FOREACH(vim2, &imports, list) {
-		if (strcmp(vim->name, vim2->name))
+		if (vstrcmp(vim->name, vim2->name))
 			continue;
-		if (!strcmp(vim->file_id, vim2->file_id)) {
+		if (!vstrcmp(vim->file_id, vim2->file_id)) {
 			// (Truly) duplicate imports are OK
 			return (0);
 		}
@@ -324,7 +324,7 @@ vcc_vj_foreach(struct vcc *tl, const struct vmod_import *vim,
 		assert (vjsn_is_array(vv2));
 		vv3 = VTAILQ_FIRST(&vv2->children);
 		assert (vjsn_is_string(vv3));
-		if (!strcmp(vv3->value, stanza))
+		if (!vstrcmp(vv3->value, stanza))
 			func(tl, vim, VTAILQ_NEXT(vv3, list));
 	}
 }
@@ -523,7 +523,7 @@ vcc_ParseImport(struct vcc *tl)
 	vimold = msym->import;
 	if (vimold != NULL) {
 		CHECK_OBJ(vimold, VMOD_IMPORT_MAGIC);
-		if (!strcmp(vimold->file_id, vim->file_id)) {
+		if (!vstrcmp(vimold->file_id, vim->file_id)) {
 			/* Identical import is OK */
 		} else {
 			VSB_printf(tl->sb,
@@ -541,7 +541,7 @@ vcc_ParseImport(struct vcc *tl)
 		assert(vsym->kind == SYM_VMOD);
 		vimold = vsym->import;
 		CHECK_OBJ_NOTNULL(vimold, VMOD_IMPORT_MAGIC);
-		if (!strcmp(vimold->file_id, vim->file_id)) {
+		if (!vstrcmp(vimold->file_id, vim->file_id)) {
 			/* Already loaded under different name */
 			msym->eval_priv = vsym->eval_priv;
 			msym->import = vsym->import;

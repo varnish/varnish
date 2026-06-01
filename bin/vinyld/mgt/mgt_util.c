@@ -71,7 +71,7 @@ void
 mgt_ProcTitle(const char *comp)
 {
 #ifdef HAVE_SETPROCTITLE
-	if (strcmp(heritage.identity, "varnishd"))
+	if (vstrcmp(heritage.identity, "varnishd"))
 		setproctitle("Varnish-%s -i %s", comp, heritage.identity);
 	else
 		setproctitle("Varnish-%s", comp);
@@ -196,7 +196,7 @@ MGT_Pick(const struct choice *cp, const char *which, const char *kind)
 {
 
 	for (; cp->name != NULL; cp++) {
-		if (!strcmp(cp->name, which))
+		if (!vstrcmp(cp->name, which))
 			return (cp->ptr);
 	}
 	ARGV_ERR("Unknown %s method \"%s\"\n", kind, which);

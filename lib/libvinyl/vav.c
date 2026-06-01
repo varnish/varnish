@@ -453,7 +453,7 @@ test_run(const struct test_case *tc, int *ret)
 	}
 
 	for (i = 1; i < argc && tc->argv[i] != NULL && argv[i] != NULL; i++) {
-		if (!strcmp(tc->argv[i], argv[i]))
+		if (!vstrcmp(tc->argv[i], argv[i]))
 			continue;
 		printf(
 		    "ERROR: Parsing string <%s> with flags %x, "

@@ -460,7 +460,7 @@ vjsn_child(const struct vjsn_val *vv, const char *key)
 	CHECK_OBJ_NOTNULL(vv, VJSN_VAL_MAGIC);
 	AN(key);
 	VTAILQ_FOREACH(vc, &vv->children, list) {
-		if (vc->name != NULL && !strcmp(vc->name, key))
+		if (vc->name != NULL && !vstrcmp(vc->name, key))
 			return (vc);
 	}
 	return (NULL);

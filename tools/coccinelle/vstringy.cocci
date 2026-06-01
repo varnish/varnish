@@ -9,3 +9,10 @@ idexpression x;
 
 -strlen(x)
 +vstrlen(x)
+
+@@
+idexpression x, y;
+@@
+
+-strcmp(x, y)
++vstrcmp(x, y)

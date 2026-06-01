@@ -804,7 +804,7 @@ int
 main(int argc, char **argv)
 {
 
-	if (argc == 2 && !strcmp(argv[1], "-v"))
+	if (argc == 2 && !vstrcmp(argv[1], "-v"))
 		verbose = 1;
 	else if (argc != 1) {
 		fprintf(stderr, "Usage: %s [-v]\n", argv[0]);

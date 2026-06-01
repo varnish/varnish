@@ -66,7 +66,7 @@ do_xml_cb(void *priv, const struct VSC_point * const pt)
 	(void)priv;
 	if (pt == NULL)
 		return (0);
-	AZ(strcmp(pt->ctype, "uint64_t"));
+	AZ(vstrcmp(pt->ctype, "uint64_t"));
 	val = VSC_Value(pt);
 
 	printf("\t<stat>\n");
@@ -105,7 +105,7 @@ do_json_cb(void *priv, const struct VSC_point * const pt)
 	if (pt == NULL)
 		return (0);
 
-	AZ(strcmp(pt->ctype, "uint64_t"));
+	AZ(vstrcmp(pt->ctype, "uint64_t"));
 	val = (uintmax_t)VSC_Value(pt);
 
 	sep = priv;
@@ -164,8 +164,8 @@ do_once_cb_first(void *priv, const struct VSC_point * const pt)
 	if (pt == NULL)
 		return (0);
 	op = priv;
-	AZ(strcmp(pt->ctype, "uint64_t"));
-	if (strcmp(pt->name, "MAIN.uptime"))
+	AZ(vstrcmp(pt->ctype, "uint64_t"));
+	if (vstrcmp(pt->name, "MAIN.uptime"))
 		return (0);
 	val = VSC_Value(pt);
 	op->up = (double)val;
@@ -182,7 +182,7 @@ do_once_cb(void *priv, const struct VSC_point * const pt)
 	if (pt == NULL)
 		return (0);
 	op = priv;
-	AZ(strcmp(pt->ctype, "uint64_t"));
+	AZ(vstrcmp(pt->ctype, "uint64_t"));
 	val = VSC_Value(pt);
 	i = 0;
 	i += printf("%s", pt->name);
@@ -281,7 +281,7 @@ main(int argc, char * const *argv)
 	int i;
 	struct vsc *vsc;
 
-	if (argc == 2 && !strcmp(argv[1], "--bindings"))
+	if (argc == 2 && !vstrcmp(argv[1], "--bindings"))
 		exit(key_bindings());
 
 	vut = VUT_InitProg(argc, argv, &vopt_spec);

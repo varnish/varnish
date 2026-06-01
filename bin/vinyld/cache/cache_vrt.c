@@ -942,7 +942,7 @@ VRT_ban_string(VRT_CTX, VCL_STRING str)
 				bp = NULL;
 			break;
 		}
-		if (strcmp(av[i], "&&")) {
+		if (vstrcmp(av[i], "&&")) {
 			err = WS_Printf(ctx->ws, "Expected && between "
 			    "conditions, found \"%s\"", av[i]);
 			if (err == NULL)
@@ -1045,7 +1045,7 @@ VRT_strcmp(const char *s1, const char *s2)
 {
 	if (s1 == NULL || s2 == NULL)
 		return (1);
-	return (strcmp(s1, s2));
+	return (vstrcmp(s1, s2));
 }
 
 void

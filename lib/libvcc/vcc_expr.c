@@ -414,10 +414,10 @@ vcc_priv_arg(struct vcc *tl, const char *p, struct symbol *sym)
 	AN(sym);
 	AN(sym->vmod_name);
 
-	if (!strcmp(p, "PRIV_VCL"))
+	if (!vstrcmp(p, "PRIV_VCL"))
 		return (vcc_mk_expr(VOID, "&vmod_priv_%s", sym->vmod_name));
 
-	if (!strcmp(p, "PRIV_CALL")) {
+	if (!vstrcmp(p, "PRIV_CALL")) {
 		bprintf(buf, "vmod_priv_%u", tl->unique++);
 		ifp = New_IniFin(tl);
 		Fh(tl, 0, "static struct vmod_priv %s;\n", buf);
@@ -425,9 +425,9 @@ vcc_priv_arg(struct vcc *tl, const char *p, struct symbol *sym)
 		return (vcc_mk_expr(VOID, "&%s", buf));
 	}
 
-	if (!strcmp(p, "PRIV_TASK"))
+	if (!vstrcmp(p, "PRIV_TASK"))
 		f = "task";
-	else if (!strcmp(p, "PRIV_TOP")) {
+	else if (!vstrcmp(p, "PRIV_TOP")) {
 		f = "top";
 		sym->r_methods &= VCL_MET_TASK_C;
 	} else {

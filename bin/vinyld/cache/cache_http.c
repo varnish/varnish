@@ -1166,7 +1166,7 @@ http_ForceField(struct http *to, unsigned n, const char *t)
 	AN(t);
 
 	/* NB: method names and protocol versions are case-sensitive. */
-	if (to->hd[n].b == NULL || strcmp(to->hd[n].b, t)) {
+	if (to->hd[n].b == NULL || vstrcmp(to->hd[n].b, t)) {
 		i = (HTTP_HDR_UNSET - HTTP_HDR_METHOD);
 		i += to->logtag;
 		/* XXX: this is a dead branch */
@@ -1377,13 +1377,13 @@ HTTP_GetHdrPack(struct worker *wrk, struct objcore *oc, hdr_t hdr)
 		ptr += 4;	/* Skip nhd and status */
 
 		/* XXX: should we also have h2_hdr_eq() ? */
-		if (!strcmp(hdr->str, ":proto:"))
+		if (!vstrcmp(hdr->str, ":proto:"))
 			return (ptr);
 		ptr = strchr(ptr, '\0') + 1;
-		if (!strcmp(hdr->str, ":status:"))
+		if (!vstrcmp(hdr->str, ":status:"))
 			return (ptr);
 		ptr = strchr(ptr, '\0') + 1;
-		if (!strcmp(hdr->str, ":reason:"))
+		if (!vstrcmp(hdr->str, ":reason:"))
 			return (ptr);
 		WRONG("Unknown magic packed header");
 	}

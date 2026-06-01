@@ -709,7 +709,7 @@ vtx_parse_link(const char *str, enum VSL_transaction_e *ptype,
 
 	/* transaction type */
 	for (et = VSL_t_unknown; et < VSL_t__MAX; et++)
-		if (!strcmp(type, vsl_t_names[et]))
+		if (!vstrcmp(type, vsl_t_names[et]))
 			break;
 	if (et >= VSL_t__MAX)
 		et = VSL_t_unknown;
@@ -725,7 +725,7 @@ vtx_parse_link(const char *str, enum VSL_transaction_e *ptype,
 
 	/* transaction reason */
 	for (er = VSL_r_unknown; er < VSL_r__MAX; er++)
-		if (!strcmp(reason, vsl_r_names[er]))
+		if (!vstrcmp(reason, vsl_r_names[er]))
 			break;
 	if (er >= VSL_r__MAX)
 		er = VSL_r_unknown;

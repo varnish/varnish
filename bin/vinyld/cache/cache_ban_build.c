@@ -216,7 +216,7 @@ ban_parse_oper(const char *p)
 	int i;
 
 	for (i = 0; i < BAN_OPERARRSZ; i++) {
-		if (!strcmp(p, ban_oper[i]))
+		if (!vstrcmp(p, ban_oper[i]))
 			return (BANS_OPER_OFF_ + i);
 	}
 	return (-1);
@@ -288,7 +288,7 @@ BAN_AddTest(struct ban_proto *bp,
 		return (bp->err);
 
 	for (pv = pvars; pv->name != NULL; pv++) {
-		if (!(pv->flag & BANS_FLAG_HTTP) && !strcmp(a1, pv->name))
+		if (!(pv->flag & BANS_FLAG_HTTP) && !vstrcmp(a1, pv->name))
 			break;
 		if ((pv->flag & BANS_FLAG_HTTP) && !strncmp(a1, pv->name, vstrlen(pv->name)))
 			break;

@@ -110,7 +110,7 @@ mcf_panic(struct cli *cli, const char * const *av, void *priv)
 	(void)av;
 	(void)priv;
 	v_gcov_flush();
-	AZ(strcmp("", "You asked for it"));
+	AZ(vstrcmp("", "You asked for it"));
 	/* NOTREACHED */
 	abort();
 }
@@ -720,7 +720,7 @@ cli_cmp(const void *a, const void *b)
 	struct cli_cmd_desc * const * const aa = a;
 	struct cli_cmd_desc * const * const bb = b;
 
-	return (strcmp((*aa)->request, (*bb)->request));
+	return (vstrcmp((*aa)->request, (*bb)->request));
 }
 
 void

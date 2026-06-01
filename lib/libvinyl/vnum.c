@@ -632,7 +632,7 @@ main(int argc, char *argv[])
 		consumed = input - tspn->input;
 		bprintf(buf1, "%.4f", dbl);
 		bprintf(buf2, "%.4f", tspn->retval);
-		if (strcmp(buf1, buf2) ||
+		if (vstrcmp(buf1, buf2) ||
 		    consumed != tspn->consumed ||
 		    errtxt != tspn->errtxt) {
 			ec++;

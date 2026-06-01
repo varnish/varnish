@@ -194,7 +194,7 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	for (i = 0; i < aac; i++) {
 		a = aav[i];
 		if (a != NULL) {
-			if (! strcmp(a, "full")) {
+			if (! vstrcmp(a, "full")) {
 				if (getspace != NULL) {
 					ARGV_ERR("-s%s conflicting options\n",
 					    smd_stevedore.name);
@@ -204,7 +204,7 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 				allocobj = smd_full_allocobj;
 				continue;
 			}
-			if (! strcmp(a, "lessspace")) {
+			if (! vstrcmp(a, "lessspace")) {
 				if (getspace != NULL) {
 					ARGV_ERR("-s%s conflicting options\n",
 					    smd_stevedore.name);

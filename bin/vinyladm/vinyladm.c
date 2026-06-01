@@ -278,7 +278,7 @@ command_generator (const char *text, int state)
 		AN(jv2);
 		jv = VTAILQ_NEXT(jv, list);
 		assert (vjsn_is_string(jv2));
-		assert (!strcmp(jv2->name, "request"));
+		assert (!vstrcmp(jv2->name, "request"));
 		if (!strncmp(text, jv2->value, vstrlen(text)))
 			return (strdup(jv2->value));
 	}
@@ -467,7 +467,7 @@ main(int argc, char * const *argv)
 	char *wd;
 	int opt, sock;
 
-	if (argc == 2 && !strcmp(argv[1], "--optstring")) {
+	if (argc == 2 && !vstrcmp(argv[1], "--optstring")) {
 		printf(OPTARG "\n");
 		exit(0);
 	}
@@ -501,7 +501,7 @@ main(int argc, char * const *argv)
 			break;
 		case 'x':
 			AN(optarg);
-			if (strcmp(optarg, "workdir")) {
+			if (vstrcmp(optarg, "workdir")) {
 				fprintf(stderr, "Invalid -x argument\n");
 				usage(1);
 			}

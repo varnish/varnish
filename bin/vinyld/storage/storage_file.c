@@ -141,11 +141,11 @@ smf_init(struct stevedore *parent, int ac, char * const *av)
 			ARGV_ERR("(-sfile) granularity \"%s\": %s\n", av[2], r);
 	}
 	if (ac > 3) {
-		if (!strcmp(av[3], "normal"))
+		if (!vstrcmp(av[3], "normal"))
 			advice = MADV_NORMAL;
-		else if (!strcmp(av[3], "random"))
+		else if (!vstrcmp(av[3], "random"))
 			advice = MADV_RANDOM;
-		else if (!strcmp(av[3], "sequential"))
+		else if (!vstrcmp(av[3], "sequential"))
 			advice = MADV_SEQUENTIAL;
 		else
 			ARGV_ERR("(-s file) invalid advice: \"%s\"", av[3]);

@@ -466,7 +466,7 @@ static void
 include_attr_onerror(struct vep_state *vep)
 {
 
-	vep->include_continue = !strcmp("continue", VSB_data(vep->attr_vsb));
+	vep->include_continue = !vstrcmp("continue", VSB_data(vep->attr_vsb));
 	VSB_destroy(&vep->attr_vsb);
 }
 
@@ -481,11 +481,11 @@ vep_do_include(struct vep_state *vep, enum dowhat what)
 	if (what == DO_ATTR) {
 		Debug("ATTR (%s) (%s)\n", vep->match_hit->match,
 			VSB_data(vep->attr_vsb));
-		if (!strcmp("src=", vep->match_hit->match)) {
+		if (!vstrcmp("src=", vep->match_hit->match)) {
 			include_attr_src(vep);
 			return;
 		}
-		if (!strcmp("onerror=", vep->match_hit->match)) {
+		if (!vstrcmp("onerror=", vep->match_hit->match)) {
 			include_attr_onerror(vep);
 			return;
 		}

@@ -287,7 +287,7 @@ vcl_find(const char *name)
 	VTAILQ_FOREACH(vcl, &vcl_head, list) {
 		if (vcl->discard)
 			continue;
-		if (!strcmp(vcl->loaded_name, name))
+		if (!vstrcmp(vcl->loaded_name, name))
 			return (vcl);
 	}
 	return (NULL);
@@ -367,10 +367,10 @@ VCL_Update(struct vcl **vcc, struct vcl *vcl)
 				   * race */
 	CHECK_OBJ_NOTNULL(vcl, VCL_MAGIC);
 	if (vcl->label == NULL) {
-		AN(strcmp(vcl->state, VCL_TEMP_LABEL->name));
+		AN(vstrcmp(vcl->state, VCL_TEMP_LABEL->name));
 		*vcc = vcl;
 	} else {
-		AZ(strcmp(vcl->state, VCL_TEMP_LABEL->name));
+		AZ(vstrcmp(vcl->state, VCL_TEMP_LABEL->name));
 		*vcc = vcl->label;
 	}
 	CHECK_OBJ_NOTNULL(*vcc, VCL_MAGIC);
@@ -570,7 +570,7 @@ VCL_IterDirector(struct cli *cli, const char *pat,
 	ASSERT_VCL_ACTIVE();
 	vsb = VSB_new_auto();
 	AN(vsb);
-	if (pat == NULL || *pat == '\0' || !strcmp(pat, "*")) {
+	if (pat == NULL || *pat == '\0' || !vstrcmp(pat, "*")) {
 		// all backends in active VCL
 		VSB_printf(vsb, "%s.*", VCL_Name(vcl_active));
 		vcl = vcl_active;
@@ -1148,13 +1148,13 @@ vcl_cli_discard(struct cli *cli, const char * const *av, void *priv)
 	VSC_C_main->n_vcl_avail--;
 	vcl->discard = 1;
 	if (vcl->label != NULL) {
-		AZ(strcmp(vcl->state, VCL_TEMP_LABEL->name));
+		AZ(vstrcmp(vcl->state, VCL_TEMP_LABEL->name));
 		vcl->label->nlabels--;
 		vcl->label= NULL;
 	}
 	Lck_Unlock(&vcl_mtx);
 
-	if (!strcmp(vcl->state, VCL_TEMP_LABEL->name)) {
+	if (!vstrcmp(vcl->state, VCL_TEMP_LABEL->name)) {
 		VTAILQ_REMOVE(&vcl_head, vcl, list);
 		free(vcl->loaded_name);
 		AZ(vcl->vdire);
@@ -1220,7 +1220,7 @@ vcl_cli_show(struct cli *cli, const char * const *av, void *priv)
 	ASSERT_VCL_ACTIVE();
 	AZ(priv);
 
-	if (av[i] != NULL && !strcmp(av[i], "-v")) {
+	if (av[i] != NULL && !vstrcmp(av[i], "-v")) {
 		verbose = 1;
 		i++;
 	}

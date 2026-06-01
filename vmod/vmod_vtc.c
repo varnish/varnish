@@ -400,7 +400,7 @@ vsl_tagcmp(const void *aa, const void *bb)
 		return (-1);
 	else if (a->string == NULL && b->string == NULL)
 		return (0);
-	return (strcmp(a->string, b->string));
+	return (vstrcmp(a->string, b->string));
 }
 
 /*lint -esym(528, init_vsl_tag2enum) */

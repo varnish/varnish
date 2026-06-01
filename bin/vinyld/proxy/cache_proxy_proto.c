@@ -112,9 +112,9 @@ vpx_proto1(const struct worker *wrk, const struct req *req)
 		return (-1);
 	}
 
-	if (!strcmp(fld[0], "TCP4"))
+	if (!vstrcmp(fld[0], "TCP4"))
 		pfam = PF_INET;
-	else if (!strcmp(fld[0], "TCP6"))
+	else if (!vstrcmp(fld[0], "TCP6"))
 		pfam = PF_INET6;
 	else {
 		VSL(SLT_ProxyGarbage, req->sp->vxid,

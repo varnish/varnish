@@ -638,7 +638,7 @@ main(int argc, char **argv)
 		gmtime_r(&t, &tm);
 		strftime(buf1, sizeof buf1, "%a, %d %b %Y %T GMT", &tm);
 		VTIM_format(t, buf);
-		if (strcmp(buf, buf1)) {
+		if (vstrcmp(buf, buf1)) {
 			printf("libc: <%s> Vtim <%s> %jd\n",
 			    buf1, buf, (intmax_t)t);
 			exit(2);

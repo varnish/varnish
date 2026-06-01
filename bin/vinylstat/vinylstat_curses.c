@@ -1127,15 +1127,15 @@ newpt(void *priv, const struct VSC_point *const vpt)
 	VTAILQ_INSERT_TAIL(&ptlist, pt, list);
 	n_ptlist++;
 
-	AZ(strcmp(vpt->ctype, "uint64_t"));
+	AZ(vstrcmp(vpt->ctype, "uint64_t"));
 
-	if (!strcmp(vpt->name, "MGT.uptime"))
+	if (!vstrcmp(vpt->name, "MGT.uptime"))
 		mgt_uptime = vpt->ptr;
-	if (!strcmp(vpt->name, "MAIN.uptime"))
+	if (!vstrcmp(vpt->name, "MAIN.uptime"))
 		main_uptime = vpt->ptr;
-	if (!strcmp(vpt->name, "MAIN.cache_hit"))
+	if (!vstrcmp(vpt->name, "MAIN.cache_hit"))
 		main_cache_hit = vpt->ptr;
-	if (!strcmp(vpt->name, "MAIN.cache_miss"))
+	if (!vstrcmp(vpt->name, "MAIN.cache_miss"))
 		main_cache_miss = vpt->ptr;
 	return (pt);
 }

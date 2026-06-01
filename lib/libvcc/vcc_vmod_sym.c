@@ -123,7 +123,7 @@ func_restrict(struct vcc *tl, struct symbol *sym, vcc_kind_t kind, const struct 
 	vv = VTAILQ_FIRST(&v->children);
 	AN(vv);
 	assert(vjsn_is_string(vv));
-	if (strcmp(vv->value, "$RESTRICT"))
+	if (vstrcmp(vv->value, "$RESTRICT"))
 		return;
 	vv = VTAILQ_NEXT(vv, list);
 	AN(vv);
@@ -134,7 +134,7 @@ func_restrict(struct vcc *tl, struct symbol *sym, vcc_kind_t kind, const struct 
 	while (vv) {
 		s = 0;
 #define VCL_CTX(l,H)							\
-		if (strcmp(vv->value, #l) == 0) s = VCL_MET_##H;
+		if (vstrcmp(vv->value, #l) == 0) s = VCL_MET_##H;
 #include "tbl/vcl_context.h"
 		if (!s) {
 			VSB_printf(tl->sb, "Error in vmod \"%s\", invalid scope for $Restrict: %s\n",sym->vmod_name, vv->value);
@@ -276,7 +276,7 @@ vcc_Act_New(struct vcc *tl, struct token *t, struct symbol *sym)
 	// vv = flags
 	assert(vjsn_is_object(vv));
 	VTAILQ_FOREACH(vf, &vv->children, list)
-		if (!strcmp(vf->name, "NULL_OK") && vjsn_is_true(vf))
+		if (!vstrcmp(vf->name, "NULL_OK") && vjsn_is_true(vf))
 			null_ok = 1;
 	if (!null_ok)
 		VTAILQ_INSERT_TAIL(&tl->sym_objects, isym, sideways);
@@ -290,7 +290,7 @@ vcc_Act_New(struct vcc *tl, struct token *t, struct symbol *sym)
 	vf = VTAILQ_FIRST(&vv->children);
 	vv = VTAILQ_NEXT(vv, list);
 	assert(vjsn_is_string(vf));
-	assert(!strcmp(vf->value, "$INIT"));
+	assert(!vstrcmp(vf->value, "$INIT"));
 
 	vf = VTAILQ_NEXT(vf, list);
 
@@ -306,7 +306,7 @@ vcc_Act_New(struct vcc *tl, struct token *t, struct symbol *sym)
 
 	vf = VTAILQ_FIRST(&vv->children);
 	assert(vjsn_is_string(vf));
-	assert(!strcmp(vf->value, "$FINI"));
+	assert(!vstrcmp(vf->value, "$FINI"));
 
 	vf = VTAILQ_NEXT(vf, list);
 	vf = VTAILQ_FIRST(&vf->children);

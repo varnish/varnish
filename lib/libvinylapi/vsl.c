@@ -417,7 +417,7 @@ VSL_WriteOpen(struct VSL_data *vsl, const char *name, int append, int unbuf)
 {
 	FILE* f;
 
-	if (!strcmp(name, "-"))
+	if (!vstrcmp(name, "-"))
 		f = stdout;
 	else
 		f = fopen(name, append ? "a" : "w");

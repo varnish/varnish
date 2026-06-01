@@ -136,7 +136,7 @@ mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv)
 	v_dst = mgt_vcl_symtab_val(vv, "dst");
 
 	VTAILQ_FOREACH(vf, &vmodhead, list)
-		if (!strcmp(vf->fname, v_dst))
+		if (!vstrcmp(vf->fname, v_dst))
 			break;
 	if (vf == NULL) {
 		ALLOC_OBJ(vf, VMODFILE_MAGIC);
@@ -177,12 +177,12 @@ mgt_vcl_symtab(struct vclprog *vp, const char *input)
 		if (v2 == NULL)
 			continue;
 		assert(vjsn_is_string(v2));
-		if (strcmp(v2->value, "import"))
+		if (vstrcmp(v2->value, "import"))
 			continue;
 		typ = mgt_vcl_symtab_val(v1, "type");
-		if (!strcmp(typ, "$VMOD"))
+		if (!vstrcmp(typ, "$VMOD"))
 			mgt_vcl_import_vmod(vp, v1);
-		else if (!strcmp(typ, "$VCL"))
+		else if (!vstrcmp(typ, "$VCL"))
 			mgt_vcl_import_vcl(vp, v1);
 		else
 			WRONG("Bad symtab import entry");

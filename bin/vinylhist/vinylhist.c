@@ -583,7 +583,7 @@ main(int argc, char **argv)
 	if (profile) {
 		for (active_profile = profiles; active_profile->name;
 		     active_profile++) {
-			if (strcmp(active_profile->name, profile) == 0)
+			if (vstrcmp(active_profile->name, profile) == 0)
 				break;
 		}
 	}

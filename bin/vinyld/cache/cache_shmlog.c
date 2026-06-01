@@ -473,7 +473,7 @@ VSLbv(struct vsl_log *vsl, enum VSL_tag_e tag, const char *fmt, va_list ap)
 	/*
 	 * If the format is trivial, deal with it directly
 	 */
-	if (!strcmp(fmt, "%s")) {
+	if (!vstrcmp(fmt, "%s")) {
 		p1 = va_arg(ap, char *);
 		vslb_simple(vsl, tag, 0, p1);
 		return;

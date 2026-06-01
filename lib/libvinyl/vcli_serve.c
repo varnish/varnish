@@ -147,9 +147,9 @@ VCLS_func_help(struct cli *cli, const char * const *av, void *priv)
 	CHECK_OBJ_NOTNULL(cs, VCLS_MAGIC);
 
 	for (av += 2; av[0] != NULL && av[0][0] == '-'; av++) {
-		if (!strcmp(av[0], "-a")) {
+		if (!vstrcmp(av[0], "-a")) {
 			filter = 3;
-		} else if (!strcmp(av[0], "-d")) {
+		} else if (!vstrcmp(av[0], "-d")) {
 			filter = 2;
 		} else {
 			VCLI_Out(cli, "Unknown flag\n");
@@ -164,7 +164,7 @@ VCLS_func_help(struct cli *cli, const char * const *av, void *priv)
 			continue;
 		if (clp->desc->flags & CLI_F_HIDDEN)
 			continue;
-		if (av[0] != NULL && !strcmp(clp->desc->request, av[0])) {
+		if (av[0] != NULL && !vstrcmp(clp->desc->request, av[0])) {
 			help_helper(cli, clp, av);
 			return;
 		} else if (av[0] == NULL) {
@@ -246,7 +246,7 @@ cls_dispatch(struct cli *cli, const struct cli_proto *cp,
 
 	VSB_clear(cli->sb);
 
-	if (na > 1 && !strcmp(av[2], "-j"))
+	if (na > 1 && !vstrcmp(av[2], "-j"))
 		json = 1;
 
 	if (cp->func == NULL && !json) {
@@ -462,7 +462,7 @@ cls_feed(struct VCLS_fd *cfd, const char *p, const char *e)
 			if (cli->auth > 0 &&
 			    av[0] == NULL &&
 			    ac >= 3 &&
-			    !strcmp(av[ac-2], "<<") &&
+			    !vstrcmp(av[ac - 2], "<<") &&
 			    *av[ac - 1] != '\0') {
 				/* Go to "<< nonce" mode */
 				cfd->argv = av;
@@ -617,12 +617,12 @@ VCLS_AddFunc(struct VCLS *cs, struct cli_proto *clp)
 	AN(clp);
 
 	for (;clp->desc != NULL; clp++) {
-		if (!strcmp(clp->desc->request, "*")) {
+		if (!vstrcmp(clp->desc->request, "*")) {
 			cs->wildcard = clp;
 		} else {
 			i = 0;
 			VTAILQ_FOREACH(clp2, &cs->funcs, list) {
-				i = strcmp(clp->desc->request,
+				i = vstrcmp(clp->desc->request,
 				    clp2->desc->request);
 				if (i <= 0)
 					break;
