@@ -297,7 +297,7 @@ priv_vcl_fini(VRT_CTX, void *priv)
 	struct priv_vcl *priv_vcl;
 
 	CAST_OBJ_NOTNULL(priv_vcl, priv, PRIV_VCL_MAGIC);
-	AZ(close(priv_vcl->tmpf));
+	closefd(&priv_vcl->tmpf);
 	AN(priv_vcl->foo);
 	AZ(unlink(priv_vcl->foo));
 	free(priv_vcl->foo);
