@@ -302,7 +302,7 @@ BAN_AddTest(struct ban_proto *bp,
 
 	VSB_putc(bp->vsb, pv->tag);
 	if (pv->flag & BANS_FLAG_HTTP) {
-		if (strlen(a1 + strlen(pv->name)) < 1)
+		if (vstrlen(a1 + vstrlen(pv->name)) < 1)
 			return (ban_error(bp,
 			    "Missing header name: \"%s\"", pv->name));
 		assert(BANS_HAS_ARG1_SPEC(pv->tag));
