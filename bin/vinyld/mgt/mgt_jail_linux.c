@@ -174,8 +174,8 @@ vjl_make_workdir(const char *dname, const char *what, struct vsb *vsb)
 		return (1);
 	}
 	if (info.f_type != TMPFS_MAGIC) {
-		VSB_printf(vsb, "Working directory not mounted on"
-		    " tmpfs partition\n");
+		VSB_cat(vsb, "Working directory not mounted on"
+			" tmpfs partition\n");
 	}
 	vjl_master(JAIL_MASTER_LOW);
 	return (0);

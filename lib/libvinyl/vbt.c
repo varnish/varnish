@@ -166,7 +166,7 @@ VBT_dump(size_t len, char buf[len])
 	if (VSB_init(vsb, buf, len) == NULL)
 		return (-1);
 
-	VSB_printf(vsb, "Backtrace:\n");
+	VSB_cat(vsb, "Backtrace:\n");
 	VSB_indent(vsb, 2);
 	VBT_format(vsb);
 	VSB_indent(vsb, -2);
