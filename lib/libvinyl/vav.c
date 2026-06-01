@@ -429,7 +429,7 @@ test_run(const struct test_case *tc, int *ret)
 	char **argv, *tmp;
 	int argc, i;
 
-	i = strlen(tc->str);
+	i = vstrlen(tc->str);
 	if (i == 0) {
 		argv = VAV_Parse(tc->str, &argc, tc->flag);
 	} else {

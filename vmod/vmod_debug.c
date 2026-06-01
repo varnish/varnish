@@ -160,7 +160,7 @@ xyzzy_test_priv_task(VRT_CTX, struct vmod_priv *priv, VCL_STRING s)
 		    priv, priv->priv);
 	} else {
 		char *n = realloc(priv->priv,
-		    strlen(priv->priv) + strlen(s) + 2);
+		    vstrlen(priv->priv) + vstrlen(s) + 2);
 		if (n == NULL)
 			return (NULL);
 		strcat(n, " ");
@@ -336,7 +336,7 @@ event_load(VRT_CTX, struct vmod_priv *priv)
 	AN(priv_vcl->foo);
 	priv_vcl->tmpf = mkstemp(priv_vcl->foo);
 	assert(priv_vcl->tmpf >= 0);
-	AN(write(priv_vcl->tmpf, priv_vcl->foo, strlen(priv_vcl->foo)));
+	AN(write(priv_vcl->tmpf, priv_vcl->foo, vstrlen(priv_vcl->foo)));
 	priv->priv = priv_vcl;
 	priv->methods = priv_vcl_methods;
 
@@ -636,7 +636,7 @@ xyzzy_concat__init(VRT_CTX, struct xyzzy_debug_concat **concatp,
 
 	for (int i = 0; i < s->n; i++)
 		if (s->p[i] != NULL)
-			sz += strlen(s->p[i]);
+			sz += vstrlen(s->p[i]);
 	p = malloc(sz + 1);
 	AN(p);
 	(void)VRT_Strands(p, sz + 1, s);
@@ -1387,7 +1387,8 @@ xyzzy_log_strands(VRT_CTX, VCL_STRING prefix, VCL_STRANDS subject, VCL_INT nn)
 	for (i = 0; i < subject->n; i++) {
 		const char *p = subject->p[i];
 		mylog(ctx->vsl, SLT_Debug, "%s[%d]: (%s) %p %.*s%s", prefix, i,
-		    ptr_where(ctx, p), p, n, p, strlen(p) > (unsigned)n ? "..." : "");
+		    ptr_where(ctx, p), p, n, p,
+		    vstrlen(p) > (unsigned)n ? "..." : "");
 	}
 }
 

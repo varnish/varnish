@@ -89,7 +89,7 @@ id_decode(const enum encoding enc, blob_dest_t buf,
 		s = strings->p[i];
 		if (s == NULL || *s == '\0')
 			continue;
-		len = strlen(s);
+		len = vstrlen(s);
 		if (len > c)
 			len = c;
 		c -= len;

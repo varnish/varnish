@@ -172,7 +172,7 @@ ban_parse_http(const struct ban_proto *bp, const char *a1)
 {
 	int l;
 
-	l = strlen(a1) + 1;
+	l = vstrlen(a1) + 1;
 	assert(l <= 127);
 	VSB_putc(bp->vsb, (char)l);
 	VSB_cat(bp->vsb, a1);
@@ -231,7 +231,7 @@ ban_add_spec(struct ban_proto *bp, const struct pvar *pv, int op, const char *a3
 
 	assert(! BANS_HAS_ARG2_DOUBLE(pv->tag));
 
-	ban_add_lump(bp, a3, strlen(a3) + 1);
+	ban_add_lump(bp, a3, vstrlen(a3) + 1);
 	VSB_putc(bp->vsb, op);
 
 	if (! BANS_HAS_ARG2_SPEC(op))
@@ -290,7 +290,7 @@ BAN_AddTest(struct ban_proto *bp,
 	for (pv = pvars; pv->name != NULL; pv++) {
 		if (!(pv->flag & BANS_FLAG_HTTP) && !strcmp(a1, pv->name))
 			break;
-		if ((pv->flag & BANS_FLAG_HTTP) && !strncmp(a1, pv->name, strlen(pv->name)))
+		if ((pv->flag & BANS_FLAG_HTTP) && !strncmp(a1, pv->name, vstrlen(pv->name)))
 			break;
 	}
 
@@ -306,7 +306,7 @@ BAN_AddTest(struct ban_proto *bp,
 			return (ban_error(bp,
 			    "Missing header name: \"%s\"", pv->name));
 		assert(BANS_HAS_ARG1_SPEC(pv->tag));
-		ban_parse_http(bp, a1 + strlen(pv->name));
+		ban_parse_http(bp, a1 + vstrlen(pv->name));
 	}
 
 	op = ban_parse_oper(a2);

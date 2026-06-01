@@ -214,7 +214,7 @@ SES_Set_String_Attr(struct sess *sp, enum sess_attr a, const char *src)
 	if (strcmp(sess_attr[a].type, "char"))
 		WRONG("wrong sess_attr: not char");
 
-	l = sz = strlen(src) + 1;
+	l = sz = vstrlen(src) + 1;
 	if (! ses_res_attr(sp, a, &q, &sz))
 		return (0);
 	assert(l == sz);

@@ -98,7 +98,7 @@ Lck_Witness_Unlock(const struct ilck *il)
 		r = q;
 	else
 		*r++ = '\0';
-	if (memcmp(r, il->w, strlen(il->w)))
+	if (memcmp(r, il->w, vstrlen(il->w)))
 		VSL(SLT_Witness, NO_VXID, "Unlock %s @ %s <%s>", il->w, r, q);
 	else
 		*r = '\0';

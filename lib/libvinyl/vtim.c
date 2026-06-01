@@ -312,9 +312,9 @@ vtim_parse_http(struct tm *tm, const char **pp)
 			DIGIT(10, year);
 			DIGIT(1, year);
 		} else if (!strncmp(p, more_weekday[tm->tm_wday],
-		    strlen(more_weekday[tm->tm_wday]))) {
+		    vstrlen(more_weekday[tm->tm_wday]))) {
 			/* RFC850 -- "Sunday, 06-Nov-94 08:49:37 GMT" */
-			p += strlen(more_weekday[tm->tm_wday]);
+			p += vstrlen(more_weekday[tm->tm_wday]);
 			MUSTBE(',');
 			MUSTBE(' ');
 			DIGIT(10, mday);

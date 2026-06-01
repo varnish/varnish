@@ -115,7 +115,7 @@ TlDup(struct vcc *tl, const char *s)
 {
 	char *p;
 
-	p = TlAlloc(tl, strlen(s) + 1);
+	p = TlAlloc(tl, vstrlen(s) + 1);
 	AN(p);
 	strcpy(p, s);
 	return (p);

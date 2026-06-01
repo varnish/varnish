@@ -640,7 +640,7 @@ match(const char *b, size_t l, ...)
 		m = va_arg(ap, const char *);
 		if (m == NULL)
 			break;
-		l = strlen(m);
+		l = vstrlen(m);
 		if (e - b <= l || b[l] != '\0' || strncmp(b, m, l)) {
 			printf("%.*s != %s\n", (int)(e - b), b, m);
 			r = -1;

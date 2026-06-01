@@ -389,7 +389,7 @@ VRT_HashStrands32(VCL_STRANDS s)
 	for (i = 0; i < s->n; i++) {
 		p = s->p[i];
 		if (p != NULL && *p != '\0')
-			VSHA256_Update(&sha_ctx, p, strlen(p));
+			VSHA256_Update(&sha_ctx, p, vstrlen(p));
 	}
 	VSHA256_Final(sha256, &sha_ctx);
 
@@ -419,7 +419,7 @@ VRT_Strands(char *d, size_t dl, VCL_STRANDS s)
 	e = b + dl;
 	for (int i = 0; i < s->n; i++)
 		if (s->p[i] != NULL && *s->p[i] != '\0') {
-			x = strlen(s->p[i]);
+			x = vstrlen(s->p[i]);
 			if (b + x >= e)
 				return (NULL);
 			memcpy(b, s->p[i], x);
@@ -614,7 +614,7 @@ VRT_SetHdr(VRT_CTX, VCL_HEADER hs, const char *pfx, VCL_STRANDS s)
 	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
 
 	u = WS_ReserveAll(hp->ws);
-	pl = (pfx == NULL) ? 0 : strlen(pfx);
+	pl = (pfx == NULL) ? 0 : vstrlen(pfx);
 	l = hs->what->len + 1 + pl;
 	if (u <= l) {
 		WS_Release(hp->ws, 0);
@@ -1143,7 +1143,7 @@ VRT_Endpoint_Clone(const struct vrt_endpoint * const vep)
 	if (vep->ipv6)
 		sz += vsa_suckaddr_len;
 	if (vep->uds_path != NULL) {
-		uds_len = strlen(vep->uds_path) + 1;
+		uds_len = vstrlen(vep->uds_path) + 1;
 		sz += uds_len;
 	}
 	if (vep->hosthdr != NULL) {

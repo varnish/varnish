@@ -429,7 +429,7 @@ vcc_xreftable_len(struct vcc *tl, const struct symbol *sym)
 	(void)tl;
 	CHECK_OBJ_NOTNULL(sym, SYMBOL_MAGIC);
 	CHECK_OBJ_NOTNULL(sym->type, TYPE_MAGIC);
-	len = strlen(sym->type->name);
+	len = vstrlen(sym->type->name);
 	if (sym_type_len < len)
 		sym_type_len = len;
 }

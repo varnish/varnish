@@ -143,7 +143,7 @@ thr_setname_generic(const char *name)
 	/* The Linux kernel enforces a strict limitation of 15 bytes name,
 	 * truncate the name if we would overflow it.
 	 */
-	if (strlen(name) > 15) {
+	if (vstrlen(name) > 15) {
 		bprintf(buf, "%.14s~", name);
 		name = buf;
 	}

@@ -134,7 +134,7 @@ WS_Allocated(const struct ws *ws, const void *ptr, ssize_t len)
 	WS_Assert(ws);
 	AN(ptr);
 	if (len < 0)
-		len = strlen(ptr) + 1;
+		len = vstrlen(ptr) + 1;
 	p = (uintptr_t)ptr;
 	we = ws_emu(ws);
 
@@ -325,7 +325,7 @@ WS_Copy(struct ws *ws, const void *str, int len)
 
 	AN(str);
 	if (len == -1)
-		len = strlen(str) + 1;
+		len = vstrlen(str) + 1;
 	assert(len > 0);
 	wa = ws_emu_alloc(ws, len);
 	WS_Assert(ws);

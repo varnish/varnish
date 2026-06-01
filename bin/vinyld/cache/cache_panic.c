@@ -263,7 +263,7 @@ pan_objcore(struct vsb *vsb, const char *typ, const struct objcore *oc)
 	VSB_printf(vsb, "stevedore = %p", oc->stobj->stevedore);
 	if (oc->stobj->stevedore != NULL) {
 		VSB_printf(vsb, " (%s", oc->stobj->stevedore->name);
-		if (strlen(oc->stobj->stevedore->ident))
+		if (vstrlen(oc->stobj->stevedore->ident))
 			VSB_printf(vsb, " %s", oc->stobj->stevedore->ident);
 		VSB_cat(vsb, ")");
 		if (oc->stobj->stevedore->panic) {

@@ -381,7 +381,7 @@ VRY_Validate(const uint8_t *vary)
 	unsigned l, retval = 0;
 
 	while (vary[2] != 0) {
-		assert(strlen((const char*)vary + 3) == vary[2]);
+		assert(vstrlen((const char *)vary + 3) == vary[2]);
 		l = VRY_Len(vary);
 		retval += l;
 		vary += l;

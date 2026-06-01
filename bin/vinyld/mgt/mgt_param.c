@@ -680,7 +680,7 @@ mcf_init_params(void)
 			exit(4);
 		}
 		mcf_addpar(pp);
-		margin2 = vmax_t(int, margin2, strlen(pp->name) + 1);
+		margin2 = vmax_t(int, margin2, vstrlen(pp->name) + 1);
 	}
 }
 
@@ -879,7 +879,7 @@ MCF_DumpRstParam(void)
 		    continue;
 		printf(".. _ref_param_%s:\n\n", pp->name);
 		printf("%s\n", pp->name);
-		for (z = 0; z < strlen(pp->name); z++)
+		for (z = 0; z < vstrlen(pp->name); z++)
 			printf("~");
 		printf("\n");
 

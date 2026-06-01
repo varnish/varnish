@@ -477,11 +477,11 @@ vjsn_dump_i(const struct vjsn_val *jsv, FILE *fo, int indent)
 		printf("[\"%s\"]: ", jsv->name);
 	printf("{%s}", jsv->type);
 	if (jsv->value != NULL) {
-		if (strlen(jsv->value) < 20)
+		if (vstrlen(jsv->value) < 20)
 			printf(" <%s", jsv->value);
 		else
 			printf(" <%.10s[...#%zu]",
-			    jsv->value, strlen(jsv->value + 10));
+			    jsv->value, vstrlen(jsv->value + 10));
 		printf(">");
 	}
 	printf("\n");

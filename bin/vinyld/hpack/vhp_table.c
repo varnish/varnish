@@ -307,7 +307,7 @@ VHT_AppendName(struct vht_table *tbl, const char *buf, ssize_t len)
 		return;
 	AN(buf);
 	if (len < 0)
-		len = strlen(buf);
+		len = vstrlen(buf);
 	vht_trim(tbl, tbl->maxsize - len);
 	if (tbl->n == 0)
 		/* Max size exceeded */
@@ -325,7 +325,7 @@ VHT_AppendValue(struct vht_table *tbl, const char *buf, ssize_t len)
 		return;
 	AN(buf);
 	if (len < 0)
-		len = strlen(buf);
+		len = vstrlen(buf);
 	vht_trim(tbl, tbl->maxsize - len);
 	if (tbl->n == 0)
 		/* Max size exceeded */
@@ -519,10 +519,10 @@ vht_matchtable(struct vht_table *tbl, ...)
 
 		if (a) {
 			AN(b);
-			if (e->namelen != strlen(a) ||
+			if (e->namelen != vstrlen(a) ||
 			    strncmp(a, tbl->buf + e->offset, e->namelen))
 				r = -1;
-			if (e->valuelen != strlen(b) ||
+			if (e->valuelen != vstrlen(b) ||
 			    strncmp(b, tbl->buf + e->offset + e->namelen,
 			     e->valuelen))
 				r = -1;
@@ -571,21 +571,21 @@ test_1(void)
 
 	/* 1: ':authority' -> '' */
 	p = VHT_LookupName(NULL, 1, &l);
-	assert(l == strlen(":authority"));
-	AZ(strncmp(p, ":authority", strlen(":authority")));
+	assert(l == vstrlen(":authority"));
+	AZ(strncmp(p, ":authority", vstrlen(":authority")));
 	p = VHT_LookupValue(NULL, 1, &l);
 	AN(p);
 	AZ(l);
 
 	/* 5: ':path' -> '/index.html' */
 	p = VHT_LookupValue(NULL, 5, &l);
-	assert(l == strlen("/index.html"));
-	AZ(strncmp(p, "/index.html", strlen("/index.html")));
+	assert(l == vstrlen("/index.html"));
+	AZ(strncmp(p, "/index.html", vstrlen("/index.html")));
 
 	/* 61: 'www-authenticate' -> '' */
 	p = VHT_LookupName(NULL, 61, &l);
-	assert(l == strlen("www-authenticate"));
-	AZ(strncmp(p, "www-authenticate", strlen("www-authenticate")));
+	assert(l == vstrlen("www-authenticate"));
+	AZ(strncmp(p, "www-authenticate", vstrlen("www-authenticate")));
 	p = VHT_LookupValue(NULL, 61, &l);
 	AN(p);
 	AZ(l);
@@ -739,7 +739,7 @@ test_4(void)
 	/* New entry indexed from dynamic table, overlap eviction with
 	   overlap larger than the copy buffer size */
 	VHT_NewEntry(tbl);
-	VHT_AppendName(tbl, longname, strlen(longname));
+	VHT_AppendName(tbl, longname, vstrlen(longname));
 	AZ(vht_matchtable(tbl, longname, "", NULL));
 	AZ(VHT_NewEntry_Indexed(tbl, VHT_DYNAMIC + 0));
 	VHT_AppendValue(tbl, "2", -1);

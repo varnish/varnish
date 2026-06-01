@@ -208,7 +208,7 @@ update(unsigned p)
 		n++;
 	AC(erase());
 	q = ident;
-	len = COLS - strlen(q);
+	len = COLS - vstrlen(q);
 	if (end_of_file)
 		IC(mvprintw(0, len - (1 + 6), "%s (EOF)", q));
 	else
@@ -248,8 +248,8 @@ do_curses(void *arg)
 	for (i = 0; i < 256; i++) {
 		if (VSL_tags[i] == NULL)
 			continue;
-		if (maxfieldlen < strlen(VSL_tags[i]))
-			maxfieldlen = strlen(VSL_tags[i]);
+		if (maxfieldlen < vstrlen(VSL_tags[i]))
+			maxfieldlen = vstrlen(VSL_tags[i]);
 	}
 
 	(void)initscr();

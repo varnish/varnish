@@ -91,7 +91,7 @@ cli_write(int sock, const char *s)
 {
 	int i, l;
 
-	i = strlen(s);
+	i = vstrlen(s);
 	l = write (sock, s, i);
 	if (i == l)
 		return;
@@ -185,7 +185,7 @@ pass_answer(int fd, enum pass_mode_e mode)
 	}
 
 	if (p_arg && answer != NULL) {
-		printf("%-3u %-8zu\n%s", status, strlen(answer), answer);
+		printf("%-3u %-8zu\n%s", status, vstrlen(answer), answer);
 	} else if (p_arg) {
 		printf("%-3u %-8u\n", status, 0U);
 	} else {
@@ -279,7 +279,7 @@ command_generator (const char *text, int state)
 		jv = VTAILQ_NEXT(jv, list);
 		assert (vjsn_is_string(jv2));
 		assert (!strcmp(jv2->name, "request"));
-		if (!strncmp(text, jv2->value, strlen(text)))
+		if (!strncmp(text, jv2->value, vstrlen(text)))
 			return (strdup(jv2->value));
 	}
 	vjsn_delete(&jsn_cmds);

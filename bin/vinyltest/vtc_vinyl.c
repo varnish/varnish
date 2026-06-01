@@ -150,8 +150,8 @@ vinyl_ask_cli(const struct vinyl *v, const char *cmd, char **repl)
 
 	if (cmd != NULL) {
 		vtc_dump(v->vl, 4, "CLI TX", cmd, -1);
-		i = write(v->cli_fd, cmd, strlen(cmd));
-		if (i != strlen(cmd) && !vtc_stop)
+		i = write(v->cli_fd, cmd, vstrlen(cmd));
+		if (i != vstrlen(cmd) && !vtc_stop)
 			vinyl_fatal(v, "CLI write failed (%s) = %u %s",
 			    cmd, errno, strerror(errno));
 		i = write(v->cli_fd, "\n", 1);

@@ -759,7 +759,7 @@ draw_line(WINDOW *w, int y, const struct pt *pt)
 	assert(colw_name >= COLW_NAME_MIN);
 	X = getmaxx(w);
 	x = 0;
-	if (strlen(pt->vpt->name) > colw_name)
+	if (vstrlen(pt->vpt->name) > colw_name)
 		IC(mvwprintw(w, y, x, "%.*s...", colw_name - 3, pt->vpt->name));
 	else
 		IC(mvwprintw(w, y, x, "%.*s", colw_name, pt->vpt->name));
@@ -867,13 +867,13 @@ draw_bar_b(void)
 	    page_start + l_points < n_ptarray ?
 		page_start + l_points : n_ptarray,
 	    n_ptarray);
-	IC(mvwprintw(w_bar_b, 0, X - strlen(buf), "%s", buf));
-	X -= strlen(buf) + 2;
+	IC(mvwprintw(w_bar_b, 0, X - vstrlen(buf), "%s", buf));
+	X -= vstrlen(buf) + 2;
 
 	if (verbosity != NULL) {
-		IC(mvwprintw(w_bar_b, 0, X - strlen(verbosity->label), "%s",
-		    verbosity->label));
-		X -= strlen(verbosity->label) + 2;
+		IC(mvwprintw(w_bar_b, 0, X - vstrlen(verbosity->label), "%s",
+			     verbosity->label));
+		X -= vstrlen(verbosity->label) + 2;
 	}
 	if (!hide_unseen) {
 		IC(mvwprintw(w_bar_b, 0, X - 6, "%s", "UNSEEN"));

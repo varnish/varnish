@@ -229,7 +229,7 @@ vep_match(const struct vep_state *vep, const char *b, const char *e)
 
 	AN(vep->match);
 	for (vm = vep->match; vm->match != NULL; vm++) {
-		assert(strlen(vm->match) <= sizeof (vep->tag));
+		assert(vstrlen(vm->match) <= sizeof (vep->tag));
 		r = b;
 		for (q = vm->match; *q != '\0' && r < e; q++, r++)
 			if (*q != *r)
@@ -965,7 +965,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 			vep->match_hit = vm;
 			if (vm != NULL) {
 				if (vm->match != NULL)
-					p += strlen(vm->match);
+					p += vstrlen(vm->match);
 				vep->state = *vm->state;
 				vep->match = NULL;
 				vep->tag_i = 0;
@@ -1003,7 +1003,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 				vep->match_hit = vm;
 				vep->state = *vm->state;
 				if (vm->match != NULL) {
-					i = strlen(vm->match);
+					i = vstrlen(vm->match);
 					if (i > vep->tag_i)
 						p += i - vep->tag_i;
 				}

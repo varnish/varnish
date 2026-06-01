@@ -299,7 +299,7 @@ accumulate(struct VSL_data *vsl, struct VSL_transaction * const pt[],
 				if (active_profile->prefix &&
 				    strncmp(VSL_CDATA(tr->c->rec.ptr),
 				    active_profile->prefix,
-				    strlen(active_profile->prefix)) != 0)
+				    vstrlen(active_profile->prefix)) != 0)
 					break;
 
 				i = sscanf(VSL_CDATA(tr->c->rec.ptr),

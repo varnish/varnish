@@ -72,7 +72,7 @@ smp_def_sign(const struct smp_sc *sc, struct smp_signctx *ctx,
 {
 
 	AZ(off & 7);			/* Alignment */
-	assert(strlen(id) < sizeof ctx->ss->ident);
+	assert(vstrlen(id) < sizeof ctx->ss->ident);
 
 	memset(ctx, 0, sizeof *ctx);
 	ctx->ss = (void*)(sc->base + off);
@@ -143,7 +143,7 @@ smp_reset_sign(struct smp_signctx *ctx)
 {
 
 	memset(ctx->ss, 0, sizeof *ctx->ss);
-	assert(strlen(ctx->id) < sizeof *ctx->ss);
+	assert(vstrlen(ctx->id) < sizeof *ctx->ss);
 	strcpy(ctx->ss->ident, ctx->id);
 	ctx->ss->unique = ctx->unique;
 	ctx->ss->mapped = (uintptr_t)ctx->ss;
@@ -329,7 +329,7 @@ smp_valid_silo(struct smp_sc *sc)
 	struct smp_ident	*si;
 	int i, j;
 
-	assert(strlen(SMP_IDENT_STRING) < sizeof si->ident);
+	assert(vstrlen(SMP_IDENT_STRING) < sizeof si->ident);
 
 	i = smp_chk_sign(&sc->idn);
 	if (i)

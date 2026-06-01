@@ -168,7 +168,7 @@ mcf_askchild(struct cli *cli, const char * const *av, void *priv)
 
 	VSB_clear(cli_buf);
 	for (i = 1; av[i] != NULL; i++) {
-		VSB_quote(cli_buf, av[i], strlen(av[i]), 0);
+		VSB_quote(cli_buf, av[i], vstrlen(av[i]), 0);
 		VSB_putc(cli_buf, ' ');
 	}
 	VSB_putc(cli_buf, '\n');
@@ -517,7 +517,7 @@ mgt_cli_secret(const char *S_arg)
 	char buf[BUFSIZ];
 
 	/* Save in shmem */
-	mgt_SHM_static_alloc(S_arg, strlen(S_arg) + 1L, "Arg", "-S");
+	mgt_SHM_static_alloc(S_arg, vstrlen(S_arg) + 1L, "Arg", "-S");
 
 	VJ_master(JAIL_MASTER_FILE);
 	fd = open(S_arg, O_RDONLY);
@@ -745,7 +745,7 @@ mgt_DumpRstCli(void)
 			fputc(*p == '.' ? '_' : *p, stdout);
 		printf(":\n\n");
 		printf("%s\n", cp->syntax);
-		for (j = 0; j < strlen(cp->syntax); j++)
+		for (j = 0; j < vstrlen(cp->syntax); j++)
 			printf("~");
 		printf("\n");
 		printf("  %s\n", cp->help);

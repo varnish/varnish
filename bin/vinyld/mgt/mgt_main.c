@@ -976,7 +976,7 @@ main(int argc, char * const *argv)
 
 	mgt_SHM_Init();
 
-	mgt_SHM_static_alloc(i_arg, strlen(i_arg) + 1L, "Arg", "-i");
+	mgt_SHM_static_alloc(i_arg, vstrlen(i_arg) + 1L, "Arg", "-i");
 	VSC_C_mgt = VSC_mgt_New(NULL, NULL, "");
 
 	VTAILQ_FOREACH(alp, &arglist, list) {

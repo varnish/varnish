@@ -559,7 +559,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 
 	if (sep == NULL || *sep == '\0')
 		sep = ", ";
-	lsep = strlen(sep);
+	lsep = vstrlen(sep);
 
 	f = http_findhdr(hp, hdr->len - 1, hdr->str);
 	if (f == 0)
@@ -709,7 +709,7 @@ http_split(const char **src, const char *stop, const char *sep,
 static int
 http_istoken(const char **bp, const char *e, const char *token)
 {
-	int fl = strlen(token);
+	int fl = vstrlen(token);
 	const char *b;
 
 	AN(bp);
@@ -1595,7 +1595,7 @@ http_TimeHeader(struct http *to, const char *fmt, vtim_real now)
 		http_fail(to);
 		return;
 	}
-	p = WS_Alloc(to->ws, strlen(fmt) + VTIM_FORMAT_SIZE);
+	p = WS_Alloc(to->ws, vstrlen(fmt) + VTIM_FORMAT_SIZE);
 	if (p == NULL) {
 		http_fail(to);
 		VSLbs(to->vsl, SLT_LostHeader, TOSTRAND(fmt));

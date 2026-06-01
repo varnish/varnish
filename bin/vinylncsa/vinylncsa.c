@@ -969,7 +969,7 @@ frag_line(enum format_policy fp, const char *b, const char *e,
 	}
 
 	if (e == NULL)
-		e = b + strlen(b);
+		e = b + vstrlen(b);
 
 	/* Skip leading space */
 	while (b < e && isspace(*b))
@@ -1123,7 +1123,7 @@ dispatch_f(struct VSL_data *vsl, struct VSL_transaction * const pt[],
 				    0, NULL);
 				break;
 			case SLT_Timestamp:
-#define ISPREFIX(a, b, c, d)	isprefix(a, strlen(a), b, c, d)
+#define ISPREFIX(a, b, c, d)	isprefix(a, vstrlen(a), b, c, d)
 				if (ISPREFIX("Start:", b, e, &p)) {
 					frag_fields(FMTPOL_INTERNAL, p, e, 1,
 					    &CTX.frag[F_tstart], 0, NULL);

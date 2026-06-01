@@ -284,7 +284,7 @@ vbp_write_proxy_v1(struct vbp_target *vt, const struct vco *oper,
 	AZ(VSB_finish(&vsb));
 
 	VSB_fini(&vsb);
-	return (vbp_write(vt, oper, oper_priv, fd, buf, strlen(buf)));
+	return (vbp_write(vt, oper, oper_priv, fd, buf, vstrlen(buf)));
 }
 
 static void

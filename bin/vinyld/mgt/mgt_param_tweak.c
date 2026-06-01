@@ -859,7 +859,7 @@ tweak_vcc_feature(struct vsb *vsb, const struct parspec *par, const char *arg)
 		if (val < 0)
 			return (-1);
 		bprintf(buf, "%c%s", val ? '+' : '-',
-		    par->name + strlen("vcc_"));
+		    par->name + vstrlen("vcc_"));
 		return (tweak_vcc_feature(vsb, orig, buf));
 	}
 	return (tweak_generic_bits(vsb, par, arg, mgt_param.vcc_feature_bits,

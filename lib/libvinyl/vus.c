@@ -51,7 +51,7 @@ sun_init(struct sockaddr_un *uds, const char *path, const char **err)
 	if (err)
 		*err = NULL;
 
-	if (strlen(path) + 1 > sizeof(uds->sun_path)) {
+	if (vstrlen(path) + 1 > sizeof(uds->sun_path)) {
 		errno = ENAMETOOLONG;
 		if (err)
 			*err = "Path too long for a Unix domain socket";

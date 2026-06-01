@@ -129,8 +129,8 @@ smd_full_allocobj(struct worker *wrk, const struct stevedore *stv,
 }
 
 #define dur_arg(a, s, d)					\
-	(! strncmp((a), (s), strlen(s))				\
-	 && (d = VNUM_duration(a + strlen(s))) != nan(""))
+	(! strncmp((a), (s), vstrlen(s))				\
+	 && (d = VNUM_duration(a + vstrlen(s))) != nan(""))
 
 static int
 bytes_arg(char *a, const char *s, ssize_t *sz)
@@ -139,9 +139,9 @@ bytes_arg(char *a, const char *s, ssize_t *sz)
 	uintmax_t bytes;
 
 	AN(sz);
-	if (strncmp(a, s, strlen(s)))
+	if (strncmp(a, s, vstrlen(s)))
 		return (0);
-	a += strlen(s);
+	a += vstrlen(s);
 	err = VNUM_2bytes(a, &bytes, 0);
 	if (err != NULL)
 		ARGV_ERR("%s\n", err);

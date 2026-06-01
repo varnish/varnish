@@ -69,7 +69,7 @@ extern int		exit_status;
 static inline const char *
 keyval(const char *p, const char *name)
 {
-	size_t l = strlen(name);
+	size_t l = vstrlen(name);
 	if (strncmp(p, name, l))
 		return (NULL);
 	return (p + l);

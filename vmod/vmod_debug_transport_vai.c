@@ -61,7 +61,7 @@ vdpio_hello_init(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
 	if (*vdc->clen < 0)
 		return (capacity);
 
-	*vdc->clen += strlen(HELLO);
+	*vdc->clen += vstrlen(HELLO);
 	http_Unset(vdc->hp, H_Content_Length);
 	http_PrintfHeader(vdc->hp, "Content-Length: %jd", *vdc->clen);
 	return (capacity);
@@ -78,7 +78,7 @@ vdpio_hello_lease(struct vdp_ctx *vdc, struct vdp_entry *this,
 		return (0);
 	//lint -e{446} side effects in initializer - uh?
 	VSCARAB_ADD_IOV_NORET(scarab, ((struct iovec)
-	    {.iov_base = TRUST_ME(HELLO), .iov_len = strlen(HELLO)}));
+	    {.iov_base = TRUST_ME(HELLO), .iov_len = vstrlen(HELLO)}));
 	r = vdpio_pull(vdc, this, scarab);
 
 	(void) VDPIO_Close1(vdc, this);

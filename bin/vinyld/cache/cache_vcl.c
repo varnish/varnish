@@ -1254,7 +1254,7 @@ vcl_cli_show(struct cli *cli, const char * const *av, void *priv)
 	if (verbose) {
 		for (u = 0; u < vcl->conf->nsrc; u++)
 			VCLI_Out(cli, "// VCL.SHOW %u %zd %s\n%s\n",
-			    u, strlen(vcl->conf->srcbody[u]),
+			    u, vstrlen(vcl->conf->srcbody[u]),
 			    vcl->conf->srcname[u],
 			    vcl->conf->srcbody[u]);
 	} else {

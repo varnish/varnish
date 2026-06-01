@@ -133,7 +133,7 @@ vcc_symtab_new(const char *name)
 	ALLOC_OBJ(st, SYMTAB_MAGIC);
 	AN(st);
 	st->name = name;
-	st->nlen = strlen(st->name);
+	st->nlen = vstrlen(st->name);
 	VTAILQ_INIT(&st->children);
 	VTAILQ_INIT(&st->symbols);
 	return (st);

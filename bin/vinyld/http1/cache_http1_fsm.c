@@ -207,7 +207,7 @@ http1_minimal_response(struct req *req, uint16_t status)
 	reason = http_Status2Reason(status, NULL);
 
 	bprintf(buf, "HTTP/1.1 %03d %s\r\n\r\n", status, reason);
-	l = strlen(buf);
+	l = vstrlen(buf);
 
 	VSLb(req->vsl, SLT_RespProtocol, "HTTP/1.1");
 	VSLb(req->vsl, SLT_RespStatus, "%03d", status);

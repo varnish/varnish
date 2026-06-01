@@ -64,7 +64,7 @@
 /* Safe strcpy into a fixed-size buffer */
 #define bstrcpy(dst, src)						\
 	do {								\
-		assert(strlen(src) + 1 <= sizeof (dst));		\
+		assert(vstrlen(src) + 1 <= sizeof (dst));		\
 		strcpy((dst), (src));					\
 	} while (0)
 
@@ -284,8 +284,8 @@ typedef struct {
 
 #define Tcheck(t)	do { (void)pdiff((t).b, (t).e); } while (0)
 #define Tlen(t)		(pdiff((t).b, (t).e))
-#define Tstr(s)		(/*lint -e(446)*/ (txt){(s), (s) + strlen(s)})
-#define Tstreq(t, s)	(Tlen(t) == strlen(s) && !vmemcmp((t).b, (s), Tlen(t)))
+#define Tstr(s)		(/*lint -e(446)*/ (txt){(s), (s) + vstrlen(s)})
+#define Tstreq(t, s)	(Tlen(t) == vstrlen(s) && !vmemcmp((t).b, (s), Tlen(t)))
 #define Tforeach(c, t)	for ((c) = (t).b; (c) < (t).e; (c)++)
 
 /* #3020 dummy definitions until PR is merged*/

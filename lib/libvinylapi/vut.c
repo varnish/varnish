@@ -549,7 +549,7 @@ print_nobrackets(const char *s)
 	/* Remove whitespace */
 	while (isspace(*s))
 		s++;
-	e = s + strlen(s);
+	e = s + vstrlen(s);
 	while (e > s && isspace(e[-1]))
 		e--;
 

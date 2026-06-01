@@ -666,7 +666,7 @@ vpx_format_proxy_v2(struct vsb *vsb, int proto,
 	AN(sas);
 
 	if (authority != NULL && *authority != '\0') {
-		l_authority = strlen(authority);
+		l_authority = vstrlen(authority);
 		/* 3 bytes in the TLV before the authority string */
 		assert(3 + l_authority <= UINT16_MAX);
 		l_tlv = 3 + l_authority;

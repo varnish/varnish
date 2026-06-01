@@ -1212,7 +1212,7 @@ VRT_l_resp_body(VRT_CTX, enum lbody_e type,
 		viov = VSCARAB_GET(scarab);
 		AN(viov);	// ObjGetSpace ensures
 		viov->iov.iov_base = TRUST_ME(str);
-		viov->iov.iov_len = strlen(str);
+		viov->iov.iov_len = vstrlen(str);
 	}
 
 	s = body;
@@ -1231,7 +1231,7 @@ VRT_l_resp_body(VRT_CTX, enum lbody_e type,
 		}
 		AN(viov);
 		viov->iov.iov_base = TRUST_ME(s->p[n]);
-		viov->iov.iov_len = strlen(s->p[n]);
+		viov->iov.iov_len = vstrlen(s->p[n]);
 	}
 }
 

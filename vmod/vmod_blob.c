@@ -147,7 +147,7 @@ decode_l(enum encoding dec, VCL_STRANDS s)
 	CHECK_OBJ_NOTNULL(s, STRANDS_MAGIC);
 	for (int i = 0; i < s->n; i++)
 		if (s->p[i] != NULL && *s->p[i] != '\0')
-			len += strlen(s->p[i]);
+			len += vstrlen(s->p[i]);
 
 	return (func[dec].decode_l(len));
 }
