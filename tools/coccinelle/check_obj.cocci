@@ -19,3 +19,22 @@ expression obj, magicval;
 
 - assert(obj->magic == magicval);
 + CHECK_OBJ(obj, magicval);
+
+@@
+expression obj, magicval;
+@@
+
+(
+if (obj == NULL) {
+    ...
+    return(...);
+}
+|
+if (obj == NULL)
+    return(...);
+)
+...
+when != (obj = ...)
+- CHECK_OBJ_NOTNULL(obj, magicval);
++ CHECK_OBJ(obj, magicval);
+...

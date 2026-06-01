@@ -460,7 +460,7 @@ smf_alloc(const struct stevedore *st, size_t sz)
 		Lck_Unlock(&sc->mtx);
 		return (NULL);
 	}
-	CHECK_OBJ_NOTNULL(smf, SMF_MAGIC);
+	CHECK_OBJ(smf, SMF_MAGIC);
 	sc->stats->g_alloc++;
 	sc->stats->c_bytes += smf->size;
 	sc->stats->g_bytes += smf->size;

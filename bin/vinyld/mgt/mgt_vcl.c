@@ -292,7 +292,7 @@ mgt_has_vcl(void)
 		return ("No VCL loaded");
 	if (mgt_vcl_active == NULL)
 		return ("No active VCL");
-	CHECK_OBJ_NOTNULL(mgt_vcl_active, VCLPROG_MAGIC);
+	CHECK_OBJ(mgt_vcl_active, VCLPROG_MAGIC);
 	AN(mgt_vcl_active->warm);
 	return (NULL);
 }

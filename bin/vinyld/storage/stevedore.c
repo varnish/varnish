@@ -288,7 +288,7 @@ VRT_STEVEDORE_string(VCL_STEVEDORE s)
 {
 	if (s == NULL)
 		return (NULL);
-	CHECK_OBJ_NOTNULL(s, STEVEDORE_MAGIC);
+	CHECK_OBJ(s, STEVEDORE_MAGIC);
 	return (s->vclname);
 }
 
@@ -306,7 +306,7 @@ VRT_stevedore_##nm(VCL_STEVEDORE stv)			\
 		return (0);				\
 	if (stv->var_##nm == NULL)			\
 		return (dval);				\
-	CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);	\
+	CHECK_OBJ(stv, STEVEDORE_MAGIC);		\
 	return (stv->var_##nm(stv));			\
 }
 #include "tbl/vrt_stv_var.h"

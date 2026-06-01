@@ -849,7 +849,7 @@ vtx_scan_link(struct VSLQ *vslq, struct vtx *vtx, const uint32_t *ptr)
 		return (0);
 	}
 
-	CHECK_OBJ_NOTNULL(c_vtx, VTX_MAGIC);
+	CHECK_OBJ(c_vtx, VTX_MAGIC);
 	if (c_vtx->parent == vtx)
 		/* Link already exists */
 		return (0);

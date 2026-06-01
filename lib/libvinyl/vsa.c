@@ -256,7 +256,7 @@ VSA_GetPtr(const struct suckaddr *sua, const unsigned char ** dst)
 	AN(dst);
 	if (sua == NULL)
 		return (-1);
-	CHECK_OBJ_NOTNULL(sua, SUCKADDR_MAGIC);
+	CHECK_OBJ(sua, SUCKADDR_MAGIC);
 
 	switch (sua->u.sa.sa_family) {
 	case PF_INET:

@@ -235,7 +235,7 @@ VRT_Healthy(VRT_CTX, VCL_BACKEND d, VCL_TIME *changed)
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	if (d == NULL)
 		return (0);
-	CHECK_OBJ_NOTNULL(d, DIRECTOR_MAGIC);
+	CHECK_OBJ(d, DIRECTOR_MAGIC);
 
 	if (d->vdir->admin_health->health >= 0) {
 		if (changed != NULL)

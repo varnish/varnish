@@ -162,7 +162,7 @@ SML_allocobj(struct worker *wrk, const struct stevedore *stv,
 	if (st == NULL)
 		return (0);
 
-	CHECK_OBJ_NOTNULL(st, STORAGE_MAGIC);
+	CHECK_OBJ(st, STORAGE_MAGIC);
 	o = SML_MkObject(stv, oc, st->ptr);
 	CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
 	st->len = sizeof(*o);

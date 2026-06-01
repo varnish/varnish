@@ -1084,7 +1084,7 @@ VRT_r_resp_is_streaming(VRT_CTX)
 	CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);
 	if (ctx->req->objcore == NULL)
 		return (0);	/* When called from vcl_synth */
-	CHECK_OBJ_NOTNULL(ctx->req->objcore, OBJCORE_MAGIC);
+	CHECK_OBJ(ctx->req->objcore, OBJCORE_MAGIC);
 	return (ctx->req->objcore->boc == NULL ? 0 : 1);
 }
 

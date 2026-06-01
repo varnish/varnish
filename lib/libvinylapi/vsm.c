@@ -999,7 +999,7 @@ VSM_Map(struct vsm *vd, struct vsm_fantom *vf)
 		return (0);
 	}
 
-	CHECK_OBJ_NOTNULL(vgc, VSM_SEG_MAGIC);
+	CHECK_OBJ(vgc, VSM_SEG_MAGIC);
 	assert(vgc->flags & VSM_FLAG_CLUSTER);
 	assert(vg->s == NULL);
 	assert(vg->sz == 0);
@@ -1040,7 +1040,7 @@ VSM_Unmap(struct vsm *vd, struct vsm_fantom *vf)
 	vg = vsm_findseg(vd, vf);
 	if (vg == NULL)
 		return (vsm_diag(vd, "VSM_Unmap: bad fantom"));
-	CHECK_OBJ_NOTNULL(vg, VSM_SEG_MAGIC);
+	CHECK_OBJ(vg, VSM_SEG_MAGIC);
 	assert(vg->refs > 0);
 	vg->refs--;
 	vf->b = NULL;

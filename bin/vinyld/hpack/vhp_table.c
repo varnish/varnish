@@ -405,7 +405,7 @@ VHT_LookupName(const struct vht_table *tbl, unsigned idx, size_t *plen)
 
 	if (tbl == NULL)
 		return (NULL);
-	CHECK_OBJ_NOTNULL(tbl, VHT_TABLE_MAGIC);
+	CHECK_OBJ(tbl, VHT_TABLE_MAGIC);
 
 	idx -= VHT_STATIC_MAX + 1;
 	if (idx >= tbl->n)
@@ -436,7 +436,7 @@ VHT_LookupValue(const struct vht_table *tbl, unsigned idx, size_t *plen)
 
 	if (tbl == NULL)
 		return (NULL);
-	CHECK_OBJ_NOTNULL(tbl, VHT_TABLE_MAGIC);
+	CHECK_OBJ(tbl, VHT_TABLE_MAGIC);
 
 	idx -= VHT_STATIC_MAX + 1;
 	if (idx >= tbl->n)

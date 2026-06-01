@@ -816,7 +816,7 @@ VRT_BACKEND_string(VCL_BACKEND d)
 {
 	if (d == NULL)
 		return (NULL);
-	CHECK_OBJ_NOTNULL(d, DIRECTOR_MAGIC);
+	CHECK_OBJ(d, DIRECTOR_MAGIC);
 	return (d->vcl_name);
 }
 
@@ -825,7 +825,7 @@ VRT_PROBE_string(VCL_PROBE p)
 {
 	if (p == NULL)
 		return (NULL);
-	CHECK_OBJ_NOTNULL(p, VRT_BACKEND_PROBE_MAGIC);
+	CHECK_OBJ(p, VRT_BACKEND_PROBE_MAGIC);
 	return (p->vcl_name);
 }
 

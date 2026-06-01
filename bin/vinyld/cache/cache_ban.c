@@ -483,7 +483,7 @@ BAN_Time(const struct ban *b)
 	if (b == NULL)
 		return (0.0);
 
-	CHECK_OBJ_NOTNULL(b, BAN_MAGIC);
+	CHECK_OBJ(b, BAN_MAGIC);
 	return (ban_time(b->spec));
 }
 
