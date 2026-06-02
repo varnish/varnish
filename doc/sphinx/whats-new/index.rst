@@ -13,8 +13,8 @@ This section describes the changes and improvements between different
 versions of Varnish, and what upgrading between the different versions
 entail.
 
-Vinyl 9.0
----------
+Varnish 9.0
+-----------
 
 **Note: These are working documents for a future release, with running
 updates for changes in the development branch. For changes in the

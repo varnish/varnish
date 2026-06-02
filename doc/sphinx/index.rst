@@ -4,21 +4,21 @@
 	See LICENSE file for full text of license
 
 
-Vinyl Cache Documentation
-=========================
+Varnish Cache Documentation
+===========================
 
-Vinyl Cache is a web application accelerator also known as a caching HTTP
+Varnish Cache is a web application accelerator also known as a caching HTTP
 reverse proxy. You install it in front of any server that speaks HTTP and
-configure it to cache the contents. Vinyl Cache is really, really fast. It
+configure it to cache the contents. Varnish Cache is really, really fast. It
 typically speeds up delivery with a factor of 300 - 1000x, depending on your
 architecture.
 
-To get started with Vinyl Cache we recommend that you read the installation
-guide :ref:`install-index`. Once you have Vinyl Cache up and running we recommend
+To get started with Varnish Cache we recommend that you read the installation
+guide :ref:`install-index`. Once you have Varnish Cache up and running we recommend
 that you go through our tutorial - :ref:`tutorial-index`, and finally the
 :ref:`users-guide-index`.
 
-If you need to find out how to use a specific Vinyl Cache tool, the
+If you need to find out how to use a specific Varnish Cache tool, the
 :ref:`reference-index` contains detailed documentation over the tools. Changes
 from previous versions are located in the :ref:`whats-new-index` chapter. In
 closing, the :ref:`glossary` provides definitions of common terms.
@@ -26,29 +26,29 @@ closing, the :ref:`glossary` provides definitions of common terms.
 
 Conventions used in this manual include:
 
-  ``service vinyl restart``
+  ``service varnish restart``
     A command you can run, or a shortkey you can press. Used either in the
     terminal or after starting one of the tools.
 
-  `/usr/local/`, `vinyladm`, `sess_timeout`
-    A utility, Vinyl configurable parameter or path.
+  `/usr/local/`, `varnishadm`, `sess_timeout`
+    A utility, Varnish configurable parameter or path.
 
-  https://www.vinyl-cache.org/
+  https://www.varnish.org/
     A hyperlink.
 
 Longer listings like example command output and VCL look like this::
 
-    $ /opt/vinyl/sbin/vinyld -V
-    vinyld (vinyl-8.0.0 revision 1234567)
+    $ /opt/varnish/sbin/varnishd -V
+    varnishd (varnish-9.0.0 revision 1234567)
     Copyright (c) 2006 Verdens Gang AS
     Copyright (c) 2006-2025 Varnish Software
 
 
 .. For maintainers:
-.. * always write Vinyl Cache with a capital V&C: Vinyl Cache.
-.. * Write Vinyl tools as their executable name: `vinyld`, `vinyladm`.
+.. * always write Varnish Cache with a capital V&C: Varnish Cache.
+.. * Write Varnish tools as their executable name: `varnishd`, `varnishadm`.
 .. * if part of a command actually runable by the reader, use double backticks:
-..   ``vinyld -f foo.c``
+..   ``varnishd -f foo.c``
 .. * wrap lines at 80 characters, ident with 4 spaces. No tabs, please.
 .. We use the following header indicators
 .. For titles:

@@ -268,8 +268,8 @@ Known issues on SmartOS
 
 If you see this error from GNU ``cp``::
 
-	make[6]: Entering directory '/tmp/vinyl-cache/doc/sphinx'
-	cp: preserving permissions for '../../vinyl-trunk/doc/sphinx/dev-guide': Operation not applicable
+	make[6]: Entering directory '/tmp/varnish-cache/doc/sphinx'
+	cp: preserving permissions for '../../varnish-trunk/doc/sphinx/dev-guide': Operation not applicable
 	make[6]: *** [Makefile:409: distdir-am] Error 1
 
 put ``/usr/bin`` first in  ``PATH``.

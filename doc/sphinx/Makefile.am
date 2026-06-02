@@ -73,10 +73,10 @@ EXTRA_DIST = \
 	_static/fonts/Literata-SemiBoldItalic.woff2 \
 	_static/fonts/Literata-SemiBold.woff2 \
 	_static/LICENSE.txt \
-	_static/vinyl-cache-logo-primary.png \
-	_static/vinyl-cache-logo-primary.svg \
-	_static/vinyl-cache-symbol-crop-square.svg \
-	_static/vinyl-cache-symbol.ico
+	_static/varnish-cache-logo-primary.png \
+	_static/varnish-cache-logo-primary.svg \
+	_static/varnish-cache-symbol-crop-square.svg \
+	_static/varnish-cache-symbol.ico
 
 dist-hook:
 	$(MAKE) html

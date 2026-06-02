@@ -261,6 +261,13 @@ for the command without the ``-j`` parameter.
 Commands
 --------
 
+The list below covers the commands intended for administrators. A
+number of additional commands flagged ``debug.*`` (for example
+``debug.listen_address``, ``debug.fragfetch``, ``debug.shutdown.delay``
+and ``debug.panic.worker``) exist for use by Varnish developers and are
+deliberately omitted from this reference; they may change or disappear
+without notice.
+
 .. include:: ../include/cli.rst
 
 Backend Pattern

@@ -38,3 +38,8 @@ objects can be accessed and manipulated using VCL.
 
 .. XXX:What object? the current request? benc
 
+For the full list of variables on each of these objects -- including
+their types, the VCL subroutines in which they are readable, writable,
+or unsettable, and a description of each -- consult the
+:ref:`vcl-var(7)` reference manual.
+
