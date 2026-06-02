@@ -1,0 +1,22 @@
+vtest "built-in base64 codec"
+
+varnish v1 -vcl {
+	backend proforma none;
+
+	sub vcl_recv {
+		return (synth(200));
+	}
+
+	sub vcl_synth {
+		set resp.http.alpha =
+		:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/:;
+		return (deliver);
+	}
+
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.http.alpha == :ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/:
+} -run
