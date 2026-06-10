@@ -259,12 +259,18 @@ vmod_strstr(VRT_CTX, VCL_STRING s1, VCL_STRING s2)
 }
 
 VCL_STRING v_matchproto_(td_std_getenv)
-vmod_getenv(VRT_CTX, VCL_STRING name)
+vmod_getenv(VRT_CTX, VCL_STRING name, VCL_STRING def)
 {
+	const char *val;
+
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	if (name == NULL || *name == '\0')
 		return (NULL);
-	return (getenv(name));
+
+	val = getenv(name);
+	if (val == NULL)
+		return (def);
+	return (val);
 }
 
 VCL_VOID v_matchproto_(td_std_late_100_continue)
