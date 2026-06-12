@@ -5,7 +5,13 @@ server s0 {
 	txresp -bodylen 100000
 } -start
 
-varnish v1 -vcl+backend {} -start
+varnish v1 -vcl+backend {
+	sub vcl_backend_response {
+		# Deliver from a complete object so the DATA framing does
+		# not depend on fetch timing.
+		set beresp.do_stream = false;
+	}
+} -start
 varnish v1 -cliok "param.set feature +http2"
 varnish v1 -cliok "param.set h2_window_timeout 3"
 
