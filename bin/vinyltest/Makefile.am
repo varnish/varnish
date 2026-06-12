@@ -40,7 +40,6 @@ varnishtest_SOURCES = \
 		vtest2/src/teken_subr_compat.h \
 		vtest2/src/teken_wcwidth.h \
 		vtest2/src/vtc.c \
-		vtest2/src/vtc_asn_gentm.c \
 		vtest2/src/vtc_barrier.c \
 		vtest2/src/vtc_client.c \
 		vtest2/src/vtc_gzip.c \
@@ -82,7 +81,6 @@ varnishtest_LDADD = \
 
 varnishtest_CFLAGS = \
 		-DVTEST_WITH_VTC_LOGEXPECT \
-		-DVTEST_WITH_VTC_VINYL \
 		-DVTEST_WITH_VTC_VARNISH \
 		-DVTEST_WITH_VTC_VSM \
 		-DTOP_BUILDDIR='"${top_builddir}"' \
