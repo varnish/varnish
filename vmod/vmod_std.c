@@ -259,7 +259,7 @@ vmod_strstr(VRT_CTX, VCL_STRING s1, VCL_STRING s2)
 }
 
 VCL_STRING v_matchproto_(td_std_getenv)
-vmod_getenv(VRT_CTX, VCL_STRING name, VCL_STRING def)
+vmod_getenv(VRT_CTX, VCL_STRING name, VCL_STRING fallback)
 {
 	const char *val;
 
@@ -269,7 +269,7 @@ vmod_getenv(VRT_CTX, VCL_STRING name, VCL_STRING def)
 
 	val = getenv(name);
 	if (val == NULL)
-		return (def);
+		return (fallback);
 	return (val);
 }
 

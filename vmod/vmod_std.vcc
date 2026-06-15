@@ -497,9 +497,13 @@ $Function BOOL syntax(REAL)
 
 Returns ``true`` if VCL version is at least *REAL*.
 
-$Function STRING getenv(STRING name, STRING default = 0)
+$Function STRING getenv(STRING name, STRING fallback = 0)
 
-Return environment variable *name* or the empty string. See `getenv(3)`.
+Return environment variable *name* if it is set, or the fallback if it is not.
+
+The default fallback is ``NULL``, which evaluates to the empty sting in most cases.
+
+See `getenv(3)`.
 
 Example::
 

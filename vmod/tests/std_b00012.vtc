@@ -20,7 +20,7 @@ varnish v1 -vcl {
 		} else {
 			set resp.http.X-eval = "false";
 		}
-		set resp.http.X-default = std.getenv("doesnotexist", default="def-val");
+		set resp.http.X-fallback = std.getenv("doesnotexist", fallback="def-val");
 	}
 } -start
 
@@ -31,5 +31,5 @@ client c1 {
 	expect resp.http.X-PATH ~ "^/"
 	expect resp.http.X-unset == ""
 	expect resp.http.X-eval == "false"
-	expect resp.http.X-default == "def-val"
+	expect resp.http.X-fallback == "def-val"
 } -run
