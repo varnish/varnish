@@ -87,7 +87,7 @@ ocstash_clear(struct worker *wrk, struct ocstash *stash)
 }
 
 void
-Req_StashObjcore(struct req *req, struct objcore **ocp)
+Req_StashObjcore(const struct req *req, struct objcore **ocp)
 {
 
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
