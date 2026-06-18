@@ -219,8 +219,12 @@ debug_transport_reembarking_http1_use(VRT_CTX)
 	req = ctx->req;
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 
+	if (req->transport == &DBG_transport) {
+		return;
+	}
 	if (req->transport != &HTTP1_transport) {
-		VRT_fail(ctx, "Only works on built-in http1 transport");
+		VRT_fail(ctx, "%s: %s transport not supported",
+		    DBG_transport.name, req->transport->name);
 		return;
 	}
 	AZ(req->transport_priv);
