@@ -175,7 +175,7 @@ v1f_parse_chunked_hdr_i(char *b, const char *e, ssize_t *szp, char **nextp)
 	AN(szp);
 	AN(nextp);
 
-	/* Skip leading whitespace */
+	/* Skip leading whitespace - XXX rfc9112 does not specify this */
 	while (b < e && vct_isows(*b))
 		b++;
 	if (b == e)
@@ -194,7 +194,7 @@ v1f_parse_chunked_hdr_i(char *b, const char *e, ssize_t *szp, char **nextp)
 	if (b == e)
 		return (pch_more);
 	he = b;
-	/* Skip trailing whitespace.
+	/* Skip trailing whitespace. XXX rfc9112 does not specify this
 	 * XXX extension support missing https://httpwg.org/specs/rfc9112.html#chunked.extension
 	 */
 	while (b < e && vct_isows(*b))
