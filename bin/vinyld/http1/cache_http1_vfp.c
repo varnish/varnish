@@ -194,7 +194,7 @@ static enum vfp_status v_matchproto_(vfp_pull_f)
 v1f_chunked_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *ptr,
     ssize_t *lp)
 {
-	static enum vfp_status vfps;
+	enum vfp_status vfps;
 	struct http_conn *htc;
 	ssize_t l, lr;
 
