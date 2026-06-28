@@ -44,6 +44,7 @@ varnish v1 -vcl {
 		set resp.http."some1.some2.approx" =
 			math.approx(999999999999 + 0.999, 999999999999 + (9.989 / 10));
 
+		set resp.http.can_you_guess = math.code_coverage(1.0);
 		return (deliver);
 	}
 } -start
