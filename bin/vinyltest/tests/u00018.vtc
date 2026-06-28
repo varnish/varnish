@@ -17,3 +17,13 @@ shell -err -expect {No such file or directory} {
 	env VTEST_DURATION=15 \
 	    varnishtest -j 4 -n 10 -C -v -b 100k -L -l ${tmpdir}/_.vtc
 }
+
+# Hit varnish_fatal
+
+shell -err -expect {Unknown varnish argument: -cause-a-scene} {
+	cat > ${tmpdir}/_.vtc <<- EOF
+	vtest foo
+	varnish v1 -cause-a-scene
+	EOF
+	varnishtest -v ${tmpdir}/_.vtc
+}
