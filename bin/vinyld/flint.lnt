@@ -153,6 +153,9 @@
 -emacro(774, HTTPH)	// always false
 -emacro(527, ARGV_ERR)	// unreachable
 
+-emacro(506, SESS_CLOSE)	// constant value boolean
+-emacro(774, SESS_CLOSE)	// if always evaluates to True
+
 -e788			// enum value not used in defaulted switch
 
 // cache.h
