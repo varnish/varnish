@@ -72,6 +72,7 @@
 #define BANS_FLAG_HTTP		(1<<3)
 #define BANS_FLAG_DURATION	(1<<4)
 #define BANS_FLAG_NODEDUP	(1<<5)
+#define BANS_FLAG_BOOL		(1<<6)
 
 #define BANS_OPER_EQ		0x10
 #define BANS_OPER_OFF_		BANS_OPER_EQ
@@ -98,7 +99,10 @@
 #define BANS_ARG_OBJGRACE	0x1e
 #define BANS_ARG_OBJKEEP	0x1f
 #define BANS_ARG_OBJLASTHIT	0x20
-#define BANS_ARG_LIM		(BANS_ARG_OBJLASTHIT + 1)
+#define BANS_ARG_OBJHFM		0x21
+#define BANS_ARG_OBJHFP		0x22
+#define BANS_ARG_OBJUNCACHEABLE	0x23
+#define BANS_ARG_LIM		(BANS_ARG_OBJUNCACHEABLE + 1)
 
 #define BAN_ARGIDX(x) ((x) - BANS_ARG_OFF_)
 #define BAN_ARGARRSZ  (BANS_ARG_LIM - BANS_ARG_OFF_)
@@ -118,6 +122,12 @@
 #define BANS_HAS_ARG2_DOUBLE(arg)	\
 	((arg) >= BANS_ARG_OBJTTL &&	\
 	 (arg) <= BANS_ARG_OBJLASTHIT)
+
+// has an arg2_bool (BANS_FLAG_BOOL at build time)
+#define BANS_HAS_ARG2_BOOL(arg)	\
+	((arg) == BANS_ARG_OBJHFM ||	\
+	 (arg) == BANS_ARG_OBJHFP ||	\
+	 (arg) == BANS_ARG_OBJUNCACHEABLE)
 
 /*--------------------------------------------------------------------*/
 

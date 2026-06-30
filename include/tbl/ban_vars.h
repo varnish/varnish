@@ -60,6 +60,12 @@ PVAR("obj.keep",
 PVAR("obj.last_hit",
      BANS_FLAG_OBJ | BANS_FLAG_DURATION | BANS_FLAG_NODEDUP,
      BANS_ARG_OBJLASTHIT)
+PVAR("obj.hfm",
+     BANS_FLAG_OBJ | BANS_FLAG_BOOL , BANS_ARG_OBJHFM)
+PVAR("obj.hfp",
+     BANS_FLAG_OBJ | BANS_FLAG_BOOL , BANS_ARG_OBJHFP)
+PVAR("obj.uncacheable",
+     BANS_FLAG_OBJ | BANS_FLAG_BOOL , BANS_ARG_OBJUNCACHEABLE)
 #undef PVAR
 
 /*lint -restore */
