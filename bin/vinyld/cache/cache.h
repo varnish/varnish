@@ -799,8 +799,14 @@ typedef void vai_notify_cb(vai_hdl, void *priv);
  *
  * an array of viovs, elsewhere also called an siov or sarray
  */
+#ifdef __CHERI__
+typedef uintptr_t viov_lease_t;
+#else
+typedef uint64_t viov_lease_t;
+#endif
+
 struct viov {
-	uintptr_t	lease;
+	viov_lease_t	lease;
 	struct iovec	iov;
 };
 
@@ -924,7 +930,7 @@ struct vscaret {
 #define VSCARET_MAGIC	0x9c1f3d7b
 	unsigned	capacity;
 	unsigned	used;
-	uintptr_t	lease[] v_counted_by_(capacity);
+	viov_lease_t	lease[] v_counted_by_(capacity);
 };
 
 #define VSCARET_SIZE(cap) VFLA_SIZE(vscaret, lease, cap)

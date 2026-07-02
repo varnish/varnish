@@ -32,10 +32,10 @@
  *
  */
 
-static inline uintptr_t
+static inline viov_lease_t
 ptr2lease(const void *ptr)
 {
-	uintptr_t r = (uintptr_t)ptr;
+	viov_lease_t r = (viov_lease_t)ptr;
 
 	if (sizeof(void *) < 8) //lint !e506 !e774
 		r <<= 1;
@@ -44,7 +44,7 @@ ptr2lease(const void *ptr)
 }
 
 static inline void *
-lease2ptr(uintptr_t l)
+lease2ptr(viov_lease_t l)
 {
 
 	if (sizeof(void *) < 8) //lint !e506 !e774
