@@ -237,7 +237,7 @@ vhp_decode_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
 TESTS += http1_vfp_test
 http1_vfp_test_SOURCES = http1/cache_http1_vfp.c
 http1_vfp_test_CFLAGS = -DTEST_DRIVER
-http1_vfp_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
+http1_vfp_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la ${NET_LIBS}
 
 noinst_PROGRAMS += esi_parse_fuzzer
 esi_parse_fuzzer_SOURCES = \
