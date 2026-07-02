@@ -74,7 +74,7 @@ static ssize_t
 v1f_rxbuf_read(struct http_conn *htc)
 {
 	ssize_t i;
-	size_t sz;
+	size_t av, sz;
 	char *p;
 
 	if (htc->pipeline_b)
@@ -90,19 +90,18 @@ v1f_rxbuf_read(struct http_conn *htc)
 		p = htc->pipeline_b = htc->rxbuf_b;
 	else {
 		AN(htc->pipeline_e);
-		i = pdiff(htc->pipeline_b, htc->pipeline_e);
-		if (i >= sz) {
+		av = pdiff(htc->pipeline_b, htc->pipeline_e);
+		if (av >= sz) {
 			// VTCP_Check(): can not originate from read()
 			errno = ENOBUFS;
 			return (-1);
 		}
-		assert(i >= 0);
-		assert((size_t)i < sz);
-		memmove(htc->rxbuf_b, htc->pipeline_b, i);
+		assert(av < sz);
+		memmove(htc->rxbuf_b, htc->pipeline_b, av);
 		htc->pipeline_b = htc->rxbuf_b;
-		htc->pipeline_e = htc->rxbuf_b + i;
+		htc->pipeline_e = htc->rxbuf_b + av;
 		p = htc->pipeline_e;
-		sz -= i;
+		sz -= av;
 	}
 	do {
 		errno = 0;
