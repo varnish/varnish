@@ -545,7 +545,7 @@ enum ahead {
 };
 
 static ssize_t
-v1f_readahead(struct http_conn *htc, unsigned char *p, ssize_t len)
+v1f_readahead(struct http_conn *htc, char *p, ssize_t len)
 {
 	struct iovec iov[2];
 	ssize_t i;
