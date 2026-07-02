@@ -577,7 +577,7 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len,
     enum ahead ahead)
 {
 	ssize_t l;
-	unsigned char *p;
+	char *p;
 	ssize_t i;
 
 	CHECK_OBJ_NOTNULL(vc, VFP_CTX_MAGIC);
