@@ -75,29 +75,6 @@ typedef void sml_free_f(struct storage *);
     typedef ct stv_var_##nm(const struct stevedore *);
 #include "tbl/vrt_stv_var.h"
 
-/* VAI helpers -------------------------------------------------------*/
-
-static inline uintptr_t
-ptr2lease(const void *ptr)
-{
-	uintptr_t r = (uintptr_t)ptr;
-
-	if (sizeof(void *) < 8) //lint !e506 !e774
-		r <<= 1;
-
-	return (r);
-}
-
-static inline void *
-lease2ptr(uintptr_t l)
-{
-
-	if (sizeof(void *) < 8) //lint !e506 !e774
-		l >>= 1;
-
-	return ((void *)(uintptr_t)l);
-}
-
 /*--------------------------------------------------------------------*/
 
 struct stevedore {

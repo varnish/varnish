@@ -177,6 +177,7 @@ noinst_HEADERS = \
 	mgt/mgt_vcl.h \
 	mgt/mgt_param.h \
 	storage/storage.h \
+	storage/storage_vai.h \
 	storage/storage_persistent.h \
 	storage/storage_simple.h \
 	waiter/mgt_waiter.h \

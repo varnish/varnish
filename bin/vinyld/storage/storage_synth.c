@@ -45,6 +45,7 @@
 
 #include "storage/storage.h"
 #include "storage/storage_simple.h"
+#include "storage/storage_vai.h"
 
 #include "VSC_ssy.h"
 
