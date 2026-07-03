@@ -990,26 +990,10 @@ void VSLbt(struct vsl_log *, enum VSL_tag_e tag, txt t);
 void VSLbs(struct vsl_log *, enum VSL_tag_e tag, const struct strands *s);
 void VSLb_ts(struct vsl_log *, const char *event, vtim_real first,
     vtim_real *pprev, vtim_real now);
+void VSLb_ts_req(struct req *req, const char *event, vtim_real now);
+void VSLb_ts_busyobj(struct busyobj *bo, const char *event, vtim_real now);
 void VSLb_bin(struct vsl_log *, enum VSL_tag_e, ssize_t, const void*);
 int VSL_tag_is_masked(enum VSL_tag_e tag);
-
-static inline void
-VSLb_ts_req(struct req *req, const char *event, vtim_real now)
-{
-
-	if (isnan(req->t_first) || req->t_first == 0.)
-		req->t_first = req->t_prev = now;
-	VSLb_ts(req->vsl, event, req->t_first, &req->t_prev, now);
-}
-
-static inline void
-VSLb_ts_busyobj(struct busyobj *bo, const char *event, vtim_real now)
-{
-
-	if (isnan(bo->t_first) || bo->t_first == 0.)
-		bo->t_first = bo->t_prev = now;
-	VSLb_ts(bo->vsl, event, bo->t_first, &bo->t_prev, now);
-}
 
 /* cache_vcl.c */
 const char *VCL_Name(const struct vcl *);

@@ -540,6 +540,24 @@ VSLb_ts(struct vsl_log *vsl, const char *event, vtim_real first,
 }
 
 void
+VSLb_ts_req(struct req *req, const char *event, vtim_real now)
+{
+
+	if (isnan(req->t_first) || req->t_first == 0.)
+		req->t_first = req->t_prev = now;
+	VSLb_ts(req->vsl, event, req->t_first, &req->t_prev, now);
+}
+
+void
+VSLb_ts_busyobj(struct busyobj *bo, const char *event, vtim_real now)
+{
+
+	if (isnan(bo->t_first) || bo->t_first == 0.)
+		bo->t_first = bo->t_prev = now;
+	VSLb_ts(bo->vsl, event, bo->t_first, &bo->t_prev, now);
+}
+
+void
 VSLb_bin(struct vsl_log *vsl, enum VSL_tag_e tag, ssize_t len, const void *ptr)
 {
 	unsigned mlen;
