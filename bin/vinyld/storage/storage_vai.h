@@ -35,7 +35,7 @@
 static inline viov_lease_t
 ptr2lease(const void *ptr)
 {
-	viov_lease_t r = (viov_lease_t)ptr;
+	viov_lease_t r = (viov_lease_t)(uintptr_t)ptr;
 
 	if (sizeof(void *) < 8) //lint !e506 !e774
 		r <<= 1;
