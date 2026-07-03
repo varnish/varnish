@@ -1019,31 +1019,22 @@ uintptr_t WS_Snapshot(struct ws *ws);
 int WS_Allocated(const struct ws *ws, const void *ptr, ssize_t len);
 unsigned WS_Dump(const struct ws *ws, char, size_t off, void *buf, size_t len);
 
-static inline void *
-WS_Reservation(const struct ws *ws)
-{
+#define WS_Reservation(ws) (void *)({	\
+	WS_Assert(ws);			\
+	AN(ws->r);			\
+	AN(ws->f);			\
+	(ws)->f;			\
+})
 
-	WS_Assert(ws);
-	AN(ws->r);
-	AN(ws->f);
-	return (ws->f);
-}
+#define WS_ReservationSize(ws) ({	\
+	AN(ws->r);			\
+	ws->r - ws->f;			\
+})
 
-static inline unsigned
-WS_ReservationSize(const struct ws *ws)
-{
-
-	AN(ws->r);
-	return (ws->r - ws->f);
-}
-
-static inline unsigned
-WS_ReserveLumps(struct ws *ws, size_t sz)
-{
-
-	AN(sz);
-	return (WS_ReserveAll(ws) / sz);
-}
+#define WS_ReserveLumps(ws, sz) ({	\
+	AN(sz);				\
+	WS_ReserveAll(ws) / sz;		\
+})
 
 /* cache_ws_common.c */
 void WS_MarkOverflow(struct ws *ws);
