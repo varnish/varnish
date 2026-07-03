@@ -42,7 +42,9 @@
 
 #include "cache/cache_vinyld.h"
 #include "cache/cache_conn_oper.h"
-#include "cache/cache_filter.h"
+#ifndef TEST_DRIVER
+# include "cache/cache_filter.h"
+#endif
 #include "cache_http1.h"
 
 #include "vct.h"
