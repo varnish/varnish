@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "vgz.h"
 #include "vsl_priv.h"
 #include "vmb.h"
 
