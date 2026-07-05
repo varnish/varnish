@@ -246,6 +246,18 @@ EXP_Reduce(struct objcore *oc, vtim_real now,
  *
  */
 
+static inline void
+apply_timers(struct objcore *oc, vtim_real now,
+    vtim_dur ttl, vtim_dur grace, vtim_dur keep)
+{
+	if (!isnan(ttl))
+		oc->ttl = now + ttl - oc->t_origin;
+	if (!isnan(grace))
+		oc->grace = grace;
+	if (!isnan(keep))
+		oc->keep = keep;
+}
+
 void
 EXP_Rearm(struct objcore *oc, vtim_real now,
     vtim_dur ttl, vtim_dur grace, vtim_dur keep)
@@ -258,12 +270,7 @@ EXP_Rearm(struct objcore *oc, vtim_real now,
 	if (!(oc->exp_flags & OC_EF_REFD))
 		return;
 
-	if (!isnan(ttl))
-		oc->ttl = now + ttl - oc->t_origin;
-	if (!isnan(grace))
-		oc->grace = grace;
-	if (!isnan(keep))
-		oc->keep = keep;
+	apply_timers(oc, now, ttl, grace, keep);
 
 	when = EXP_WHEN(oc);
 
