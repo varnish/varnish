@@ -164,6 +164,8 @@
 -esym(525, __builtin_frame_address)	// Not defined
 -esym(525, __builtin_return_address)	// Not defined
 
+-emacro(160, WS_Reservation, WS_ReservationSize, WS_ReserveLumps)	// Statement expression
+
 // cache_vcl.c
 -esym(528, vcl_call_method)	// Not referenced
 -esym(765, VCL_TEMP_*)

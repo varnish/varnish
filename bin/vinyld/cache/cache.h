@@ -1021,19 +1021,20 @@ unsigned WS_Dump(const struct ws *ws, char, size_t off, void *buf, size_t len);
 
 #define WS_Reservation(ws) (void *)({	\
 	WS_Assert(ws);			\
-	AN(ws->r);			\
-	AN(ws->f);			\
+	AN((ws)->r);			\
+	AN((ws)->f);			\
 	(ws)->f;			\
 })
 
 #define WS_ReservationSize(ws) ({	\
-	AN(ws->r);			\
-	ws->r - ws->f;			\
+	AN((ws)->r);			\
+	AN((ws)->r >= (ws)->f);		\
+	(unsigned)((ws)->r - (ws)->f);	\
 })
 
 #define WS_ReserveLumps(ws, sz) ({	\
 	AN(sz);				\
-	WS_ReserveAll(ws) / sz;		\
+	WS_ReserveAll(ws) / (sz);	\
 })
 
 /* cache_ws_common.c */
