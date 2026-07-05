@@ -267,6 +267,19 @@ EXP_Rearm(struct objcore *oc, vtim_real now,
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 	assert(oc->refcnt > 0);
 
+	if (oc->flags & OC_F_BUSY) {
+		struct objhead *oh = oc->objhead;
+		uint8_t flags;
+
+		Lck_Lock(&oh->mtx);
+		flags = oc->flags;
+		if (flags & OC_F_BUSY)
+			apply_timers(oc, now, ttl, grace, keep);
+		Lck_Unlock(&oh->mtx);
+		if (flags & OC_F_BUSY)
+			return;
+	}
+
 	if (!(oc->exp_flags & OC_EF_REFD))
 		return;
 
