@@ -652,8 +652,8 @@ cnt_lookup(struct worker *wrk, struct req *req)
 
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 	AZ(oc->flags & OC_F_BUSY);
-	req->objcore = oc;
 	AZ(oc->flags & OC_F_HFM);
+	req->objcore = oc;
 
 	VCL_hit_method(req->vcl, wrk, req, NULL, NULL);
 
