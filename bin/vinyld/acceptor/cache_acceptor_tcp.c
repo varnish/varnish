@@ -549,7 +549,9 @@ vca_tcp_accept(struct pool *pp)
 		ps->task->func = vca_tcp_accept_task;
 		ps->task->priv = ps;
 		ps->pool = pp;
+		Lck_Lock(&pp->mtx);
 		VTAILQ_INSERT_TAIL(&pp->poolsocks, ps, list);
+		Lck_Unlock(&pp->mtx);
 		AZ(Pool_Task(pp, ps->task, TASK_QUEUE_VCA));
 	}
 }
