@@ -52,6 +52,7 @@ struct poolsock {
 	struct pool_task		task[1];
 	struct pool			*pool;
 	void				*vca_priv;
+	pthread_t			thread;
 };
 
 struct conn_heritage {
