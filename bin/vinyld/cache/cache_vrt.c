@@ -511,7 +511,7 @@ VRT_UpperLowerStrands(VRT_CTX, VCL_STRANDS s, int up)
 	unsigned u;
 	char *b, *e, *r;
 	const char *p, *q = NULL;
-	int i, copy = 0;
+	int i, copy = 0, op = 0;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(ctx->ws, WS_MAGIC);
@@ -525,15 +525,20 @@ VRT_UpperLowerStrands(VRT_CTX, VCL_STRANDS s, int up)
 		if (q != NULL)
 			copy = 1;
 		for(p = q = s->p[i]; *p != '\0'; p++) {
-			if ((up && vct_islower(*p)) ||
-			    (!up && vct_isupper(*p))) {
-				*b++ = *p ^ 0x20;
+			op = up ? vct_islower(*p) : vct_isupper(*p);
+
+			if (op)
 				copy = 1;
-			} else if (b < e) {
-				*b++ = *p;
-			}
-			if (copy && b == e)
+
+			if (!copy && b == e)
+				continue;
+			else if (b == e)
 				break;
+
+			if (op)
+				*b++ = *p ^ 0x20;
+			else
+				*b++ = *p;
 		}
 		if (copy && b == e) {
 			WS_Release(ctx->ws, 0);
