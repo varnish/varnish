@@ -417,6 +417,8 @@ int Pool_Task_Any(struct pool_task *task, enum task_prio prio);
 void Pool_PurgeStat(unsigned nobj);
 void pan_pool(struct vsb *);
 void Pool_Init(void);
+void Pool_Stop(void);
+void Pool_Fini(void);
 
 /* cache_range.c */
 int VRG_CheckBo(struct busyobj *);

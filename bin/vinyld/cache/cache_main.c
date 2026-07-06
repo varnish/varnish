@@ -575,12 +575,13 @@ child_main(int sigmagic, size_t altstksz)
 		VTIM_sleep(shutdown_delay);
 
 	VCA_Shutdown();
-	cache_param->wthread_pools = 0;
+	Pool_Stop();
 	BAN_Shutdown();
 	STV_warn();
 	VCL_Shutdown();
 	EXP_Shutdown();
 	STV_close();
+	Pool_Fini();
 
 	struct rusage usage = {0};
 	if (! getrusage(RUSAGE_SELF, &usage)) {
