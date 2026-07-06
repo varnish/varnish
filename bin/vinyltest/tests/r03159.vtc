@@ -12,7 +12,7 @@ process p1 -log {
 	varnishd -F -n "${tmpdir}/t" -a "${tmpdir}/sock" \
 	    -p vcc_feature=-err_unref -f "${tmpdir}/unref.vcl" \
 	    -l 2m 2>&1
-} -start -expect-exit 0x40
+} -winsz 80 48 -start -expect-exit 0x40
 
 shell {
 	# wait for startup vcl.load to complete
