@@ -318,8 +318,7 @@ HSH_Insert(struct worker *wrk, const void *digest, struct objcore *oc,
 	AN(digest);
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 	AN(ban);
-	AZ(oc->flags & OC_F_BUSY);
-	AZ(oc->flags & OC_F_PRIVATE);
+	AZ(oc->flags & (OC_F_BUSY | OC_F_PRIVATE));
 	assert(oc->refcnt == 1);
 	INIT_OBJ(&rush, RUSH_MAGIC);
 
@@ -408,8 +407,7 @@ hsh_rush_match(const struct req *req)
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 	assert(oc->refcnt > 0);
 
-	AZ(oc->flags & OC_F_BUSY);
-	AZ(oc->flags & OC_F_PRIVATE);
+	AZ(oc->flags & (OC_F_BUSY | OC_F_PRIVATE));
 	if (oc->flags & (OC_F_WITHDRAWN|OC_F_HFM|OC_F_HFP|OC_F_CANCEL|
 	    OC_F_FAILED))
 		return (0);
@@ -714,8 +712,7 @@ hsh_rush1(const struct worker *wrk, struct objcore *oc, struct rush *r)
 	CHECK_OBJ_NOTNULL(oh, OBJHEAD_MAGIC);
 	Lck_AssertHeld(&oh->mtx);
 
-	AZ(oc->flags & OC_F_BUSY);
-	AZ(oc->flags & OC_F_PRIVATE);
+	AZ(oc->flags & (OC_F_BUSY | OC_F_PRIVATE));
 	max = cache_param->rush_exponent;
 	if (oc->flags & (OC_F_WITHDRAWN|OC_F_FAILED))
 		max = 1;
