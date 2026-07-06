@@ -136,10 +136,12 @@ VCA_DestroyPool(struct pool *pp)
 {
 	struct poolsock *ps;
 
+	Lck_Lock(&pp->mtx);
 	while (!VTAILQ_EMPTY(&pp->poolsocks)) {
 		ps = VTAILQ_FIRST(&pp->poolsocks);
 		VTAILQ_REMOVE(&pp->poolsocks, ps, list);
 	}
+	Lck_Unlock(&pp->mtx);
 }
 
 /*--------------------------------------------------------------------*/
