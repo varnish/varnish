@@ -37,6 +37,7 @@
 #include <stdlib.h>
 
 #include "vbh.h"
+#include "vtim.h"
 
 #include "waiter/waiter.h"
 #include "waiter/waiter_priv.h"
@@ -205,11 +206,19 @@ void
 Waiter_Destroy(struct waiter **wp)
 {
 	struct waiter *w;
+	struct waited *waited;
+	vtim_real now;
 
 	TAKE_OBJ_NOTNULL(w, wp, WAITER_MAGIC);
 
-	AZ(VBH_root(w->heap));
 	AN(w->impl->fini);
 	w->impl->fini(w);
+	now = VTIM_real();
+	while ((waited = VBH_root(w->heap)) != NULL) {
+		(void) Wait_HeapDelete(w, waited);
+		Wait_Call(w, waited, WAITER_TIMEOUT, now);
+	}
+
+	AZ(VBH_root(w->heap));
 	FREE_OBJ(w);
 }
