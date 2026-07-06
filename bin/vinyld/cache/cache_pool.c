@@ -49,6 +49,7 @@ static pthread_t		thr_pool_herder;
 static struct lock		wstat_mtx;
 struct lock			pool_mtx;
 static VTAILQ_HEAD(,pool)	pools = VTAILQ_HEAD_INITIALIZER(pools);
+static pthread_cond_t		cond = PTHREAD_COND_INITIALIZER;
 
 /*--------------------------------------------------------------------
  * Summing of stats into global stats counters
@@ -197,7 +198,7 @@ pool_poolherder(void *priv)
 	(void)priv;
 
 	nwq = 0;
-	while (1) {
+	while (cache_param->wthread_pools > 0 || VTAILQ_FIRST(&pools)) {
 		if (nwq < cache_param->wthread_pools) {
 			pp = pool_mkpool(nwq);
 			if (pp != NULL) {
@@ -222,12 +223,12 @@ pool_poolherder(void *priv)
 				pp->die = 1;
 				VCA_DestroyPool(pp);
 				PTOK(pthread_cond_signal(&pp->herder_cond));
+				continue;
 			}
 		}
-		(void)sleep(1);
 		u = 0;
-		ppx = NULL;
 		Lck_Lock(&pool_mtx);
+		ppx = NULL;
 		VTAILQ_FOREACH(pp, &pools, list) {
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 
@@ -235,6 +236,9 @@ pool_poolherder(void *priv)
 				ppx = pp;
 			u += pp->lqueue;
 		}
+		VSC_C_main->thread_queue_len = u;
+		if (nwq > 0 || cache_param->wthread_pools > 0 || ppx == NULL)
+			(void)Lck_CondWaitTimeout(&cond, &pool_mtx, 1.0);
 		if (ppx != NULL) {
 			VTAILQ_REMOVE(&pools, ppx, list);
 			PTOK(pthread_join(ppx->herder_thr, &rvp));
@@ -248,9 +252,8 @@ pool_poolherder(void *priv)
 			VSC_C_main->pools--;
 		}
 		Lck_Unlock(&pool_mtx);
-		VSC_C_main->thread_queue_len = u;
 	}
-	NEEDLESS(return (NULL));
+	return (NULL);
 }
 
 /*--------------------------------------------------------------------*/
@@ -285,4 +288,19 @@ Pool_Init(void)
 	PTOK(pthread_create(&thr_pool_herder, NULL, pool_poolherder, NULL));
 	while (!VSC_C_main->pools)
 		VTIM_sleep(0.01);
+}
+
+void
+Pool_Stop(void)
+{
+	Lck_Lock(&pool_mtx);
+	cache_param->wthread_pools = 0;
+	PTOK(pthread_cond_signal(&cond));
+	Lck_Unlock(&pool_mtx);
+}
+
+void
+Pool_Fini(void)
+{
+	AZ(pthread_join(thr_pool_herder, NULL));
 }
