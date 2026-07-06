@@ -239,6 +239,7 @@ pool_poolherder(void *priv)
 			VTAILQ_REMOVE(&pools, ppx, list);
 			PTOK(pthread_join(ppx->herder_thr, &rvp));
 			PTOK(pthread_cond_destroy(&ppx->herder_cond));
+			assert(VTAILQ_EMPTY(&ppx->poolsocks));
 			free(ppx->a_stat);
 			free(ppx->b_stat);
 			SES_DestroyPool(ppx);
