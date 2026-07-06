@@ -445,11 +445,11 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 	/* Return any cached resources from previous task */
 	WRK_Cleanup(wrk);
 
-	while (!pool_accepting)
+	while (!pool_accepting && ls->sock != -2 && !ps->pool->die)
 		VTIM_sleep(.1);
 
 	ps->thread = pthread_self();
-	while (!ps->pool->die) {
+	while (ls->sock != -2 && !ps->pool->die) {
 		INIT_OBJ(&wa, WRK_ACCEPT_MAGIC);
 		wa.acceptlsock = ls;
 
@@ -461,14 +461,8 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 			    &wa.acceptaddrlen);
 		} while (i < 0 && errno == EAGAIN && !ps->pool->die);
 
-		if (i < 0 && ps->pool->die)
+		if (i < 0 && (ls->sock == -2 || ps->pool->die))
 			break;
-
-		if (i < 0 && ls->sock == -2) {
-			/* Shut down in progress */
-			sleep(2);
-			continue;
-		}
 
 		if (i < 0) {
 			switch (errno) {
