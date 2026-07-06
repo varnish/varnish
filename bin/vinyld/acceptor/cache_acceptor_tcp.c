@@ -448,6 +448,7 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 	while (!pool_accepting)
 		VTIM_sleep(.1);
 
+	ps->thread = pthread_self();
 	while (!ps->pool->die) {
 		INIT_OBJ(&wa, WRK_ACCEPT_MAGIC);
 		wa.acceptlsock = ls;
@@ -513,6 +514,7 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 
 		if (!Pool_Task_Arg(wrk, TASK_QUEUE_REQ,
 		    vca_tcp_make_session, &wa, sizeof wa)) {
+			ps->thread = cli_thread;
 			/*
 			 * We couldn't get another thread, so we will handle
 			 * the request in this worker thread, but first we
@@ -529,8 +531,12 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 			VTIM_sleep(2.0);
 
 	}
+	ps->thread = cli_thread;
 
 	VSL(SLT_Debug, NO_VXID, "XXX Accept thread dies %p", ps);
+	Lck_Lock(&ps->pool->mtx);
+	VTAILQ_REMOVE(&ps->pool->poolsocks, ps, list);
+	Lck_Unlock(&ps->pool->mtx);
 	FREE_OBJ(ps);
 }
 
@@ -549,6 +555,8 @@ vca_tcp_accept(struct pool *pp)
 		ps->task->func = vca_tcp_accept_task;
 		ps->task->priv = ps;
 		ps->pool = pp;
+		// we use cli_thread as a marker for "not accepting"
+		ps->thread = cli_thread;
 		Lck_Lock(&pp->mtx);
 		VTAILQ_INSERT_TAIL(&pp->poolsocks, ps, list);
 		Lck_Unlock(&pp->mtx);
