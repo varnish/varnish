@@ -140,7 +140,6 @@ vwp_dopipe(struct vwp *vwp)
 	while (ss) {
 		if (w[i] == NULL) {
 			assert(ss == sizeof w[0]);
-			assert(vwp->hpoll == 1);
 			pthread_exit(NULL);
 		}
 		CHECK_OBJ_NOTNULL(w[i], WAITED_MAGIC);
@@ -207,6 +206,7 @@ vwp_main(void *priv)
 				z++;
 			}
 		}
+		// vwp_dopipe calls pthread_exit()
 		if (vwp->pollfd[0].revents)
 			vwp_dopipe(vwp);
 	}
@@ -261,8 +261,6 @@ vwp_fini(struct waiter *w)
 
 	CAST_OBJ_NOTNULL(vwp, w->priv, VWP_MAGIC);
 	vp = NULL;
-	while (vwp->hpoll > 1)
-		VTIM_sleep(0.1);
 	// XXX: set write pipe blocking
 	assert(write(vwp->pipes[1], &vp, sizeof vp) == sizeof vp);
 	PTOK(pthread_join(vwp->thread, &vp));
