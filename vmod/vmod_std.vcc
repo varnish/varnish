@@ -626,6 +626,11 @@ The format of *STRING* is::
     time of the ban, such that they represent a fixed point in time despite
     being specified as a duration.
 
+  * boolean fields:
+
+    * ``obj.uncacheable`` uncacheable object (either HFM or HFP)
+    * ``obj.hfm`` Hit-For-Miss object
+    * ``obj.hfp`` Hit-For-Pass object
 
 * *<operator>*:
 
@@ -648,6 +653,10 @@ The format of *STRING* is::
     * ``<``: *<field>* is less than *<arg>*
     * ``<=``: *<field>* is less than or equal to *<arg>*
 
+  * for boolean fields:
+
+    * Only ``==`` and ``!=`` can be used with boolean fields.
+
 
 * *<arg>*:
 
@@ -662,6 +671,10 @@ The format of *STRING* is::
   * for duration fields:
 
     A VCL duration like ``10s``, ``5m`` or ``1h``, see :ref:`vcl(7)_durations`
+
+  * for boolean fields:
+
+    A boolean field can only be compared to ``true``or ``false``.
 
 Expressions can be chained using the *and* operator ``&&``. For *or*
 semantics, use several bans.
