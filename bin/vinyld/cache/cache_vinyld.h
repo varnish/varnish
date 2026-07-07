@@ -556,6 +556,7 @@ void VMOD_Panic(struct vsb *);
 #endif
 
 /* cache_wrk.c */
+void WRK_Cleanup(const struct worker *);
 void WRK_Init(void);
 void WRK_AddStat(const struct worker *);
 void WRK_Log(enum VSL_tag_e, const char *, ...);
