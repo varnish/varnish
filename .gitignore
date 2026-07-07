@@ -156,3 +156,7 @@ witness.svg
 # Flexelint droppings
 _.fl
 _.fl.old
+
+# pahole report
+_.pa.h
+_.pa.h.ref
