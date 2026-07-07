@@ -59,8 +59,8 @@ struct vbitmap {
 #define VBITMAP_FL_MALLOC	 1	/* struct vbitmap is malloced */
 #define VBITMAP_FL_MALLOC_BITS	(1<<1)	/* bits space is malloced */
 
-	VBITMAP_TYPE	*bits;
 	unsigned	nbits;
+	VBITMAP_TYPE	*bits;
 };
 
 static inline void
