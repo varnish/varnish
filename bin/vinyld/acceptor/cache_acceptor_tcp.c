@@ -442,12 +442,11 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 	CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
 	CHECK_OBJ_NOTNULL(ps->pool, POOL_MAGIC);
 
+	/* Return any cached resources from previous task */
+	WRK_Cleanup(wrk);
+
 	while (!pool_accepting)
 		VTIM_sleep(.1);
-
-	/* Dont hold on to (possibly) discarded VCLs */
-	if (wrk->wpriv->vcl != NULL)
-		VCL_Rel(&wrk->wpriv->vcl);
 
 	while (!ps->pool->die) {
 		INIT_OBJ(&wa, WRK_ACCEPT_MAGIC);
