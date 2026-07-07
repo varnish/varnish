@@ -70,6 +70,21 @@ static void Pool_Work_Thread(struct pool *pp, struct worker *wrk);
 static uintmax_t reqpoolfail;
 
 /*--------------------------------------------------------------------
+ * Return all cached resources
+ */
+
+void
+WRK_Cleanup(const struct worker *wrk)
+{
+
+	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
+	CHECK_OBJ_NOTNULL(wrk->wpriv, WORKER_PRIV_MAGIC);
+	HSH_Cleanup(wrk);
+	if (wrk->wpriv->vcl != NULL)
+		VCL_Rel(&wrk->wpriv->vcl);
+}
+
+/*--------------------------------------------------------------------
  * Create and start a back-ground thread which as its own worker and
  * session data structures;
  */
@@ -102,7 +117,7 @@ wrk_bgthread(void *arg)
 	wrk.stats = &ds;
 
 	r = bt->func(&wrk, bt->priv);
-	HSH_Cleanup(&wrk);
+	WRK_Cleanup(&wrk);
 	Pool_Sumstat(&wrk);
 	return (r);
 }
@@ -158,10 +173,8 @@ WRK_Thread(struct pool *qp, size_t stacksize, unsigned thread_workspace)
 	AZ(w->pool);
 
 	VSL(SLT_WorkThread, NO_VXID, "%p end", w);
-	if (w->wpriv->vcl != NULL)
-		VCL_Rel(&w->wpriv->vcl);
 	PTOK(pthread_cond_destroy(&w->cond));
-	HSH_Cleanup(w);
+	WRK_Cleanup(w);
 	Pool_Sumstat(w);
 }
 
