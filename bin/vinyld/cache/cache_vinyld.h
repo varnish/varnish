@@ -410,15 +410,12 @@ int PAN__DumpStruct(struct vsb *vsb, int block, int track, const void *ptr,
     PAN__DumpStruct(vsb, 0, 0, ptr, #magic, magic, __VA_ARGS__)
 
 /* cache_pool.c */
-void Pool_Init(void);
-int Pool_Task(struct pool *pp, struct pool_task *task, enum task_prio prio);
-int Pool_Task_Arg(struct worker *, enum task_prio, task_func_t *,
-    const void *arg, size_t arg_len);
 void Pool_Sumstat(const struct worker *w);
 int Pool_TrySumstat(const struct worker *wrk);
-void Pool_PurgeStat(unsigned nobj);
 int Pool_Task_Any(struct pool_task *task, enum task_prio prio);
+void Pool_PurgeStat(unsigned nobj);
 void pan_pool(struct vsb *);
+void Pool_Init(void);
 
 /* cache_range.c */
 int VRG_CheckBo(struct busyobj *);
@@ -562,6 +559,9 @@ void VMOD_Panic(struct vsb *);
 void WRK_Init(void);
 void WRK_AddStat(const struct worker *);
 void WRK_Log(enum VSL_tag_e, const char *, ...);
+int Pool_Task(struct pool *pp, struct pool_task *task, enum task_prio prio);
+int Pool_Task_Arg(struct worker *, enum task_prio, task_func_t *,
+    const void *arg, size_t arg_len);
 
 /* cache_vpi.c */
 extern const size_t vpi_wrk_len;
