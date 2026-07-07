@@ -988,12 +988,12 @@ MCF_DumpJsonParam(void)
 		if (!strcmp("deprecated_dummy", pp->name))
 		    continue;
 
-	VSB_cat(vsb, p);
-	p = ",\n";
-	VSB_cat(vsb, "\"");
-	VSB_quote(vsb, pp->name, -1, VSB_QUOTE_JSON);
-	VSB_cat(vsb, "\": {\n");
-	VSB_indent(vsb, 2);
+		VSB_cat(vsb, p);
+		p = ",\n";
+		VSB_cat(vsb, "\"");
+		VSB_quote(vsb, pp->name, -1, VSB_QUOTE_JSON);
+		VSB_cat(vsb, "\": {\n");
+		VSB_indent(vsb, 2);
 		if (pp->flags & PLATFORM_DEPENDENT)
 			VSB_cat(vsb, "\"platformDependent\": true,\n");
 
