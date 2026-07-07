@@ -297,3 +297,25 @@ EXTRA_DIST += \
 
 cache/cache_varnishd.h: cache/cache_vinyld.h
 	cp $^ $@
+
+##
+# find holes, usual flow:
+# make pahole-ref
+# make pahole		# look for XXX, make changes
+# make pahole-diff	# check
+.PHONY: pahole _.pa.h
+
+_.pa.h: varnishd
+	pahole --sort --hex -I varnishd >_.pa.h
+
+_.pa.h.ref:
+	mv -f _.pa.h _.pa.h.ref
+
+pahole: _.pa.h
+	cat _.pa.h
+
+pahole-ref: _.pa.h
+	mv -f _.pa.h _.pa.h.ref
+
+pahole-diff: _.pa.h.ref _.pa.h
+	-diff -u _.pa.h.ref _.pa.h
