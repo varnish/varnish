@@ -33,7 +33,7 @@
 
 #include <stdlib.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 
 #include "cache/cache_obj.h"
 #include "cache/cache_objhead.h"

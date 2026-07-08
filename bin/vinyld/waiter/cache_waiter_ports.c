@@ -73,7 +73,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 
 #include "waiter/waiter.h"
 #include "waiter/waiter_priv.h"

@@ -35,7 +35,7 @@
 
 #include "config.h"
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 
 #include <stdio.h>
 #include <stdlib.h>

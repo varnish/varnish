@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_conn_oper.h"
 #include "cache/cache_objhead.h"
 #include "cache/cache_transport.h"

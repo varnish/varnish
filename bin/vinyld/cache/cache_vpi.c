@@ -34,7 +34,7 @@
 
 #include <stdio.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 
 #include "vcl.h"
 #include "vbm.h"

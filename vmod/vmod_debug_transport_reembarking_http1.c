@@ -33,7 +33,7 @@
 
 #include "config.h"
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 
 #include "cache/cache_filter.h"
 #include "cache/cache_transport.h"

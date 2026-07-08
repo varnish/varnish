@@ -40,7 +40,7 @@
 #include <inttypes.h>
 #include <poll.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_conn_oper.h"
 #ifndef TEST_DRIVER
 # include "cache/cache_filter.h"

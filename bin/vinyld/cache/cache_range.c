@@ -31,7 +31,7 @@
 
 #include "config.h"
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "cache_filter.h"
 
 #include "vct.h"

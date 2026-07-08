@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 
 #include "vsha256.h"
 #include "vend.h"

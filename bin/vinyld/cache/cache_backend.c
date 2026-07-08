@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "cache_director.h"
 
 #include "vtcp.h"

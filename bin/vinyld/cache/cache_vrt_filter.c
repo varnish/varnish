@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "cache_vcl.h"
 #include "vrt_obj.h"
 

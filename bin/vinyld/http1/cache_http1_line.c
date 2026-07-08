@@ -42,7 +42,7 @@
 #include "config.h"
 
 #include <sys/uio.h>
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_conn_oper.h"
 #include "cache/cache_filter.h"
 

@@ -38,7 +38,7 @@
 
 #include "config.h"
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "common/heritage.h"
 
 #include "vcli_serve.h"

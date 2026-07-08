@@ -32,7 +32,7 @@
 
 #include "config.h"
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_obj.h"
 #include "common/heritage.h"
 

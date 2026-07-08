@@ -37,7 +37,7 @@
 #  include <sanitizer/asan_interface.h>
 #endif
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 
 #include <stdlib.h>
 

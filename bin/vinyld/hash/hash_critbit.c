@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_objhead.h"
 
 #include "hash/hash_slinger.h"

@@ -279,7 +279,7 @@ builtin_vcl.c:	builtin.vcl
 	    -e 's/^/ "/' $(srcdir)/builtin.vcl >> $@
 	echo ';' >> $@
 
-EXTRA_DIST = builtin.vcl cache/cache_vinyld.h
+EXTRA_DIST = builtin.vcl cache/cache_int.h
 
 vhp_hufdec.h: vhp_gen_hufdec
 	$(AM_V_GEN) ./vhp_gen_hufdec > vhp_hufdec.h_
@@ -295,7 +295,7 @@ EXTRA_DIST += \
 	mgt/vtls_cfg/vtls_cfg_parser.c \
 	mgt/vtls_cfg/vtls_cfg_parser.h
 
-cache/cache_varnishd.h: cache/cache_vinyld.h
+cache/cache_varnishd.h: cache/cache_int.h
 	cp $^ $@
 
 ##
