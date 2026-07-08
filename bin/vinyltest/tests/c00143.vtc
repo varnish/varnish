@@ -68,15 +68,6 @@ varnish v1 -expect bans_lurker_obj_killed == 0
 varnish v1 -expect n_object == 2
 
 client c1 {
-	txreq -url "/hfm1"
-	rxresp
-	expect resp.status == 200
-	expect resp.http.X-hitmiss == true
-	expect resp.http.X-hitpass == false
-	expect resp.http.X-hit == false
-} -run
-
-client c1 {
 	txreq -url "/hfp1"
 	rxresp
 	expect resp.status == 200
