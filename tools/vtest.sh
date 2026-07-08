@@ -151,7 +151,7 @@ gcovtest () (
 			-i \
 			tests/[ab]0000?.vtc \
 			vtest2/tests/a000*.vtc \
-			tests/c0086?.vtc \
+			tests/c00086.vtc \
 			tests/j*.vtc \
 			|| exit 1
 
