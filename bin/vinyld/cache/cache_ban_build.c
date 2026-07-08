@@ -261,7 +261,7 @@ ban_add_double(const struct ban_proto *bp, const struct pvar *pv, int op, double
 static const char *
 ban_add_bool(struct ban_proto *bp, const struct pvar *pv, int op, const char *a3)
 {
-	unsigned b;
+	uint8_t b;
 
 	CHECK_OBJ_NOTNULL(bp, BAN_PROTO_MAGIC);
 	AN(pv);
