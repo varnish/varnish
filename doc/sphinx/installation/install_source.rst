@@ -63,6 +63,8 @@ them (replace ``sudo apt-get install`` if needed)::
 	make \
 	automake \
 	autotools-dev \
+	cpio \
+	furo \
 	libedit-dev \
 	libjemalloc-dev \
 	libncurses-dev \
@@ -70,8 +72,7 @@ them (replace ``sudo apt-get install`` if needed)::
 	libtool \
 	pkg-config \
 	python3-docutils \
-	python3-sphinx \
-	cpio
+	python3-sphinx
 
 Optionally, to rebuild the svg files::
 
