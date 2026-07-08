@@ -146,7 +146,15 @@ gcovtest () (
 	if [ `id -u` -eq 0 ] && su -m varnish -c 'true' ; then
 		su -m varnish -c "make check" || exit 1
 		cd bin/varnishtest
-		./varnishtest -i tests/[ab]0000?.vtc tests/j*.vtc || exit 1
+		./varnishtest \
+			-C \
+			-i \
+			tests/[ab]0000?.vtc \
+			vtest2/tests/a000*.vtc \
+			tests/c0086?.vtc \
+			tests/j*.vtc \
+			|| exit 1
+
 	else
 		make check || exit 1
 	fi
