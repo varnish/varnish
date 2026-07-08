@@ -36,7 +36,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_transport.h"
 #include "proxy/cache_proxy.h"
 

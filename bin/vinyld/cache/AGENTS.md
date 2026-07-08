@@ -84,7 +84,7 @@ Ban expressions reference object attributes (URL, headers, etc.) defined in `inc
 
 Short-lived allocations in request context use the **workspace** (`struct ws`), not `malloc`. The workspace is a simple linear allocator reset at the end of each request.
 
-Key functions (declared in `cache.h`, `WS_Rollback` in `cache_vinyld.h`):
+Key functions (declared in `cache.h`, `WS_Rollback` in `cache_int.h`):
 ```c
 void      *WS_Alloc(struct ws *, unsigned len);          /* returns NULL if out of space */
 void      *WS_Copy(struct ws *, const void *, int len);  /* copy bytes into workspace */

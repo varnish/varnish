@@ -33,7 +33,7 @@
 
 #include "config.h"
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_conn_oper.h"
 
 #include <poll.h>

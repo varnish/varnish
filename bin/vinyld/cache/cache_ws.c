@@ -33,7 +33,7 @@
 
 #include "config.h"
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 
 #define WS_REDZONE_END		'\x15'
 

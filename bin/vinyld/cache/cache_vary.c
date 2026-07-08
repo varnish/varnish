@@ -60,7 +60,7 @@
 
 #include <stdlib.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 
 #include "vct.h"
 #include "vend.h"

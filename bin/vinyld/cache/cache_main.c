@@ -31,7 +31,7 @@
 
 #include "config.h"
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "cache_conn_pool_ssl.h"
 #include "acceptor/cache_acceptor.h"
 #include "tls/cache_tls.h"

@@ -34,7 +34,7 @@
 
 #if defined(HAVE_KQUEUE)
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 
 #include <sys/event.h>
 

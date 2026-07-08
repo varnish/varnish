@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_vgz.h"		/* enum vgz_flag */
 #include "cache/cache_esi.h"
 #include "cache/cache_filter.h"		/* struct vfp_ctx */

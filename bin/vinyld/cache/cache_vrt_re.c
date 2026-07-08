@@ -35,7 +35,7 @@
 
 #include <ctype.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "vcc_interface.h"
 
 void

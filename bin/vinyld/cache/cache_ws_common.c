@@ -35,7 +35,7 @@
 
 #include <stdio.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 
 uintptr_t const ws_pipeline_rollback = (uintptr_t)&ws_pipeline_rollback;
 

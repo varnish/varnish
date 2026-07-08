@@ -35,7 +35,7 @@
 
 #include <stdlib.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 
 #include "vsa.h"
 #include "vsha256.h"

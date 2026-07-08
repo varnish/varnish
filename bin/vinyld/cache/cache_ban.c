@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "cache_ban.h"
 #include "cache_objhead.h"
 

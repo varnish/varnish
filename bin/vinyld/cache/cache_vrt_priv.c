@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "vcl.h"
 #include "vcc_interface.h"
 

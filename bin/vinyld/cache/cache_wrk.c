@@ -57,7 +57,7 @@
 #include <stdlib.h>
 #include <sched.h>
 
-#include "cache_vinyld.h"
+#include "cache_int.h"
 #include "cache_pool.h"
 
 #include "vcli_serve.h"

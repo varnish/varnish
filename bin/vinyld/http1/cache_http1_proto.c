@@ -44,7 +44,7 @@
 
 #include "config.h"
 
-#include "cache/cache_vinyld.h"
+#include "cache/cache_int.h"
 #include "cache/cache_transport.h"
 
 #include "cache_http1.h"
