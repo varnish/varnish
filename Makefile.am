@@ -8,7 +8,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = varnishapi.pc
 
 m4dir = $(datadir)/aclocal
-m4_DATA = varnish.m4 varnish-legacy.m4
+m4_DATA = varnish.m4
 
 CLEANFILES = \
 	cscope.in.out \
@@ -24,7 +24,6 @@ EXTRA_DIST = \
 	autogen.sh \
 	varnishapi.pc.in \
 	varnish.m4 \
-	varnish-legacy.m4 \
 	vsc.am \
 	vtc.am \
 	wflags.py
