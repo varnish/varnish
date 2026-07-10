@@ -560,7 +560,7 @@ mct_callback(void *priv, const struct suckaddr *sa)
 		ev = VEV_Alloc();
 		AN(ev);
 		ev->fd = sock;
-		ev->fd_flags = POLLIN;
+		ev->fd_flags = VEV__RD;
 		ev->callback = telnet_accept;
 		AZ(VEV_Start(mgt_evb, ev));
 	}
