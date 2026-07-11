@@ -61,6 +61,7 @@ We'll use `typescript` notation to describe the object shape:
         headers: Map<string, string>,           // keys (header names) are lowercase, this map is built using ReqHeader,
                                                 // BereqHeader, RespUnset, and BerespUnset tags
         method: string,                         // ReqMethod, BereqMethod
+        url: string,                            // ReqURL, BereqURL
         proto: string,                          // ReqProtocol, BereqProtocol
         hdrBytes: number,                       // ReqAcct, BereqAcct
         bodyBytes: number,                      // ^ same
