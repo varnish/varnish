@@ -134,6 +134,10 @@ $Function VOID rot104()
 Try to register the rot52 filter again. This should always fail
 the vcl.
 
+$Function VOID rot13_fail_init()
+
+Make the rot13 vdp init method always fail.
+
 $Function VOID rot52(HTTP hdr)
 
 Encrypt the HTTP header with quad-ROT13 encryption,

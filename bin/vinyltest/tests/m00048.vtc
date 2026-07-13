@@ -107,3 +107,22 @@ client c1 -repeat 2 {
 	expect resp.http.Transfer-Encoding == "chunked"
 	expect resp.body == "Cbagb Snpgb, Pnrfne Genafvg!"
 } -run
+
+server s1 {
+	rxreq
+	txresp -body "hello"
+} -start
+
+varnish v1 -vcl+backend {
+	import debug;
+
+	sub vcl_deliver {
+		set resp.filters += " rot13";
+		debug.rot13_fail_init();
+	}
+}
+
+client c1 {
+	txreq -url /vdp-init-fail
+	expect_close
+} -run

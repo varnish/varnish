@@ -80,6 +80,16 @@ static const struct vfp xyzzy_vfp_rot13 = {
 // deliberately fragmenting the stream to make testing more interesting
 #define ROT13_BUFSZ 8
 
+static int rot13_init_fail = 0;
+
+void
+xyzzy_rot13_fail_init(VRT_CTX)
+{
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	rot13_init_fail = 1;
+}
+
 static int v_matchproto_(vdp_init_f)
 xyzzy_vdp_rot13_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 {
@@ -92,6 +102,8 @@ xyzzy_vdp_rot13_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 
 	AN(priv);
 
+	if (rot13_init_fail)
+		return (-1);
 	*priv = malloc(ROT13_BUFSZ);
 	if (*priv == NULL)
 		return (-1);
@@ -142,6 +154,7 @@ xyzzy_vdp_rot13_fini(struct vdp_ctx *vdc, void **priv)
 {
 	(void)vdc;
 	AN(priv);
+	AN(*priv);
 	free(*priv);
 	*priv = NULL;
 	return (0);
