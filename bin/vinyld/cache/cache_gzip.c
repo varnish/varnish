@@ -167,8 +167,11 @@ vgz_getmbuf(struct worker *wrk, struct vgz *vg)
 	AZ(vg->stvbuf);
 
 	vg->stvbuf = STV_AllocBuf(wrk, stv_transient, cache_param->gzip_buffer);
-	if (vg->stvbuf == NULL)
+	if (vg->stvbuf == NULL) {
+		VSLb(vg->vsl, SLT_Gzip, "G(un)zip error:"
+		    "failed to allocate gzip_buffer from transient stevedore");
 		return (-1);
+	}
 	vg->m_buf = STV_GetBufPtr(vg->stvbuf, &sz);
 	vg->m_sz = sz;
 	AN(vg->m_buf);
