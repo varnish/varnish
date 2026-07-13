@@ -657,10 +657,6 @@ vcc_CompileSource(struct vcc *tl, struct source *sp, const char *jfile)
 	if (tl->err)
 		return (NULL);
 
-	/* Expand and lex any includes in the token string */
-	if (tl->err)
-		return (NULL);
-
 	/* Parse the token string */
 	tl->t = VTAILQ_FIRST(&tl->tokens);
 	vcc_Parse(tl);

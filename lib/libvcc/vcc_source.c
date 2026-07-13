@@ -255,6 +255,7 @@ vcc_lex_source(struct vcc *tl, struct source *src_sp, int eoi)
 		if (!eoi && t->tok == EOI)
 			break;
 
+		/* Expand and lex any includes in the token string */
 		if (t->tok == ID && vcc_IdIs(t, "include")) {
 			t = vcc_lex_include(tl, src_sp, t);
 		} else {
