@@ -200,11 +200,11 @@ VDP_Push(VRT_CTX, struct vdp_ctx *vdc, struct ws *ws, const struct vdp *vdp,
 		vdc->retval = vdpe->vdp->init(ctx, vdc, &vdpe->priv);
 	vdc->oc = NULL;
 
-	if (vdc->retval > 0) {
+	if (vdc->retval) {
 		VTAILQ_REMOVE(&vdc->vdp, vdpe, list);
 		vdc->nxt = VTAILQ_FIRST(&vdc->vdp);
 		vdc->retval = 0;
-	} else if (vdc->retval == 0)
+	} else
 		AN(vdp->bytes);
 	return (vdc->retval);
 }
