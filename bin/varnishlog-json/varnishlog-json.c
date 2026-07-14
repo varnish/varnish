@@ -495,8 +495,6 @@ process_vsl_transaction(struct VSL_transaction *t, struct VSL_data *vsl,
 				handling = "pass";
 			else if (!strcmp(data, "PIPE"))
 				handling = "pipe";
-			else if (!strcmp(data, "SYNTH"))
-				handling = "synth";
 			else if (!strcmp(data, "BACKEND_RESPONSE"))
 				handling = "fetch";
 			else if (!strcmp(data, "BACKEND_ERROR"))
