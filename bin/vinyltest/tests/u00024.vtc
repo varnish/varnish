@@ -20,6 +20,8 @@ shell {
 		.auto_restart.units == "bool" or error("auto_restart: wrong units"),
 		.auto_restart.default == "on" or error("auto_restart: wrong default"),
 		(.auto_restart | has("minimum")) == false or error("auto_restart: unexpected minimum"),
-		(.auto_restart | has("flags")) == false or error("auto_restart: unexpected flags")
+		(.auto_restart | has("flags")) == false or error("auto_restart: unexpected flags"),
+
+		(.cc_command.flags | index("must_reload")) != null or error("cc_command: missing must_reload flag")
 	' result.json
 }
