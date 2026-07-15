@@ -127,6 +127,16 @@ smd_full_allocobj(struct worker *wrk, const struct stevedore *stv,
 
 	return (0);
 }
+static void * v_matchproto_(storage_allocbuf_t)
+smd_full_allocbuf(struct worker *wrk, const struct stevedore *stv, size_t size,
+    uintptr_t *ppriv)
+{
+	(void)wrk;
+	(void)stv;
+	(void)size;
+	(void)ppriv;
+	return (NULL);
+}
 
 #define dur_arg(a, s, d)					\
 	(! strncmp((a), (s), vstrlen(s))				\
@@ -202,6 +212,7 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 				getspace = smd_full_getspace;
 				AZ(allocobj);
 				allocobj = smd_full_allocobj;
+				parent->allocbuf = smd_full_allocbuf;
 				continue;
 			}
 			if (! vstrcmp(a, "lessspace")) {
