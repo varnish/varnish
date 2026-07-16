@@ -69,6 +69,8 @@ The TCP port number or service name can be specified as part of
 
     .port = "http";
 
+Defaults to 80 if ``.ssl`` is set to 0, 443 otherwise.
+
 Attribute ``.path``
 -------------------
 
@@ -94,6 +96,51 @@ Attribute ``.host_header``
 A host header to add to probes and regular backend requests if they have no such header::
 
     .host_header = "example.com";
+
+HTTPS/TLS Attributes
+--------------------
+
+The ``.ssl*`` attributes control how Varnish connect to the backend using TLS::
+
+    .ssl = 1;
+    .ssl_sni = 0;
+    .ssl_verify_peer = 0;
+    .ssl_verify_host = 1;
+
+For all of these, 0 means "activated" and 1 "deactivated". If ``.ssl`` is
+deactivated, the others have no effect.
+
+``.ssl`` [default: 0]
+    Set to 1 to activate HTTPS connection to the backend. By default the
+    connections will have an SNI extension name provided during negotiation.
+
+    This defaults to the ``.host`` attribute, unless if the ``.host_header``
+    attribute is set in which case that will be used instead.
+
+    Activating HTTPS also changess the default ``.port`` value to 443.
+
+``.ssl_sni`` [default: 1]
+    Set this to 0 to disable the use of the Server Name Indication (SNI)
+    extension for backend TLS connections. SNI allows a backend to serve
+    multiple TLS domains over a single IP and port.
+
+    The SNI name defaults to
+    the backend ``.host`` value, unless ``.host_header`` is defined, in which case it
+    will be used as the SNI name.
+
+``.ssl_verify_peer`` [default: 1]
+    Set this to 0 to disable verification of the peer’s certificate chain.
+
+    This allows a backend to use a self signed certificate.
+
+``.ssl_verify_host`` [default: 0]
+    Set this to 1 to enable verification of the peer’s certificate
+    identity. The identity in the certificate is verified against the name
+    configured in the ``.host attribute``, unless ``.host_header`` is set in which case
+    that is used instead.
+
+    If set to 0, this allows a backend to use an invalid
+    certificate.
 
 Timeout Attributes
 ------------------
