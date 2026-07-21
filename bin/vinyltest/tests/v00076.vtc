@@ -1,0 +1,37 @@
+vtest "Complex C expression for a VMOD argument default value"
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -vcl+backend {
+	import debug;
+
+	sub vcl_deliver {
+		set resp.http.false-lower = debug.test_default_bool(false);
+		set resp.http.false-upper = debug.test_default_bool(FALSE);
+		set resp.http.false-cap = debug.test_default_bool(False);
+		set resp.http.true-lower = debug.test_default_bool(true);
+		set resp.http.true-upper = debug.test_default_bool(TRUE);
+		set resp.http.true-cap = debug.test_default_bool(True);
+		set resp.http.def-client = debug.test_default_bool();
+	}
+
+	sub vcl_backend_response {
+		set beresp.http.def-backend = debug.test_default_bool();
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.http.false-lower == false
+	expect resp.http.false-upper == false
+	expect resp.http.false-cap == false
+	expect resp.http.true-lower == true
+	expect resp.http.true-upper == true
+	expect resp.http.true-cap == true
+	expect resp.http.def-client == true
+	expect resp.http.def-backend == false
+} -run

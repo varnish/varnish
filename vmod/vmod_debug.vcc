@@ -69,6 +69,10 @@ $Function STRING test_priv_top(PRIV_TOP, STRING)
 
 Test function for TOP private pointers
 
+$Function BOOL test_default_bool(BOOL test=ctx->method&VCL_MET_TASK_C)
+
+Complex C expression for a default value.
+
 $Object obj(STRING string="default", ENUM { one, two, three } number=one)
 
 Test object
