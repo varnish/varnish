@@ -383,20 +383,6 @@ HTTP1_Session(struct worker *wrk, struct req *req)
 				http1_setstate(sp, H1CLEANUP);
 				continue;
 			}
-			if (http_HdrIs(req->http, H_Upgrade, "h2c")) {
-				if (!FEATURE(FEATURE_HTTP2)) {
-					VSLb(req->vsl, SLT_Debug,
-					    "H2 upgrade attempt");
-				} else if (req->htc->body_status != BS_NONE) {
-					VSLb(req->vsl, SLT_Debug,
-					    "H2 upgrade attempt has body");
-				} else {
-					http1_setstate(sp, NULL);
-					req->err_code = 2;
-					H2_OU_Sess(wrk, sp, req);
-					return;
-				}
-			}
 			assert(req->req_step == R_STP_TRANSPORT);
 			VCL_TaskEnter(req->privs);
 			VCL_TaskEnter(req->top->privs);

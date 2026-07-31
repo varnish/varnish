@@ -1,0 +1,156 @@
+vtest	"Upgrade: h2c is ignored"
+
+server s1 {
+	rxreq
+	expect req.url == /noconn
+	expect req.http.host == foo.bar
+	# Upgrade and HTTP2-Settings are filtered client-to-backend
+	expect req.http.upgrade == <undef>
+	expect req.http.http2-settings == <undef>
+	txresp -status 400 -bodylen 10
+} -start
+
+varnish v1 -vcl+backend {
+	sub vcl_deliver {
+		set resp.http.saw-upgrade = req.http.upgrade;
+		set resp.http.saw-settings = req.http.http2-settings;
+	}
+} -start
+
+varnish v1 -cliok "param.set feature -http2"
+varnish v1 -cliok "param.set debug +syncvsl"
+
+# Without a Connection header the upgrade request is just a request, and
+# VCL sees the two headers.
+
+client c1 {
+	send "GET /noconn HTTP/1.1\r\n"
+	send "Host: foo.bar\r\n"
+	send "Upgrade: h2c\r\n"
+	send "HTTP2-Settings: AAMAAABkAAQAAP__\r\n"
+	send "\r\n"
+	rxresp
+	expect resp.status == 400
+	expect resp.bodylen == 10
+	expect resp.http.saw-upgrade == h2c
+	expect resp.http.saw-settings == AAMAAABkAAQAAP__
+} -run
+
+varnish v1 -vsl_catchup
+
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
+
+# Same with the http2 feature enabled: no 101, no upgrade.
+
+varnish v1 -cliok "param.set feature +http2"
+
+server s1 -wait
+server s1 {
+	rxreq
+	expect req.url == /noconn
+	expect req.http.upgrade == <undef>
+	txresp -status 400 -bodylen 10
+} -start
+
+client c1 -run
+
+varnish v1 -vsl_catchup
+
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
+
+# Listing both headers as connection-specific changes nothing: they are
+# filtered client-to-backend either way, and VCL sees them either way.
+
+server s1 -wait
+server s1 {
+	rxreq
+	expect req.url == /conn
+	expect req.http.upgrade == <undef>
+	expect req.http.http2-settings == <undef>
+	txresp -status 401 -bodylen 8
+} -start
+
+client c2 {
+	send "GET /conn HTTP/1.1\r\n"
+	send "Host: foo.bar\r\n"
+	send "Connection: Upgrade, HTTP2-Settings\r\n"
+	send "Upgrade: h2c\r\n"
+	send "HTTP2-Settings: AAMAAABkAAQAAP__\r\n"
+	send "\r\n"
+	rxresp
+	expect resp.status == 401
+	expect resp.bodylen == 8
+	expect resp.http.saw-upgrade == h2c
+	expect resp.http.saw-settings == AAMAAABkAAQAAP__
+} -run
+
+varnish v1 -vsl_catchup
+
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
+
+# A request body is no longer special.
+
+server s1 -wait
+server s1 {
+	rxreq
+	expect req.url == /body
+	expect req.bodylen == 4
+	txresp -status 402 -bodylen 11
+} -start
+
+client c3 {
+	send "POST /body HTTP/1.1\r\n"
+	send "Host: foo.bar\r\n"
+	send "Upgrade: h2c\r\n"
+	send "HTTP2-Settings: AAMAAABkAAQAAP__\r\n"
+	send "Content-Length: 4\r\n"
+	send "\r\n"
+	send "FOO\n"
+	rxresp
+	expect resp.status == 402
+	expect resp.bodylen == 11
+} -run
+
+varnish v1 -vsl_catchup
+
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
+
+# Garbage settings no longer cost the connection.
+
+server s1 -wait
+server s1 {
+	rxreq
+	expect req.url == /junk
+	txresp -status 403 -bodylen 6
+} -start
+
+client c4 {
+	send "GET /junk HTTP/1.1\r\n"
+	send "Host: foo.bar\r\n"
+	send "Upgrade: h2c\r\n"
+	send "HTTP2-Settings: #######\r\n"
+	send "\r\n"
+	rxresp
+	expect resp.status == 403
+	expect resp.bodylen == 6
+	expect resp.http.saw-settings == "#######"
+} -run
+
+varnish v1 -vsl_catchup
+
+varnish v1 -expect MEMPOOL.req0.live == 0
+varnish v1 -expect MEMPOOL.req1.live == 0
+varnish v1 -expect MEMPOOL.sess0.live == 0
+varnish v1 -expect MEMPOOL.sess1.live == 0
