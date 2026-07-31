@@ -206,13 +206,10 @@ H2_prism_complete(struct http_conn *htc)
 /**********************************************************************
  */
 
-#define H2_PU_MARKER	1
-
 void
 H2_PU_Sess(struct worker *wrk, struct sess *sp, struct req *req)
 {
 	VSL(SLT_Debug, sp->vxid, "H2 Prior Knowledge Upgrade");
-	req->err_code = H2_PU_MARKER;
 	SES_SetTransport(wrk, sp, req, &HTTP2_transport);
 }
 
@@ -223,7 +220,6 @@ h2_new_session(struct worker *wrk, void *arg)
 	struct sess *sp;
 	struct h2_sess h2s;
 	struct h2_sess *h2;
-	uint16_t marker;
 	uint8_t settings[48];
 	struct h2h_decode decode;
 	stream_close_t reason;
@@ -241,10 +237,6 @@ h2_new_session(struct worker *wrk, void *arg)
 		VCL_Rel(&wrk->wpriv->vcl);
 
 	assert(srq->transport == &HTTP2_transport);
-
-	marker = srq->err_code;
-	assert(marker == H2_PU_MARKER);
-	srq->err_code = 0;
 
 	THR_SetRequest(srq);
 
