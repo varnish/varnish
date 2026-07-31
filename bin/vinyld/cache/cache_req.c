@@ -295,6 +295,7 @@ Req_Cleanup(struct sess *sp, struct worker *wrk, struct req *req)
 
 	AZ(req->director_hint);
 	req->restarts = 0;
+	req->err_code = 0;
 
 	if (req->vcl != NULL)
 		VCL_Recache(wrk, &req->vcl);
