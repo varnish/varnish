@@ -219,7 +219,7 @@ H2_PU_Sess(struct worker *wrk, struct sess *sp, struct req *req)
 static void v_matchproto_(task_func_t)
 h2_new_session(struct worker *wrk, void *arg)
 {
-	struct req *req, *srq = NULL;
+	struct req *srq;
 	struct sess *sp;
 	struct h2_sess h2s;
 	struct h2_sess *h2;
@@ -229,27 +229,23 @@ h2_new_session(struct worker *wrk, void *arg)
 	stream_close_t reason;
 	size_t l;
 
+	/* Prior knowledge. The incoming req does not hold
+	 * anything of value and can be repurposed as the session
+	 * req (srq). */
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
-	CAST_OBJ_NOTNULL(req, arg, REQ_MAGIC);
-	sp = req->sp;
+	CAST_OBJ_NOTNULL(srq, arg, REQ_MAGIC);
+	sp = srq->sp;
 	CHECK_OBJ_NOTNULL(sp, SESS_MAGIC);
 
 	if (wrk->wpriv->vcl)
 		VCL_Rel(&wrk->wpriv->vcl);
 
-	assert(req->transport == &HTTP2_transport);
+	assert(srq->transport == &HTTP2_transport);
 
-	marker = req->err_code;
+	marker = srq->err_code;
 	assert(marker == H2_PU_MARKER);
-	req->err_code = 0;
+	srq->err_code = 0;
 
-	/* Prior knowledge. The incoming req does not hold
-	 * anything of value and can be repurposed as the session
-	 * req (srq). */
-	srq = req;
-	req = NULL;
-
-	CHECK_OBJ_NOTNULL(srq, REQ_MAGIC);
 	THR_SetRequest(srq);
 
 	h2 = h2_init_sess(wrk, sp, &h2s, &srq, &decode);
