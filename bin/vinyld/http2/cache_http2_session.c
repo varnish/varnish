@@ -35,19 +35,12 @@
 #include <stdio.h>
 
 #include "cache/cache_vinyld.h"
-#include "cache/cache_conn_oper.h"
 #include "cache/cache_transport.h"
 #include "http2/cache_http2.h"
 
 #include "tls/cache_tls.h"
 #include "vend.h"
 #include "vtcp.h"
-
-static const char h2_resp_101[] =
-	"HTTP/1.1 101 Switching Protocols\r\n"
-	"Connection: Upgrade\r\n"
-	"Upgrade: h2c\r\n"
-	"\r\n";
 
 static const char H2_prism[24] = {
 	0x50, 0x52, 0x49, 0x20, 0x2a, 0x20, 0x48, 0x54,
@@ -211,162 +204,15 @@ H2_prism_complete(struct http_conn *htc)
 
 
 /**********************************************************************
- * Deal with the base64url (NB: ...url!) encoded SETTINGS in the H1 req
- * of a H2C upgrade.
- */
-
-static int
-h2_b64url_settings(struct h2_sess *h2, struct req *req)
-{
-	const char *p, *q;
-	uint8_t u[6], *up;
-	unsigned x;
-	int i, n;
-	static const char s[] =
-	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	    "abcdefghijklmnopqrstuvwxyz"
-	    "0123456789"
-	    "-_=";
-
-	/*
-	 * If there is trouble with this, we could reject the upgrade
-	 * but putting this on the H1 side is just plain wrong...
-	 */
-	if (!http_GetHdr(req->http, H_HTTP2_Settings, &p))
-		return (-1);
-	AN(p);
-	VSLb(req->vsl, SLT_Debug, "H2CS %s", p);
-
-	n = 0;
-	x = 0;
-	up = u;
-	for (;*p; p++) {
-		q = strchr(s, *p);
-		if (q == NULL)
-			return (-1);
-		i = q - s;
-		assert(i >= 0 && i <= 64);
-		x <<= 6;
-		x |= i;
-		n += 6;
-		if (n < 8)
-			continue;
-		*up++ = (uint8_t)(x >> (n - 8));
-		n -= 8;
-		if (up == u + sizeof u) {
-			AZ(n);
-			if (h2_set_setting(h2, (void*)u))
-				return (-1);
-			up = u;
-		}
-	}
-	if (up != u)
-		return (-1);
-	return (0);
-}
-
-
-/**********************************************************************/
-
-static void
-h2_ou_rel_req(struct worker *wrk, struct req **preq)
-{
-	struct req *req;
-
-	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
-	TAKE_OBJ_NOTNULL(req, preq, REQ_MAGIC);
-	AZ(req->vcl);
-	Req_AcctLogCharge(wrk->stats, req);
-	Req_Release(req);
-}
-
-static struct h2_req *
-h2_ou_session(struct worker *wrk, struct h2_sess *h2,
-    struct req **preq)
-{
-	struct req *req;
-	ssize_t sz;
-	enum htc_status_e hs;
-	struct h2_req *r2;
-
-	TAKE_OBJ_NOTNULL(req, preq, REQ_MAGIC);
-
-	if (h2_b64url_settings(h2, req)) {
-		VSLb(h2->vsl, SLT_Debug, "H2: Bad HTTP-Settings");
-		h2_ou_rel_req(wrk, &req);
-		return (NULL);
-	}
-
-	sz = h2->htc->oper->write(h2->htc->oper_priv, h2->sess->fd,
-	    h2_resp_101, strlen(h2_resp_101));
-	VCO_Assert(h2->htc->oper, sz);
-	if (sz != strlen(h2_resp_101)) {
-		VSLb(h2->vsl, SLT_Debug, "H2: Upgrade: Error writing 101"
-		    " response: %s\n", VAS_errtxt(errno));
-		h2_ou_rel_req(wrk, &req);
-		return (NULL);
-	}
-
-	/* Copy any pipelined data from the request into the session. */
-	h2->htc->pipeline_b = req->htc->pipeline_b;
-	h2->htc->pipeline_e = req->htc->pipeline_e;
-	req->htc->pipeline_b = NULL;
-	req->htc->pipeline_e = NULL;
-	/* XXX: This call may assert on buffer overflow if the pipelined
-	   data exceeds the available space in the ws workspace. What to
-	   do about the overflowing data is an open issue. */
-	HTC_RxInit(h2->htc, h2->ws);
-
-	/* Wait for PRISM response */
-	hs = HTC_RxStuff(h2->htc, H2_prism_complete,
-	    NULL, NULL, NAN, h2->sess->t_idle + cache_param->timeout_idle, NAN,
-	    sizeof H2_prism);
-	if (hs != HTC_S_COMPLETE) {
-		VSLb(h2->vsl, SLT_Debug, "H2: No/Bad OU PRISM (hs=%d)", hs);
-		h2_ou_rel_req(wrk, &req);
-		return (NULL);
-	}
-
-	http_Unset(req->http, H_Upgrade);
-	http_Unset(req->http, H_HTTP2_Settings);
-
-	/* Prepare the req thread, but do not start it. The RFC requires
-	 * us to send our settings frame before any response frames, so we
-	 * delay the start of the thread until after the settings frame
-	 * has been sent. */
-	r2 = h2_new_req(h2, 1, &req);
-	AZ(req);
-	AZ(h2->highest_stream);
-	h2->highest_stream = r2->stream;
-	r2->req->transport = &HTTP2_transport;
-	assert(r2->req->req_step == R_STP_TRANSPORT);
-	r2->req->task->func = h2_do_req;
-	r2->req->task->priv = r2->req;
-	h2_stream_setstate(r2, H2_S_CLOS_REM); // rfc7540,l,489,491
-	http_SetH(r2->req->http, HTTP_HDR_PROTO, "HTTP/2.0");
-
-	return (r2);
-}
-
-/**********************************************************************
  */
 
 #define H2_PU_MARKER	1
-#define H2_OU_MARKER	2
 
 void
 H2_PU_Sess(struct worker *wrk, struct sess *sp, struct req *req)
 {
 	VSL(SLT_Debug, sp->vxid, "H2 Prior Knowledge Upgrade");
 	req->err_code = H2_PU_MARKER;
-	SES_SetTransport(wrk, sp, req, &HTTP2_transport);
-}
-
-void
-H2_OU_Sess(struct worker *wrk, struct sess *sp, struct req *req)
-{
-	VSL(SLT_Debug, sp->vxid, "H2 Optimistic Upgrade");
-	req->err_code = H2_OU_MARKER;
 	SES_SetTransport(wrk, sp, req, &HTTP2_transport);
 }
 
@@ -377,7 +223,6 @@ h2_new_session(struct worker *wrk, void *arg)
 	struct sess *sp;
 	struct h2_sess h2s;
 	struct h2_sess *h2;
-	struct h2_req *r2_ou = NULL;
 	uint16_t marker;
 	uint8_t settings[48];
 	struct h2h_decode decode;
@@ -395,21 +240,15 @@ h2_new_session(struct worker *wrk, void *arg)
 	assert(req->transport == &HTTP2_transport);
 
 	marker = req->err_code;
-	assert(marker == H2_PU_MARKER || marker == H2_OU_MARKER);
+	assert(marker == H2_PU_MARKER);
 	req->err_code = 0;
 
-	if (marker == H2_PU_MARKER) {
-		/* Prior knowledge. The incoming req does not hold
-		 * anything of value and can be repurposed as the session
-		 * req (srq). */
-		srq = req;
-		req = NULL;
-	} else {
-		/* Opportunistic upgrade. The incoming req holds the first
-		 * stream H/1 received request. We will need a fresh req
-		 * for srq. */
-		srq = Req_New(sp, NULL);
-	}
+	/* Prior knowledge. The incoming req does not hold
+	 * anything of value and can be repurposed as the session
+	 * req (srq). */
+	srq = req;
+	req = NULL;
+
 	CHECK_OBJ_NOTNULL(srq, REQ_MAGIC);
 	THR_SetRequest(srq);
 
@@ -444,24 +283,7 @@ h2_new_session(struct worker *wrk, void *arg)
 		VTLS_buf_release(sp->tls);
 	}
 
-	if (marker == H2_OU_MARKER) {
-		/* Deal with opportunistic upgrade. The upgrade request
-		 * was received by HTTP/1 and is held in req. The response
-		 * will be sent by H/2. Convert the req struct to an H/2
-		 * req. */
-		AN(req);
-		r2_ou = h2_ou_session(wrk, h2, &req);
-		AZ(req);
-		if (r2_ou == NULL) {
-			h2_del_sess(wrk, h2, SC_RX_JUNK);
-			wrk->vsl = NULL;
-			return;
-		}
-
-		CHECK_OBJ_NOTNULL(r2_ou, H2_REQ_MAGIC);
-		AZ(r2_ou->scheduled);
-	} else
-		VSLb(h2->vsl, SLT_Debug, "H2: Got pu PRISM");
+	VSLb(h2->vsl, SLT_Debug, "H2: Got pu PRISM");
 
 	assert(HTC_S_COMPLETE == H2_prism_complete(h2->htc));
 
@@ -477,27 +299,6 @@ h2_new_session(struct worker *wrk, void *arg)
 	/* Send our settings */
 	l = h2_enc_settings(&h2->local_settings, settings, sizeof (settings));
 	H2_Send_SETTINGS(h2, H2FF_NONE, l, settings);
-
-	if (r2_ou != NULL) {
-		/* Schedule the opportunistic request received over HTTP/1
-		 * as part of the upgrade. */
-		AZ(r2_ou->scheduled);
-		r2_ou->scheduled = 1;
-		if (Pool_Task(wrk->pool, r2_ou->req->task, TASK_QUEUE_REQ)) {
-			/* We failed to schedule it. Make the client go
-			 * away.
-			 *
-			 * Note: Calling h2_tx_goaway will set the
-			 * h2->goaway flag, causing h2_rxframe() below to
-			 * return failure without reading from the
-			 * socket. */
-			r2_ou->scheduled = 0;
-			VSLb(h2->vsl, SLT_Debug, "H2: No Worker-threads");
-			h2_kill_req(wrk, h2, &r2_ou, H2SE_ENHANCE_YOUR_CALM);
-			h2->error = H2CE_ENHANCE_YOUR_CALM;
-		}
-		r2_ou = NULL;
-	}
 
 	/* and off we go... */
 	h2_run(wrk, h2);
