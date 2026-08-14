@@ -140,17 +140,16 @@ url_decode(const enum encoding dec, blob_dest_t buf,
 		if (s == NULL || *s == '\0')
 			continue;
 		while (*s && len) {
+			if (dest == end) {
+				errno = ENOMEM;
+				return (-1);
+			}
 			switch (state) {
 			case NORMAL:
 				if (*s == '%')
 					state = PERCENT;
-				else {
-					if (dest == end) {
-						errno = ENOMEM;
-						return (-1);
-					}
+				else
 					*dest++ = *s;
-				}
 				break;
 			case PERCENT:
 				if (isoutofrange(*s) ||
@@ -161,10 +160,6 @@ url_decode(const enum encoding dec, blob_dest_t buf,
 				state = FIRSTNIB;
 				break;
 			case FIRSTNIB:
-				if (dest == end) {
-					errno = ENOMEM;
-					return (-1);
-				}
 				if (isoutofrange(*s) ||
 				    (nib2 = hex_nibble[*s - '0']) == ILL) {
 					errno = EINVAL;
