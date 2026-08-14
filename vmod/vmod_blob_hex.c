@@ -108,6 +108,7 @@ hex_decode(const enum encoding dec, blob_dest_t buf,
     blob_len_t buflen, ssize_t n, VCL_STRANDS strings)
 {
 	char *dest = buf;
+	const char * const end = buf + buflen;
 	const char *b, *s;
 	unsigned char extranib = 0;
 	size_t len = 0;
@@ -137,10 +138,6 @@ hex_decode(const enum encoding dec, blob_dest_t buf,
 	if (n >= 0 && len > (size_t)n)
 		len = n;
 
-	if (((len+1) >> 1) > buflen) {
-		errno = ENOMEM;
-		return (-1);
-	}
 	if (len & 1) {
 		extranib = '0';
 		len++;
@@ -152,16 +149,24 @@ hex_decode(const enum encoding dec, blob_dest_t buf,
 		if (s == NULL || *s == '\0')
 			continue;
 		if (extranib) {
+			if (dest == end) {
+				errno = ENOMEM;
+				return (-1);
+			}
 			*dest++ = hex2byte(extranib, *s++);
 			len -= 2;
 		}
 		while (len >= 2 && *s && *(s+1)) {
+			if (dest == end) {
+				errno = ENOMEM;
+				return (-1);
+			}
 			*dest++ = hex2byte(*s, *(s+1));
 			s += 2;
 			len -= 2;
 		}
 		extranib = *s;
 	}
-	assert(dest <= buf + buflen);
+	assert(dest <= end);
 	return (dest - buf);
 }
