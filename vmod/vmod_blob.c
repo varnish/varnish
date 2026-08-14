@@ -426,7 +426,7 @@ vmod_transcode(VRT_CTX, VCL_ENUM decs, VCL_ENUM encs, VCL_ENUM case_s,
 	enum case_e kase = parse_case(case_s);
 	struct vrt_blob b;
 	VCL_STRING r;
-	size_t l;
+	size_t buflen;
 	ssize_t len;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
@@ -443,17 +443,17 @@ vmod_transcode(VRT_CTX, VCL_ENUM decs, VCL_ENUM encs, VCL_ENUM case_s,
 	 * Allocate space for the decoded blob on the stack
 	 * ignoring the limitation imposed by n
 	 */
-	l = decode_l(dec, strings);
-	if (l == 0)
+	buflen = decode_l(dec, strings);
+	if (buflen == 0)
 		return ("");
 
 	/* XXX: handle stack overflow? */
-	char buf[l];
+	char buf[buflen];
 
 	if (length <= 0)
 		length = -1;
 	errno = 0;
-	len = func[dec].decode(dec, buf, l, length, strings);
+	len = func[dec].decode(dec, buf, buflen, length, strings);
 
 	if (len < 0) {
 		err_decode(ctx, strings->p[0]);
