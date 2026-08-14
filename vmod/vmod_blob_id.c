@@ -93,11 +93,13 @@ id_decode(const enum encoding enc, blob_dest_t buf,
 		if (len > c)
 			len = c;
 		c -= len;
-		if ((outlen += len) > buflen) {
+		if ((outlen + len) > buflen) {
+			memcpy(dest, s, buflen - outlen);
 			errno = ENOMEM;
 			return (-1);
 		}
 		memcpy(dest, s, len);
+		outlen += len;
 		dest += len;
 	}
 
