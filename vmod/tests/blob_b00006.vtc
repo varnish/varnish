@@ -282,7 +282,7 @@ client c1 {
 
 # Decode failures
 
-server s1 -repeat 4 {
+server s1 -repeat 5 {
 	rxreq
 	txresp
 } -start
@@ -307,6 +307,13 @@ varnish v1 -vcl+backend {
 		elsif (req.url == "/percent-two-q") {
 			set resp.http.bad = blob.encode(URL, UPPER,
 					    blob.decode(URL, encoded="%2q"));
+		}
+		elsif (req.url == "/percent-split") {
+			set resp.http.good = blob.encode(URL, UPPER,
+					     blob.decode(URL, encoded="%4" + "1"));
+		}
+		else {
+			return (synth(404));
 		}
 	}
 }
@@ -341,6 +348,13 @@ client c1 {
 	expect resp.status == 503
 	expect resp.reason == "VCL failed"
 	expect resp.http.bad == <undef>
+} -run
+
+client c1 {
+	txreq -url /percent-split
+	rxresp
+	expect resp.status == 200
+	expect resp.http.good == "A"
 } -run
 
 logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
