@@ -404,15 +404,17 @@ client c1 {
 
 # Decode failures
 
-server s1 -repeat 11 -keepalive {
-	rxreq
-	txresp
-} -start
+varnish v1 -vcl {
+	backend proforma none;
 
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
 
-	sub vcl_deliver {
+	sub vcl_recv {
+		return (synth(200));
+	}
+
+	sub vcl_synth {
 		set req.http.foo = "AAA=";
 		if (req.url == "/1") {
 			set resp.http.bad
@@ -470,88 +472,88 @@ varnish v1 -vcl+backend {
 client c1 {
 	txreq -url /1
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /2
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /3
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /4
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /5
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /6
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /7
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /8
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /9
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /10
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /11
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 

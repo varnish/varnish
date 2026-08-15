@@ -137,15 +137,16 @@ client c1 {
 
 # Decode failures
 
-server s1 -repeat 4 {
-	rxreq
-	txresp
-} -start
-
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
 
-	sub vcl_deliver {
+	backend proforma none;
+
+	sub vcl_recv {
+		return (synth(200));
+	}
+
+	sub vcl_synth {
 		if (req.url == "/percent") {
 			set resp.http.bad = blob.encode(URL, UPPER,
 					    blob.decode(URL, 1, "%20"));
@@ -162,6 +163,9 @@ varnish v1 -vcl+backend {
 			set resp.http.good = blob.encode(IDENTITY, blob=
 					     blob.decode(URL, 3, "%3a%2q"));
 		}
+		else {
+			set resp.status = 404;
+		}
 	}
 }
 
@@ -176,16 +180,16 @@ client c1 {
 	expect resp.http.good == ":"
 	txreq -url /percent
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 
 client c1 {
 	txreq -url /percent-two
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
 } -run
 

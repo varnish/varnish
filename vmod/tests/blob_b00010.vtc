@@ -218,20 +218,21 @@ client c1 {
 } -run
 
 # sub() failures
-server s1 -repeat 3 {
-	rxreq
-	txresp
-} -start
-
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
+
+	backend proforma none;
 
 	sub vcl_init {
 		new up07 = blob.blob(BASE64, "AAECAwQFBgc=");
 		new empty = blob.blob(IDENTITY, "");
 	}
 
-	sub vcl_deliver {
+	sub vcl_recv {
+		return (synth(200));
+	}
+
+	sub vcl_synth {
 		if (req.url == "/empty") {
 			set resp.http.empty = blob.encode(BASE64, blob=
 			    blob.sub(empty.get(), 1B));
@@ -245,6 +246,9 @@ varnish v1 -vcl+backend {
 			set resp.http.badoffset = blob.encode(BASE64,
 			    blob=blob.sub(up07.get(), 4B, 5B));
 		}
+		else {
+			set resp.status = 404;
+		}
 	}
 }
 
@@ -257,8 +261,8 @@ logexpect l1 -v v1 -d 0 -g vxid -q "VCL_Error" {
 client c1 {
 	txreq -url /empty
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.empty == <undef>
 } -run
 
@@ -267,8 +271,8 @@ logexpect l1 -wait
 client c1 {
 	txreq -url /toolong
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.toolong == <undef>
 } -run
 
@@ -279,8 +283,8 @@ logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
 client c1 {
 	txreq -url /badoffset
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.badoffset == <undef>
 } -run
 

@@ -77,15 +77,14 @@ client c1 {
 
 # Require case=DEFAULT
 
-server s1 -repeat 2 {
-	rxreq
-	txresp
-} -start
-
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
+	backend proforma none;
 
-	sub vcl_deliver {
+	sub vcl_recv {
+		return(synth(200));
+	}
+	sub vcl_synth {
 	  if (req.url == "/lc") {
 	    set resp.http.lc =
 	      blob.encode(IDENTITY, LOWER, blob.decode(IDENTITY,
@@ -96,22 +95,25 @@ varnish v1 -vcl+backend {
 	      blob.encode(IDENTITY, UPPER, blob.decode(IDENTITY,
 						       encoded="foobar"));
 	  }
+	  else {
+	    set resp.status = 404;
+	  }
 	}
 }
 
 client c1 {
 	txreq -url "/lc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.lc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/uc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.uc == <undef>
 } -run
 

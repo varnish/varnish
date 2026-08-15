@@ -192,15 +192,16 @@ client c1 {
 
 # Decode failure
 
-server s1 {
-	rxreq
-	txresp
-} -start
-
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
 
-	sub vcl_deliver {
+	backend proforma none;
+
+	sub vcl_recv {
+	  return (synth(200));
+	}
+
+	sub vcl_synth {
 	  set req.http.foo = "123";
 	  set resp.http.badhex = blob.encode(HEX, UPPER,
 				 blob.decode(HEX, encoded="g" + req.http.foo));
@@ -210,8 +211,8 @@ varnish v1 -vcl+backend {
 client c1 {
 	txreq
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.badhex == <undef>
 } -run
 

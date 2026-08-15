@@ -336,19 +336,20 @@ varnish v1 -cliok "vcl.discard vcl2"
 
 # Require case=DEFAULT in the .encode() method where necessary
 
-server s1 -repeat 8 {
-	rxreq
-	txresp
-} -start
-
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
+
+	backend proforma none;
 
 	sub vcl_init {
 	  new b = blob.blob(IDENTITY, "");
 	}
 
-	sub vcl_deliver {
+	sub vcl_recv {
+	  return (synth(200));
+	}
+
+	sub vcl_synth {
 	  if (req.url == "/idlc") {
 	    set resp.http.idlc = b.encode(IDENTITY, LOWER);
 	  }
@@ -373,70 +374,73 @@ varnish v1 -vcl+backend {
 	  elsif (req.url == "/b64urlnopaduc") {
 	    set resp.http.b64urlnopaduc = b.encode(BASE64URLNOPAD, UPPER);
 	  }
+	  else {
+	    set resp.status = 404;
+	  }
 	}
 }
 
 client c1 {
 	txreq -url "/idlc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.idlc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/iduc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.iduc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/b64lc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.b64lc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/b64uc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.b64uc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/b64urllc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.b64urllc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/b64urluc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.b64urluc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/b64urlnopadlc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.b64urlnopadlc == <undef>
 } -run
 
 client c1 {
 	txreq -url "/b64urlnopaduc"
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.b64urlnopaduc == <undef>
 } -run
 
