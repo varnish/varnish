@@ -1,5 +1,5 @@
 /*-
- * Copyright 2015-2016 UPLEX - Nils Goroll Systemoptimierung
+ * Copyright 2015-2016,2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Authors: Nils Goroll <nils.goroll@uplex.de>
@@ -297,15 +297,19 @@ base64_encode(const enum encoding enc, const enum case_e kase,
 
 ssize_t
 base64_decode(const enum encoding dec, blob_dest_t buf,
-    blob_len_t buflen, ssize_t inlen, VCL_STRANDS strings)
+    blob_len_t buflen, ssize_t inlen, VCL_STRANDS strings, size_t *consumedp)
 {
 	const struct b64_alphabet *alpha = &b64_alphabet[dec];
 	const char *s;
 	char *dest = buf;
 	unsigned u = 0, term = 0;
 	size_t len = SIZE_MAX;
+	size_t consumed = 0;
 	int n = 0, i;
 	char b;
+	ssize_t r;
+
+	/*lint --e{801} goto used as defer pattern */
 
 	AN(buf);
 	AN(alpha);
@@ -321,7 +325,8 @@ base64_decode(const enum encoding dec, blob_dest_t buf,
 			continue;
 		if (*s && term) {
 			errno = EINVAL;
-			return (-1);
+			r = -1;
+			goto out;
 		}
 		while (*s && len) {
 			b = alpha->i64[(uint8_t)*s];
@@ -330,7 +335,8 @@ base64_decode(const enum encoding dec, blob_dest_t buf,
 			u <<= 6;
 			if (b == ILL) {
 				errno = EINVAL;
-				return (-1);
+				r = -1;
+				goto out;
 			}
 			n++;
 			if (b == PAD) {
@@ -339,8 +345,11 @@ base64_decode(const enum encoding dec, blob_dest_t buf,
 			}
 			u |= (uint8_t)b;
 			if (n == 4) {
-				if (decode(&dest, buf, buflen, u, n-term) < 0)
-					return (-1);
+				if (decode(&dest, buf, buflen, u, n-term) < 0) {
+					r = -1;
+					goto out;
+				}
+				consumed += n;
 				n = 0;
 			}
 		}
@@ -348,9 +357,17 @@ base64_decode(const enum encoding dec, blob_dest_t buf,
 	if (n) {
 		if (n - term != 0)
 			u <<= (6 * (4 - n));
-		if (decode(&dest, buf, buflen, u, n-term) < 0)
-			return (-1);
+		if (decode(&dest, buf, buflen, u, n-term) < 0) {
+			r = -1;
+			goto out;
+		}
+		consumed += n;
 	}
 
-	return (dest - buf);
+	r = dest - buf;
+
+    out:
+	if (consumedp)
+		*consumedp = consumed;
+	return (r);
 }
