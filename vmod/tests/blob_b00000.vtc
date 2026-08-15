@@ -101,25 +101,33 @@ varnish v1 -vcl {
 	}
 }
 
+logexpect l1 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c1$\"" {
+	fail add * End
+	expect * * VCL_Error "^vmod blob error: case LOWER is illegal with encoding IDENTITY$"
+	fail clear
+} -start
 client c1 {
 	txreq -url "/lc"
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.lc == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l2 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c2$\"" {
+	fail add * End
+	expect * * VCL_Error "^vmod blob error: case UPPER is illegal with encoding IDENTITY$"
+	fail clear
+} -start
+client c2 {
 	txreq -url "/uc"
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.uc == <undef>
-} -run
-
-logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
-	expect * * VCL_Error "^vmod blob error: case LOWER is illegal with encoding IDENTITY$"
-	expect * * VCL_Error "^vmod blob error: case UPPER is illegal with encoding IDENTITY$"
 } -start
 
+client c1 -wait
+client c2 -wait
 logexpect l1 -wait
+logexpect l2 -wait
