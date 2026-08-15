@@ -157,15 +157,16 @@ client c1 {
 
 # Decode failures
 
-server s1 -repeat 3 {
-	rxreq
-	txresp
-} -start
-
-varnish v1 -vcl+backend {
+varnish v1 -vcl {
 	import blob;
 
-	sub vcl_deliver {
+	backend profoma none;
+
+	sub vcl_recv {
+	  return (synth(200));
+	}
+
+	sub vcl_synth {
 	  set req.http.foo = "AAA=";
 	  if (req.url == "/base64") {
 		set resp.http.bad64 = blob.encode(IDENTITY,
@@ -180,14 +181,17 @@ varnish v1 -vcl+backend {
 		    blob=blob.decode(BASE64URLNOPAD, 8,
 				     "TWFu" + req.http.foo));
 	  }
+	  else {
+		set resp.status = 404;
+	  }
 	}
 }
 
 client c1 {
 	txreq -url /base64
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad64 == <undef>
 } -run
 
@@ -200,8 +204,8 @@ logexpect l1 -wait
 client c1 {
 	txreq -url /base64url
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.badurl == <undef>
 } -run
 
@@ -214,8 +218,8 @@ logexpect l1 -wait
 client c1 {
 	txreq -url /base64urlnopad
 	rxresp
-	expect resp.status == 503
-	expect resp.reason == "VCL failed"
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
 	expect resp.http.badpad == <undef>
 } -run
 
