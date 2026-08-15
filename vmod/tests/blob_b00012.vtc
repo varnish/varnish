@@ -404,7 +404,6 @@ client c1 {
 varnish v1 -vcl {
 	backend proforma none;
 
-varnish v1 -vcl {
 	import blob;
 	import vtc;
 
@@ -498,139 +497,230 @@ varnish v1 -vcl {
 	}
 }
 
+logexpect l1 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c1$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "0x123456"$}
+	fail clear
+} -start
 client c1 {
 	txreq -url /1
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l2 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c2$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "-_-_"$}
+	fail clear
+} -start
+client c2 {
 	txreq -url /2
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l3 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c3$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "\+/\+/"$}
+	fail clear
+} -start
+client c3 {
 	txreq -url /3
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l4 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c4$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "TWFu"$}
+	fail clear
+} -start
+client c4 {
 	txreq -url /4
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l5 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c5$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "_-_-"$}
+	fail clear
+} -start
+client c5 {
 	txreq -url /5
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l6 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c6$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "/\+/\+"$}
+	fail clear
+} -start
+client c6 {
 	txreq -url /6
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l7 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c7$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "Zm9v"$}
+	fail clear
+} -start
+client c7 {
 	txreq -url /7
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l8 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c8$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%"$}
+	fail clear
+} -start
+client c8 {
 	txreq -url /8
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l9 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c9$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%2"$}
+	fail clear
+} -start
+client c9 {
 	txreq -url /9
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l10 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c10$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%q"$}
+	fail clear
+} -start
+client c10 {
 	txreq -url /10
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l11 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c11$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%2q"$}
+	fail clear
+} -start
+client c11 {
 	txreq -url /11
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l12 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c12$\"" {
+	fail add * End
+	# error not inside blob because returning the original string does not
+	# use workspace
+	expect * * Error {^Failed to create object}
+	fail clear
+} -start
+client c12 {
 	txreq -url /12-ws-id
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l13 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c13$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
+	fail clear
+} -start
+client c13 {
 	txreq -url /13-ws-decode
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l14 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c14$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
+	fail clear
+} -start
+client c14 {
 	txreq -url /14-ws-nul
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-client c1 {
+logexpect l15 -v v1 -g vxid -q "ReqHeader:User-Agent ~ \"^c15$\"" {
+	fail add * End
+	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
+	fail clear
+} -start
+client c15 {
 	txreq -url /15-stack
 	rxresp
 	expect resp.status == 500
 	expect resp.reason == "Internal Server Error"
 	expect resp.http.bad == <undef>
-} -run
+} -start
 
-logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "0x123456"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "-_-_"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "\+/\+/"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "TWFu"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "_-_-"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "/\+/\+"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "Zm9v"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%2"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%q"$}
-	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%2q"$}
-	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
-	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
-	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
-} -run
+client c1 -wait
+client c2 -wait
+client c3 -wait
+client c4 -wait
+client c5 -wait
+client c6 -wait
+client c7 -wait
+client c8 -wait
+client c9 -wait
+client c10 -wait
+client c11 -wait
+client c12 -wait
+client c13 -wait
+client c14 -wait
+client c15 -wait
+logexpect l1 -wait
+logexpect l2 -wait
+logexpect l3 -wait
+logexpect l4 -wait
+logexpect l5 -wait
+logexpect l6 -wait
+logexpect l7 -wait
+logexpect l8 -wait
+logexpect l9 -wait
+logexpect l10 -wait
+logexpect l11 -wait
+logexpect l12 -wait
+logexpect l13 -wait
+logexpect l14 -wait
+logexpect l15 -wait
