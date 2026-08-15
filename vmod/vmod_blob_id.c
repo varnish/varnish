@@ -1,5 +1,5 @@
 /*-
- * Copyright 2015-2016 UPLEX - Nils Goroll Systemoptimierung
+ * Copyright 2015-2016,2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Authors: Nils Goroll <nils.goroll@uplex.de>
@@ -71,16 +71,19 @@ id_encode(const enum encoding enc, const enum case_e kase,
 
 ssize_t
 id_decode(const enum encoding enc, blob_dest_t buf,
-    blob_len_t buflen, ssize_t n, VCL_STRANDS strings)
+    blob_len_t buflen, ssize_t n, VCL_STRANDS strings, size_t *consumedp)
 {
 	const char *s;
 	char *dest = buf;
 	size_t len, outlen = 0, c = SIZE_MAX;
+	ssize_t r;
 	int i;
 
 	(void)enc;
 	AN(buf);
 	CHECK_OBJ_NOTNULL(strings, STRANDS_MAGIC);
+
+	/*lint --e{801} goto used as defer pattern */
 
 	if (n >= 0)
 		c = n;
@@ -95,13 +98,20 @@ id_decode(const enum encoding enc, blob_dest_t buf,
 		c -= len;
 		if ((outlen + len) > buflen) {
 			memcpy(dest, s, buflen - outlen);
+			outlen = buflen;
 			errno = ENOMEM;
-			return (-1);
+			r = -1;
+			goto out;
 		}
 		memcpy(dest, s, len);
 		outlen += len;
 		dest += len;
 	}
 
-	return (outlen);
+	r = outlen;
+
+    out:
+	if (consumedp)
+		*consumedp = outlen;
+	return (r);
 }

@@ -1,5 +1,5 @@
 /*-
- * Copyright 2016 UPLEX - Nils Goroll Systemoptimierung
+ * Copyright 2016,2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Authors: Nils Goroll <nils.goroll@uplex.de>
@@ -105,7 +105,7 @@ hex_encode(const enum encoding enc, const enum case_e kase,
 
 ssize_t
 hex_decode(const enum encoding dec, blob_dest_t buf,
-    blob_len_t buflen, ssize_t n, VCL_STRANDS strings)
+    blob_len_t buflen, ssize_t n, VCL_STRANDS strings, size_t *consumedp)
 {
 	char *dest = buf;
 	const char * const end = buf + buflen;
@@ -113,10 +113,13 @@ hex_decode(const enum encoding dec, blob_dest_t buf,
 	unsigned char extranib = 0;
 	size_t len = 0;
 	int i;
+	ssize_t r, consumed = 0;
 
 	AN(buf);
 	CHECK_OBJ_NOTNULL(strings, STRANDS_MAGIC);
 	assert(dec == HEX);
+
+	/*lint --e{801} goto used as defer pattern */
 
 	for (i = 0; i < strings->n; i++) {
 		s = strings->p[i];
@@ -127,14 +130,18 @@ hex_decode(const enum encoding dec, blob_dest_t buf,
 		while (*s) {
 			if (!isxdigit(*s++)) {
 				errno = EINVAL;
-				return (-1);
+				r = -1;
+				goto out;
 			}
 		}
 		len += s - b;
 	}
 
-	if (len == 0)
-		return (0);
+	if (len == 0) {
+		r = 0;
+		goto out;
+	}
+
 	if (n >= 0 && len > (size_t)n)
 		len = n;
 
@@ -151,22 +158,30 @@ hex_decode(const enum encoding dec, blob_dest_t buf,
 		if (extranib) {
 			if (dest == end) {
 				errno = ENOMEM;
-				return (-1);
+				r = -1;
+				goto out;
 			}
 			*dest++ = hex2byte(extranib, *s++);
+			consumed++;
 			len -= 2;
 		}
 		while (len >= 2 && *s && *(s+1)) {
 			if (dest == end) {
 				errno = ENOMEM;
-				return (-1);
+				r = -1;
+				goto out;
 			}
 			*dest++ = hex2byte(*s, *(s+1));
+			consumed += 2;
 			s += 2;
 			len -= 2;
 		}
 		extranib = *s;
 	}
 	assert(dest <= end);
-	return (dest - buf);
+	r = dest - buf;
+    out:
+	if (consumedp)
+		*consumedp = consumed;
+	return (r);
 }

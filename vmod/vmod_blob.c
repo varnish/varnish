@@ -1,5 +1,5 @@
 /*-
- * Copyright 2015-2017 UPLEX - Nils Goroll Systemoptimierung
+ * Copyright 2015-2017,2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Authors: Nils Goroll <nils.goroll@uplex.de>
@@ -225,7 +225,7 @@ vmod_blob__init(VRT_CTX, struct vmod_blob_blob **blobp, const char *vcl_name,
 	}
 
 	errno = 0;
-	len = func[dec].decode(dec, buf, len, -1, strings);
+	len = func[dec].decode(dec, buf, len, -1, strings, NULL);
 
 	if (len == -1) {
 		assert(errno == EINVAL);
@@ -354,7 +354,7 @@ vmod_decode(VRT_CTX, VCL_ENUM decs, VCL_INT length, VCL_STRANDS strings)
 	if (length <= 0)
 		length = -1;
 	errno = 0;
-	len = func[dec].decode(dec, buf, space, length, strings);
+	len = func[dec].decode(dec, buf, space, length, strings, NULL);
 
 	if (len == -1) {
 		err_decode(ctx, strings->p[0]);
@@ -417,21 +417,74 @@ vmod_encode(VRT_CTX, VCL_ENUM encs, VCL_ENUM case_s, VCL_BLOB b)
 	return (encode(ctx, enc, kase, b));
 }
 
+/*
+ * Remove the first len bytes from strands
+ *
+ * to VRT?
+ */
+static void
+strands_consume(struct strands *strings, size_t consume)
+{
+	const char *s;
+	size_t len;
+	int i;
+
+	CHECK_OBJ_NOTNULL(strings, STRANDS_MAGIC);
+
+	for (i = 0; i < strings->n; i++) {
+		s = strings->p[i];
+		if (s == NULL || *s == '\0')
+			continue;
+		len = vstrlen(s);
+		if (consume >= len) {
+			strings->p[i] = NULL;
+			consume -= len;
+			continue;
+		}
+		strings->p[i] += consume;
+		break;
+	}
+
+	// i is at first string still needed
+	assert(i >= 0);
+	assert(i <= strings->n);
+	if (i == strings->n) {
+		memset(strings->p, 0, strings->n * sizeof *strings->p);
+		strings->n = 0;
+		return;
+	}
+	len = (unsigned)strings->n - i;
+	memmove(strings->p, strings->p + i, len * sizeof *strings->p);
+	strings->n -= i;
+}
+
 VCL_STRING v_matchproto_(td_blob_transcode)
 vmod_transcode(VRT_CTX, VCL_ENUM decs, VCL_ENUM encs, VCL_ENUM case_s,
-	       VCL_INT length, VCL_STRANDS strings)
+	       VCL_INT length, VCL_STRANDS stringsa)
 {
 	enum encoding dec = parse_encoding(decs);
 	enum encoding enc = parse_encoding(encs);
 	enum case_e kase = parse_case(case_s);
-	struct vrt_blob b;
 	VCL_STRING r;
+	// 32K are safe because PCRE. Needs to be a multiple of three for base64
+	// For bughunt, set to 3
+	const size_t bufmax = (32 * 1024) - 2;
 	size_t buflen;
 	ssize_t len;
+	char *out;
+	unsigned space;
+	size_t consumed;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(ctx->ws, WS_MAGIC);
-	CHECK_OBJ_NOTNULL(strings, STRANDS_MAGIC);
+	CHECK_OBJ_NOTNULL(stringsa, STRANDS_MAGIC);
+
+	// copy stringsa into strings on stack
+	const char *p[stringsa->n];
+	memcpy(p, stringsa->p, stringsa->n * sizeof *p);
+	struct strands *strings = &(struct strands){.magic=STRANDS_MAGIC, .n=stringsa->n, .p=p};
+
+	assert(bufmax % 3 == 0); //lint !e778 constant
 
 	AENC(dec);
 	AENC(enc);
@@ -447,39 +500,76 @@ vmod_transcode(VRT_CTX, VCL_ENUM decs, VCL_ENUM encs, VCL_ENUM case_s,
 	if (buflen == 0)
 		return ("");
 
-	/* XXX: handle stack overflow? */
+	if (buflen > bufmax)
+		buflen = bufmax;
+
 	char buf[buflen];
 
 	if (length <= 0)
 		length = -1;
-	errno = 0;
-	len = func[dec].decode(dec, buf, buflen, length, strings);
 
-	if (len < 0) {
-		err_decode(ctx, strings->p[0]);
-		return (NULL);
+	if (length == -1 && enc == dec && !encodes_hex(enc)) {
+		/* test if decodes OK, and if so, return input
+		 * basically the same loop as below, but without the encode step
+		 */
+		while (strings->n) {
+			errno = 0;
+			len = func[dec].decode(dec, buf, buflen, length, strings, &consumed);
+
+			if (len < 0 && errno != ENOMEM) {
+				err_decode(ctx, strings->p[0]);
+				return (NULL);
+			}
+
+			strands_consume(strings, consumed);
+		}
+		return (VRT_STRANDS_string(ctx, stringsa));
 	}
 
-	b.magic = VRT_BLOB_MAGIC;
-	b.len = len;
-	b.blob = buf;
+	space = WS_ReserveAll(ctx->ws);
+	r = out = WS_Reservation(ctx->ws);
 
-	/*
-	 * If the encoding and decoding are the same, and the decoding was
-	 * legal, just return the concatenated string.
-	 * For encodings with hex digits, we cannot assume the same result.
-	 * since the call may specify upper- or lower-case that differs
-	 * from the encoded string.
-	 */
-	if (length == -1 && enc == dec && !encodes_hex(enc))
-		/*
-		 * Returns NULL and invokes VCL failure on workspace
-		 * overflow. If there is only one string already in the
-		 * workspace, then it is re-used.
-		 */
-		return (VRT_STRANDS_string(ctx, strings));
+	while (strings->n && length != 0) {
+		errno = 0;
 
-	r = encode(ctx, enc, kase, &b);
+		len = func[dec].decode(dec, buf, buflen, length, strings, &consumed);
+		if (len < 0 && errno != ENOMEM) {
+			err_decode(ctx, strings->p[0]);
+			WS_Release(ctx->ws, 0);
+			return (NULL);
+		}
+		if (len < 0)
+			len = buflen;
+
+		strands_consume(strings, consumed);
+
+		if (length > 0) {
+			assert(consumed <= (typeof(consumed))length);
+			length -= consumed;
+		}
+
+		if (len == 0)
+			continue;
+		AN(consumed);
+
+		errno = 0;
+		len = func[enc].encode(enc, kase, out, space, buf, len);
+
+		assert(len <= space);
+		if (len == -1) {
+			ERRNOMEM(ctx, "cannot encode");
+			WS_Release(ctx->ws, 0);
+			return (NULL);
+		}
+
+		out += len;
+		space -= len;
+	}
+
+	// _encode_l ensures
+	assert(space > 0);
+	*out++ = '\0';
+	WS_ReleaseP(ctx->ws, out);
 	return (r);
 }
 

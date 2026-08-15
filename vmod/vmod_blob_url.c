@@ -1,5 +1,5 @@
 /*-
- * Copyright 2015-2016 UPLEX - Nils Goroll Systemoptimierung
+ * Copyright 2015-2016,2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Authors: Nils Goroll <nils.goroll@uplex.de>
@@ -117,19 +117,23 @@ url_encode(const enum encoding enc, const enum case_e kase,
 
 ssize_t
 url_decode(const enum encoding dec, blob_dest_t buf,
-    blob_len_t buflen, ssize_t n, VCL_STRANDS strings)
+    blob_len_t buflen, ssize_t n, VCL_STRANDS strings, size_t *consumedp)
 {
 	char *dest = buf;
 	const char * const end = buf + buflen;
 	const char *s;
 	size_t len = SIZE_MAX;
+	size_t consumed = 0;
 	uint8_t nib = 0, nib2;
 	enum state_e state = NORMAL;
 	int i;
+	ssize_t r;
 
 	AN(buf);
 	CHECK_OBJ_NOTNULL(strings, STRANDS_MAGIC);
 	assert(dec == URL);
+
+	/*lint --e{801} goto used as defer pattern */
 
 	if (n >= 0)
 		len = n;
@@ -142,7 +146,8 @@ url_decode(const enum encoding dec, blob_dest_t buf,
 		while (*s && len) {
 			if (dest == end) {
 				errno = ENOMEM;
-				return (-1);
+				r = -1;
+				goto out;
 			}
 			switch (state) {
 			case NORMAL:
@@ -155,7 +160,8 @@ url_decode(const enum encoding dec, blob_dest_t buf,
 				if (isoutofrange(*s) ||
 				    (nib = hex_nibble[*s - '0']) == ILL) {
 					errno = EINVAL;
-					return (-1);
+					r = -1;
+					goto out;
 				}
 				state = FIRSTNIB;
 				break;
@@ -163,7 +169,8 @@ url_decode(const enum encoding dec, blob_dest_t buf,
 				if (isoutofrange(*s) ||
 				    (nib2 = hex_nibble[*s - '0']) == ILL) {
 					errno = EINVAL;
-					return (-1);
+					r = -1;
+					goto out;
 				}
 				*dest++ = (nib << 4) | nib2;
 				nib = 0;
@@ -172,14 +179,21 @@ url_decode(const enum encoding dec, blob_dest_t buf,
 			default:
 				WRONG("illegal URL decode state");
 			}
+			consumed++;
 			s++;
 			len--;
 		}
 	}
 	if (state != NORMAL) {
 		errno = EINVAL;
-		return (-1);
+		r = -1;
 	}
+	else
+		r = dest - buf;
+
+    out:
+	if (consumedp)
+		*consumedp = consumed;
 	assert(dest <= end);
-	return (dest - buf);
+	return (r);
 }

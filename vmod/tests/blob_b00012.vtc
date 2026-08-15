@@ -3,7 +3,6 @@ vtest "VMOD blob test transcode()"
 # Some platforms need larger workspaces for this test
 varnish v1 -arg "-p workspace_client=256k" -vcl {
 	import blob;
-	import std;
 	backend b None;
 
 	sub vcl_recv {
@@ -128,7 +127,6 @@ client c1 {
 
 varnish v1 -vcl {
 	import blob;
-	import std;
 	backend b None;
 
 	sub vcl_recv {
@@ -273,7 +271,6 @@ client c1 {
 
 varnish v1 -vcl {
 	import blob;
-	import std;
 	backend b None;
 
 	sub vcl_recv {
@@ -409,6 +406,7 @@ varnish v1 -vcl {
 
 varnish v1 -vcl {
 	import blob;
+	import vtc;
 
 	sub vcl_recv {
 		return (synth(200));
@@ -465,6 +463,37 @@ varnish v1 -vcl {
 		elsif (req.url == "/11") {
 			set resp.http.bad
 			    = blob.transcode(URL, IDENTITY, encoded="%2q");
+		}
+		elsif (req.url == "/12-ws-id") {
+			vtc.workspace_alloc(client, -4);
+			set resp.http.bad
+			    = blob.transcode(IDENTITY, IDENTITY, encoded="abcdef");
+		}
+		elsif (req.url == "/13-ws-decode") {
+			vtc.workspace_alloc(client, -8);
+			set resp.http.bad
+			    = blob.transcode(IDENTITY, BASE64, encoded="abcdefghi");
+		}
+		elsif (req.url == "/14-ws-nul") {
+			vtc.workspace_alloc(client, -8);
+			set resp.http.bad
+			    = blob.transcode(IDENTITY, BASE64, encoded="abcdef");
+		}
+		elsif (req.url == "/15-stack") {
+			# original test case LLM generated, received via
+			# gquintard, this is a human rewrite
+			# OK to fail, but no panic
+			set req.http.big = "${string,repeat,8000,A}";
+			set resp.http.bad = blob.transcode(IDENTITY, HEX, encoded =
+			    req.http.big + req.http.big + req.http.big + req.http.big +
+			    req.http.big + req.http.big + req.http.big + req.http.big +
+			    req.http.big + req.http.big + req.http.big + req.http.big +
+			    req.http.big + req.http.big + req.http.big + req.http.big +
+			    req.http.big + req.http.big + req.http.big + req.http.big +
+			    req.http.big + req.http.big + req.http.big + req.http.big);
+		}
+		else {
+			set resp.status = 404;
 		}
 	}
 }
@@ -557,6 +586,38 @@ client c1 {
 	expect resp.http.bad == <undef>
 } -run
 
+client c1 {
+	txreq -url /12-ws-id
+	rxresp
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
+	expect resp.http.bad == <undef>
+} -run
+
+client c1 {
+	txreq -url /13-ws-decode
+	rxresp
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
+	expect resp.http.bad == <undef>
+} -run
+
+client c1 {
+	txreq -url /14-ws-nul
+	rxresp
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
+	expect resp.http.bad == <undef>
+} -run
+
+client c1 {
+	txreq -url /15-stack
+	rxresp
+	expect resp.status == 500
+	expect resp.reason == "Internal Server Error"
+	expect resp.http.bad == <undef>
+} -run
+
 logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
 	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "0x123456"$}
 	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "-_-_"$}
@@ -569,4 +630,7 @@ logexpect l1 -v v1 -d 1 -g vxid -q "VCL_Error" {
 	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%2"$}
 	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%q"$}
 	expect * * VCL_Error {^vmod blob error: cannot decode, illegal encoding beginning with "%2q"$}
+	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
+	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
+	expect * * VCL_Error {^vmod blob error: cannot encode, out of space$}
 } -run
