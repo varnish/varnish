@@ -879,7 +879,7 @@ vbf_objiterate(void *priv, unsigned flush, const void *ptr, ssize_t len)
 	return (0);
 }
 
-// Fetch an object's data through a pipeline into another object
+// Fetch oc into vfc->oc
 // soon to be exported
 static enum vfp_status
 VBF_Obj(struct worker *wrk, struct objcore *oc, struct vfp_ctx *vfc)
