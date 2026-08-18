@@ -829,7 +829,7 @@ vbf_stp_fetchend(struct worker *wrk, struct busyobj *bo)
 struct vbf_objiter_priv {
 	unsigned		magic;
 #define VBF_OBITER_PRIV_MAGIC	0x3c272a17
-	struct busyobj		*bo;
+	struct vfp_ctx		*vfc;
 	// not yet allocated
 	ssize_t		l;
 	// current allocation
@@ -845,7 +845,7 @@ vbf_objiterate(void *priv, unsigned flush, const void *ptr, ssize_t len)
 	const uint8_t *ps = ptr;
 
 	CAST_OBJ_NOTNULL(vop, priv, VBF_OBITER_PRIV_MAGIC);
-	CHECK_OBJ_NOTNULL(vop->bo, BUSYOBJ_MAGIC);
+	CHECK_OBJ_NOTNULL(vop->vfc, VFP_CTX_MAGIC);
 
 	flush &= OBJ_ITER_END;
 
@@ -854,7 +854,7 @@ vbf_objiterate(void *priv, unsigned flush, const void *ptr, ssize_t len)
 			vop->p = NULL;
 			AN(vop->l);
 			vop->pl = vop->l;
-			if (VFP_GetStorage(vop->bo->vfc, &vop->pl, &vop->p)
+			if (VFP_GetStorage(vop->vfc, &vop->pl, &vop->p)
 			    != VFP_OK)
 				return (1);
 			if (vop->pl < vop->l)
@@ -867,14 +867,14 @@ vbf_objiterate(void *priv, unsigned flush, const void *ptr, ssize_t len)
 
 		l = vmin(vop->pl, len);
 		memcpy(vop->p, ps, l);
-		VFP_Extend(vop->bo->vfc, l,
+		VFP_Extend(vop->vfc, l,
 			   flush && l == len ? VFP_END : VFP_OK);
 		ps += l;
 		vop->p += l;
 		len -= l;
 		vop->pl -= l;
 	}
-	if (flush && vop->bo->vfc->failed == 0)
+	if (flush && vop->vfc->failed == 0)
 		AZ(vop->l);
 	return (0);
 }
@@ -943,7 +943,7 @@ vbf_stp_condfetch(struct worker *wrk, struct busyobj *bo)
 		VBO_SetState(wrk, bo, BOS_STREAM);
 
 	INIT_OBJ(vop, VBF_OBITER_PRIV_MAGIC);
-	vop->bo = bo;
+	vop->vfc = bo->vfc;
 	vop->l = ObjGetLen(bo->wrk, stale_oc);
 	if (ObjIterate(wrk, stale_oc, vop, vbf_objiterate, 0))
 		(void)VFP_Error(bo->vfc, "Template object failed");
