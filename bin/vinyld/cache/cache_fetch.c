@@ -879,13 +879,27 @@ vbf_objiterate(void *priv, unsigned flush, const void *ptr, ssize_t len)
 	return (0);
 }
 
+// Fetch an object's data through a pipeline into another object
+// soon to be exported
+static enum vfp_status
+VBF_Obj(struct worker *wrk, struct objcore *oc, struct vfp_ctx *vfc)
+{
+	struct vbf_objiter_priv vop[1];
+
+	INIT_OBJ(vop, VBF_OBITER_PRIV_MAGIC);
+	vop->vfc = vfc;
+	vop->l = ObjGetLen(wrk, oc);
+	if (ObjIterate(wrk, oc, vop, vbf_objiterate, 0))
+		return (VFP_Error(vfc, "Template object failed"));
+	return (VFP_OK);
+}
+
 static const struct fetch_step * v_matchproto_(vbf_state_f)
 vbf_stp_condfetch(struct worker *wrk, struct busyobj *bo)
 {
 	struct boc *stale_boc;
 	enum boc_state_e stale_state;
 	struct objcore *oc, *stale_oc;
-	struct vbf_objiter_priv vop[1];
 
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	CHECK_OBJ_NOTNULL(bo, BUSYOBJ_MAGIC);
@@ -942,11 +956,7 @@ vbf_stp_condfetch(struct worker *wrk, struct busyobj *bo)
 	if (bo->do_stream)
 		VBO_SetState(wrk, bo, BOS_STREAM);
 
-	INIT_OBJ(vop, VBF_OBITER_PRIV_MAGIC);
-	vop->vfc = bo->vfc;
-	vop->l = ObjGetLen(bo->wrk, stale_oc);
-	if (ObjIterate(wrk, stale_oc, vop, vbf_objiterate, 0))
-		(void)VFP_Error(bo->vfc, "Template object failed");
+	(void)VBF_Obj(wrk, stale_oc, bo->vfc);
 
 	if (bo->vfc->failed) {
 		vbf_cleanup(bo);
