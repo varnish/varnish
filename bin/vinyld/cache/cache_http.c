@@ -1587,6 +1587,7 @@ http_PrintfHeader(struct http *to, const char *fmt, ...)
 void
 http_TimeHeader(struct http *to, const char *fmt, vtim_real now)
 {
+	unsigned l;
 	char *p;
 
 	CHECK_OBJ_NOTNULL(to, HTTP_MAGIC);
@@ -1595,14 +1596,15 @@ http_TimeHeader(struct http *to, const char *fmt, vtim_real now)
 		http_fail(to);
 		return;
 	}
-	p = WS_Alloc(to->ws, vstrlen(fmt) + VTIM_FORMAT_SIZE);
+	l = (unsigned)vstrlen(fmt);
+	p = WS_Alloc(to->ws, l + VTIM_FORMAT_SIZE);
 	if (p == NULL) {
 		http_fail(to);
 		VSLbs(to->vsl, SLT_LostHeader, TOSTRAND(fmt));
 		return;
 	}
 	strcpy(p, fmt);
-	VTIM_format(now, strchr(p, '\0'));
+	VTIM_format(now, p + l);
 	http_SetH(to, to->nhd++, p);
 }
 
