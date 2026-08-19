@@ -102,7 +102,7 @@ static int kill_child(void);
 static void
 mgt_panic_record(pid_t r)
 {
-	char time_str[30];
+	char time_str[VTIM_FORMAT_SIZE];
 
 	if (child_panic != NULL)
 		VSB_destroy(&child_panic);
