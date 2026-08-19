@@ -162,6 +162,7 @@ VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE])
 {
 	struct tm tm;
 	time_t tt;
+	int r;
 
 	AN(p);
 	*p = '\0';
@@ -173,11 +174,12 @@ VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE])
 	if (gmtime_r(&tt, &tm) == NULL)
 		return;
 
-	AN(snprintf(p, VTIM_FORMAT_SIZE,
+	r = snprintf(p, VTIM_FORMAT_SIZE,
 	    "%s, %02d %s %4d %02d:%02d:%02d GMT",
 	    weekday_name[tm.tm_wday],
 	    tm.tm_mday, month_name[tm.tm_mon], tm.tm_year + 1900,
-	    tm.tm_hour, tm.tm_min, tm.tm_sec));
+	    tm.tm_hour, tm.tm_min, tm.tm_sec);
+	assert(r == VTIM_FORMAT_SIZE - 1);
 }
 
 #ifdef TEST_DRIVER
