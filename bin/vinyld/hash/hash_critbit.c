@@ -234,7 +234,7 @@ hcb_insert(const struct worker *wrk, struct hcb_root *root,
 	/* We found a node, does it match ? */
 	oh2 = hcb_l_node(pp);
 	CHECK_OBJ_NOTNULL(oh2, OBJHEAD_MAGIC);
-	if (!memcmp(oh2->digest, digest, DIGEST_LEN))
+	if (!vmemcmp(oh2->digest, digest, DIGEST_LEN))
 		return (oh2);
 
 	if (noh == NULL)

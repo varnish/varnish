@@ -520,10 +520,10 @@ vht_matchtable(struct vht_table *tbl, ...)
 		if (a) {
 			AN(b);
 			if (e->namelen != vstrlen(a) ||
-			    strncmp(a, tbl->buf + e->offset, e->namelen))
+			    vstrncmp(a, tbl->buf + e->offset, e->namelen))
 				r = -1;
 			if (e->valuelen != vstrlen(b) ||
-			    strncmp(b, tbl->buf + e->offset + e->namelen,
+			    vstrncmp(b, tbl->buf + e->offset + e->namelen,
 			     e->valuelen))
 				r = -1;
 		}
@@ -572,7 +572,7 @@ test_1(void)
 	/* 1: ':authority' -> '' */
 	p = VHT_LookupName(NULL, 1, &l);
 	assert(l == vstrlen(":authority"));
-	AZ(strncmp(p, ":authority", vstrlen(":authority")));
+	AZ(vstrncmp(p, ":authority", vstrlen(":authority")));
 	p = VHT_LookupValue(NULL, 1, &l);
 	AN(p);
 	AZ(l);
@@ -580,12 +580,12 @@ test_1(void)
 	/* 5: ':path' -> '/index.html' */
 	p = VHT_LookupValue(NULL, 5, &l);
 	assert(l == vstrlen("/index.html"));
-	AZ(strncmp(p, "/index.html", vstrlen("/index.html")));
+	AZ(vstrncmp(p, "/index.html", vstrlen("/index.html")));
 
 	/* 61: 'www-authenticate' -> '' */
 	p = VHT_LookupName(NULL, 61, &l);
 	assert(l == vstrlen("www-authenticate"));
-	AZ(strncmp(p, "www-authenticate", vstrlen("www-authenticate")));
+	AZ(vstrncmp(p, "www-authenticate", vstrlen("www-authenticate")));
 	p = VHT_LookupValue(NULL, 61, &l);
 	AN(p);
 	AZ(l);

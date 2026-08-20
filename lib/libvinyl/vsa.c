@@ -208,21 +208,21 @@ vsa_normalize(struct suckaddr *sua)
 		return;
 	uint8_t *p6 = (void*)&sua->u.sa6.sin6_addr;
 
-	if (memcmp(p6, map4_0_80, sizeof map4_0_80)) {
+	if (vmemcmp(p6, map4_0_80, sizeof map4_0_80)) {
 		// A "normal" IPv6 address.
 		return;
 	}
 
-	if (!memcmp(p6, map4_0_104, sizeof map4_0_104)) {
+	if (!vmemcmp(p6, map4_0_104, sizeof map4_0_104)) {
 		// IPv6 loopback
 		// IPv6 "any"
 		// IPv4-compat-IPv6, but IPv4 is in 0/8 IPv4
 		return;
 	}
 
-	if (!memcmp(p6, map4_0_96, sizeof map4_0_96)) {
+	if (!vmemcmp(p6, map4_0_96, sizeof map4_0_96)) {
 		// RFC3513 2.5.5 - convert
-	} else if (!memcmp(p6, map4_ffff_96, sizeof map4_ffff_96)) {
+	} else if (!vmemcmp(p6, map4_ffff_96, sizeof map4_ffff_96)) {
 		// RFC4291 2.5.5.2 - convert
 	} else {
 		return;
@@ -431,7 +431,7 @@ VSA_Compare(const struct suckaddr *sua1, const struct suckaddr *sua2)
 
 	CHECK_OBJ_NOTNULL(sua1, SUCKADDR_MAGIC);
 	CHECK_OBJ_NOTNULL(sua2, SUCKADDR_MAGIC);
-	return (memcmp(sua1, sua2, vsa_suckaddr_len));
+	return (vmemcmp(sua1, sua2, vsa_suckaddr_len));
 }
 
 int
@@ -446,10 +446,10 @@ VSA_Compare_IP(const struct suckaddr *sua1, const struct suckaddr *sua2)
 
 	switch (sua1->u.sa.sa_family) {
 	case PF_INET:
-		return (memcmp(&sua1->u.sa4.sin_addr,
+		return (vmemcmp(&sua1->u.sa4.sin_addr,
 		    &sua2->u.sa4.sin_addr, sizeof(struct in_addr)));
 	case PF_INET6:
-		return (memcmp(&sua1->u.sa6.sin6_addr,
+		return (vmemcmp(&sua1->u.sa6.sin6_addr,
 		    &sua2->u.sa6.sin6_addr, sizeof(struct in6_addr)));
 	default:
 		WRONG("Just plain insane");

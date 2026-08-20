@@ -440,7 +440,7 @@ vcc_delim_token(struct vcc *tl, struct source *sp, const char *p,
 	const char *q, *r;
 
 	for (dd = delim_defs; dd->name != NULL; dd++)
-		if (!strncmp(p, dd->b, dd->len))
+		if (!vstrncmp(p, dd->b, dd->len))
 			break;
 
 	if (dd->name == NULL)

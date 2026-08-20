@@ -209,7 +209,7 @@ VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE])
 	do {							\
 		int i;						\
 		for (i = 0; i < 7; i++) {			\
-			if (!strncmp(p, weekday_name[i], 3)) {	\
+			if (!vstrncmp(p, weekday_name[i], 3)) {	\
 				tm->tm_wday = i;		\
 				break;				\
 			}					\
@@ -224,7 +224,7 @@ VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE])
 	do {							\
 		int i;						\
 		for (i = 0; i < 12; i++) {			\
-			if (!strncmp(p, month_name[i], 3)) {	\
+			if (!vstrncmp(p, month_name[i], 3)) {	\
 				tm->tm_mon = i + 1;		\
 				break;				\
 			}					\
@@ -313,7 +313,7 @@ vtim_parse_http(struct tm *tm, const char **pp)
 			DIGIT(100, year);
 			DIGIT(10, year);
 			DIGIT(1, year);
-		} else if (!strncmp(p, more_weekday[tm->tm_wday],
+		} else if (!vstrncmp(p, more_weekday[tm->tm_wday],
 		    vstrlen(more_weekday[tm->tm_wday]))) {
 			/* RFC850 -- "Sunday, 06-Nov-94 08:49:37 GMT" */
 			p += vstrlen(more_weekday[tm->tm_wday]);

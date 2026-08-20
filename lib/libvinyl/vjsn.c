@@ -382,15 +382,15 @@ vjsn_value(struct vjsn *js)
 		AN(jsv->value);
 		return (jsv);
 	}
-	if (!strncmp(js->ptr, "true", 4)) {
+	if (!vstrncmp(js->ptr, "true", 4)) {
 		js->ptr += 4;
 		return (vjsn_val_new(VJSN_TRUE));
 	}
-	if (!strncmp(js->ptr, "false", 5)) {
+	if (!vstrncmp(js->ptr, "false", 5)) {
 		js->ptr += 5;
 		return (vjsn_val_new(VJSN_FALSE));
 	}
-	if (!strncmp(js->ptr, "null", 4)) {
+	if (!vstrncmp(js->ptr, "null", 4)) {
 		js->ptr += 4;
 		return (vjsn_val_new(VJSN_NULL));
 	}

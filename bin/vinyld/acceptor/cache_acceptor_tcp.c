@@ -133,7 +133,7 @@ vca_tcp_sockopt_init(void)
 			sz = sizeof tmp.fld;				\
 			assert(so->sz == sz);				\
 			tmp.fld = (val);				\
-			if (memcmp(&so->arg->fld, &(tmp.fld), sz)) {	\
+			if (vmemcmp(&so->arg->fld, &(tmp.fld), sz)) {	\
 				memcpy(&so->arg->fld, &(tmp.fld), sz);	\
 				so->mod++;				\
 				chg = 1;				\
@@ -191,7 +191,7 @@ vca_tcp_sockopt_test(const struct listen_sock *ls, const struct sess *sp)
 		l = so->sz;
 		i = getsockopt(sp->fd, so->level, so->optname, &tmp, &l);
 
-		if (i == 0 && memcmp(&tmp, so->arg, so->sz)) {
+		if (i == 0 && vmemcmp(&tmp, so->arg, so->sz)) {
 			VSL(SLT_Debug, sp->vxid,
 			    "sockopt: Test confirmed %s non heredity for %s=%s",
 			    so->strname, ls->name, ls->endpoint);

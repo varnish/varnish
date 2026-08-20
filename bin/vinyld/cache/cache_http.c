@@ -719,7 +719,7 @@ http_istoken(const char **bp, const char *e, const char *token)
 	b = *bp;
 
 	if (b + fl + 2 <= e && *b == '"' &&
-	    !memcmp(b + 1, token, fl) && b[fl + 1] == '"') {
+	    !vmemcmp(b + 1, token, fl) && b[fl + 1] == '"') {
 		*bp += fl + 2;
 		return (1);
 	}

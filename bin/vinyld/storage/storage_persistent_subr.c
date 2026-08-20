@@ -90,7 +90,7 @@ smp_chk_sign(struct smp_signctx *ctx)
 	unsigned char sign[VSHA256_LEN];
 	int r = 0;
 
-	if (strncmp(ctx->id, ctx->ss->ident, sizeof ctx->ss->ident))
+	if (vstrncmp(ctx->id, ctx->ss->ident, sizeof ctx->ss->ident))
 		r = 1;
 	else if (ctx->unique != ctx->ss->unique)
 		r = 2;
@@ -104,7 +104,7 @@ smp_chk_sign(struct smp_signctx *ctx)
 		cx = ctx->ctx;
 		VSHA256_Update(&cx, &ctx->ss->length, sizeof(ctx->ss->length));
 		VSHA256_Final(sign, &cx);
-		if (memcmp(sign, SIGN_END(ctx), sizeof sign))
+		if (vmemcmp(sign, SIGN_END(ctx), sizeof sign))
 			r = 4;
 	}
 	if (r) {

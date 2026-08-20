@@ -419,7 +419,7 @@ t_rxbuf_read(void) {
 	char rxbuf[16];
 	int fd[2], i, r;
 
-	assert(strlen(data) == sizeof rxbuf);
+	assert(vstrlen(data) == sizeof rxbuf);
 
 	INIT_OBJ(htc, HTTP_CONN_MAGIC);
 	// v1f_rxbuf_init without the workspace
@@ -430,14 +430,14 @@ t_rxbuf_read(void) {
 	AZ(pipe(fd));
 	htc->rfd = &fd[0];
 
-	for (i = 0; i < strlen(data); i++) {
+	for (i = 0; i < vstrlen(data); i++) {
 		r = write(fd[1], data + i, 1);
 		assert(r == 1);
 		r = v1f_rxbuf_read(htc);
 		assert(r == 1);
 		size_t av = pdiff(htc->pipeline_b, htc->pipeline_e);
 		assert(av == i + 1);
-		AZ(memcmp(htc->pipeline_b, data, av));
+		AZ(vmemcmp(htc->pipeline_b, data, av));
 		if (i % 2 == 0) {
 			// v1f_rxbuf_read moves pipelined data to the beginning
 			assert(htc->pipeline_b == htc->rxbuf_b);
@@ -486,7 +486,7 @@ main(int argc, char *argv[])
 		bprintf(buf, "%s%jx%s%s", t_ok_pre[n_pre], t_ok_sz[n_sz],
 		    t_ok_post[n_post], t_ok_next[n_next]);
 
-		char *ee = buf + strlen(buf) - strlen(t_ok_next[n_next]);
+		char *ee = buf + vstrlen(buf) - vstrlen(t_ok_next[n_next]);
 
 		for (char *e = buf; e < ee; e++)
 			t_parse_chunked_hdr_err(buf, e, pch_more);
@@ -496,7 +496,7 @@ main(int argc, char *argv[])
 
 	printf("-- head negative tests\n");
 	for (struct pch_neg *neg = t_neg; neg < t_neg + vcountof(t_neg); neg++) {
-		size_t l = strlen(neg->hdr);
+		size_t l = vstrlen(neg->hdr);
 		assert(l < sizeof buf);
 
 		memcpy(buf, neg->hdr, l + 1);
@@ -513,7 +513,7 @@ main(int argc, char *argv[])
 		assert(n_next < vcountof(t_ok_tail_next));
 
 		bprintf(buf, "%s%s", t_ok_tail[n_tail], t_ok_tail_next[n_next]);
-		char *ee = buf + strlen(buf) - strlen(t_ok_tail_next[n_next]);
+		char *ee = buf + vstrlen(buf) - vstrlen(t_ok_tail_next[n_next]);
 
 		for (char *e = buf; e < ee; e++)
 			t_parse_chunked_tail(buf, e, pct_more, NULL);
@@ -523,7 +523,7 @@ main(int argc, char *argv[])
 
 	printf("-- tail negative tests\n");
 	for (struct pct_neg *neg = t_neg_tail; neg < t_neg_tail + vcountof(t_neg_tail); neg++) {
-		size_t l = strlen(neg->hdr);
+		size_t l = vstrlen(neg->hdr);
 		assert(l < sizeof buf);
 
 		memcpy(buf, neg->hdr, l + 1);

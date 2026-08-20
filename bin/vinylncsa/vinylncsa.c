@@ -395,8 +395,8 @@ format_requestline(const struct format *format)
 	AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_m], "-"));
 	AZ(VSB_putc(CTX.vsb, ' '));
 	if (CTX.frag[F_host].gen == CTX.gen) {
-		if (strncmp(CTX.frag[F_host].b, "http://", 7) &&
-		    strncmp(CTX.frag[F_host].b, "https://", 8)) {
+		if (vstrncmp(CTX.frag[F_host].b, "http://", 7) &&
+		    vstrncmp(CTX.frag[F_host].b, "https://", 8)) {
 			AZ(vsb_fcat(CTX.vsb, &CTX.frag[F_scheme], "http"));
 			AZ(VSB_cat(CTX.vsb, "://"));
 		}
@@ -544,7 +544,7 @@ addf_time(char type, const char *fmt)
 		if (!vstrcmp(fmt, "sec")) {
 			f->time_type = 'S';
 			REPLACE(f->time_fmt, "%jd");
-		} else if (!strncmp(fmt, "msec", 4)) {
+		} else if (!vstrncmp(fmt, "msec", 4)) {
 			fmt += 4;
 			if (!vstrcmp(fmt, "_frac")) {
 				f->time_type = '3';
@@ -553,7 +553,7 @@ addf_time(char type, const char *fmt)
 				f->time_type = 'M';
 				REPLACE(f->time_fmt, "%jd");
 			}
-		} else if (!strncmp(fmt, "usec", 4)) {
+		} else if (!vstrncmp(fmt, "usec", 4)) {
 			fmt += 4;
 			if (!vstrcmp(fmt, "_frac")) {
 				f->time_type = '6';
@@ -617,9 +617,9 @@ addf_hdr(struct watch_head *head, char *key)
 	match = strchr(key, ':');
 	if (match != NULL) {
 		match++;
-		if (!strncmp(match, "first", 5))
+		if (!vstrncmp(match, "first", 5))
 			w->match = FMTPOL_FIRST;
-		else if (!strncmp(match, "last", 4))
+		else if (!vstrncmp(match, "last", 4))
 			w->match = FMTPOL_LAST;
 		else
 			VUT_Error(vut, 1, "Unknown match rule :%s", match);
@@ -700,11 +700,11 @@ parse_x_format(char *buf)
 		addf_int64(&CTX.vxid);
 		return;
 	}
-	if (!strncmp(buf, "VCL_Log:", 8)) {
+	if (!vstrncmp(buf, "VCL_Log:", 8)) {
 		addf_vcl_log(buf + 8);
 		return;
 	}
-	if (!strncmp(buf, "VSL:", 4)) {
+	if (!vstrncmp(buf, "VSL:", 4)) {
 		buf += 4;
 		e = buf;
 		while (*e != '\0')
@@ -1100,7 +1100,7 @@ dispatch_f(struct VSL_data *vsl, struct VSL_transaction * const pt[],
 				break;
 			case SLT_BereqURL:
 			case SLT_ReqURL:
-				p = memchr(b, '?', e - b);
+				p = vmemchr(b, '?', e - b);
 				if (p == NULL)
 					p = e;
 				frag_line(FMTPOL_REQ, b, p, &CTX.frag[F_U]);
@@ -1208,7 +1208,7 @@ dispatch_f(struct VSL_data *vsl, struct VSL_transaction * const pt[],
 				VTAILQ_FOREACH(w, &CTX.watch_vcl_log, list) {
 					CHECK_OBJ_NOTNULL(w, WATCH_MAGIC);
 					if (e - b < w->keylen ||
-					    strncmp(b, w->key, w->keylen))
+					    vstrncmp(b, w->key, w->keylen))
 						continue;
 					p = b + w->keylen;
 					frag_line(FMTPOL_INTERNAL, p, e, &w->frag);

@@ -519,7 +519,7 @@ vep_do_include(struct vep_state *vep, enum dowhat what)
 
 	incl = vep->include_continue ? VEC_IC : VEC_IA;
 
-	if (l > 7 && !memcmp(p, "http://", 7)) {
+	if (l > 7 && !vmemcmp(p, "http://", 7)) {
 		h = p + 7;
 		p = strchr(h, '/');
 		if (p == NULL) {
@@ -533,7 +533,7 @@ vep_do_include(struct vep_state *vep, enum dowhat what)
 		Debug("HOST <%.*s> PATH <%s>\n", (int)(p-h),h, p);
 		VSB_printf(vep->vsb, "%c", incl);
 		VSB_printf(vep->vsb, "Host: %.*s%c", (int)(p-h), h, 0);
-	} else if (l > 8 && !memcmp(p, "https://", 8)) {
+	} else if (l > 8 && !vmemcmp(p, "https://", 8)) {
 		if (!vep->flags.esi_ignore_https) {
 			vep_warn(vep,
 			    "ESI 1.0 <esi:include> with https:// ignored");
@@ -578,7 +578,7 @@ vep_do_include(struct vep_state *vep, enum dowhat what)
 	for (q = p; *q != '\0'; ) {
 		if (*q == '&') {
 #define R(w,f,r)							\
-			if (q + w <= p + l && !memcmp(q, f, w)) { \
+			if (q + w <= p + l && !vmemcmp(q, f, w)) { \
 				VSB_printf(vep->vsb, "%c", r);	\
 				q += w;				\
 				continue;			\

@@ -279,7 +279,7 @@ command_generator (const char *text, int state)
 		jv = VTAILQ_NEXT(jv, list);
 		assert (vjsn_is_string(jv2));
 		assert (!vstrcmp(jv2->name, "request"));
-		if (!strncmp(text, jv2->value, vstrlen(text)))
+		if (!vstrncmp(text, jv2->value, vstrlen(text)))
 			return (strdup(jv2->value));
 	}
 	vjsn_delete(&jsn_cmds);

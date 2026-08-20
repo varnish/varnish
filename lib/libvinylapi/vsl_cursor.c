@@ -273,7 +273,7 @@ VSL_CursorVSM(struct VSL_data *vsl, struct vsm *vsm, unsigned options)
 	AN(vf.b);
 
 	head = vf.b;
-	if (memcmp(head->marker, VSL_HEAD_MARKER, sizeof head->marker)) {
+	if (vmemcmp(head->marker, VSL_HEAD_MARKER, sizeof head->marker)) {
 		AZ(VSM_Unmap(vsm, &vf));
 		(void)vsl_diag(vsl, "Not a VSL chunk");
 		return (NULL);
@@ -557,7 +557,7 @@ VSL_CursorFile(struct VSL_data *vsl, const char *name, unsigned options)
 		return (NULL);
 	}
 	assert(i == sizeof buf);
-	if (memcmp(buf, VSL_FILE_ID, sizeof buf)) {
+	if (vmemcmp(buf, VSL_FILE_ID, sizeof buf)) {
 		if (close_fd)
 			(void)close(fd);
 		vsl_diag(vsl, "Not a VSL file: %s", name);
