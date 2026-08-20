@@ -204,7 +204,7 @@ H2_prism_complete(struct http_conn *htc)
 	sz = sizeof(H2_prism);
 	if (htc->rxbuf_b + sz > htc->rxbuf_e)
 		sz = htc->rxbuf_e - htc->rxbuf_b;
-	if (memcmp(htc->rxbuf_b, H2_prism, sz))
+	if (vmemcmp(htc->rxbuf_b, H2_prism, sz))
 		return (HTC_S_JUNK);
 	return (sz == sizeof(H2_prism) ? HTC_S_COMPLETE : HTC_S_MORE);
 }

@@ -209,7 +209,7 @@ PFD_TLSPriv(const struct pfd *p)
 static inline int
 vcp_cmp(const struct conn_pool *a, const struct conn_pool *b)
 {
-	return (memcmp(a->ident, b->ident, sizeof b->ident));
+	return (vmemcmp(a->ident, b->ident, sizeof b->ident));
 }
 
 /*--------------------------------------------------------------------

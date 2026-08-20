@@ -137,7 +137,7 @@ hcl_lookup(struct worker *wrk, const void *digest, struct objhead **noh)
 	Lck_Lock(&hp->mtx);
 	VTAILQ_FOREACH(oh, &hp->head, hoh_list) {
 		CHECK_OBJ_NOTNULL(oh, OBJHEAD_MAGIC);
-		i = memcmp(oh->digest, digest, sizeof oh->digest);
+		i = vmemcmp(oh->digest, digest, sizeof oh->digest);
 		if (i < 0)
 			continue;
 		if (i > 0)

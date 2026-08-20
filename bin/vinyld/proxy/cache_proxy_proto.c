@@ -82,7 +82,7 @@ vpx_proto1(const struct worker *wrk, const struct req *req)
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 	CHECK_OBJ_NOTNULL(req->sp, SESS_MAGIC);
 
-	q = memchr(req->htc->rxbuf_b, '\r',
+	q = vmemchr(req->htc->rxbuf_b, '\r',
 	    req->htc->rxbuf_e - req->htc->rxbuf_b);
 	if (q == NULL)
 		return (-1);
@@ -509,7 +509,7 @@ vpx_complete(struct http_conn *htc)
 		if (j == 0)
 			return (HTC_S_JUNK);
 		if (j == 1 && z == sizeof vpx1_sig) {
-			q = memchr(p + z, '\n', htc->rxbuf_e - (p + z));
+			q = vmemchr(p + z, '\n', htc->rxbuf_e - (p + z));
 			if (q != NULL && (q - htc->rxbuf_b) > 107)
 				return (HTC_S_OVERFLOW);
 			if (q == NULL)

@@ -124,7 +124,7 @@ vbt_execinfo(struct vsb *vsb)
 			VSB_cat(vsb, "(?)");
 		} else {
 			p = strings[0];
-			if (!memcmp(buf, p, vstrlen(buf))) {
+			if (!vmemcmp(buf, p, vstrlen(buf))) {
 				p += vstrlen(buf);
 				if (*p == ':')
 					p++;

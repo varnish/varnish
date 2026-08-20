@@ -139,7 +139,7 @@ smd_full_allocbuf(struct worker *wrk, const struct stevedore *stv, size_t size,
 }
 
 #define dur_arg(a, s, d)					\
-	(! strncmp((a), (s), vstrlen(s))				\
+	(! vstrncmp((a), (s), vstrlen(s))				\
 	 && (d = VNUM_duration(a + vstrlen(s))) != nan(""))
 
 static int
@@ -149,7 +149,7 @@ bytes_arg(char *a, const char *s, ssize_t *sz)
 	uintmax_t bytes;
 
 	AN(sz);
-	if (strncmp(a, s, vstrlen(s)))
+	if (vstrncmp(a, s, vstrlen(s)))
 		return (0);
 	a += vstrlen(s);
 	err = VNUM_2bytes(a, &bytes, 0);

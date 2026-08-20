@@ -192,7 +192,7 @@ vcl_filter_list_iter(int want_vfp, const struct vfilter_head *h1,
 			continue;
 		else if (!want_vfp && vp->vdp == NULL)
 			continue;
-		if (vp->nlen == q - fl && !memcmp(fl, vp->name, vp->nlen))
+		if (vp->nlen == q - fl && !vmemcmp(fl, vp->name, vp->nlen))
 			return (vp);
 	}
 	VTAILQ_FOREACH(vp, h2, list) {
@@ -200,7 +200,7 @@ vcl_filter_list_iter(int want_vfp, const struct vfilter_head *h1,
 			continue;
 		else if (!want_vfp && vp->vdp == NULL)
 			continue;
-		if (vp->nlen == q - fl && !memcmp(fl, vp->name, vp->nlen))
+		if (vp->nlen == q - fl && !vmemcmp(fl, vp->name, vp->nlen))
 			return (vp);
 	}
 	*flp = fl;

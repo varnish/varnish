@@ -89,7 +89,7 @@ HTTP1_Complete(struct http_conn *htc)
 	 * is completed.  More stringent validation happens later.
 	 */
 	while (1) {
-		p = memchr(p, '\n', htc->rxbuf_e - p);
+		p = vmemchr(p, '\n', htc->rxbuf_e - p);
 		if (p == NULL)
 			return (HTC_S_MORE);
 		if (++p == htc->rxbuf_e)

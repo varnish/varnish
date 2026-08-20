@@ -370,6 +370,6 @@ VSHA256_Test(void)
 		VSHA256_Init(&c);
 		VSHA256_Update(&c, p->input, vstrlen(p->input));
 		VSHA256_Final(o, &c);
-		AZ(memcmp(o, p->output, 32));
+		AZ(vmemcmp(o, p->output, 32));
 	}
 }

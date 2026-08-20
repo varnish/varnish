@@ -195,10 +195,10 @@ vry_cmp(const uint8_t *v1, const uint8_t *v2)
 {
 	unsigned retval = 0;
 
-	if (!memcmp(v1, v2, VRY_Len(v1))) {
+	if (!vmemcmp(v1, v2, VRY_Len(v1))) {
 		/* Same same */
 		retval = 0;
-	} else if (memcmp(v1 + 2, v2 + 2, v1[2] + 2)) {
+	} else if (vmemcmp(v1 + 2, v2 + 2, v1[2] + 2)) {
 		/* Different header */
 		retval = 1;
 	} else if (cache_param->http_gzip_support &&

@@ -641,7 +641,7 @@ match(const char *b, size_t l, ...)
 		if (m == NULL)
 			break;
 		l = vstrlen(m);
-		if (e - b <= l || b[l] != '\0' || strncmp(b, m, l)) {
+		if (e - b <= l || b[l] != '\0' || vstrncmp(b, m, l)) {
 			printf("%.*s != %s\n", (int)(e - b), b, m);
 			r = -1;
 			break;

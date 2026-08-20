@@ -171,7 +171,7 @@ ban_equal(const uint8_t *bs1, const uint8_t *bs2)
 	if (bs1[BANS_FLAGS] & BANS_FLAG_NODEDUP)
 		return (0);
 
-	return (!memcmp(bs1 + BANS_LENGTH, bs2 + BANS_LENGTH, u - BANS_LENGTH));
+	return (!vmemcmp(bs1 + BANS_LENGTH, bs2 + BANS_LENGTH, u - BANS_LENGTH));
 }
 
 void

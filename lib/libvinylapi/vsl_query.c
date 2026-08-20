@@ -252,7 +252,7 @@ vslq_test_rec(const struct vex *vex, const struct VSLC_ptr *rec)
 			if (strncasecmp(b, rhs->val_string, e - b))
 				return (0);
 		} else {
-			if (strncmp(b, rhs->val_string, e - b))
+			if (vstrncmp(b, rhs->val_string, e - b))
 				return (0);
 		}
 		return (1);
@@ -264,7 +264,7 @@ vslq_test_rec(const struct vex *vex, const struct VSLC_ptr *rec)
 			if (strncasecmp(b, rhs->val_string, e - b))
 				return (1);
 		} else {
-			if (strncmp(b, rhs->val_string, e - b))
+			if (vstrncmp(b, rhs->val_string, e - b))
 				return (1);
 		}
 		return (0);

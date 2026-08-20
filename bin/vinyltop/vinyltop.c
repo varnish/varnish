@@ -91,7 +91,7 @@ cmp_key(const struct top *a, const struct top *b)
 		return (a->tag - b->tag);
 	if (a->clen != b->clen)
 		return (a->clen - b->clen);
-	return (memcmp(a->rec_data, b->rec_data, a->clen));
+	return (vmemcmp(a->rec_data, b->rec_data, a->clen));
 }
 
 static inline int

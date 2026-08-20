@@ -144,7 +144,7 @@ acl_tbl_cmp(int fam, const uint8_t *key, const uint8_t *b)
 
 	rv = fam - (int)b[3];
 	if (rv == 0 && b[1] > 0)
-		rv = memcmp(key, b + 4, b[1]);
+		rv = vmemcmp(key, b + 4, b[1]);
 	if (rv == 0 && b[2])
 		rv = (int)(key[b[1]] & b[2]) - (int)b[4 + b[1]];
 	return (rv);

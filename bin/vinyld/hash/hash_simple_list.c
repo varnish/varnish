@@ -78,7 +78,7 @@ hsl_lookup(struct worker *wrk, const void *digest, struct objhead **noh)
 
 	Lck_Lock(&hsl_mtx);
 	VTAILQ_FOREACH(oh, &hsl_head, hoh_list) {
-		i = memcmp(oh->digest, digest, sizeof oh->digest);
+		i = vmemcmp(oh->digest, digest, sizeof oh->digest);
 		if (i < 0)
 			continue;
 		if (i > 0)

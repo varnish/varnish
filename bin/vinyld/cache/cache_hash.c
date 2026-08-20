@@ -283,7 +283,7 @@ hsh_testmagic(void *result)
 	static size_t nused = 0;
 
 	for (i = 0; i < nused; i++)
-		if (!memcmp(hsh_magiclist[i].was, result, VSHA256_LEN))
+		if (!vmemcmp(hsh_magiclist[i].was, result, VSHA256_LEN))
 			break;
 	if (i == nused && i < HSH_NMAGIC)
 		memcpy(hsh_magiclist[nused++].was, result, VSHA256_LEN);
