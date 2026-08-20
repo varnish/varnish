@@ -113,7 +113,7 @@ LineUpProcess(struct vlu *l)
 		q = strchr(p, '\0');
 		assert(q != NULL);
 		l->bufp = (unsigned)(q - p);
-		memmove(l->buf, p, l->bufp);
+		vmemmove(l->buf, p, l->bufp);
 		l->buf[l->bufp] = '\0';
 	} else
 		l->bufp = 0;
@@ -167,7 +167,7 @@ VLU_Feed(struct vlu *l, const char *ptr, int len)
 		u = len;
 		if (u > l->bufl - l->bufp)
 			u = l->bufl - l->bufp;
-		memcpy(l->buf + l->bufp, ptr, u);
+		vmemcpy(l->buf + l->bufp, ptr, u);
 		len -= u;
 		ptr += u;
 		l->bufp += u;

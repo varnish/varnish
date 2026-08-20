@@ -134,7 +134,7 @@ setup_sweep(VRT_CTX, struct acl_sweep *asw, VCL_IP ip0, VCL_IP ip1,
 	/* Dont try this at home */
 	asw->probe = malloc(vsa_suckaddr_len);
 	AN(asw->probe);
-	memcpy(asw->probe, ip0, vsa_suckaddr_len);
+	vmemcpy(asw->probe, ip0, vsa_suckaddr_len);
 	(void)VSA_GetPtr(asw->probe, &ptr);
 	asw->probe_p = ((uint8_t*)(asw->probe)) + (ptr - (uint8_t*)asw->probe);
 
@@ -225,7 +225,7 @@ xyzzy_sweep_acl(VRT_CTX, VCL_ACL acl, VCL_IP ip0, VCL_IP ip1, VCL_INT step)
 	VSHA256_Final(digest, vsha);
 	b = WS_Alloc(ctx->ws, sizeof *b + sizeof digest);
 	if (b != NULL) {
-		memcpy(b + 1, digest, sizeof digest);
+		vmemcpy(b + 1, digest, sizeof digest);
 		b->magic = VRT_BLOB_MAGIC;
 		b->blob = b + 1;
 		b->len = sizeof digest;

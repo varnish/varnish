@@ -162,7 +162,7 @@ mcf_alias(struct parspec *alias, const struct parspec *pp)
 
 	orig = TRUST_ME(pp->priv);
 	AN(orig);
-	memcpy(alias, orig, sizeof *alias);
+	vmemcpy(alias, orig, sizeof *alias);
 	alias->priv = TRUST_ME(orig);
 	return (alias);
 }

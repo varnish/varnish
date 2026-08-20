@@ -272,7 +272,7 @@ VRY_Finish(struct req *req, enum vry_finish_flag flg)
 	if (flg == KEEP && l > 3) {
 		p = malloc(l);
 		if (p != NULL)
-			memcpy(p, req->vary_b, l);
+			vmemcpy(p, req->vary_b, l);
 	}
 	WS_Release(req->ws, 0);
 	req->vary_e = NULL;
@@ -338,9 +338,9 @@ VRY_Match(const struct req *req, const uint8_t *vary)
 			}
 
 			vbe16enc(vsp, (uint16_t)lh);
-			memcpy(vsp + 2, vary + 2, vary[2] + 2);
+			vmemcpy(vsp + 2, vary + 2, vary[2] + 2);
 			if (h != NULL)
-				memcpy(vsp + 2 + vsp[2] + 2, h, lh);
+				vmemcpy(vsp + 2 + vsp[2] + 2, h, lh);
 			vsp[ln++] = 0xff;
 			vsp[ln++] = 0xff;
 			vsp[ln++] = 0;

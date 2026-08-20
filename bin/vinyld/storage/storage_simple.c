@@ -1010,7 +1010,7 @@ sml_trimstore(struct worker *wrk, struct objcore *oc)
 		return;
 	assert(st1->space >= st->len);
 
-	memcpy(st1->ptr, st->ptr, st->len);
+	vmemcpy(st1->ptr, st->ptr, st->len);
 	st1->len = st->len;
 	Lck_Lock(&oc->boc->mtx);
 	VTAILQ_REMOVE(&o->list, st, list);
@@ -1156,7 +1156,7 @@ sml_setattr(struct worker *wrk, struct objcore *oc, enum obj_attr attr,
 	}
 
 	if (retval != NULL && ptr != NULL)
-		memcpy(retval, ptr, len);
+		vmemcpy(retval, ptr, len);
 	return (retval);
 }
 

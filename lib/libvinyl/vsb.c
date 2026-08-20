@@ -152,7 +152,7 @@ VSB_extend(struct vsb *s, ssize_t addlen)
 	if (newbuf == NULL)
 		return (-1);
 	if (!VSB_ISDYNAMIC(s)) {
-		memcpy(newbuf, s->s_buf, s->s_size);
+		vmemcpy(newbuf, s->s_buf, s->s_size);
 		VSB_SETFLAG(s, VSB_DYNAMIC);
 	}
 	s->s_buf = newbuf;
@@ -299,7 +299,7 @@ VSB_bcat(struct vsb *s, const void *buf, ssize_t len)
 		if (s->s_error != 0)
 			return (-1);
 	}
-	memcpy(s->s_buf + s->s_len, buf, len);
+	vmemcpy(s->s_buf + s->s_len, buf, len);
 	s->s_len += len;
 	return (0);
 }

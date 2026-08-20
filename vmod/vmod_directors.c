@@ -186,8 +186,10 @@ vdir_remove_backend(VRT_CTX, struct vdir *vd, VCL_BACKEND be, unsigned *cur)
 	}
 	VRT_Assign_Backend(&vd->backend[u], NULL);
 	n = (vd->n_backend - u) - 1;
-	memmove(&vd->backend[u], &vd->backend[u+1], n * sizeof(vd->backend[0]));
-	memmove(&vd->weight[u], &vd->weight[u+1], n * sizeof(vd->weight[0]));
+	vmemmove(&vd->backend[u], &vd->backend[u + 1],
+		 n * sizeof(vd->backend[0]));
+	vmemmove(&vd->weight[u], &vd->weight[u + 1],
+		 n * sizeof(vd->weight[0]));
 	vd->n_backend--;
 
 	if (cur) {

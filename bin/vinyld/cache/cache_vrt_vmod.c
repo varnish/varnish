@@ -161,7 +161,7 @@ VPI_Vmod_Init(VRT_CTX, struct vmod **hdl, unsigned nbr, void *ptr, int len,
 	}
 
 	assert(len == v->funclen);
-	memcpy(ptr, v->funcs, v->funclen);
+	vmemcpy(ptr, v->funcs, v->funclen);
 	v->ref++;
 
 	*hdl = v;

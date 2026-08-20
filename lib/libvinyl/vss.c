@@ -259,7 +259,7 @@ VSS_resolver_range(const char *addr, const char *def_port, vss_resolved_f *func,
 	}
 
 	/* Undo vss_parse() string modifications */
-	memcpy(p, addr, pp - p);
+	vmemcpy(p, addr, pp - p);
 
 	for (i = lo; i <= hi && !error; i++) {
 		/* pp points to the first character of the range definition.

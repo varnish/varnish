@@ -475,7 +475,7 @@ vpx_proto2(const struct worker *wrk, const struct req *req)
 		return (vpx_ws_err(req));
 	INIT_OBJ(tlv, VPX_TLV_MAGIC);
 	tlv->len = tlv_len;
-	memcpy(tlv->tlv, tlv_start, tlv_len);
+	vmemcpy(tlv->tlv, tlv_start, tlv_len);
 	if (! SES_Reserve_proxy_tlv(req->sp, &up, &sz))
 		return (vpx_ws_err(req));
 	assert(sz == sizeof up);

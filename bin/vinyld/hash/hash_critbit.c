@@ -208,7 +208,7 @@ hcb_insert(const struct worker *wrk, struct hcb_root *root,
 			return (NULL);
 		oh2 = *noh;
 		*noh = NULL;
-		memcpy(oh2->digest, digest, sizeof oh2->digest);
+		vmemcpy(oh2->digest, digest, sizeof oh2->digest);
 		*p = hcb_r_node(oh2);
 		return (oh2);
 	}
@@ -248,7 +248,7 @@ hcb_insert(const struct worker *wrk, struct hcb_root *root,
 	assert(s2 < 2);
 	oh2 = *noh;
 	*noh = NULL;
-	memcpy(oh2->digest, digest, sizeof oh2->digest);
+	vmemcpy(oh2->digest, digest, sizeof oh2->digest);
 	y2->leaf[s2] = hcb_r_node(oh2);
 	s2 = 1-s2;
 

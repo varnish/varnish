@@ -260,7 +260,7 @@ VAV_ParseTxt(const char *b, const char *e, int *argc, int flag)
 		if (flag & ARGV_NOESC) {
 			argv[nargv] = malloc(1L + (b - p));
 			assert(argv[nargv] != NULL);
-			memcpy(argv[nargv], p, b - p);
+			vmemcpy(argv[nargv], p, b - p);
 			argv[nargv][b - p] = '\0';
 		} else {
 			argv[nargv] = VAV_BackSlashDecode(p, b);
@@ -435,7 +435,7 @@ test_run(const struct test_case *tc, int *ret)
 	} else {
 		tmp = malloc(i); /* sanitizer-friendly */
 		AN(tmp);
-		memcpy(tmp, tc->str, i);
+		vmemcpy(tmp, tc->str, i);
 		argv = VAV_ParseTxt(tmp, tmp + i, &argc, tc->flag);
 		free(tmp);
 	}

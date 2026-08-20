@@ -1124,7 +1124,7 @@ VSM_Dup(struct vsm *vd, const char *category, const char *ident)
 		AN(vf.e);
 		p = malloc((char*)vf.e - (char*)vf.b);
 		AN(p);
-		memcpy(p, vf.b, (char*)vf.e - (char*)vf.b);
+		vmemcpy(p, vf.b, (char *)vf.e - (char *)vf.b);
 		AZ(VSM_Unmap(vd, &vf));
 		break;
 	}

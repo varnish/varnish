@@ -236,7 +236,7 @@ MGT_NamedArg(const char *spec, const char **name, const char *what)
 		l = p - spec;
 		r = malloc(1L + l);
 		AN(r);
-		memcpy(r, spec, l);
+		vmemcpy(r, spec, l);
 		r[l] = '\0';
 		*name = r;
 	}

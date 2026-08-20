@@ -65,7 +65,7 @@ id_encode(const enum encoding enc, const enum case_e kase,
 	if (in == NULL || inlen == 0)
 		return (0);
 
-	memcpy(buf, in, inlen);
+	vmemcpy(buf, in, inlen);
 	return (inlen);
 }
 
@@ -97,13 +97,13 @@ id_decode(const enum encoding enc, blob_dest_t buf,
 			len = c;
 		c -= len;
 		if ((outlen + len) > buflen) {
-			memcpy(dest, s, buflen - outlen);
+			vmemcpy(dest, s, buflen - outlen);
 			outlen = buflen;
 			errno = ENOMEM;
 			r = -1;
 			goto out;
 		}
-		memcpy(dest, s, len);
+		vmemcpy(dest, s, len);
 		outlen += len;
 		dest += len;
 	}

@@ -250,7 +250,7 @@ ban_add_double(const struct ban_proto *bp, const struct pvar *pv, int op, double
 	assert(BANS_HAS_ARG2_DOUBLE(pv->tag));
 	assert(sizeof darg == sizeof dtmp);
 	assert(sizeof dtmp == sizeof denc);
-	memcpy(&dtmp, &darg, sizeof dtmp);
+	vmemcpy(&dtmp, &darg, sizeof dtmp);
 	vbe64enc(denc, dtmp);
 
 	ban_add_lump(bp, denc, sizeof denc);
@@ -395,10 +395,10 @@ BAN_Commit(struct ban_proto *bp)
 
 	memset(b->spec, 0, BANS_HEAD_LEN);
 	t0 = VTIM_real();
-	memcpy(&u, &t0, sizeof u);
+	vmemcpy(&u, &t0, sizeof u);
 	vbe64enc(b->spec + BANS_TIMESTAMP, u);
 	b->spec[BANS_FLAGS] = b->flags & 0xff;
-	memcpy(b->spec + BANS_HEAD_LEN, VSB_data(bp->vsb), ln);
+	vmemcpy(b->spec + BANS_HEAD_LEN, VSB_data(bp->vsb), ln);
 	ln += BANS_HEAD_LEN;
 	vbe32enc(b->spec + BANS_LENGTH, ln);
 

@@ -45,7 +45,7 @@ WS_Id(const struct ws *ws, char *id)
 
 	WS_Assert(ws);
 	AN(id);
-	memcpy(id, ws->id, WS_ID_SIZE);
+	vmemcpy(id, ws->id, WS_ID_SIZE);
 	id[0] |= 0x20;			// cheesy tolower()
 }
 

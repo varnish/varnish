@@ -298,7 +298,7 @@ smp_close_seg(struct smp_sc *sc, struct smp_seg *sg)
 		dst = sc->next_bot + IRNUP(sc, SMP_SIGN_SPACE);
 		dp = sc->base + dst;
 		assert((uintptr_t)dp + len < (uintptr_t)sg->objs);
-		memcpy(dp, sg->objs, len);
+		vmemcpy(dp, sg->objs, len);
 		sc->next_top = dst;
 		sg->objs = dp;
 		sg->p.length = (sc->next_top - sg->p.offset)

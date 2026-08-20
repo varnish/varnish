@@ -454,7 +454,7 @@ strands_consume(struct strands *strings, size_t consume)
 		return;
 	}
 	len = (unsigned)strings->n - i;
-	memmove(strings->p, strings->p + i, len * sizeof *strings->p);
+	vmemmove(strings->p, strings->p + i, len * sizeof *strings->p);
 	strings->n -= i;
 }
 
@@ -481,7 +481,7 @@ vmod_transcode(VRT_CTX, VCL_ENUM decs, VCL_ENUM encs, VCL_ENUM case_s,
 
 	// copy stringsa into strings on stack
 	const char *p[stringsa->n];
-	memcpy(p, stringsa->p, stringsa->n * sizeof *p);
+	vmemcpy(p, stringsa->p, stringsa->n * sizeof *p);
 	struct strands *strings = &(struct strands){.magic=STRANDS_MAGIC, .n=stringsa->n, .p=p};
 
 	assert(bufmax % 3 == 0); //lint !e778 constant

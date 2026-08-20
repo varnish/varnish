@@ -1032,7 +1032,7 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident, struct vsb *err)
 	cp->holddown = 0;
 	cp->endpoint = VRT_Endpoint_Clone(vep);
 	CHECK_OBJ_NOTNULL(cp->endpoint, VRT_ENDPOINT_MAGIC);
-	memcpy(cp->ident, digest, sizeof cp->ident);
+	vmemcpy(cp->ident, digest, sizeof cp->ident);
 	if (vep->uds_path != NULL)
 		cp->methods = &vus_methods;
 	else if (vep->sslflags & BSSL_F_ENABLE)

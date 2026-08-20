@@ -408,7 +408,7 @@ vcc_TypeSymbol(struct vcc *tl, vcc_ns_t ns, vcc_kind_t kind, vcc_type_t type)
 	AZ(VSB_finish(buf));
 
 	/* NB: we create a fake token but errors are handled by the caller. */
-	memcpy(t, tl->t, sizeof *t);
+	vmemcpy(t, tl->t, sizeof *t);
 	t->b = VSB_data(buf);
 	t->e = t->b + VSB_len(buf);
 

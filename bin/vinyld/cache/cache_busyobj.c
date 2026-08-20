@@ -126,7 +126,7 @@ VBO_GetBusyObj(const struct worker *wrk, const struct req *req)
 	bo->first_byte_timeout = NAN;
 	bo->between_bytes_timeout = NAN;
 
-	memcpy(bo->digest, req->digest, sizeof bo->digest);
+	vmemcpy(bo->digest, req->digest, sizeof bo->digest);
 
 	return (bo);
 }

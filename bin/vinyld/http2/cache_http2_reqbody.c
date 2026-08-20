@@ -253,7 +253,7 @@ h2_reqbody_data(struct worker *wrk, struct h2_sess *h2, struct h2_req *r2)
 		if ((head % r2->rxbuf->size) + l2 > r2->rxbuf->size)
 			l2 = r2->rxbuf->size - (head % r2->rxbuf->size);
 		assert(l2 > 0);
-		memcpy(&r2->rxbuf->data[head % r2->rxbuf->size], src, l2);
+		vmemcpy(&r2->rxbuf->data[head % r2->rxbuf->size], src, l2);
 		src += l2;
 		head += l2;
 		l -= l2;
@@ -349,7 +349,7 @@ h2_vfp_body(struct vfp_ctx *vc, struct vfp_entry *vfe, void *ptr, ssize_t *lp)
 		if ((tail % r2->rxbuf->size) + l2 > r2->rxbuf->size)
 			l2 = r2->rxbuf->size - (tail % r2->rxbuf->size);
 		assert(l2 > 0);
-		memcpy(dst, &r2->rxbuf->data[tail % r2->rxbuf->size], l2);
+		vmemcpy(dst, &r2->rxbuf->data[tail % r2->rxbuf->size], l2);
 		dst += l2;
 		tail += l2;
 		l -= l2;

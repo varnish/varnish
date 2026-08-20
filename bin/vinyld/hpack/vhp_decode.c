@@ -271,7 +271,7 @@ vhd_lookup(struct vhd_ctx *ctx, unsigned first)
 	assert(lu->l <= l);
 	p += l - lu->l;
 	l = vmin_t(size_t, lu->l, ctx->out_e - ctx->out);
-	memcpy(ctx->out, p, l);
+	vmemcpy(ctx->out, p, l);
 	ctx->out += l;
 	lu->l -= l;
 
@@ -376,7 +376,7 @@ vhd_raw(struct vhd_ctx *ctx, unsigned first)
 			l2 = ctx->out_e - ctx->out;
 		if (l2 == 0)
 			return (VHD_BUF);
-		memcpy(ctx->out, ctx->in, l2);
+		vmemcpy(ctx->out, ctx->in, l2);
 		ctx->in += l2;
 		if (ctx->tbl != NULL && (s->arg2 & VHD_INCREMENTAL)) {
 			switch (s->arg1) {

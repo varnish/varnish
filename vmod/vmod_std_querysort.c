@@ -121,7 +121,7 @@ vmod_querysort(VRT_CTX, VCL_STRING url)
 		assert(pp[i + 1] > pp[i]);
 		if (*cq)
 			*p++ = *cq;
-		memcpy(p, pp[i], pp[i + 1] - pp[i]);
+		vmemcpy(p, pp[i], pp[i + 1] - pp[i]);
 		p += pp[i + 1] - pp[i];
 		cq = "&";
 	}

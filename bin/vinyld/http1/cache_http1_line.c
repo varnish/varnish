@@ -188,7 +188,7 @@ v1l_prune(struct v1l *v1l, ssize_t abytes)
 			    (char*)v1l->iov[j].iov_base + used_here;
 			sz = (unsigned)v1l->niov - (unsigned)j;
 			sz *= sizeof(struct iovec);
-			memmove(v1l->iov, &v1l->iov[j], sz);
+			vmemmove(v1l->iov, &v1l->iov[j], sz);
 			v1l->niov -= j;
 			assert(v1l->liov >= bytes);
 			v1l->liov -= bytes;

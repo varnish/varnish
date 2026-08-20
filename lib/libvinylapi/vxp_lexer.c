@@ -165,7 +165,7 @@ vxp_Lexer(struct vxp *vxp)
 			vxp_append_token(vxp, VAL, p, q);
 			vxp->t->dec = vxp_Alloc(vxp, (q - p) + 1);
 			AN(vxp->t->dec);
-			memcpy(vxp->t->dec, p, q - p);
+			vmemcpy(vxp->t->dec, p, q - p);
 			vxp->t->dec[q - p] = '\0';
 			p = q;
 			continue;

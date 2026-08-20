@@ -82,7 +82,7 @@ strands_cat(char *buf, unsigned bufl, const struct strands *s)
 		if (s->p[i] == NULL || *s->p[i] == '\0')
 			continue;
 		ll = vmin_t(unsigned, vstrlen(s->p[i]), bufl);
-		memcpy(buf, s->p[i], ll);
+		vmemcpy(buf, s->p[i], ll);
 		l += ll;
 		buf += ll;
 		bufl -= ll;
@@ -274,7 +274,7 @@ vslr(enum VSL_tag_e tag, vxid_t vxid, const char *b, unsigned len)
 
 	p = vsl_get(len, 1, 0);
 
-	memcpy(p + VSL_OVERHEAD, b, len);
+	vmemcpy(p + VSL_OVERHEAD, b, len);
 
 	/*
 	 * the vxid needs to be written before the barrier to
@@ -356,7 +356,7 @@ VSL_Flush(struct vsl_log *vsl, int overflow)
 
 	p = vsl_get(l, vsl->wlr, overflow);
 
-	memcpy(p + VSL_OVERHEAD, vsl->wlb, l);
+	vmemcpy(p + VSL_OVERHEAD, vsl->wlb, l);
 	p[1] = l;
 	VWMB();
 	p[0] = ((((unsigned)SLT__Batch & 0xff) << VSL_IDSHIFT));
@@ -403,7 +403,7 @@ vslb_simple(struct vsl_log *vsl, enum VSL_tag_e tag,
 		length = vstrlen(str);
 	length += 1; // NUL
 	p = vslb_get(vsl, tag, &length);
-	memcpy(p, str, length - 1);
+	vmemcpy(p, str, length - 1);
 	p[length - 1] = '\0';
 
 	if (DO_DEBUG(DBG_SYNCVSL))
@@ -579,7 +579,7 @@ VSLb_bin(struct vsl_log *vsl, enum VSL_tag_e tag, ssize_t len, const void *ptr)
 		VSL_Flush(vsl, 1);
 	assert(VSL_END(vsl->wlp, len) <= vsl->wle);
 	p = VSL_DATA(vsl->wlp);
-	memcpy(p, ptr, len);
+	vmemcpy(p, ptr, len);
 	vsl->wlp = vsl_hdr(tag, vsl->wlp, len, vsl->wid);
 	assert(vsl->wlp <= vsl->wle);
 	vsl->wlr++;
@@ -731,5 +731,5 @@ VSM_Init(void)
 	for (u = 1; u < VSL_SEGMENTS; u++)
 		vsl_head->offset[u] = -1;
 	VWMB();
-	memcpy(vsl_head->marker, VSL_HEAD_MARKER, sizeof vsl_head->marker);
+	vmemcpy(vsl_head->marker, VSL_HEAD_MARKER, sizeof vsl_head->marker);
 }

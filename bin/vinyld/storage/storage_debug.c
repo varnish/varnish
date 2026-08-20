@@ -187,13 +187,13 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 		ARGV_ERR("Only one -s%s instance supported\n", smd_stevedore.name);
 
 	ident = parent->ident;
-	memcpy(parent, &sma_stevedore, sizeof *parent);
+	vmemcpy(parent, &sma_stevedore, sizeof *parent);
 	parent->ident = ident;
 	parent->name = smd_stevedore.name;
 
 	methods = malloc(sizeof *methods);
 	AN(methods);
-	memcpy(methods, &SML_methods, sizeof *methods);
+	vmemcpy(methods, &SML_methods, sizeof *methods);
 	parent->methods = methods;
 
 	assert(aac >= 0);

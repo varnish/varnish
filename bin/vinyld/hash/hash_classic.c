@@ -130,7 +130,7 @@ hcl_lookup(struct worker *wrk, const void *digest, struct objhead **noh)
 		CHECK_OBJ_NOTNULL(*noh, OBJHEAD_MAGIC);
 
 	assert(sizeof oh->digest >= sizeof hdigest);
-	memcpy(&hdigest, digest, sizeof hdigest);
+	vmemcpy(&hdigest, digest, sizeof hdigest);
 	u1 = hdigest % hcl_nhash;
 	hp = &hcl_head[u1];
 
@@ -160,7 +160,7 @@ hcl_lookup(struct worker *wrk, const void *digest, struct objhead **noh)
 
 	oh = *noh;
 	*noh = NULL;
-	memcpy(oh->digest, digest, sizeof oh->digest);
+	vmemcpy(oh->digest, digest, sizeof oh->digest);
 
 	oh->hoh_head = hp;
 

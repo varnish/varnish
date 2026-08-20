@@ -158,7 +158,7 @@ WS_Pipeline(struct ws *ws, const void *b, const void *e, uintptr_t snap)
 	l = pdiff(b, e);
 	if (l > r)
 		return (-1);
-	memmove(ws->f, b, l);
+	vmemmove(ws->f, b, l);
 	return (l);
 }
 
@@ -203,7 +203,7 @@ WS_Copy(struct ws *ws, const void *str, int len)
 	}
 	r = ws->f;
 	ws->f += bytes;
-	memcpy(r, str, len);
+	vmemcpy(r, str, len);
 	DSLb(DBG_WORKSPACE, "WS_Copy(%s, %p, %d) = %p", ws->id, ws, len, r);
 	WS_Assert(ws);
 	return (r);
@@ -348,12 +348,12 @@ WS_Dump(const struct ws *ws, char where, size_t off, void *buf, size_t len)
 
 	l = pdiff(p, ws->e);
 	if (len <= l) {
-		memcpy(buf, p, len);
+		vmemcpy(buf, p, len);
 		return (len);
 	}
 
 	b = buf;
-	memcpy(b, p, l);
+	vmemcpy(b, p, l);
 	memset(b + l, WS_REDZONE_END, len - l);
 	return (l);
 }
