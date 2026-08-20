@@ -131,8 +131,8 @@ vht_trim(struct vht_table *tbl, ssize_t max)
 	}
 	assert(v <= tbl->n);
 
-	memmove(tbl->buf, tbl->buf + u, tbl->size - u);
-	memmove(TBLENTRY(tbl, v), TBLENTRY(tbl, 0), (tbl->n - v) * sizeof *e);
+	vmemmove(tbl->buf, tbl->buf + u, tbl->size - u);
+	vmemmove(TBLENTRY(tbl, v), TBLENTRY(tbl, 0), (tbl->n - v) * sizeof *e);
 	tbl->n -= v;
 	tbl->size -= u;
 }
@@ -149,7 +149,7 @@ vht_appendname(struct vht_table *tbl, const char *buf, size_t len)
 	AZ(e->valuelen);	/* Name needs to be set before value */
 	assert(TBLSIZE(tbl) + len <= tbl->maxsize);
 	assert(e->offset + e->namelen == tbl->size);
-	memcpy(tbl->buf + tbl->size, buf, len);
+	vmemcpy(tbl->buf + tbl->size, buf, len);
 	e->namelen += len;
 	tbl->size += len;
 }
@@ -165,7 +165,7 @@ vht_appendvalue(struct vht_table *tbl, const char *buf, size_t len)
 	CHECK_OBJ_NOTNULL(e, VHT_ENTRY_MAGIC);
 	assert(TBLSIZE(tbl) + len <= tbl->maxsize);
 	assert(e->offset + e->namelen + e->valuelen == tbl->size);
-	memcpy(tbl->buf + tbl->size, buf, len);
+	vmemcpy(tbl->buf + tbl->size, buf, len);
 	e->valuelen += len;
 	tbl->size += len;
 }
@@ -258,7 +258,7 @@ VHT_NewEntry_Indexed(struct vht_table *tbl, unsigned idx)
 	lname = e->namelen;
 	lentry = ENTRYLEN(e);
 	FINI_OBJ(e);
-	memmove(TBLENTRY(tbl, 1), TBLENTRY(tbl, 0), (tbl->n - 1) * sizeof *e);
+	vmemmove(TBLENTRY(tbl, 1), TBLENTRY(tbl, 0), (tbl->n - 1) * sizeof *e);
 	tbl->n--;
 
 	/* Shift the referenced element last using a temporary buffer. */
@@ -267,9 +267,9 @@ VHT_NewEntry_Indexed(struct vht_table *tbl, unsigned idx)
 		l2 = lentry - l;
 		if (l2 > sizeof tmp)
 			l2 = sizeof tmp;
-		memcpy(tmp, tbl->buf, l2);
-		memmove(tbl->buf, tbl->buf + l2, tbl->size - l2);
-		memcpy(tbl->buf + tbl->size - l2, tmp, l2);
+		vmemcpy(tmp, tbl->buf, l2);
+		vmemmove(tbl->buf, tbl->buf + l2, tbl->size - l2);
+		vmemcpy(tbl->buf + tbl->size - l2, tmp, l2);
 		l += l2;
 	}
 	assert(l == lentry);
@@ -376,9 +376,9 @@ VHT_SetProtoMax(struct vht_table *tbl, size_t protomax)
 		return (-1);
 
 	if (tbl->buf != NULL) {
-		memcpy(buf, tbl->buf, tbl->size);
-		memcpy(ENTRIES(buf, bufsize, tbl->n), TBLENTRIES(tbl),
-		    sizeof (struct vht_entry) * tbl->n);
+		vmemcpy(buf, tbl->buf, tbl->size);
+		vmemcpy(ENTRIES(buf, bufsize, tbl->n), TBLENTRIES(tbl),
+			sizeof(struct vht_entry) * tbl->n);
 		free(tbl->buf);
 	}
 	tbl->buf = buf;

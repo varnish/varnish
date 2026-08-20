@@ -508,7 +508,7 @@ shardcfg_backend_finalize(struct backend_reconfig *re)
 		assert(bb[re->hole_i].backend == NULL);
 		assert(bb[i].backend != NULL);
 
-		memcpy(&bb[re->hole_i], &bb[i], sizeof(*bb));
+		vmemcpy(&bb[re->hole_i], &bb[i], sizeof(*bb));
 		memset(&bb[i], 0, sizeof(*bb));
 
 		(re->hole_n)--;

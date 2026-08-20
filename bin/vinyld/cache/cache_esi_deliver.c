@@ -780,7 +780,7 @@ ved_gzgz_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 			assert(l >= 0);
 			assert(l <= 8);
 			assert(l + dl <= 8);
-			memcpy(foo->tailbuf + l, pp, dl);
+			vmemcpy(foo->tailbuf + l, pp, dl);
 			foo->ll += dl;
 			len -= dl;
 		}

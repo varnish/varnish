@@ -144,7 +144,7 @@ ban_time(const uint8_t *banspec)
 	assert(sizeof t == sizeof u);
 	assert(sizeof t == (BANS_LENGTH - BANS_TIMESTAMP));
 	u = vbe64dec(banspec + BANS_TIMESTAMP);
-	memcpy(&t, &u, sizeof t);
+	vmemcpy(&t, &u, sizeof t);
 	return (t);
 }
 
@@ -237,7 +237,7 @@ ban_iter(const uint8_t **bs, struct ban_test *bt)
 	bt->oper = *(*bs)++;
 	if (BANS_HAS_ARG2_DOUBLE(bt->arg1)) {
 		dtmp = vbe64dec(lump);
-		memcpy(&bt->arg2_double, &dtmp, sizeof dtmp);
+		vmemcpy(&bt->arg2_double, &dtmp, sizeof dtmp);
 		return;
 	} else if (BANS_HAS_ARG2_BOOL(bt->arg1)) {
 		bt->arg2_bool = *(uint8_t const *)lump;
@@ -424,7 +424,7 @@ ban_reload(const uint8_t *ban, unsigned len)
 	AN(b2);
 	b2->spec = malloc(len);
 	AN(b2->spec);
-	memcpy(b2->spec, ban, len);
+	vmemcpy(b2->spec, ban, len);
 	if (ban[BANS_FLAGS] & BANS_FLAG_REQ) {
 		VSC_C_main->bans_req++;
 		b2->flags |= BANS_FLAG_REQ;

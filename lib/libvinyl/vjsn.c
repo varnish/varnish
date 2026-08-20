@@ -420,7 +420,7 @@ vjsn_parse_end(const char *from, const char *to, const char **err)
 
 	p = malloc(sz + 1L);
 	AN(p);
-	memcpy(p, from, sz);
+	vmemcpy(p, from, sz);
 	p[sz] = '\0';
 	e = p + sz;
 

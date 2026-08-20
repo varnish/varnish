@@ -422,7 +422,7 @@ VRT_Strands(char *d, size_t dl, VCL_STRANDS s)
 			x = vstrlen(s->p[i]);
 			if (b + x >= e)
 				return (NULL);
-			memcpy(b, s->p[i], x);
+			vmemcpy(b, s->p[i], x);
 			b += x;
 		}
 	assert(b < e);
@@ -636,11 +636,11 @@ VRT_SetHdr(VRT_CTX, VCL_HEADER hs, const char *pfx, VCL_STRANDS s)
 		b[l] = '\0';
 	}
 	p = b;
-	memcpy(p, hs->what->str, hs->what->len);
+	vmemcpy(p, hs->what->str, hs->what->len);
 	p += hs->what->len;
 	*p++ = ' ';
 	if (pfx != NULL)
-		memcpy(p, pfx, pl);
+		vmemcpy(p, pfx, pl);
 	p += pl;
 	if (FEATURE(FEATURE_VALIDATE_HEADERS) && !validhdr(b)) {
 		VRT_fail(ctx, "Bad header %s", b);
@@ -1052,7 +1052,7 @@ void
 VRT_memmove(void *dst, const void *src, unsigned len)
 {
 
-	(void)memmove(dst, src, len);
+	(void) vmemmove(dst, src, len);
 }
 
 VCL_BOOL
@@ -1166,13 +1166,13 @@ VRT_Endpoint_Clone(const struct vrt_endpoint * const vep)
 	INIT_OBJ(nvep, VRT_ENDPOINT_MAGIC);
 	if (vep->ipv4) {
 		sa = (void*)p;
-		memcpy(sa, vep->ipv4, vsa_suckaddr_len);
+		vmemcpy(sa, vep->ipv4, vsa_suckaddr_len);
 		nvep->ipv4 = sa;
 		p += vsa_suckaddr_len;
 	}
 	if (vep->ipv6) {
 		sa = (void*)p;
-		memcpy(sa, vep->ipv6, vsa_suckaddr_len);
+		vmemcpy(sa, vep->ipv6, vsa_suckaddr_len);
 		nvep->ipv6 = sa;
 		p += vsa_suckaddr_len;
 	}
@@ -1182,14 +1182,14 @@ VRT_Endpoint_Clone(const struct vrt_endpoint * const vep)
 		INIT_OBJ(blob, VRT_BLOB_MAGIC);
 		p += sizeof(*blob);
 		nvep->preamble = blob;
-		memcpy(p, vep->preamble->blob, vep->preamble->len);
+		vmemcpy(p, vep->preamble->blob, vep->preamble->len);
 		blob->type = 0x70ea5b1e;
 		blob->len = vep->preamble->len;
 		blob->blob = p;
 		p += vep->preamble->len;
 	}
 	if (uds_len) {
-		memcpy(p, vep->uds_path, uds_len);
+		vmemcpy(p, vep->uds_path, uds_len);
 		nvep->uds_path = p;
 		p += uds_len;
 	}

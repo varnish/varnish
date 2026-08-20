@@ -145,7 +145,7 @@ ses_set_attr(const struct sess *sp, enum sess_attr a, const void *src, int sz)
 		return (-1);
 	dst = WS_AtOffset(sp->ws, sp->sattr[a], sz);
 	AN(dst);
-	memcpy(dst, src, sz);
+	vmemcpy(dst, src, sz);
 	return (0);
 }
 

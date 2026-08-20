@@ -164,7 +164,7 @@ vev_get_sig(int sig)
 		return (ENOMEM);
 
 	if (vev_sigs != NULL) {
-		memcpy(os, vev_sigs, vev_nsig * sizeof *os);
+		vmemcpy(os, vev_sigs, vev_nsig * sizeof *os);
 		free(vev_sigs);
 	}
 	vev_sigs = os;
@@ -186,7 +186,7 @@ vev_sigaction(int sig, siginfo_t *siginfo, void *ctx)
 	es = &vev_sigs[sig];
 	if (!es->happened) {
 		es->vevb->psig++;
-		memcpy(es->siginfo, siginfo, sizeof *es->siginfo);
+		vmemcpy(es->siginfo, siginfo, sizeof *es->siginfo);
 		es->vev->siginfo = es->siginfo;
 	}
 	es->happened = 1;

@@ -134,7 +134,7 @@ vca_tcp_sockopt_init(void)
 			assert(so->sz == sz);				\
 			tmp.fld = (val);				\
 			if (vmemcmp(&so->arg->fld, &(tmp.fld), sz)) {	\
-				memcpy(&so->arg->fld, &(tmp.fld), sz);	\
+				vmemcpy(&so->arg->fld, &(tmp.fld), sz);	\
 				so->mod++;				\
 				chg = 1;				\
 			}						\

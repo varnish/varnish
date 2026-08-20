@@ -217,7 +217,7 @@ h2h_addhdr(struct http *hp, struct h2h_decode *d)
 		/* NB: we inject "host" in place of "rity" for
 		 * the ":authority" pseudo-header.
 		 */
-		memcpy(d->out + 6, "host", 4);
+		vmemcpy(d->out + 6, "host", 4);
 		hdr.b += 6;
 		nm = Tstr(":authority"); /* preserve original */
 		has_dup = d->has_authority;

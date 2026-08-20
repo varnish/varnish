@@ -723,7 +723,7 @@ xyzzy_chksha256(VRT_CTX, VCL_BLOB blob, VCL_ENUM mode_e)
 	l = blob->len;
 	if (l > sizeof cfg->expected)
 		l = sizeof cfg->expected;
-	memcpy(cfg->expected, blob->blob, l);
+	vmemcpy(cfg->expected, blob->blob, l);
 
 }
 

@@ -230,7 +230,7 @@ vsa_normalize(struct suckaddr *sua)
 
 	uint8_t *p4 = (void*)&sua->u.sa4.sin_addr;
 	sua->u.sa.sa_family = PF_INET;
-	memcpy(p4, p6+12, 4);
+	vmemcpy(p4, p6 + 12, 4);
 
 #ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 	sua->u.sa.sa_len = sizeof(sua->u.sa4);
@@ -328,12 +328,12 @@ VSA_BuildFAP(void *d, sa_family_t fam, const void *a, unsigned al,
 		if (a != NULL && al > 0) {
 			if (al != sizeof(sin4.sin_addr))
 				break;
-			memcpy(&sin4.sin_addr, a, al);
+			vmemcpy(&sin4.sin_addr, a, al);
 		}
 		if (p != NULL && pl > 0) {
 			if (pl != sizeof(sin4.sin_port))
 				break;
-			memcpy(&sin4.sin_port, p, pl);
+			vmemcpy(&sin4.sin_port, p, pl);
 		}
 		return (VSA_Build(d, &sin4, sizeof sin4));
 	case PF_INET6:
@@ -342,12 +342,12 @@ VSA_BuildFAP(void *d, sa_family_t fam, const void *a, unsigned al,
 		if (a != NULL && al > 0) {
 			if (al != sizeof(sin6.sin6_addr))
 				break;
-			memcpy(&sin6.sin6_addr, a, al);
+			vmemcpy(&sin6.sin6_addr, a, al);
 		}
 		if (p != NULL && pl > 0) {
 			if (pl != sizeof(sin6.sin6_port))
 				break;
-			memcpy(&sin6.sin6_port, p, pl);
+			vmemcpy(&sin6.sin6_port, p, pl);
 		}
 		return (VSA_Build(d, &sin6, sizeof sin6));
 	default:
@@ -380,11 +380,11 @@ VSA_Build(void *d, const void *s, unsigned sal)
 	INIT_OBJ(sua, SUCKADDR_MAGIC);
 	switch (l) {
 	case sizeof sua->u.sa4:
-		memcpy(&sua->u.sa4, s, l);
+		vmemcpy(&sua->u.sa4, s, l);
 		assert(sua->u.sa.sa_family == PF_INET);
 		break;
 	case sizeof sua->u.sa6:
-		memcpy(&sua->u.sa6, s, l);
+		vmemcpy(&sua->u.sa6, s, l);
 		assert(sua->u.sa.sa_family == PF_INET6);
 		break;
 	default:
@@ -465,7 +465,7 @@ VSA_Clone(const struct suckaddr *sua)
 	assert(VSA_Sane(sua));
 	sua2 = calloc(1, vsa_suckaddr_len);
 	XXXAN(sua2);
-	memcpy(sua2, sua, vsa_suckaddr_len);
+	vmemcpy(sua2, sua, vsa_suckaddr_len);
 	return (sua2);
 }
 

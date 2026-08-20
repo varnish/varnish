@@ -392,8 +392,8 @@ HTTP_Dup(struct http *to, const struct http * fm)
 {
 
 	assert(fm->nhd <= to->shd);
-	memcpy(to->hd, fm->hd, fm->nhd * sizeof *to->hd);
-	memcpy(to->hdf, fm->hdf, fm->nhd * sizeof *to->hdf);
+	vmemcpy(to->hd, fm->hd, fm->nhd * sizeof *to->hd);
+	vmemcpy(to->hdf, fm->hdf, fm->nhd * sizeof *to->hdf);
 	to->nhd = fm->nhd;
 	to->logtag = fm->logtag;
 	to->status = fm->status;
@@ -588,7 +588,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 				WS_Release(hp->ws, 0);
 				return;
 			}
-			memcpy(b, hp->hd[f].b, x);
+			vmemcpy(b, hp->hd[f].b, x);
 			b += x;
 		}
 
@@ -610,9 +610,9 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 			WS_Release(hp->ws, 0);
 			return;
 		}
-		memcpy(b, sep, lsep);
+		vmemcpy(b, sep, lsep);
 		b += lsep;
-		memcpy(b, v, x);
+		vmemcpy(b, v, x);
 		b += x;
 	}
 	if (b == NULL)
@@ -1276,7 +1276,7 @@ HTTP_Encode(const struct http *fm, uint8_t *p0, unsigned l, unsigned how)
 		http_VSLH(fm, u);
 		w = Tlen(fm->hd[u]) + 1L;
 		assert(p + w + 1 <= e);
-		memcpy(p, fm->hd[u].b, w);
+		vmemcpy(p, fm->hd[u].b, w);
 		p += w;
 		n++;
 	}
@@ -1629,8 +1629,8 @@ http_Unset(struct http *hp, hdr_t hdr)
 			continue;
 		}
 		if (v != u) {
-			memcpy(&hp->hd[v], &hp->hd[u], sizeof *hp->hd);
-			memcpy(&hp->hdf[v], &hp->hdf[u], sizeof *hp->hdf);
+			vmemcpy(&hp->hd[v], &hp->hd[u], sizeof *hp->hd);
+			vmemcpy(&hp->hdf[v], &hp->hdf[u], sizeof *hp->hdf);
 		}
 		v++;
 	}

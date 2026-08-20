@@ -244,7 +244,7 @@ vfp_esi_gzip_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *p,
 		}
 		l = vef->ibuf_i - vef->ibuf_o;
 		if (l > 0)
-			memmove(vef->ibuf, vef->ibuf_o, l);
+			vmemmove(vef->ibuf, vef->ibuf_o, l);
 		vef->ibuf_o = vef->ibuf;
 		vef->ibuf_i = vef->ibuf + l;
 	}

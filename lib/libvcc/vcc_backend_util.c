@@ -83,7 +83,7 @@ vcc_FldSpec(struct vcc *tl, const char *first, ...)
 	vcc_ResetFldSpec(f);
 
 	r = TlAlloc(tl, sizeof *r * n);
-	memcpy(r, f, n * sizeof *r);
+	vmemcpy(r, f, n * sizeof *r);
 	return (r);
 }
 

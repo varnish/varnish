@@ -974,7 +974,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 				vep->tag_i = 0;
 			} else {
 				assert(p + sizeof(vep->tag) >= e);
-				memcpy(vep->tag, p, e - p);
+				vmemcpy(vep->tag, p, e - p);
 				vep->tag_i = e - p;
 				vep->state = VEP_MATCHBUF;
 				p = e;
@@ -988,7 +988,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 			i = sizeof(vep->tag) - vep->tag_i;
 			if (i > e - p)
 				i = e - p;
-			memcpy(vep->tag + vep->tag_i, p, i);
+			vmemcpy(vep->tag + vep->tag_i, p, i);
 			vm = vep_match(vep, vep->tag,
 			    vep->tag + vep->tag_i + i);
 			Debug("MB (%.*s) tag_i %d i %d = vm %p match %s\n",

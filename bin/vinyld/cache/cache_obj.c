@@ -799,7 +799,7 @@ ObjSetDouble(struct worker *wrk, struct objcore *oc, enum obj_attr a, double t)
 	uint64_t u;
 
 	assert(sizeof t == sizeof u);
-	memcpy(&u, &t, sizeof u);
+	vmemcpy(&u, &t, sizeof u);
 	vp = ObjSetAttr(wrk, oc, a, sizeof u, NULL);
 	if (vp == NULL)
 		return (-1);
@@ -821,7 +821,7 @@ ObjGetDouble(struct worker *wrk, struct objcore *oc, enum obj_attr a, double *d)
 	if (d != NULL) {
 		assert(l == sizeof u);
 		u = vbe64dec(vp);
-		memcpy(d, &u, sizeof *d);
+		vmemcpy(d, &u, sizeof *d);
 	}
 	return (0);
 }

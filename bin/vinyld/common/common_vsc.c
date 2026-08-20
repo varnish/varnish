@@ -159,7 +159,7 @@ VRT_VSC_Allocv(struct vsmw_cluster *vc, struct vsc_seg **sg,
 		AN(dvsg);
 		dvsg->jp = jp;
 		dvsg->head->doc_id = jjp;
-		memcpy(dvsg->ptr, jp, sj);
+		vmemcpy(dvsg->ptr, jp, sj);
 		VWMB();
 		dvsg->head->ready = 1;
 		VTAILQ_INSERT_HEAD(&vsc_seglist, dvsg, list);

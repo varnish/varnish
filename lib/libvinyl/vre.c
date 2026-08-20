@@ -174,7 +174,7 @@ VRE_export(const vre_t *code, size_t *sz)
 
 	INIT_OBJ(exp, VRE_MAGIC);
 	exp->re = VRE_PACKED_RE;
-	memcpy(exp + 1, re, *sz);
+	vmemcpy(exp + 1, re, *sz);
 	*sz += sizeof(*exp);
 	return (exp);
 }

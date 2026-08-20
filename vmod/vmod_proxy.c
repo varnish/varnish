@@ -114,7 +114,7 @@ tlv_string(VRT_CTX, int tlv)
 		return (NULL);
 	}
 	AN(ptr);
-	memcpy(d, ptr, len);
+	vmemcpy(d, ptr, len);
 	d[len] = '\0';
 	return (d);
 }

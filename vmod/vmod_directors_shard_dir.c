@@ -161,8 +161,8 @@ shard_next(struct shard_state *state, VCL_INT skip, VCL_BOOL healthy)
 			}
 			if (sbe == &state->last &&
 			    state->last.hostid != UINT_MAX)
-				memcpy(&state->previous, &state->last,
-				    sizeof(state->previous));
+				vmemcpy(&state->previous, &state->last,
+					sizeof(state->previous));
 
 			if (sbe) {
 				sbe->hostid = c;

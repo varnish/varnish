@@ -386,7 +386,7 @@ vcc_decstr(struct vcc *tl, unsigned sep)
 	tl->t->dec = TlAlloc(tl, l + 1);
 	AN(tl->t->dec);
 	q = tl->t->dec;
-	memcpy(q, tl->t->b + sep, l);
+	vmemcpy(q, tl->t->b + sep, l);
 	q[l] = '\0';
 }
 

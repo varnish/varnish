@@ -866,7 +866,7 @@ vbf_objiterate(void *priv, unsigned flush, const void *ptr, ssize_t len)
 		AN(vop->p);
 
 		l = vmin(vop->pl, len);
-		memcpy(vop->p, ps, l);
+		vmemcpy(vop->p, ps, l);
 		VFP_Extend(vop->vfc, l,
 			   flush && l == len ? VFP_END : VFP_OK);
 		ps += l;
@@ -1076,7 +1076,7 @@ vbf_stp_error(struct worker *wrk, struct busyobj *bo)
 			return (F_STP_FAIL);
 		}
 		l = vmin(l, ll);
-		memcpy(ptr, VSB_data(synth_body) + o, l);
+		vmemcpy(ptr, VSB_data(synth_body) + o, l);
 		VFP_Extend(bo->vfc, l, l == ll ? VFP_END : VFP_OK);
 		ll -= l;
 		o += l;

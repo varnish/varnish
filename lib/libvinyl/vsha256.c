@@ -70,11 +70,11 @@
 
 /* Copy a vector of big-endian uint32_t into a vector of bytes */
 #define be32enc_vect(dst, src, len)	\
-	memcpy((void *)dst, (const void *)src, (size_t)len)
+	vmemcpy((void *)dst, (const void *)src, (size_t)len)
 
 /* Copy a vector of bytes into a vector of big-endian uint32_t */
 #define be32dec_vect(dst, src, len)	\
-	memcpy((void *)dst, (const void *)src, (size_t)len)
+	vmemcpy((void *)dst, (const void *)src, (size_t)len)
 
 #else /* BYTE_ORDER != BIG_ENDIAN or in doubt... */
 
@@ -175,7 +175,7 @@ VSHA256_Transform(uint32_t * state, const unsigned char block[64])
 	be32dec_vect(W, block, 64);
 
 	/* 2. Initialize working variables. */
-	memcpy(S, state, 32);
+	vmemcpy(S, state, 32);
 
 	/* 3. Mix. */
 	for (i = 0; i < 64; i += 16) {
@@ -240,10 +240,10 @@ VSHA256_Pad(VSHA256_CTX * ctx)
 	/* Pad to 56 mod 64, transforming if we finish a block en route. */
 	if (r < 56) {
 		/* Pad to 56 mod 64. */
-		memcpy(&ctx->buf[r], PAD, 56 - r);
+		vmemcpy(&ctx->buf[r], PAD, 56 - r);
 	} else {
 		/* Finish the current block and mix. */
-		memcpy(&ctx->buf[r], PAD, 64 - r);
+		vmemcpy(&ctx->buf[r], PAD, 64 - r);
 		VSHA256_Transform(ctx->state, ctx->buf);
 
 		/* The start of the final block is all zeroes. */
@@ -295,12 +295,12 @@ VSHA256_Update(VSHA256_CTX * ctx, const void *in, size_t len)
 
 	/* Handle the case where we don't need to perform any transforms */
 	if (len < 64 - r) {
-		memcpy(&ctx->buf[r], src, len);
+		vmemcpy(&ctx->buf[r], src, len);
 		return;
 	}
 
 	/* Finish the current block */
-	memcpy(&ctx->buf[r], src, 64 - r);
+	vmemcpy(&ctx->buf[r], src, 64 - r);
 	VSHA256_Transform(ctx->state, ctx->buf);
 	src += 64 - r;
 	len -= 64 - r;
@@ -313,7 +313,7 @@ VSHA256_Update(VSHA256_CTX * ctx, const void *in, size_t len)
 	}
 
 	/* Copy left over data into buffer */
-	memcpy(ctx->buf, src, len);
+	vmemcpy(ctx->buf, src, len);
 }
 
 /*

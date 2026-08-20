@@ -241,7 +241,7 @@ WS_Pipeline(struct ws *ws, const void *b, const void *e, uintptr_t snap)
 		l = pdiff(b, e);
 		tmp = malloc(l);
 		AN(tmp);
-		memcpy(tmp, b, l);
+		vmemcpy(tmp, b, l);
 	} else {
 		AZ(e);
 		l = 0;
@@ -261,7 +261,7 @@ WS_Pipeline(struct ws *ws, const void *b, const void *e, uintptr_t snap)
 	}
 
 	if (l > 0)
-		memcpy(ws->f, tmp, l);
+		vmemcpy(ws->f, tmp, l);
 	free(tmp);
 	return (l);
 }
@@ -331,7 +331,7 @@ WS_Copy(struct ws *ws, const void *str, int len)
 	WS_Assert(ws);
 	if (wa != NULL) {
 		AN(wa->ptr);
-		memcpy(wa->ptr, str, len);
+		vmemcpy(wa->ptr, str, len);
 		DSLb(DBG_WORKSPACE, "WS_Copy(%p, %d) = %p",
 		    ws, len, wa->ptr);
 		return (wa->ptr);
@@ -533,7 +533,7 @@ WS_Dump(const struct ws *ws, char where, size_t off, void *buf, size_t len)
 		if (l > len)
 			l = len;
 		AN(wa);
-		memcpy(b, wa->ptr, l);
+		vmemcpy(b, wa->ptr, l);
 		b += l;
 		len -= l;
 	}
@@ -545,7 +545,7 @@ WS_Dump(const struct ws *ws, char where, size_t off, void *buf, size_t len)
 			if (wa->ptr == NULL)
 				break;
 			l = vmin_t(size_t, wa->len, len);
-			memcpy(b, wa->ptr, l);
+			vmemcpy(b, wa->ptr, l);
 			b += l;
 			len -= l;
 		}

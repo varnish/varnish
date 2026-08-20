@@ -331,7 +331,7 @@ xyzzy_obj_opt__init(VRT_CTX,
 	AN(o);
 	*op = o;
 	REPLACE(o->name, vcl_name);
-	memcpy(&o->args, args, sizeof o->args);
+	vmemcpy(&o->args, args, sizeof o->args);
 	if (args->valid_s) {
 		REPLACE(o->freeptr, args->s);
 		o->args.s = o->freeptr;

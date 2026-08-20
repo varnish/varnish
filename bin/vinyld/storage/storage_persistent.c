@@ -86,7 +86,7 @@ smp_appendban(const struct smp_sc *sc, struct smp_signspace *spc,
 	if (SIGNSPACE_FREE(spc) < len)
 		return (-1);
 
-	memcpy(SIGNSPACE_FRONT(spc), ban, len);
+	vmemcpy(SIGNSPACE_FRONT(spc), ban, len);
 	smp_append_signspace(spc, len);
 
 	return (0);
@@ -121,7 +121,7 @@ smp_banexport_spc(struct smp_signspace *spc, const uint8_t *bans, unsigned len)
 {
 	smp_reset_signspace(spc);
 	assert(SIGNSPACE_FREE(spc) >= len);
-	memcpy(SIGNSPACE_DATA(spc), bans, len);
+	vmemcpy(SIGNSPACE_DATA(spc), bans, len);
 	smp_append_signspace(spc, len);
 	smp_sync_sign(&spc->ctx);
 }
@@ -568,7 +568,7 @@ smp_allocobj(struct worker *wrk, const struct stevedore *stv,
 
 	/* We have to do this somewhere, might as well be here... */
 	assert(sizeof so->hash == DIGEST_LEN);
-	memcpy(so->hash, oc->objhead->digest, DIGEST_LEN);
+	vmemcpy(so->hash, oc->objhead->digest, DIGEST_LEN);
 	EXP_COPY(so, oc);
 	so->ptr = (uint8_t*)(o->objstore) - sc->base;
 	so->ban = BAN_Time(oc->ban);

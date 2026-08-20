@@ -286,7 +286,7 @@ hsh_testmagic(void *result)
 		if (!vmemcmp(hsh_magiclist[i].was, result, VSHA256_LEN))
 			break;
 	if (i == nused && i < HSH_NMAGIC)
-		memcpy(hsh_magiclist[nused++].was, result, VSHA256_LEN);
+		vmemcpy(hsh_magiclist[nused++].was, result, VSHA256_LEN);
 	if (i == nused)
 		return;
 	assert(i < HSH_NMAGIC);
@@ -294,7 +294,7 @@ hsh_testmagic(void *result)
 	for (j = 0; j < VSHA256_LEN; j++)
 		fprintf(stderr, "%02x", ((unsigned char*)result)[j]);
 	fprintf(stderr, "> -> <");
-	memcpy(result, hsh_magiclist[i].now, VSHA256_LEN);
+	vmemcpy(result, hsh_magiclist[i].now, VSHA256_LEN);
 	for (j = 0; j < VSHA256_LEN; j++)
 		fprintf(stderr, "%02x", ((unsigned char*)result)[j]);
 	fprintf(stderr, ">\n");

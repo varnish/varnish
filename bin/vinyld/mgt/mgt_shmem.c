@@ -61,7 +61,7 @@ mgt_SHM_static_alloc(const void *ptr, ssize_t size,
 
 	p = VSMW_Allocf(mgt_vsmw, NULL, category, size, "%s", ident);
 	AN(p);
-	memcpy(p, ptr, size);
+	vmemcpy(p, ptr, size);
 }
 
 /*--------------------------------------------------------------------

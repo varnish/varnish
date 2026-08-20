@@ -131,7 +131,7 @@ smp_append_sign(struct smp_signctx *ctx, const void *ptr, uint32_t len)
 	cx = ctx->ctx;
 	VSHA256_Update(&cx, &ctx->ss->length, sizeof(ctx->ss->length));
 	VSHA256_Final(sign, &cx);
-	memcpy(SIGN_END(ctx), sign, sizeof sign);
+	vmemcpy(SIGN_END(ctx), sign, sizeof sign);
 }
 
 /*--------------------------------------------------------------------
@@ -231,7 +231,7 @@ smp_copy_signspace(struct smp_signspace *dst, const struct smp_signspace *src)
 {
 	assert(SIGNSPACE_LEN(src) <= dst->size);
 	smp_reset_signspace(dst);
-	memcpy(SIGNSPACE_DATA(dst), SIGNSPACE_DATA(src), SIGNSPACE_LEN(src));
+	vmemcpy(SIGNSPACE_DATA(dst), SIGNSPACE_DATA(src), SIGNSPACE_LEN(src));
 	smp_append_signspace(dst, SIGNSPACE_LEN(src));
 	assert(SIGNSPACE_LEN(src) == SIGNSPACE_LEN(dst));
 }

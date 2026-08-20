@@ -401,7 +401,7 @@ cnt_synth(struct worker *wrk, struct req *req)
 			if (sz > szl)
 				sz = szl;
 			szl -= sz;
-			memcpy(ptr, body, sz);
+			vmemcpy(ptr, body, sz);
 			ObjExtend(wrk, req->objcore, sz, szl == 0 ? 1 : 0);
 			body += sz;
 		}

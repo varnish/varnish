@@ -99,7 +99,7 @@ hsl_lookup(struct worker *wrk, const void *digest, struct objhead **noh)
 
 	oh = *noh;
 	*noh = NULL;
-	memcpy(oh->digest, digest, sizeof oh->digest);
+	vmemcpy(oh->digest, digest, sizeof oh->digest);
 	Lck_Unlock(&hsl_mtx);
 	Lck_Lock(&oh->mtx);
 	return (oh);

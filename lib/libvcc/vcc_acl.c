@@ -375,7 +375,7 @@ vcc_acl_add_entry(struct vcc *tl, const struct acl_e *ae, int l,
 	aen->mask += 8;
 
 	assert(l + 1UL <= sizeof aen->data);
-	memcpy(aen->data + 1L, u, l);
+	vmemcpy(aen->data + 1L, u, l);
 
 	vcc_acl_insert_entry(tl, &aen);
 	if (aen != NULL)

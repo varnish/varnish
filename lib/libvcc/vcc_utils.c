@@ -145,7 +145,7 @@ vcc_suckaddr(struct vcc *tl, const char *host, const struct suckaddr *vsa,
 
 	Fh(tl, 0, "static const unsigned long long");
 	Fh(tl, 0, " suckaddr_%u[%d] = {\n", tl->unique, n);
-	memcpy(b, vsa, vsa_suckaddr_len);
+	vmemcpy(b, vsa, vsa_suckaddr_len);
 	for (len = 0; len < n; len++)
 		Fh(tl, 0, "%s    0x%0*llxULL",
 		    len ? ",\n" : "", sz * 2, b[len]);
