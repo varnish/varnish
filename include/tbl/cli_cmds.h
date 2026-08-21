@@ -609,9 +609,9 @@ CLI_CMD(VTLS_CERT_ROLLBACK,
 
 CLI_CMD(VTLS_CERT_LIST,
 	"tls.cert.list",
-	"tls.cert.list [-s]",
-	"List active TLS configurations. Takes an optional '-s' that will "
-	"only list staged or discarded certificates.",
+	"tls.cert.list [-j] [-s]",
+	"List active tls configurations, it takes an optional '-s' that will "
+	"only list staged or discarded certificates",
 	"",
 	CLI_F_AUTH,
 	0, 1
