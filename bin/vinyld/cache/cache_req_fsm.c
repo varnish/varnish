@@ -333,6 +333,10 @@ cnt_synth(struct worker *wrk, struct req *req)
 	Resp_Setup_Synth(req);
 
 	req->vdp_filter_list = NULL;
+
+	// XXX	for a BocLess storage (ssy), we do not use synth_body
+	//	otherwise (malloc), we should still copy directly to
+	//	the object
 	synth_body = VSB_new_auto();
 	AN(synth_body);
 
