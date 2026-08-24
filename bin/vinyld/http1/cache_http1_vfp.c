@@ -751,11 +751,11 @@ v1f_chunked_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *ptr,
 		    htc->pipeline_b, htc->pipeline_e,
 		    &vfe->priv2, &htc->pipeline_b);
 		if (r == pch_more)
-			return (VFP_OK);
+			return (v1f_ok(htc));
 		if (r != NULL)
 			return (VFP_Error(vc, "%s", r->msg));
 		if (vfe->priv2 != 0)
-			return (VFP_OK);
+			return (v1f_ok(htc));
 	}
 	AZ(vfe->priv2);
 	vfps = v1f_chunk_end(vc, htc);

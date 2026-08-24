@@ -1,0 +1,46 @@
+vtest "Exhaustively test body fetch i/o boundaries"
+
+# notes:
+# - 10ms delay is quite arbitrary, but seemed to catch #4575 fine
+# - this also includes all of the request, not just the body
+
+server s1 {
+	loop 50 {
+		rxreq
+		expect req.method == "PUT"
+		expect req.url == "/"
+		expect req.proto == "HTTP/1.1"
+		expect req.http.Content-Length == 3
+		expect req.http.foo == "bar"
+		expect req.body == "abc"
+		txresp
+	}
+	loop 74 {
+		rxreq
+		expect req.method == "PUT"
+		expect req.url == "/"
+		expect req.proto == "HTTP/1.1"
+		expect req.http.foo == "bar"
+		expect req.body == "abc"
+		txresp
+	}
+} -start
+
+varnish v1 -vcl+backend {
+	sub vcl_recv {
+		return (pass);
+	}
+} -start
+
+client c1 {
+	loop 50 {
+		send_split -delay 10000 ${n} "PUT / HTTP/1.1\r\nContent-Length: 3\r\nfoo: bar\r\n\r\nabc"
+		rxresp
+		expect resp.status == 200
+	}
+	loop 74 {
+		send_split -delay 10000 ${n} "PUT / HTTP/1.1\r\nTransfer-Encoding: chunked\r\nfoo: bar\r\n\r\n1\r\na\r\n2\r\nbc\r\n0\r\n\r\n"
+		rxresp
+		expect resp.status == 200
+	}
+} -run
