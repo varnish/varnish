@@ -532,24 +532,30 @@ vsm_vlu_hash(struct vsm_set *vs, const char *line)
 	return (0);
 }
 
-static int
-vsm_bad_index(struct vsm *vd, const struct vsm_set *vs, const char *line,
-    int ac, const char *err)
+static char **
+vsm_parse_plus_minus_line(struct vsm *vd, const char *line, int *acp)
 {
+	char **av;
+	int ac;
 
-	/* av[0] is VAV_Parse's error slot, so ac is one more than the
-	 * number of fields on the line
-	 */
-	if (err != NULL)
-		return (vsm_diag(vd, "Malformed _.index line %u: %s: %s",
-		    vs->lineno, err, line));
-	if (ac > 6)
-		return (vsm_diag(vd, "Malformed _.index line %u: %d fields, "
-		    "expected 3 to 5.  Whitespace in a segment name or ident "
-		    "splits it into extra fields: %s", vs->lineno, ac - 1,
-		    line));
-	return (vsm_diag(vd, "Malformed _.index line %u: %d fields, "
-	    "expected 3 to 5: %s", vs->lineno, ac - 1, line));
+	AN(acp);
+	*acp = 0;
+
+	av = VAV_Parse(line + 1, &ac, 0);
+	AN(av);
+
+	if (av[0] != NULL) {
+		(void)vsm_diag(vd, "%s", av[0]);
+		VAV_Free(av);
+		return (NULL);
+	}
+	if (ac < 4 || ac > 6) {
+		(void)vsm_diag(vd, "Wrong number of fields (%u)", ac-1);
+		VAV_Free(av);
+		return (NULL);
+	}
+	*acp = ac;
+	return (av);
 }
 
 static int
@@ -559,13 +565,9 @@ vsm_vlu_plus(struct vsm *vd, struct vsm_set *vs, const char *line)
 	int ac;
 	struct vsm_seg *vg;
 
-	av = VAV_Parse(line + 1, &ac, 0);
-
-	if (av[0] != NULL || ac < 4 || ac > 6) {
-		(void)vsm_bad_index(vd, vs, line, ac, av[0]);
-		VAV_Free(av);
+	av = vsm_parse_plus_minus_line(vd, line, &ac);
+	if (av == NULL)
 		return (-1);
-	}
 
 	vg = vs->vg;
 	CHECK_OBJ_ORNULL(vg, VSM_SEG_MAGIC);
@@ -607,13 +609,9 @@ vsm_vlu_minus(struct vsm *vd, struct vsm_set *vs, const char *line)
 	int ac;
 	struct vsm_seg *vg;
 
-	av = VAV_Parse(line + 1, &ac, 0);
-
-	if (av[0] != NULL || ac < 4 || ac > 6) {
-		(void)vsm_bad_index(vd, vs, line, ac, av[0]);
-		VAV_Free(av);
+	av = vsm_parse_plus_minus_line(vd, line, &ac);
+	if (av == NULL)
 		return (-1);
-	}
 
 	/* Clustered segments cannot come before their cluster */
 	if (*av[2] != '0')
@@ -667,6 +665,7 @@ vsm_vlu_func(void *priv, const char *line)
 		i = vsm_vlu_minus(vd, vs, line);
 		break;
 	default:
+		i = vsm_diag(vd, "Unknown ident");
 		break;
 	}
 	return (i);
@@ -688,7 +687,13 @@ vsm_readlines(struct vsm_set *vs)
 	if (i != -2) {
 		/* The line handler left the reason in the diag */
 		AN(vd->diag);
-		WRONG(VSB_data(vd->diag));
+		fprintf(
+		    stderr,
+		    "Malformed _.index line (%u): %s\n",
+		    vs->lineno,
+		    VSB_data(vd->diag)
+		);
+		exit(2);
 	}
 }
 
