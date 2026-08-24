@@ -98,6 +98,10 @@ static const int days_before_month[] = {
 	0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
 };
 
+static const unsigned days_before_month_leap_year[] = {
+	0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335
+};
+
 #ifdef __MACH__
 // http://stackoverflow.com/a/21352348
 static uint64_t mt_base;
@@ -157,11 +161,24 @@ VTIM_real(void)
 #endif
 }
 
+/*
+ * The tzcode project calls a mutex for gmtime_r(), to see if the
+ * definition of UTC time has changed.
+ *
+ * They probably have their reasons.
+ *
+ * We roll our own.
+ *
+ */
+
+#define T1600 (-11676096000.)		// time_t at 1600-01-01T00:00:00Z
+#define ND400 (365 * 400 + 3 * 24 + 25)	// Days in the 400 year period
+#define ND100 (365 * 100 + 24)		// Days in "normal" century
+#define ND4Y  (365 * 4 + 1)		// Days in 4-year period
+
 void
 VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE])
 {
-	struct tm tm;
-	time_t tt;
 	int r;
 
 	AN(p);
@@ -170,15 +187,73 @@ VTIM_format(vtim_real t, char p[VTIM_FORMAT_SIZE])
 	if (t < (vtim_real)INTMAX_MIN || t > (vtim_real)INTMAX_MAX)
 		return;
 
-	tt = (time_t)(intmax_t)t;
-	if (gmtime_r(&tt, &tm) == NULL)
+	if (t < T1600)
 		return;
+
+	int is_leap = 0;
+	unsigned day_in_year = 0;
+
+	uint64_t days = (uint64_t)((t - T1600)) / 86400;
+	unsigned seconds = (uint64_t)((t - T1600)) % 86400;
+
+	unsigned year = 1600 + 400 * (days / ND400);
+	unsigned day_in_4_century = days % ND400;
+
+	if (day_in_4_century < 366) {
+		/* Years divisible by 400 are leap years */
+		is_leap = 1;
+		day_in_year = day_in_4_century;
+	} else {
+		unsigned century = (day_in_4_century - 1) / ND100;
+		unsigned day_in_century = (day_in_4_century - 1) % ND100;
+		year += century * 100;
+
+		if (day_in_century < 365) {
+			/* Years divisible by 100 are not leap years */
+			is_leap = 0;
+			day_in_year = day_in_century;
+		} else {
+			unsigned n_4_year = (day_in_century + 1) / ND4Y;
+			unsigned day_in_4_year = (day_in_century + 1) % ND4Y;
+			year += n_4_year * 4;
+
+			if (day_in_4_year < 366) {
+				/* Years divisible by 4 are leap years */
+				is_leap = 1;
+				day_in_year = day_in_4_year;
+			} else {
+				is_leap = 0;
+				year += (day_in_4_year - 1) / 365;
+				day_in_year = (day_in_4_year - 1) % 365;
+			}
+		}
+	}
+
+	if (!is_leap && day_in_year >= 59)
+		day_in_year += 1;
+
+	unsigned month = day_in_year / 31;
+	if (month < 11 && day_in_year >= days_before_month_leap_year[month + 1])
+		month += 1;
+
+	unsigned day = day_in_year - days_before_month_leap_year[month];
+	unsigned wday = (days + 6) % 7;
+
+	unsigned hour = seconds / 3600;
+	unsigned minute = (seconds / 60) % 60;
+	unsigned second = seconds % 60;
 
 	r = snprintf(p, VTIM_FORMAT_SIZE,
 	    "%s, %02d %s %4d %02d:%02d:%02d GMT",
-	    weekday_name[tm.tm_wday],
-	    tm.tm_mday, month_name[tm.tm_mon], tm.tm_year + 1900,
-	    tm.tm_hour, tm.tm_min, tm.tm_sec);
+	    weekday_name[wday],
+	    day + 1,
+	    month_name[month],
+	    year,
+	    hour,
+	    minute,
+	    second
+	);
+
 	assert(r == VTIM_FORMAT_SIZE - 1);
 }
 
