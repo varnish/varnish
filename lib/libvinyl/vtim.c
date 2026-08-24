@@ -577,6 +577,19 @@ tst(const char *s, time_t good)
 	}
 }
 
+static void
+tstf(time_t t, const char *s)
+{
+	char buf[VTIM_FORMAT_SIZE];
+
+	VTIM_format(t, buf);
+	if (strcmp(s, buf)) {
+		printf("VTIM_format(%zd) error\nwant:\t%s\ngot:\t%s\n",
+		    t, s, buf);
+		exit(4);
+	}
+}
+
 /* XXX keep as double for the time being */
 static int
 tst_delta_check(const char *name, double begin, double end, vtim_dur ref)
@@ -742,6 +755,12 @@ main(int argc, char **argv)
 	tst("1994-11-06T08:49:37", 784111777);
 
 	tst_delta();
+
+	/* test cases from glibc tst-gmtime.c */
+	tstf(0, "Thu, 01 Jan 1970 00:00:00 GMT");
+	tstf(0x7fffffff, "Tue, 19 Jan 2038 03:14:07 GMT");
+	if (sizeof(time_t) >= 8)
+		tstf(0x80000000ULL, "Tue, 19 Jan 2038 03:14:08 GMT");
 
 	return (0);
 }
