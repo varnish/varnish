@@ -272,6 +272,7 @@ sub vcl_backend_response {
 }
 
 sub vcl_builtin_backend_response {
+	call vcl_beresp_http10;
 	call vcl_beresp_range;
 	if (bereq.uncacheable) {
 		return (deliver);
@@ -305,6 +306,14 @@ sub vcl_beresp_control {
 sub vcl_beresp_vary {
 	if (beresp.http.Vary == "*") {
 		call vcl_beresp_hitmiss;
+	}
+}
+
+sub vcl_beresp_http10 {
+	if (beresp.proto ~ "^(?i)HTTP/1.0" && beresp.http.Transfer-Encoding) {
+		# Faulty framing on HTTP/1.0, RFC 9112 6.1.  Beware that
+		# beresp.proto is clamped to bereq.proto.
+		return (abandon);
 	}
 }
 
