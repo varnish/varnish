@@ -759,7 +759,11 @@ v1f_chunked_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *ptr,
 	}
 	AZ(vfe->priv2);
 	vfps = v1f_chunk_end(vc, htc);
-	return (vfps == VFP_OK ? VFP_END : vfps);
+	if (vfps != VFP_OK)
+		return (vfps);
+	/* the tail is the last CRLF, we do not accept a trailer section */
+	htc->body_status = BS_TAKEN;
+	return (VFP_END);
 }
 
 static const struct vfp v1f_chunked = {
@@ -786,16 +790,20 @@ v1f_straight_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *p,
 	l = *lp;
 	*lp = 0;
 
-	if (vfe->priv2 == 0) // XXX: Optimize Content-Len: 0 out earlier
+	if (vfe->priv2 == 0) { // XXX: Optimize Content-Len: 0 out earlier
+		htc->body_status = BS_TAKEN;
 		return (VFP_END);
+	}
 	l = vmin(l, vfe->priv2);
 	lr = v1f_read(vc, htc, p, l, NO_READ_AHEAD);
 	if (lr <= 0)
 		return (VFP_Error(vc, "straight insufficient bytes"));
 	*lp = lr;
 	vfe->priv2 -= lr;
-	if (vfe->priv2 == 0)
+	if (vfe->priv2 == 0) {
+		htc->body_status = BS_TAKEN;
 		return (VFP_END);
+	}
 	return (VFP_OK);
 }
 
