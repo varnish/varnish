@@ -2,6 +2,8 @@ vtest "set VCL_??? [+]= VCL_???;"
 
 # set STRING|HEADER += STRINGS;
 
+shell { echo >${tmpdir}/empty.gif.blob :R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==: }
+
 server s1 {
 	rxreq
 	expect req.url == "/hello/world"
@@ -52,6 +54,8 @@ varnish v1 -vcl {
 		}
 		if (req.url ~ "blob/literal") {
 			set resp.body = :aGVsbG93b3JsZA==:;
+		} elif (req.url ~ "blob/empty.gif") {
+			set resp.body = include "${tmpdir}/empty.gif.blob";;
 		} elif (req.url ~ "blob") {
 			set resp.body = blob.decode(HEX, encoded="1100");
 			if (req.url ~ "reset") {

@@ -592,6 +592,8 @@ vcc_Lexer(struct vcc *tl, struct source *sp)
 			q -= (q - (p + 1)) % 4;
 			assert(q > p);
 			r = VENC_Decode_Base64(vsb, p + 1, q);
+			if (r == NULL && *q == ':')
+				r = q;
 			if (r == NULL) {
 				vcc_addtoken(tl, CBLOB, sp, p, q + 1);
 				VSB_cat(tl->sb,
