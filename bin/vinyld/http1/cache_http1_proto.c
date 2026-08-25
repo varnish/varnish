@@ -353,6 +353,12 @@ http1_body_status(struct http *hp, struct http_conn *htc, int request)
 			    "Multiple Transfer-Encoding: headers");
 			return (BS_ERROR);
 		}
+		if (request && hp->protover < 11) {
+			/* RFC 9112 6.1 faulty framing */
+			VSLb(hp->vsl, SLT_BogoHeader,
+			    "Transfer-Encoding on HTTP/1.0 request");
+			return (BS_ERROR);
+		}
 		return (BS_CHUNKED);
 	}
 	if (cl >= 0) {
