@@ -1036,6 +1036,8 @@ mgt_tls_cert_list(struct cli *cli, const char *const *av, void *priv,
 		VCLI_Out(cli, "%s", p);
 		VCLI_SetResult(cli, status);
 		free(p);
+	} else if (json) {
+		VCLI_Out(cli, "[]");
 	}
 }
 
