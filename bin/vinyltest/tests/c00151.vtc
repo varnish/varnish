@@ -1,0 +1,27 @@
+vtest "A fetch failed by VRG_CheckBo() must not recycle the connection"
+
+# Range is HTTPH_R_FETCH, so it only survives to the bereq on a pass,
+# which is what the Cookie selects under the builtin VCL.
+
+server s1 -repeat 2 {
+	rxreq
+	txresp -body "clean"
+} -start
+
+varnish v1 -vcl+backend {} -start
+
+client c1 {
+	txreq -url /1 -hdr "Cookie: a=b" -hdr "Range: items=0-1"
+	rxresp
+	expect resp.status == 503
+} -run
+
+varnish v1 -expect backend_recycle == 0
+varnish v1 -expect fetch_failed == 1
+
+client c2 {
+	txreq -url /2
+	rxresp
+	expect resp.status == 200
+	expect resp.body == "clean"
+} -run

@@ -568,8 +568,10 @@ vbf_stp_startfetch(struct worker *wrk, struct busyobj *bo)
 		bo->htc->doclose = SC_RESP_CLOSE;
 
 	if (VRG_CheckBo(bo) < 0) {
-		if (bo->director_state != DIR_S_NULL)
-			VDI_Finish(bo);
+		/* the body is never read, so we cannot reuse it */
+		if (bo->htc != NULL && bo->htc->body_status != BS_NONE)
+			bo->htc->doclose = SC_RX_BAD;
+		vbf_cleanup(bo);
 		return (F_STP_ERROR);
 	}
 
