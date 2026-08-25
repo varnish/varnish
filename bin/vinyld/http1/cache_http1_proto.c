@@ -347,6 +347,12 @@ http1_body_status(const struct http *hp, struct http_conn *htc, int request)
 			    "Transfer-Encoding with Content-Length");
 			return (BS_ERROR);
 		}
+		if (http_CountHdr(hp, H_Transfer_Encoding) > 1) {
+			/* RFC 9110 5.3, the checks above saw only the first */
+			VSLb(hp->vsl, SLT_BogoHeader,
+			    "Multiple Transfer-Encoding: headers");
+			return (BS_ERROR);
+		}
 		return (BS_CHUNKED);
 	}
 	if (cl >= 0) {
