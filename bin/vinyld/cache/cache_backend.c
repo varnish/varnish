@@ -246,6 +246,12 @@ vbe_dir_finish(VRT_CTX, VCL_BACKEND d)
 		bp->vsc->closed++;
 	} else {
 		assert (PFD_State(pfd) == PFD_STATE_USED);
+		/*
+		 * Recycling a connection with an unread body hands the
+		 * next fetch somebody else's octets.
+		 */
+		assert(bo->htc->body_status == BS_NONE ||
+		    bo->htc->body_status == BS_TAKEN);
 		VSLb(bo->vsl, SLT_BackendClose, "%d %s recycle", *PFD_Fd(pfd),
 		    VRT_BACKEND_string(d));
 		Lck_Lock(bp->director->mtx);
