@@ -166,8 +166,8 @@ static void smd_open(struct stevedore *stv)
 {
 	sma_stevedore.open(stv);
 	fprintf(stderr, "-sdebug open delay %fs\n", dopen);
-	if (dopen > 0.0)
-		VTIM_sleep(dopen);
+	AN(dopen);
+	VTIM_sleep(dopen);
 }
 
 static void v_matchproto_(storage_init_f)
@@ -255,12 +255,14 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 
 	sma_stevedore.init(parent, ac, av);
 	free(av);
-	fprintf(stderr, "-sdebug init delay %fs\n", dinit);
-	fprintf(stderr, "-sdebug open delay in init %fs\n", dopen);
 	if (dinit > 0.0) {
+		fprintf(stderr, "-sdebug init delay %fs\n", dinit);
 		VTIM_sleep(dinit);
 	}
-	parent->open = smd_open;
+	if (dopen > 0.0) {
+		parent->open = smd_open;
+		fprintf(stderr, "-sdebug open delay in init %fs\n", dopen);
+	}
 }
 
 const struct stevedore smd_stevedore = {
