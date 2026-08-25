@@ -311,16 +311,22 @@ http1_body_status(const struct http *hp, struct http_conn *htc, int request)
 	htc->content_length = -1;
 
 	cl = http_GetContentLength(hp);
-	if (cl == -2)
+	if (cl == -2) {
+		/* RFC 9110 8.6, no length to be had */
+		VSLb(hp->vsl, SLT_BogoHeader, "Invalid Content-Length");
 		return (BS_ERROR);
+	}
 	if (http_GetHdr(hp, H_Transfer_Encoding, &b)) {
-		if (!http_coding_eq(b, chunked))
+		if (!http_coding_eq(b, chunked)) {
+			/* RFC 9112 6.1 unimplemented transfer coding */
+			VSLb(hp->vsl, SLT_BogoHeader,
+			    "Transfer-Encoding is not chunked");
 			return (BS_ERROR);
+		}
 		if (cl != -1) {
-			/*
-			 * RFC7230 3.3.3 allows more lenient handling
-			 * but we're going to be strict.
-			 */
+			/* RFC 9112 6.3 is more lenient, we are strict */
+			VSLb(hp->vsl, SLT_BogoHeader,
+			    "Transfer-Encoding with Content-Length");
 			return (BS_ERROR);
 		}
 		return (BS_CHUNKED);
