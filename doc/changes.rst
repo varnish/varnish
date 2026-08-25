@@ -461,6 +461,10 @@ Varnish Cache 9.1.0 (2026-09-18)
 
 .. _4483: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/pulls/4483
 
+* ``tls.cert.list -j`` no longer returns an empty body with a ``200``
+  status when the child process is not running; it now returns an
+  empty JSON array (``[]``).
+
 ================================
 Varnish-Cache 9.0.1 (2026-04-08)
 ================================
