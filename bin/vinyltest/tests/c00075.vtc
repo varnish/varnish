@@ -52,6 +52,10 @@ server s1 {
 
 varnish v1 \
 	-arg "-s default,1m" -vcl+backend {
+	import vtc;
+	sub vcl_init {
+		vtc.storage_frag(storage.s0, 8KB);
+	}
 	sub vcl_backend_response {
 		set beresp.http.be-hitmiss = bereq.is_hitmiss;
 		set beresp.http.be-hitpass = bereq.is_hitpass;
@@ -64,8 +68,6 @@ varnish v1 \
 		set resp.http.is-hitpass = req.is_hitpass;
 	}
 } -start
-
-varnish v1 -cliok "debug.fragfetch 8192"
 
 client c1 {
 	txreq -url "/hfm"

@@ -374,15 +374,6 @@ CLI_CMD(BACKEND_SET_HEALTH,
 	2, 2
 )
 
-CLI_CMD(DEBUG_FRAGFETCH,
-	"debug.fragfetch",
-	"debug.fragfetch",
-	"Enable fetch fragmentation.",
-	"",
-	CLI_F_AUTH|CLI_F_DEBUG,
-	1, 1
-)
-
 CLI_CMD(DEBUG_REQPOOLFAIL,
 	"debug.reqpool.fail",
 	"debug.reqpool.fail",
