@@ -1,8 +1,13 @@
 vtest "Check set resp.body & storage in vcl_synth"
 
-varnish v1 -arg "-sTransient=debug,lessspace" -vcl {
+varnish v1 -vcl {
 	import std;
+	import vtc;
 	backend foo none;
+	sub vcl_init {
+		vtc.storage_lessspace(storage.Transient);
+		vtc.storage_lessspace(storage.Synth);
+	}
 	sub vcl_recv {
 		if (req.url == "/cov-backend") {
 			return (hash);

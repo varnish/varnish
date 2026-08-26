@@ -9,9 +9,13 @@ server s1 {
 } -start
 
 varnish v1 \
-    -arg "-smalloc=malloc,1M" \
-    -arg "-scondfetch=debug,maxspace=1024B" \
+    -arg "-smalloc=malloc" \
+    -arg "-scondfetch=malloc" \
     -vcl+backend {
+	import vtc;
+	sub vcl_init {
+		vtc.storage_maxspace(storage.condfetch, 1KB);
+	}
 	sub vcl_backend_response {
 		if (beresp.was_304) {
 			set beresp.storage = storage.condfetch;

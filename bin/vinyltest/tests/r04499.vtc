@@ -1,7 +1,11 @@
 vtest "Reading resp.storage null deref when Synth storage exhausted"
 
-varnish v1 -arg "-sSynth=debug,full" -vcl+backend {
+varnish v1 -vcl+backend {
+	import vtc;
 	backend none none;
+	sub vcl_init {
+		vtc.storage_full(storage.Synth);
+	}
 	sub vcl_recv {
 		return (synth(200));
 	}

@@ -4,7 +4,8 @@ vmod_LTLIBRARIES += libvmod_vtc.la
 dist_vcc_DATA += vmod_vtc.vcc
 
 libvmod_vtc_la_SOURCES = \
-	vmod_vtc.c
+	vmod_vtc.c \
+	vmod_vtc_storage.c
 
 libvmod_vtc_la_CFLAGS =
 

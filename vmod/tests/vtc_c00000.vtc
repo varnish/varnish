@@ -1,0 +1,77 @@
+vtest "vtc.storage_*"
+
+barrier b1 cond 2
+barrier b2 cond 2
+
+server s1 {
+	rxreq
+	txresp -bodylen 1024
+
+	rxreq
+	txresp -nolen -hdr "Content-Length: 1025"
+	barrier b1 sync
+	send_n 31 0123456789abcdef0123456789abcdef
+	send_n  1 0123456789abcdef0123456789abcde
+	barrier b2 sync
+	non_fatal
+	send "X"
+} -start
+
+
+varnish v1 -vcl+backend {
+	import vtc;
+	sub vcl_init {
+		vtc.storage_maxspace(storage.Transient, 1KB);
+	}
+	sub vcl_recv {
+		return(pass);
+	}
+} -start
+
+logexpect l1 -v v1 -q "BerespHeader:Content-Length eq 1025" {
+	fail add *	End
+	expect * * Storage	{^malloc Transient}
+	expect 1 = Debug	{^vtc.storage_maxspace: want 1025 canalloc 1024}
+	expect 0 = Debug	{^vtc.storage_maxspace: extend 1023 canalloc 1024}
+	expect 0 = Debug	{^vtc.storage_maxspace: want 2 canalloc 1}
+	expect 0 = Debug	{^vtc.storage_maxspace: extend 1 canalloc 1}
+	expect 0 = Debug	{^vtc.storage_maxspace: want 1 canalloc 0}
+	expect 0 = FetchError	{^Could not get storage}
+	expect 0 = BackendClose	{close RX_BODY}
+	fail clear
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.bodylen == 1024
+
+	txreq
+	rxresphdrs
+	expect resp.status == 200
+	expect resp.http.Content-Length == 1025
+	barrier b1 sync
+	rxrespbody -max 1023
+	barrier b2 sync
+	non_fatal
+	rxrespbody -max 1
+	expect_close
+} -run
+
+logexpect l1 -wait
+
+varnish v1 -errvcl {storage_maxspace: BYTES must be positive} {
+	import vtc;
+	backend proforma none;
+	sub vcl_init {
+		vtc.storage_maxspace(storage.Transient, 0B);
+	}
+}
+
+varnish v1 -errvcl {storage_frag: BYTES must be postive} {
+	import vtc;
+	backend proforma none;
+	sub vcl_init {
+		vtc.storage_frag(storage.Transient, 0B);
+	}
+}

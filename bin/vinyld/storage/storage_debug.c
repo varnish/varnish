@@ -45,122 +45,12 @@
 #include "vtim.h"
 #include "vnum.h"
 
-/*
- * if smd was to have its own configuration, we would have to wrap all function
- * pointers from the actual storage implementation (sma). To avoid these
- * complications, we limit to one smd instance and use statics.
- */
 static vtim_dur dopen = 0.0;
 static unsigned count = 0;
-static ssize_t max_size = 0;
-
-/* returns one byte less than requested */
-static int v_matchproto_(objgetspace_f)
-smd_lsp_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
-    uint8_t **ptr)
-{
-	AN(sz);
-	if (*sz > 2)
-		(*sz)--;
-	return (SML_methods.objgetspace(wrk, oc, sz, ptr));
-}
-
-/*
- * returns max_size at most, then fails
- *
- * relies on the actual storage implementation to not use priv2
- */
-static int v_matchproto_(objgetspace_f)
-smd_max_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
-    uint8_t **ptr)
-{
-	ssize_t used;
-	int r;
-
-	AN(sz);
-	used = (ssize_t)oc->stobj->priv2;
-
-	VSLb(wrk->vsl, SLT_Debug, "-sdebug getspace: %zd/%zd", used, max_size);
-
-	if (used >= max_size) {
-		VSLb(wrk->vsl, SLT_Storage, "-sdebug: max_size=%zd reached", max_size);
-		return (0);
-	}
-
-	assert(used < max_size);
-	*sz = vmin_t(ssize_t, *sz, max_size - used);
-
-	r = SML_methods.objgetspace(wrk, oc, sz, ptr);
-	return (r);
-}
-
-static void v_matchproto_(objextend_f)
-smd_max_extend(struct worker *wrk, struct objcore *oc, ssize_t l)
-{
-
-	assert(l > 0);
-	oc->stobj->priv2 += (uint64_t)l;
-	VSLb(wrk->vsl, SLT_Debug, "-sdebug extend: %zd/%zd", (ssize_t)oc->stobj->priv2, max_size);
-	SML_methods.objextend(wrk, oc, l);
-}
-
-/* full storage can't get space, can't alloc objects */
-static int v_matchproto_(objgetspace_f)
-smd_full_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
-    uint8_t **ptr)
-{
-	(void)wrk;
-	(void)oc;
-	(void)sz;
-	(void)ptr;
-
-	return (0);
-}
-static int v_matchproto_(storage_allocobj_f)
-smd_full_allocobj(struct worker *wrk, const struct stevedore *stv,
-    struct objcore *oc, unsigned len)
-{
-	(void)wrk;
-	(void)stv;
-	(void)oc;
-	(void)len;
-
-	return (0);
-}
-static void * v_matchproto_(storage_allocbuf_t)
-smd_full_allocbuf(struct worker *wrk, const struct stevedore *stv, size_t size,
-    uintptr_t *ppriv)
-{
-	(void)wrk;
-	(void)stv;
-	(void)size;
-	(void)ppriv;
-	return (NULL);
-}
 
 #define dur_arg(a, s, d)					\
-	(! vstrncmp((a), (s), vstrlen(s))				\
+	(! vstrncmp((a), (s), vstrlen(s))			\
 	 && (d = VNUM_duration(a + vstrlen(s))) != nan(""))
-
-static int
-bytes_arg(char *a, const char *s, ssize_t *sz)
-{
-	const char *err;
-	uintmax_t bytes;
-
-	AN(sz);
-	if (vstrncmp(a, s, vstrlen(s)))
-		return (0);
-	a += vstrlen(s);
-	err = VNUM_2bytes(a, &bytes, 0);
-	if (err != NULL)
-		ARGV_ERR("%s\n", err);
-	assert(bytes <= SSIZE_MAX);
-	*sz = (ssize_t)bytes;
-
-	return (1);
-}
-
 
 static void smd_open(struct stevedore *stv)
 {
@@ -173,9 +63,6 @@ static void smd_open(struct stevedore *stv)
 static void v_matchproto_(storage_init_f)
 smd_init(struct stevedore *parent, int aac, char * const *aav)
 {
-	struct obj_methods *methods;
-	objgetspace_f *getspace = NULL;
-	storage_allocobj_f *allocobj = NULL;
 	const char *ident;
 	int i, ac = 0;
 	size_t nac;
@@ -191,11 +78,6 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	parent->ident = ident;
 	parent->name = smd_stevedore.name;
 
-	methods = malloc(sizeof *methods);
-	AN(methods);
-	vmemcpy(methods, &SML_methods, sizeof *methods);
-	parent->methods = methods;
-
 	assert(aac >= 0);
 	nac = aac;
 	nac++;
@@ -204,34 +86,6 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	for (i = 0; i < aac; i++) {
 		a = aav[i];
 		if (a != NULL) {
-			if (! vstrcmp(a, "full")) {
-				if (getspace != NULL) {
-					ARGV_ERR("-s%s conflicting options\n",
-					    smd_stevedore.name);
-				}
-				getspace = smd_full_getspace;
-				AZ(allocobj);
-				allocobj = smd_full_allocobj;
-				parent->allocbuf = smd_full_allocbuf;
-				continue;
-			}
-			if (! vstrcmp(a, "lessspace")) {
-				if (getspace != NULL) {
-					ARGV_ERR("-s%s conflicting options\n",
-					    smd_stevedore.name);
-				}
-				getspace = smd_lsp_getspace;
-				continue;
-			}
-			if (bytes_arg(a, "maxspace=", &max_size)) {
-				if (getspace != NULL) {
-					ARGV_ERR("-s%s conflicting options\n",
-					    smd_stevedore.name);
-				}
-				getspace = smd_max_getspace;
-				methods->objextend = smd_max_extend;
-				continue;
-			}
 			if (dur_arg(a, "dinit=", d)) {
 				dinit = d;
 				continue;
@@ -247,11 +101,6 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	assert(ac >= 0);
 	assert(ac < (int)nac);
 	AZ(av[ac]);
-
-	if (getspace != NULL)
-		methods->objgetspace = getspace;
-	if (allocobj != NULL)
-		parent->allocobj = allocobj;
 
 	sma_stevedore.init(parent, ac, av);
 	free(av);
