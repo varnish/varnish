@@ -158,9 +158,9 @@ Supported formatters are:
 
   * ``%{sec}``: number of seconds since the Epoch
   * ``%{msec}``: number of milliseconds since the Epoch
-  * ``%{usec}``: number of milliseconds since the Epoch
+  * ``%{usec}``: number of microseconds since the Epoch
   * ``%{msec_frac}``: millisecond fraction
-  * ``%{usec_frac}``: microsecond fraction
+  * ``%{usec_frac}``: microseconds fraction
 
   The extensions cannot be combined with each other or strftime(3) in
   the same specification. Use multiple ``%{X}t`` specifications instead.
