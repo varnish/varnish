@@ -509,7 +509,6 @@ child_main(int sigmagic, size_t altstksz)
 
 	CLI_Init();
 	PAN_Init();
-	VFP_Init();
 
 	ObjInit();
 

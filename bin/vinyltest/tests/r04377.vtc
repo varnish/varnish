@@ -14,6 +14,7 @@ varnish v1 \
     -vcl+backend {
 	import vtc;
 	sub vcl_init {
+		vtc.storage_frag(storage.malloc, 2KB);
 		vtc.storage_maxspace(storage.condfetch, 1KB);
 	}
 	sub vcl_backend_response {
@@ -25,8 +26,6 @@ varnish v1 \
 		set beresp.keep = 1m;
 	}
 } -start
-
-varnish v1 -cliok "debug.fragfetch 2048"
 
 client c1 {
 	txreq

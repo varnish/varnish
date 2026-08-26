@@ -37,8 +37,6 @@
 #include "cache_filter.h"
 #include "vcli_serve.h"
 
-static unsigned fetchfrag;
-
 /*--------------------------------------------------------------------
  * We want to issue the first error we encounter on fetching and
  * suppress the rest.  This function does that.
@@ -76,9 +74,6 @@ VFP_GetStorage(struct vfp_ctx *vc, ssize_t *sz, uint8_t **ptr)
 	AN(sz);
 	assert(*sz >= 0);
 	AN(ptr);
-
-	if (fetchfrag > 0)
-		*sz = fetchfrag;
 
 	if (!ObjGetSpace(vc->wrk, vc->oc, sz, ptr)) {
 		*sz = 0;
@@ -235,32 +230,4 @@ VFP_Push(struct vfp_ctx *vc, const struct vfp *vfp)
 	VTAILQ_INSERT_HEAD(&vc->vfp, vfe, list);
 	vc->vfp_nxt = vfe;
 	return (vfe);
-}
-
-/*--------------------------------------------------------------------
- * Debugging aids
- */
-
-static void v_matchproto_(cli_func_t)
-debug_fragfetch(struct cli *cli, const char * const *av, void *priv)
-{
-	(void)priv;
-	(void)cli;
-	fetchfrag = strtoul(av[2], NULL, 0);
-}
-
-static struct cli_proto debug_cmds[] = {
-	{ CLICMD_DEBUG_FRAGFETCH,	debug_fragfetch },
-	{ NULL }
-};
-
-/*--------------------------------------------------------------------
- *
- */
-
-void
-VFP_Init(void)
-{
-
-	CLI_AddFuncs(debug_cmds);
 }

@@ -286,7 +286,6 @@ const char *VBF_Get_Filter_List(struct busyobj *);
 void Bereq_Rollback(VRT_CTX);
 
 /* cache_fetch_proc.c */
-void VFP_Init(void);
 struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
 enum vfp_status VFP_GetStorage(struct vfp_ctx *, ssize_t *sz, uint8_t **ptr);
 void VFP_Extend(const struct vfp_ctx *, ssize_t sz, enum vfp_status);
