@@ -544,12 +544,14 @@ http_CollectHdr(struct http *hp, hdr_t hdr)
  * the only example too.
  */
 
+static int
+http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
+    unsigned lsep, unsigned f);
+
 void
 http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 {
-	unsigned u, lsep, ml, f, x, d;
-	char *b = NULL, *e = NULL;
-	const char *v;
+	unsigned lsep, f;
 
 	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
 	CHECK_HDR(hdr);
@@ -565,6 +567,22 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 	if (f == 0)
 		return;
 
+	(void)http_CollectHdrSepFrom(hp, hdr, sep, lsep, f);
+}
+
+/*
+ * implements the actual collection from header index f
+ *
+ * returns 1 if collected, 0 if not and -1 for error
+ */
+
+static int
+http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
+    unsigned lsep, unsigned f)
+{
+	unsigned u, ml, x, d;
+	char *b = NULL, *e = NULL;
+	const char *v;
 	for (d = u = f + 1; u < hp->nhd; u++) {
 		Tcheck(hp->hd[u]);
 		if (!http_IsHdr(&hp->hd[u], hdr)) {
@@ -587,7 +605,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 				VSLbs(hp->vsl, SLT_LostHeader,
 				    TOSTRAND(hdr->str));
 				WS_Release(hp->ws, 0);
-				return;
+				return (-1);
 			}
 			vmemcpy(b, hp->hd[f].b, x);
 			b += x;
@@ -610,7 +628,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 			http_fail(hp);
 			VSLbs(hp->vsl, SLT_LostHeader, TOSTRAND(hdr->str));
 			WS_Release(hp->ws, 0);
-			return;
+			return (-1);
 		}
 		vmemcpy(b, sep, lsep);
 		b += lsep;
@@ -618,7 +636,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 		b += x;
 	}
 	if (b == NULL)
-		return;
+		return (0);
 	hp->nhd = (uint16_t)d;
 	AN(e);
 	*b = '\0';
@@ -626,6 +644,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 	hp->hd[f].e = b;
 	http_VSLH(hp, f);
 	WS_ReleaseP(hp->ws, b + 1);
+	return (1);
 }
 
 /*--------------------------------------------------------------------*/
