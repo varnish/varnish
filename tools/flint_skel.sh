@@ -30,5 +30,5 @@ flexelint \
 	2>&1 | tee _.fl
 
 if [ -f _.fl.old ] ; then
-	diff -u _.fl.old _.fl
+	diff -u _.fl.old _.fl || true
 fi
