@@ -676,6 +676,7 @@ void http_Unset(struct http *hp, hdr_t);
 unsigned http_CountHdr(const struct http *hp, hdr_t);
 void http_CollectHdr(struct http *hp, hdr_t);
 void http_CollectHdrSep(struct http *hp, hdr_t, const char *sep);
+void http_CollectAllHdrs(struct http *hp);
 void http_VSL_log(const struct http *hp);
 void HTTP_Merge(struct worker *, struct objcore *, struct http *to);
 uint16_t HTTP_GetStatusPack(struct worker *, struct objcore *oc);
