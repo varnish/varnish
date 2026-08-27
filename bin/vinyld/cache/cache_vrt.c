@@ -494,8 +494,6 @@ VRT_STRANDS_string(VRT_CTX, VCL_STRANDS s)
  * upper/lower-case STRANDS (onto workspace)
  */
 
-#include <stdio.h>
-
 VCL_STRING
 VRT_UpperLowerStrands(VRT_CTX, VCL_STRANDS s, int up)
 {
