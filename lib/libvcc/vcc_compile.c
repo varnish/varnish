@@ -578,6 +578,7 @@ EmitInitFini(struct vcc *tl)
 	}
 	Fc(tl, 0, "\tif (ev == VCL_EVENT_DISCARD)\n");
 	Fc(tl, 0, "\t\treturn (VGC_Discard(ctx));\n");
+	Fc(tl, 0, "\tassert(ev != VDI_EVENT_SICK);\n");
 	Fc(tl, 0, "\n");
 	if (!has_event)
 		Fc(tl, 0, "\t(void)vgc_warmupstep;\n");
