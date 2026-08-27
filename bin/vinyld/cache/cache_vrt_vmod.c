@@ -61,7 +61,7 @@ struct vmod {
 	char			*backup;
 	void			*hdl;
 	const void		*funcs;
-	int			funclen;
+	size_t			funclen;
 	const char		*abi;
 	unsigned		vrt_major;
 	unsigned		vrt_minor;
@@ -83,7 +83,7 @@ vmod_abi_mismatch(const struct vmod_data *d)
 }
 
 int
-VPI_Vmod_Init(VRT_CTX, struct vmod **hdl, unsigned nbr, void *ptr, int len,
+VPI_Vmod_Init(VRT_CTX, struct vmod **hdl, unsigned nbr, void *ptr, size_t len,
     const char *nm, const char *path, const char *file_id, const char *backup)
 {
 	struct vmod *v;
