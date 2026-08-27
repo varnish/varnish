@@ -32,7 +32,7 @@ AC_LANG(C)
 
 AM_MAINTAINER_MODE([disable])
 AM_INIT_AUTOMAKE([1.13 foreign color-tests parallel-tests subdir-objects])
-AM_EXTRA_RECURSIVE_TARGETS([recheck])
+AM_EXTRA_RECURSIVE_TARGETS([recheck flint])
 AM_SILENT_RULES([yes])
 AC_DISABLE_STATIC
 LT_INIT

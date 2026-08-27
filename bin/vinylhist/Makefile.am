@@ -15,3 +15,8 @@ varnishhist_SOURCES = \
 varnishhist_LDADD = \
 	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	-lm @CURSES_LIBS@ ${RT_LIBS} ${PTHREAD_LIBS}
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh

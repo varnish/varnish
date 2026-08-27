@@ -14,3 +14,8 @@ varnishadm_LDADD = \
 	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	$(top_builddir)/lib/libvinyl/libvarnish.la \
 	${PTHREAD_LIBS} ${RT_LIBS} ${NET_LIBS} @LIBEDIT_LIBS@ ${LIBM}
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh

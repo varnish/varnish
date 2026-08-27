@@ -34,3 +34,8 @@ varnishstat_LDADD = \
 
 varnishstat_help_gen_LDADD = \
 	$(top_builddir)/lib/libvinyl/libvarnish.la
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh

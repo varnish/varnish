@@ -66,3 +66,8 @@ GENERATED_H = vcc_obj.c $(GEN_H)
 BUILT_SOURCES = $(GENERATED_H)
 
 DISTCLEANFILES = $(GENERATED_H)
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh

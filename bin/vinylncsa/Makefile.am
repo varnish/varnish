@@ -13,3 +13,8 @@ varnishncsa_SOURCES = \
 varnishncsa_LDADD = \
 	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
 	${RT_LIBS} ${LIBM}
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh
