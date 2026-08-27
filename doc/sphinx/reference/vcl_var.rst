@@ -575,7 +575,7 @@ req.url
 	Writable from: client
 
 
-	The requested URL, for instance "/robots.txt".
+	The requested path and query string, for instance "/robots.txt?a=b".
 
 
 .. _req.xid:
@@ -649,7 +649,7 @@ req_top.url
 
 	Readable from: client
 
-	The requested URL of the top-level request in a tree
+	The requested path and query string of the top-level request in a tree
 	of ESI requests.
 	Identical to req.url in non-ESI requests.
 
@@ -999,7 +999,7 @@ bereq.url
 
 	Writable from: vcl_pipe, backend
 
-	The requested URL, copied from ``req.url``
+	The requested path and query string, copied from ``req.url``
 
 
 .. _bereq.xid:
