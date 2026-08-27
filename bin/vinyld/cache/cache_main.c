@@ -82,7 +82,9 @@ cache_vrnd_unlock(void)
 static pthread_key_t req_key;
 static pthread_key_t bo_key;
 static pthread_key_t wrk_key;
+#ifdef ENABLE_WITNESS
 pthread_key_t witness_key;
+#endif
 pthread_key_t panic_key;
 
 void
@@ -491,7 +493,9 @@ child_main(int sigmagic, size_t altstksz)
 	PTOK(pthread_key_create(&req_key, NULL));
 	PTOK(pthread_key_create(&bo_key, NULL));
 	PTOK(pthread_key_create(&wrk_key, NULL));
+#ifdef ENABLE_WITNESS
 	PTOK(pthread_key_create(&witness_key, free));
+#endif
 	PTOK(pthread_key_create(&name_key, NULL));
 	PTOK(pthread_key_create(&panic_key, NULL));
 

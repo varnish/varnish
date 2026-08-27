@@ -318,6 +318,19 @@ AM_COND_IF([ENABLE_WORKSPACE_EMULATOR], [
               [Define to 1 if the workspace emulator is enabled])
 ])
 
+AC_ARG_ENABLE(witness,
+	AS_HELP_STRING([--enable-witness],
+		[enable the lock witness facility (default is NO)]),
+    [], [enable_witness=no])
+
+AM_CONDITIONAL([ENABLE_WITNESS],
+	[test "$enable_witness" = yes])
+
+AM_COND_IF([ENABLE_WITNESS], [
+	AC_DEFINE([ENABLE_WITNESS], [1],
+              [Define to 1 if the lock witness facility is enabled])
+])
+
 # Use jemalloc on Linux
 JEMALLOC_LDADD=
 AC_ARG_WITH([jemalloc],
