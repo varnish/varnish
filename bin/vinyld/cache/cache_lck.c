@@ -52,12 +52,15 @@ struct ilck {
 	int			held;
 	pthread_mutex_t		mtx;
 	pthread_t		owner;
+#ifdef ENABLE_WITNESS
 	const char		*w;
+#endif
 	struct VSC_lck		*stat;
 };
 
 /*--------------------------------------------------------------------*/
 
+#ifdef ENABLE_WITNESS
 static void
 Lck_Witness_Lock(const struct ilck *il, const char *p, int l,
     const char *attempt)
@@ -103,6 +106,7 @@ Lck_Witness_Unlock(const struct ilck *il)
 	else
 		*r = '\0';
 }
+#endif
 
 /*--------------------------------------------------------------------*/
 
@@ -114,8 +118,13 @@ Lck__Lock(struct lock *lck, const char *p, int l)
 
 	AN(lck);
 	CAST_OBJ_NOTNULL(ilck, lck->priv, ILCK_MAGIC);
+#ifdef ENABLE_WITNESS
 	if (DO_DEBUG(DBG_WITNESS))
 		Lck_Witness_Lock(ilck, p, l, "");
+#else
+	(void)p;
+	(void)l;
+#endif
 	if (DO_DEBUG(DBG_LCK)) {
 		r = pthread_mutex_trylock(&ilck->mtx);
 		assert(r == 0 || r == EBUSY);
@@ -159,8 +168,10 @@ Lck__Unlock(struct lock *lck, const char *p, int l)
 	memset(&ilck->owner, 0, sizeof ilck->owner);
 #endif
 	PTOK(pthread_mutex_unlock(&ilck->mtx));
+#ifdef ENABLE_WITNESS
 	if (DO_DEBUG(DBG_WITNESS))
 		Lck_Witness_Unlock(ilck);
+#endif
 }
 
 int v_matchproto_()
@@ -171,8 +182,13 @@ Lck__Trylock(struct lock *lck, const char *p, int l)
 
 	AN(lck);
 	CAST_OBJ_NOTNULL(ilck, lck->priv, ILCK_MAGIC);
+#ifdef ENABLE_WITNESS
 	if (DO_DEBUG(DBG_WITNESS))
 		Lck_Witness_Lock(ilck, p, l, "?");
+#else
+	(void)p;
+	(void)l;
+#endif
 	r = pthread_mutex_trylock(&ilck->mtx);
 	assert(r == 0 || r == EBUSY);
 	if (r == 0) {
@@ -296,7 +312,11 @@ Lck__New(struct lock *lck, struct VSC_lck *st, const char *w)
 	AZ(lck->priv);
 	ALLOC_OBJ(ilck, ILCK_MAGIC);
 	AN(ilck);
+#ifdef ENABLE_WITNESS
 	ilck->w = w;
+#else
+	(void)w;
+#endif
 	ilck->stat = st;
 	ilck->stat->creat++;
 	PTOK(pthread_mutex_init(&ilck->mtx, &mtxattr_errorcheck));

@@ -1,5 +1,7 @@
 vtest "Does anything get through Unix domain sockets at all ?"
 
+feature witness
+
 server s1 -listen "${tmpdir}/s1.sock" {
 	rxreq
 	txresp -body "012345\n"
@@ -16,6 +18,7 @@ varnish v1 -arg "-a ${tmpdir}/v1.sock -a ${listen_addr}" -vcl+backend {
 } -start
 
 varnish v1 -cliok "param.set debug +workspace"
+varnish v1 -cliok "param.set debug +witness"
 
 varnish v1 -expect n_object == 0
 varnish v1 -expect sess_conn == 0
@@ -34,7 +37,7 @@ varnish v1 -expect client_req == 1
 varnish v1 -expect cache_miss == 1
 varnish v1 -expect s_sess == 1
 varnish v1 -expect s_resp_bodybytes == 7
-varnish v1 -expect s_resp_hdrbytes == 158
+varnish v1 -expect s_resp_hdrbytes == 156
 
 # varnishtest "vtc v_* macros when the listen address is UDS" (a00019)
 

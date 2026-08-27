@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# call configure with --enable-witness
+
 set -e
 set -u
 

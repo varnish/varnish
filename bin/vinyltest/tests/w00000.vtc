@@ -1,5 +1,6 @@
 vtest "Does anything get through at all ?"
 
+feature witness
 feature ipv4
 feature ipv6
 
@@ -31,6 +32,7 @@ varnish v1 -vcl+backend {
 } -start
 
 varnish v1 -cliok "param.set debug +workspace"
+varnish v1 -cliok "param.set debug +witness"
 
 #varnish v1 -vsc *
 
@@ -51,7 +53,7 @@ varnish v1 -expect client_req == 1
 varnish v1 -expect cache_miss == 1
 varnish v1 -expect s_sess == 1
 varnish v1 -expect s_resp_bodybytes == 7
-varnish v1 -expect s_resp_hdrbytes == 158
+varnish v1 -expect s_resp_hdrbytes == 156
 client c1 {
 	txreq -url "/2"
 	rxresp
@@ -65,4 +67,4 @@ varnish v1 -expect client_req == 2
 varnish v1 -expect cache_miss == 2
 varnish v1 -expect s_sess == 2
 varnish v1 -expect s_resp_bodybytes == 14
-varnish v1 -expect s_resp_hdrbytes == 316
+varnish v1 -expect s_resp_hdrbytes == 312

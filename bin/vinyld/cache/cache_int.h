@@ -314,7 +314,9 @@ unsigned HTTP1_Write(struct v1l *v1l, const struct http *hp, const int*);
 /* cache_main.c */
 vxid_t VXID_Get(const struct worker *, uint64_t marker);
 extern pthread_key_t panic_key;
+#ifdef ENABLE_WITNESS
 extern pthread_key_t witness_key;
+#endif
 
 void THR_SetName(const char *name);
 const char* THR_GetName(void);
