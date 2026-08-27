@@ -35,7 +35,6 @@
 
 #include "cache_int.h"
 #include "cache_filter.h"
-#include "vcli_serve.h"
 
 /*--------------------------------------------------------------------
  * We want to issue the first error we encounter on fetching and
