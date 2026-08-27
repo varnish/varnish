@@ -793,9 +793,6 @@ enum lbody_e {
 	LBODY_ADD_BLOB,
 };
 
-#define LBODY_SET LBODY_SET_STRING
-#define LBODY_ADD LBODY_ADD_STRING
-
 VCL_BYTES VRT_CacheReqBody(VRT_CTX, VCL_BYTES maxsize);
 
 VCL_STRING VRT_ban_string(VRT_CTX, VCL_STRING);
