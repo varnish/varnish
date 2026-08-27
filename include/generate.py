@@ -86,4 +86,27 @@ if i != ident:
     fo = open(os.path.join(srcroot, "include", "vmod_abi.h"), "w")
     file_header(fo)
     fo.write('#define VMOD_ABI_Version "%s %s"\n' % (i, v))
+    fo.write("""
+/***********************************************************************
+ * This is the interface structure to a compiled VMOD
+ * (produced by vmodtool.py)
+ */
+
+struct vmod_data {
+	/* The version/id fields must be first, they protect the rest */
+	unsigned			vrt_major;
+	unsigned			vrt_minor;
+	const char			*file_id;
+
+	const char			*name;
+	const char			*func_name;
+	const void			*func;
+	int				func_len;
+	const char			*proto;
+	const char			*json;
+	const char			*abi;
+	const char			*vcs;
+	const char			*version;
+};
+""")
     fo.close()

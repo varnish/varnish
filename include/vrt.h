@@ -546,28 +546,6 @@ enum vcl_func_fail_e {
 typedef void vcl_func_f(VRT_CTX, enum vcl_func_call_e, enum vcl_func_fail_e *);
 
 /***********************************************************************
- * This is the interface structure to a compiled VMOD
- * (produced by vmodtool.py)
- */
-
-struct vmod_data {
-	/* The version/id fields must be first, they protect the rest */
-	unsigned			vrt_major;
-	unsigned			vrt_minor;
-	const char			*file_id;
-
-	const char			*name;
-	const char			*func_name;
-	const void			*func;
-	int				func_len;
-	const char			*proto;
-	const char			*json;
-	const char			*abi;
-	const char			*vcs;
-	const char			*version;
-};
-
-/***********************************************************************
  * Events sent to VMODs and directors:
  * - VCL: VCL temperature events
  * - VDI: director events
