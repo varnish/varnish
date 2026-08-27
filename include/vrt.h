@@ -507,6 +507,7 @@ struct vrt_ctx {
 
 	struct req			*req;
 	VCL_HTTP			http_req;
+	VCL_HTTP			http_req0;
 	VCL_HTTP			http_req_top;
 	VCL_HTTP			http_resp;
 
@@ -737,6 +738,7 @@ struct vrt_endpoint *VRT_Endpoint_Clone(const struct vrt_endpoint *vep);
 
 enum gethdr_e {
 	HDR_REQ,
+	HDR_REQ0,
 	HDR_REQ_TOP,
 	HDR_RESP,
 	HDR_OBJ,

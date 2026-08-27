@@ -132,6 +132,10 @@ VRT_HDR_LR(req,    method,	HTTP_HDR_METHOD)
 VRT_HDR_LR(req,    url,		HTTP_HDR_URL)
 VRT_HDR_LR(req,    proto,	HTTP_HDR_PROTO)
 
+VRT_HDR_R(req0,    method,	HTTP_HDR_METHOD)
+VRT_HDR_R(req0,    url,		HTTP_HDR_URL)
+VRT_HDR_R(req0,    proto,	HTTP_HDR_PROTO)
+
 VRT_HDR_R(req_top,    method,	HTTP_HDR_METHOD)
 VRT_HDR_R(req_top,    url,	HTTP_HDR_URL)
 VRT_HDR_R(req_top,    proto,	HTTP_HDR_PROTO)

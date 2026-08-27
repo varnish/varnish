@@ -110,6 +110,7 @@ VCL_Req2Ctx(struct vrt_ctx *ctx, struct req *req)
 	ctx->syntax = ctx->vcl->conf->syntax;
 	ctx->vsl = req->vsl;
 	ctx->http_req = req->http;
+	ctx->http_req0 = req->http0;
 	CHECK_OBJ_NOTNULL(req->top, REQTOP_MAGIC);
 	ctx->http_req_top = req->top->topreq->http;
 	ctx->http_resp = req->resp;

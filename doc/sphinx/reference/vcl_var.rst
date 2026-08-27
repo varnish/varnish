@@ -161,12 +161,27 @@ local.socket	``VCL >= 4.1``
 	if no name is provided.
 
 
-req and req_top
----------------
+req, req0 and req_top
+---------------------
 
-These variables describe the present request, and when ESI:include
-requests are being processed, req_top points to the request received
-from the client.
+The ``req`` variables represent the current request, as potentially modified by
+core code or VCL.
+
+.. _req0_delta:
+
+The ``req0`` variables represent the request *almost* exactly as it was originally
+received, with the following differences:
+
+- *Absolute form* HTTP/1 requests in the form ``http(s)://host/path[?query]``
+  are converted to ``req0.http.Host`` containing ``host`` and ``req0.url``
+  containing ``path[?query]``.
+
+- After reading the request body in full (for example using
+  ``std.cache_req_body()``), ``req0.http.Content-Length`` is set to the actual
+  length and ``req0.http.Transfer-Encoding`` removed.
+
+When ``ESI:include`` requests are being processed, ``req_top`` points to the top
+level ``req``.
 
 .. _req:
 
@@ -588,6 +603,51 @@ req.xid
 
 	Unique ID of this request.
 
+
+.. _req0.http:
+
+req0.http.*
+
+	Type: HEADER
+
+	Readable from: client
+
+	HTTP headers almost as originally received, see `req0_delta`_ for
+	details.
+
+
+.. _req0.method:
+
+req0.method
+
+	Type: STRING
+
+	Readable from: client
+
+	The request method as originally received.
+
+
+.. _req0.proto:
+
+req0.proto
+
+	Type: STRING
+
+	Readable from: client
+
+	HTTP protocol version as originally received.
+
+
+.. _req0.url:
+
+req0.url
+
+	Type: STRING
+
+	Readable from: client
+
+	The requested path and query parameters almost as originally received,
+	see `req0_delta`_ for details.
 
 .. _req_top.http:
 
