@@ -3,7 +3,7 @@ vtest "test vmod_std.collect()"
 server s1 {
 	rxreq
 	expect req.http.foo == "1, 2"
-	expect req.http.baz == "3, 4"
+	expect req.http.baz == "0, 3, 4"
 	txresp -hdr "bar: a" -hdr "bar: b" -hdr "qux: c" -hdr "qux: d"
 } -start
 
@@ -34,7 +34,7 @@ varnish v1 -vcl+backend {
 } -start
 
 client c1 {
-	txreq -hdr "Foo: 1" -hdr "Foo: 2" -hdr "Baz: 3" -hdr "Baz: 4"
+	txreq -hdr "Foo: 1" -hdr "Fo: X" -hdr "Baz: 0" -hdr "Bazz: A" -hdr "Fooo: B" -hdr "foo: 2" -hdr "Baz: 3" -hdr "bAZ: 4"
 	rxresp
 	expect resp.http.bar == "a, b"
 	expect resp.http.qux == "c; d"
