@@ -576,6 +576,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 			continue;
 		}
 		if (b == NULL) {
+			http_VSLH_del(hp, f);
 			/* Found second header, start our collection */
 			ml = WS_ReserveAll(hp->ws);
 			b = WS_Reservation(hp->ws);
@@ -591,6 +592,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 			vmemcpy(b, hp->hd[f].b, x);
 			b += x;
 		}
+		http_VSLH_del(hp, u);
 
 		AN(b);
 		AN(e);
@@ -622,6 +624,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 	*b = '\0';
 	hp->hd[f].b = WS_Reservation(hp->ws);
 	hp->hd[f].e = b;
+	http_VSLH(hp, f);
 	WS_ReleaseP(hp->ws, b + 1);
 }
 

@@ -33,6 +33,25 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
+logexpect l1 -v v1 -q "ReqURL ~ \"^/$\"" {
+	fail add *	End
+	expect * *	VCL_call	{^RECV}
+	expect 0 *	ReqUnset	{^Foo: 1}
+	expect 0 *	ReqUnset	{^foo: 2}
+	expect 0 *	ReqHeader	{^Foo: 1, 2}
+	fail clear
+} -start
+
+logexpect l2 -v v1 -q "BereqURL ~ \"^/$\"" {
+	fail add *	End
+	expect * *	VCL_call	{^BACKEND_FETCH}
+	expect 0 *	BereqUnset	{^Baz: 0}
+	expect 0 *	BereqUnset	{^Baz: 3}
+	expect 0 *	BereqUnset	{^bAZ: 4}
+	expect 0 *	BereqHeader	{^Baz: 0, 3, 4}
+	fail clear
+} -start
+
 client c1 {
 	txreq -hdr "Foo: 1" -hdr "Fo: X" -hdr "Baz: 0" -hdr "Bazz: A" -hdr "Fooo: B" -hdr "foo: 2" -hdr "Baz: 3" -hdr "bAZ: 4"
 	rxresp
@@ -42,3 +61,6 @@ client c1 {
 	rxresp
 	expect resp.status == 503
 } -run
+
+logexpect l1 -wait
+logexpect l2 -wait
