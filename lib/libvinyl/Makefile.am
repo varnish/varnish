@@ -96,3 +96,8 @@ vte_test_LDADD = $(AM_LDFLAGS) libvarnish.la
 vtim_test_SOURCES = vtim.c
 vtim_test_CFLAGS = $(AM_CFLAGS) -DTEST_DRIVER
 vtim_test_LDADD = $(AM_LDFLAGS) libvarnish.la
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh

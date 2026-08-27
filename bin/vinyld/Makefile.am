@@ -319,3 +319,9 @@ pahole-ref: _.pa.h
 
 pahole-diff: _.pa.h.ref _.pa.h
 	-diff -u _.pa.h.ref _.pa.h
+
+.PHONY: fint
+
+flint-local:
+	$(SHELL) flint.sh
+	$(SHELL) vclflint.sh

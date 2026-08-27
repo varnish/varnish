@@ -60,3 +60,8 @@ vmod_debug_symbols_regex = 'Vmod_.*_Data'
 
 # not --strict, not installed
 vmodtoolargs_debug = --boilerplate --noinst -o vcc_debug_if
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh

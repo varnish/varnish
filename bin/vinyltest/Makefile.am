@@ -121,3 +121,8 @@ BUILT_SOURCES = \
 CLEANFILES = \
 	$(BUILT_SOURCES)		\
 	vtest
+
+.PHONY: flint flint-local
+
+flint-local:
+	$(SHELL) flint.sh
