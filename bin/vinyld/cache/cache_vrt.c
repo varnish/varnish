@@ -239,6 +239,9 @@ VRT_selecthttp(VRT_CTX, enum gethdr_e where)
 	case HDR_REQ:
 		hp = ctx->http_req;
 		break;
+	case HDR_REQ0:
+		hp = ctx->http_req0;
+		break;
 	case HDR_REQ_TOP:
 		hp = ctx->http_req_top;
 		break;

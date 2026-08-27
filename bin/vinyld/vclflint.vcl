@@ -20,6 +20,7 @@ sub vcl_synth {
 
 sub func {
 	set req.http.foo = req_top.http.foo;
+	set req.http."0foo" = req0.http.foo;
 }
 
 sub vcl_recv {

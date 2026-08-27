@@ -20,6 +20,18 @@ varnish v1 -vcl+backend {
 		} else {
 			set req.backend_hint = s2;
 		}
+		if (req.method != req0.method) {
+			return (synth(500, "method"));
+		}
+		if (req.url != req0.url) {
+			return (synth(500, "url"));
+		}
+		if (req.proto != req0.proto) {
+			return (synth(500, "proto"));
+		}
+		if (req.http.User-Agent != req0.http.User-Agent) {
+			return (synth(500, "UA"));
+		}
 	}
 	sub vcl_backend_response {
 		set beresp.do_stream = false;

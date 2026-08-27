@@ -42,6 +42,10 @@ varnish v1 -vcl+backend {
 	}
 	sub vcl_deliver {
 		set resp.http.can_esi = obj.can_esi;
+		set resp.http."0method" = req0.method;
+		set resp.http."0url" = req0.url;
+		set resp.http."0proto" = req0.proto;
+		set resp.http."0ua" = req0.http.User-Agent;
 
 		# make ReqAcct deterministic
 		unset resp.http.via;
@@ -50,7 +54,7 @@ varnish v1 -vcl+backend {
 
 logexpect l1 -v v1 -g request {
 	expect 0 1001   Begin   "^req .* rxreq"
-	expect * =	ReqAcct	"^45 0 45 182 75 257$"
+	expect * =	ReqAcct	"^45 0 45 232 75 307$"
 	expect 0 =      End
 } -start
 
@@ -73,7 +77,7 @@ logexpect l4 -v v1 -g request {
 logexpect l5 -v v1 -g request {
 	expect * 1006   Begin   "^req .* rxreq"
 	# Header bytes is 5 larger than in l1 due to two item X-Varnish hdr
-	expect * =	ReqAcct	"^45 0 45 187 75 262$"
+	expect * =	ReqAcct	"^45 0 45 237 75 312$"
 	expect 0 =      End
 } -start
 
@@ -83,6 +87,10 @@ client c1 {
 	expect resp.bodylen == 75
 	expect resp.status == 200
 	expect resp.http.can_esi == "true"
+	expect resp.http.0method == "GET"
+	expect resp.http.0url == "/"
+	expect resp.http.0proto == "HTTP/1.1"
+	expect resp.http.0ua == "c1"
 
 	delay .1
 	# test that there is no difference on miss/hit

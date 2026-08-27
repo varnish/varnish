@@ -181,6 +181,7 @@ vrb_pull(struct req *req, ssize_t maxsize, objiterate_f *func, void *priv)
 
 	assert(req_bodybytes >= 0);
 	if (req_bodybytes != req->htc->content_length) {
+		// XXX wrong for rollback
 		/* We must update also the "pristine" req.* copy */
 		http_Unset(req->http0, H_Content_Length);
 		http_Unset(req->http0, H_Transfer_Encoding);
