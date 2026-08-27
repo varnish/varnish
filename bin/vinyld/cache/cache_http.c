@@ -647,6 +647,52 @@ http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
 	return (1);
 }
 
+/*
+ * this respects the two exceptions for combining field values: Cookie, which
+ * uses "; ", and Set-Cookie, which can not be combined.
+ *
+ * All other cases need to be catered for in VCL (e.g. by copying again from
+ * req0)
+ */
+void
+http_CollectAllHdrs(struct http *hp)
+{
+	const unsigned lsep = 2;
+	unsigned f;
+
+	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
+
+	for (f = HTTP_HDR_FIRST; f < hp->nhd; f++) {
+		Tcheck(hp->hd[f]);
+		if (http_IsHdr(&hp->hd[f], H_Set_Cookie))
+			continue;
+		const char *sep = http_IsHdr(&hp->hd[f], H_Cookie) ?
+			"; " : ", ";
+		assert(vstrlen(sep) == lsep);
+
+		const char *e = strchr(hp->hd[f].b, ':');
+		// XXX bad, how to handle?
+		if (e == NULL)
+			continue;
+
+		e++;
+		size_t l = e - hp->hd[f].b;
+		assert(l <= UCHAR_MAX);
+
+		unsigned char h[l + 2];
+		h[0] = (unsigned char)l;
+		memcpy(&h[1], hp->hd[f].b, l);
+		h[l + 1] = '\0';
+
+		hdr_t hdr;
+		CAST_HDR(hdr, h);
+
+		int i = http_CollectHdrSepFrom(hp, hdr, sep, lsep, f);
+		if (i < 0)
+			return;
+	}
+}
+
 /*--------------------------------------------------------------------*/
 
 int

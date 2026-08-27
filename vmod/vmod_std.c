@@ -196,6 +196,19 @@ vmod_collect(VRT_CTX, VCL_HEADER hdr, VCL_STRING sep)
 	http_CollectHdrSep(hp, hdr->what, sep);
 }
 
+VCL_VOID v_matchproto_(td_std_collect_all)
+vmod_collect_all(VRT_CTX, VCL_HTTP hp)
+{
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	if (hp == NULL) {
+		VRT_fail(ctx, "std.collect_all(): header argument "
+		    "cannot be used here");
+		return;
+	}
+	http_CollectAllHdrs(hp);
+}
+
 VCL_BOOL v_matchproto_(td_std_healthy)
 vmod_healthy(VRT_CTX, VCL_BACKEND be)
 {

@@ -86,6 +86,21 @@ Examples::
 	std.collect(req.http.accept);
 	std.collect(req.http.cookie, "; ");
 
+$Function VOID collect_all(HTTP where)
+
+Combine all multiple headers in *where* by the default rules as per HTTP RFCs:
+
+- ``Set-Cookie`` does not get combined
+- ``Cookie`` gets combined with the seperator ``"; "`` (semicolon space)
+- All other headers get combined with the seperator ``", "`` (comma space)
+
+*where* can be ``req``, ``resp``, ``bereq`` or ``beresp``.
+
+Examples::
+
+	std.collect_all(req);
+	std.collect_all(beresp);
+
 $Function STRING querysort(STRING)
 
 Sorts the query string for cache normalization purposes.

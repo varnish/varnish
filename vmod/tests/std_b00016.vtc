@@ -1,0 +1,81 @@
+vtest "test vmod_std.collect_all()"
+
+server s1 {
+	rxreq
+	expect req.http.Cookie == "c1; c2; c3"
+	expect req.http.Foo == "1, 2, 3"
+	expect req.http.Bar == "1, 2, 3, 4"
+	expect req.http.Cookiee == "X"
+	expect req.http.Cooki == "Y"
+	expect req.http.Fooo == "X"
+	expect req.http.Fo == "Y"
+	txresp	-hdr "A: 1" -hdr "aa: A" -hdr "A: 2" \
+		-hdr "Set-Cookie: brr" \
+		-hdr "Set-Cookie: abc" \
+		-hdr "A: 1" -hdr "aa: A" -hdr "A: 2"
+} -start
+
+vinyl v1 -vcl+backend {
+	import std;
+
+	sub vcl_recv {
+		std.collect_all(req);
+		return (pass);
+	}
+	sub vcl_backend_response {
+		std.collect_all(beresp);
+	}
+} -start
+
+logexpect l1 -v v1 -q "ReqURL ~ \"^/$\"" {
+	fail add *	End
+	expect * *	VCL_call	{^RECV}
+	expect 0 *	ReqUnset	{^Cookie: c1}
+	expect 0 *	ReqUnset	{^Cookie: c2}
+	expect 0 *	ReqUnset	{^Cookie: c3}
+	expect 0 *	ReqHeader	{^Cookie: c1; c2; c3$}
+	expect 0 *	ReqUnset	{^Foo: 1}
+	expect 0 *	ReqUnset	{^Foo: 2}
+	expect 0 *	ReqUnset	{^Foo: 3}
+	expect 0 *	ReqHeader	{^Foo: 1, 2, 3$}
+	expect 0 *	ReqUnset	{^Bar: 1}
+	expect 0 *	ReqUnset	{^Bar: 2}
+	expect 0 *	ReqUnset	{^Bar: 3}
+	expect 0 *	ReqUnset	{^Bar: 4}
+	expect 0 *	ReqHeader	{^Bar: 1, 2, 3, 4$}
+	fail clear
+} -start
+
+logexpect l2 -v v1 -q "BereqURL ~ \"^/$\"" {
+	fail add *	End
+	expect * *	VCL_call	{^BACKEND_RESPONSE}
+	expect 0 *	BerespUnset	{^A: 1}
+	expect 0 *	BerespUnset	{^A: 2}
+	expect 0 *	BerespUnset	{^A: 1}
+	expect 0 *	BerespUnset	{^A: 2}
+	expect 0 *	BerespHeader	{^A: 1, 2, 1, 2$}
+	expect 0 *	BerespUnset	{^aa: A$}
+	expect 0 *	BerespUnset	{^aa: A$}
+	expect 0 *	BerespHeader	{^aa: A, A$}
+	fail clear
+} -start
+
+client c1 {
+	txreq	-hdr "Cookie: c1" -hdr "Foo: 1" \
+		-hdr "Cookie: c2" -hdr "Foo: 2" \
+		-hdr "Bar: 1" -hdr "Bar: 2" \
+		-hdr "Cookiee: X" -hdr "Fooo: X" \
+		-hdr "Cooki: Y" -hdr "Fo: Y" \
+		-hdr "Cookie: c3" -hdr "Foo: 3" \
+		-hdr "Bar: 3" -hdr "Bar: 4"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.A == "1, 2, 1, 2"
+	expect resp.http.aa == "A, A"
+	expect resp.http.Set-Cookie == "brr"
+	## vtest can't check second header
+	# expect resp.http.Set-Cookie == "abc"
+} -run
+
+logexpect l1 -wait
+logexpect l2 -wait
