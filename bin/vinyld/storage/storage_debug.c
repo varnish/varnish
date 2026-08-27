@@ -40,7 +40,6 @@
 #include <stdlib.h>
 
 #include "storage/storage.h"
-#include "storage/storage_simple.h"
 
 #include "vtim.h"
 #include "vnum.h"
