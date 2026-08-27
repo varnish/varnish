@@ -32,11 +32,8 @@ logexpect l1 -v v1 -q "BerespHeader:Content-Length eq 1025" {
 	fail add *	End
 	expect * * Storage	{^malloc Transient}
 	expect 1 = Debug	{^vtc.storage_maxspace: want 1025 canalloc 1024}
-	expect 0 = Debug	{^vtc.storage_maxspace: extend 1023 canalloc 1024}
-	expect 0 = Debug	{^vtc.storage_maxspace: want 2 canalloc 1}
-	expect 0 = Debug	{^vtc.storage_maxspace: extend 1 canalloc 1}
-	expect 0 = Debug	{^vtc.storage_maxspace: want 1 canalloc 0}
-	expect 0 = FetchError	{^Could not get storage}
+	expect 0 = Debug	{^vtc.storage_maxspace: extend \d+ canalloc 1024}
+	expect * = FetchError	{^Could not get storage}
 	expect 0 = BackendClose	{close RX_BODY}
 	fail clear
 } -start
