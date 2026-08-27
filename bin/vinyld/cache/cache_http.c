@@ -545,8 +545,8 @@ http_CollectHdr(struct http *hp, hdr_t hdr)
  */
 
 static int
-http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
-    unsigned lsep, unsigned f);
+http_CollectHdrSepFrom(struct http *hp, unsigned char hdl, const char *hds,
+    const char *sep, unsigned lsep, unsigned f);
 
 void
 http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
@@ -567,7 +567,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 	if (f == 0)
 		return;
 
-	(void)http_CollectHdrSepFrom(hp, hdr, sep, lsep, f);
+	(void)http_CollectHdrSepFrom(hp, hdr->len, hdr->str, sep, lsep, f);
 }
 
 /*
@@ -577,15 +577,15 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
  */
 
 static int
-http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
-    unsigned lsep, unsigned f)
+http_CollectHdrSepFrom(struct http *hp, unsigned char hdl, const char *hds,
+    const char *sep, unsigned lsep, unsigned f)
 {
 	unsigned u, ml, x, d;
 	char *b = NULL, *e = NULL;
 	const char *v;
 	for (d = u = f + 1; u < hp->nhd; u++) {
 		Tcheck(hp->hd[u]);
-		if (!http_IsHdr(&hp->hd[u], hdr)) {
+		if (! http_hdr_at(hds, hp->hd[u].b, hdl)) {
 			if (d != u) {
 				hp->hd[d] = hp->hd[u];
 				hp->hdf[d] = hp->hdf[u];
@@ -603,7 +603,7 @@ http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
 			if (b + x >= e) {
 				http_fail(hp);
 				VSLbs(hp->vsl, SLT_LostHeader,
-				    TOSTRAND(hdr->str));
+				    TOSTRAND(hds));
 				WS_Release(hp->ws, 0);
 				return (-1);
 			}
@@ -616,9 +616,9 @@ http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
 		AN(e);
 
 		/* Append the Nth header we found */
-		x = Tlen(hp->hd[u]) - hdr->len;
+		x = Tlen(hp->hd[u]) - hdl;
 
-		v = hp->hd[u].b + hdr->len;
+		v = hp->hd[u].b + hdl;
 		while (vct_issp(*v)) {
 			v++;
 			x--;
@@ -626,7 +626,7 @@ http_CollectHdrSepFrom(struct http *hp, hdr_t hdr, const char *sep,
 
 		if (b + lsep + x >= e) {
 			http_fail(hp);
-			VSLbs(hp->vsl, SLT_LostHeader, TOSTRAND(hdr->str));
+			VSLbs(hp->vsl, SLT_LostHeader, TOSTRAND(hds));
 			WS_Release(hp->ws, 0);
 			return (-1);
 		}
@@ -679,15 +679,8 @@ http_CollectAllHdrs(struct http *hp)
 		size_t l = e - hp->hd[f].b;
 		assert(l <= UCHAR_MAX);
 
-		unsigned char h[l + 2];
-		h[0] = (unsigned char)l;
-		memcpy(&h[1], hp->hd[f].b, l);
-		h[l + 1] = '\0';
-
-		hdr_t hdr;
-		CAST_HDR(hdr, h);
-
-		int i = http_CollectHdrSepFrom(hp, hdr, sep, lsep, f);
+		int i = http_CollectHdrSepFrom(hp, (unsigned char)l,
+		    hp->hd[f].b, sep, lsep, f);
 		if (i < 0)
 			return;
 	}
