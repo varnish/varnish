@@ -555,7 +555,7 @@ enum vcl_event_e {
 	VCL_EVENT_COLD,
 	VCL_EVENT_DISCARD,
 
-	VDI_EVENT_SICK,
+	VDI_EVENT_SICK
 };
 
 typedef int vmod_event_f(VRT_CTX, struct vmod_priv *, enum vcl_event_e);
@@ -788,7 +788,7 @@ enum lbody_e {
 	LBODY_SET_STRING,
 	LBODY_ADD_STRING,
 	LBODY_SET_BLOB,
-	LBODY_ADD_BLOB,
+	LBODY_ADD_BLOB
 };
 
 VCL_BYTES VRT_CacheReqBody(VRT_CTX, VCL_BYTES maxsize);
