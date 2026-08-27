@@ -5,20 +5,50 @@
 // Flexelint configuration file for VCL compiler output
 //
 
--esym(763, sess)	// Redundant declaration for symbol 'sess'
--esym(763, cli)		// Redundant declaration for symbol 'cli'
+// symbols not referenced by VCC generated code
+-esym(714, sub_VGC_*)
+-esym(749, vcl_func_call_e::VSUB_DYNAMIC)
+
+// symbols we could potentially move elsewhere
+-esym(750, WRK_VPI_MAGIC)
+
+// various symbols which are part of vrt, but not used by VGC
+-esym(750, VCL_H_INCLUDED)
+-esym(750, VMOD_PRIV_METHODS_MAGIC)
+-esym(750, DIRECTOR_MAGIC)
+-esym(750, VDI_METHODS_MAGIC)
+-esym(750, CAST_HDR)
+-esym(750, CHECK_HDR)
+-esym(750, vmem*, vstr*)
+-esym(750, v_*, _v*, __*)
+-esym(750, vcountof, vlimit*, vmi*, vma*, vtake, opm*, typeof)
+-esym(750, Tlen, Tstreq, Tforeach, Tcheck, Tstr)
+-esym(750, LIKELY, NEEDLESS)
+-esym(750, VUNIQ_NAME, VCOMBINE, VINDIRECT, VENUM)
+-esym(750, PALGN, PAOK, PRNDDN, PRNDUP, TRUST_ME, PWR2, RDN2, RUP2)
+-esym(750, *bprintf, bstrcpy, closefd)
+
+-esym(751, txt, vtim_mono, VCL_INSTANCE, vcl_*_f)
 
 -esym(750, VCL_RET_*)	// not ref
 -esym(750, VCL_MET_*)	// not ref
 
--esym(753, vsb)		// not ref
--esym(750, vrt_*)	// not ref
 -esym(753, vrt_*)	// not ref
 -esym(750, VRT_*)	// not ref
 
-			// Harmless
+// Deliberate
+-emacro(446, TOSTRAND, TOSTRANDS)	// side effect in initializer
 
+// Harmless
+-e785			// Too few initializers for aggregate
+-e506			// Constant value Boolean
+-e527			// Unreachable code at token 'if
+-e717			// do ... while(0);
+-e730			// Boolean argument to function
 -e752			// local declarator [...] not referenced
 -e754			// local structure member [...] not referenced
+-e774			// Boolean within 'if' always evaluates to False
+-e786			// String concatenation within initializer
 -e526			// Symbol [...] not defined
+-e835			// A zero has been given as left argument to operator
 
