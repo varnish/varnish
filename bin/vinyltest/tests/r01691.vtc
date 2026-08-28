@@ -9,8 +9,11 @@ varnish v1 -vcl+backend {
 
 } -start
 
-logexpect l1 -v v1 {
-	  expect * 1002	Error "Body cannot be fetched"
+logexpect l1 -v v1 -g vxid -q "vxid == 1002" {
+	expect * 1002	BogoHeader	{^Invalid Content-Length$}
+	expect 0 =	BerespStatus	{^503$}
+	expect 0 =	BerespReason	{^Service Unavailable$}
+	expect 0 =	FetchError	{^http format error$}
 } -start
 
 client c1 {
