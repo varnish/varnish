@@ -30,13 +30,15 @@ server s1 {
 	txresp -bodylen 48
 } -start
 
-varnish v1 -arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
+varnish v1 -arg "-p feature=+no_coredump" \
+	 -arg "-sdeprecated_persistent,${tmpdir}/_.per,5m" \
 	-vcl+backend {
 	import vtc;
 	sub vcl_init {
 		vtc.storage_frag(storage.s0, 32B);
 	}
 } -start
+
 
 client c1 {
 	txreq -url "/1"
@@ -57,8 +59,6 @@ barrier b2 sync
 # Get the result
 client c1 -wait
 
-varnish v1 -cliok "param.set feature +no_coredump"
-
 varnish v1 -cliok "debug.persistent s0 dump"
 
 # Panic worker so second segment does not get closed
@@ -67,6 +67,8 @@ varnish v1 -clierr 400 "debug.panic.worker"
 delay 0.5
 
 varnish v1 -cliok "panic.clear"
+
+varnish v1 -cliok "param.set feature -no_coredump"
 
 delay 0.5
 
