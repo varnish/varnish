@@ -983,9 +983,6 @@ sml_trimstore(struct worker *wrk, struct objcore *oc)
 		WRONG("sml_trimstore already called");
 	oc->boc->stevedore_priv = trim_once;
 
-	if (stv->sml_free == NULL)
-		return;
-
 	o = sml_getobj(wrk, oc);
 	CHECK_OBJ_NOTNULL(o, OBJECT_MAGIC);
 	st = VTAILQ_FIRST(&o->list);
@@ -1001,6 +998,9 @@ sml_trimstore(struct worker *wrk, struct objcore *oc)
 		oc->boc->stevedore_priv = st;
 		return;
 	}
+
+	if (stv->sml_free == NULL)
+		return;
 
 	if (st->space - st->len < 512)
 		return;
