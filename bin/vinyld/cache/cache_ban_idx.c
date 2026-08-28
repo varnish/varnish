@@ -71,8 +71,8 @@ VRBT_GENERATE_NFIND(banidx_s, metaban, tree, metaban_cmp, static)
 VRBT_GENERATE_INSERT_COLOR(banidx_s, metaban, tree, static)
 VRBT_GENERATE_INSERT_FINISH(banidx_s, metaban, tree, static)
 VRBT_GENERATE_INSERT(banidx_s, metaban, tree, metaban_cmp, static)
-VRBT_GENERATE_NEXT(banidx_s, metaban, tree, static)
-VRBT_GENERATE_MINMAX(banidx_s, metaban, tree, static)
+//VRBT_GENERATE_NEXT(banidx_s, metaban, tree, static)
+//VRBT_GENERATE_MINMAX(banidx_s, metaban, tree, static)
 
 static struct banidx_s banidx = VRBT_INITIALIZER(banidx);
 static pthread_mutex_t banidxmtx = PTHREAD_MUTEX_INITIALIZER;
@@ -125,9 +125,10 @@ BANIDX_lookup(vtim_real t0)
 void
 BANIDX_fini(void)
 {
-	struct metaban *m, *mm;
+	struct metaban *m;
 
-	VRBT_FOREACH_SAFE(m, banidx_s, &banidx, mm) {
+	while ((m = VRBT_ROOT(&banidx)) != NULL) {
+		CHECK_OBJ(m, BANIDX_MAGIC);
 		VRBT_REMOVE(banidx_s, &banidx, m);
 		FREE_OBJ(m);
 	}
