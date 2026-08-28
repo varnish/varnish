@@ -529,6 +529,18 @@ http_CountHdr(const struct http *hp, hdr_t hdr)
 /*--------------------------------------------------------------------
  * This function collapses multiple header lines of the same name.
  * The lines are joined with a comma, according to [rfc2616, 4.2bot, p32]
+ *
+ * XXX Collection of issues / open questions with the CollectHdr family of
+ * functions
+ * - should know which header is list-type, attempting collect on singleton
+ *   should fail (in particular Host)
+ *   - For list type, consider "value, containing, comma" vs v1, v2
+ *   - but no complete list exists
+ * - should offer to keep uniqe values only (Content-Length)
+ * - should skip h2 pseudo headers (starting with :)
+ * - check for empty elements (",   ,")
+ *
+ * Worthwile historic reading: 653d3912245c4010a3e0fb4c3c376fb2cd816c04
  */
 
 void

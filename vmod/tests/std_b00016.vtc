@@ -15,7 +15,7 @@ server s1 {
 		-hdr "A: 1" -hdr "aa: A" -hdr "A: 2"
 } -start
 
-vinyl v1 -vcl+backend {
+varnish v1 -vcl+backend {
 	import std;
 
 	sub vcl_recv {
