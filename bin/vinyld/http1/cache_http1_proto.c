@@ -488,7 +488,15 @@ HTTP1_DissectResponse(struct http_conn *htc, struct http *hp,
 	if (retval != 0) {
 		VSLb(hp->vsl, SLT_HttpGarbage, "%.*s",
 		    (int)(htc->rxbuf_e - htc->rxbuf_b), htc->rxbuf_b);
-		assert(retval >= 100 && retval <= 999);
+	}
+
+	if (retval == 0)
+		htc->body_status = http1_body_status(hp, htc, 0);
+
+	if (retval == 0 && htc->body_status == BS_ERROR)
+		retval = 503;
+
+	if (retval != 0) {
 		assert(retval == 503);
 		http_SetStatus(hp, 503, NULL);
 	}
@@ -498,8 +506,6 @@ HTTP1_DissectResponse(struct http_conn *htc, struct http *hp,
 		http_SetH(hp, HTTP_HDR_REASON,
 		    http_Status2Reason(hp->status, NULL));
 	}
-
-	htc->body_status = http1_body_status(hp, htc, 0);
 
 	return (retval);
 }
