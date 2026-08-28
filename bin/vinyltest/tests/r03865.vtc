@@ -11,6 +11,14 @@ server s1 {
 	txresp -hdr {surrogate-control: content="ESI/1.0"} \
 	    -body {before <esi:include src="/fail0" onerror="abort"/> after}
 
+	rxreq
+	expect req.url == "/deep0"
+	txresp -hdr {surrogate-control: content="ESI/1.0"} \
+	    -body {<DEEP0><esi:include src="/deep1" onerror="continue"/></DEEP0>}
+	rxreq
+	expect req.url == "/deep1"
+	txresp -hdr {surrogate-control: content="ESI/1.0"} \
+	    -body {<DEEP1><esi:include src="/abort" onerror="continue"/></DEEP1>}
 } -start
 
 varnish v1 -cliok "param.set feature +esi_disable_xml_check"
@@ -61,6 +69,19 @@ client c1 {
 	rxchunk
 	expect_close
 	expect resp.body == "before "
+} -run
+
+client c1 {
+	txreq -url "/deep0"
+	non_fatal
+	rxresphdrs
+	expect resp.status == 200
+	rxchunk
+	rxchunk
+	rxchunk
+	rxchunk
+	expect_close
+	expect resp.body == "<DEEP0><DEEP1>before "
 } -run
 
 varnish v1 -cliok "param.set max_esi_depth 0"
