@@ -304,14 +304,15 @@ struct boc {
 #define BOC_MAGIC		0x70c98476
 	unsigned		refcount;
 	struct lock		mtx;
-	pthread_cond_t		cond;
 	void			*stevedore_priv;
 	enum boc_state_e	state;
 	uint8_t			*vary;
 	uint64_t		fetched_so_far;
 	uint64_t		delivered_so_far;
 	uint64_t		transit_buffer;
+	// less used, these should be at offset >64
 	struct vai_q_head	vai_q_head;
+	pthread_cond_t		cond;
 };
 
 /* Object core structure ---------------------------------------------
