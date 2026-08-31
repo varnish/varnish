@@ -1,13 +1,35 @@
-vtest "Error on multiple Host headers"
+vtest "Handling of multiple Host & Content-Length headers"
 
-varnish v1 -vcl {backend be none;} -start
+varnish v1 -vcl {
+	backend be none;
+
+	sub vcl_recv {
+		return (synth(200));
+	}
+} -start
 varnish v1 -cliok "param.set debug +syncvsl"
+
+logexpect l1 -v v1 -q "vxid == 1001" {
+	fail add *	End
+	expect * 1001	ReqMethod	{^GET$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^Host: foo$}
+	expect 0 =	ReqHeader	{^Host: bar$}
+	expect 1 =	BogoHeader	{^Multiple Host: headers$}
+	expect 0 =	RespProtocol	{^HTTP/1.1$}
+	expect 0 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
 
 client c1 {
 	txreq -hdr "Host: foo" -hdr "Host: bar"
 	rxresp
 	expect resp.status == 400
 } -run
+
+logexpect l1 -wait
 
 varnish v1 -vsl_catchup
 varnish v1 -expect client_req_400 == 1
