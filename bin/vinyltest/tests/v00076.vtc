@@ -9,7 +9,9 @@ varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_init {
+		debug.test_default_bool();
 		debug.test_default_bool(false);
+		debug.test_default_bool(true);
 	}
 } -start
 
