@@ -27,13 +27,49 @@ varnish v1 -vcl+backend {
 	}
 } -start
 
+logexpect l1005 -v v1 -q "vxid == 1005" {
+	fail add *	End
+	expect * 1005	Timestamp	{^Req}
+	expect 0 =	BogoHeader	{^Header has ctrl char 0x0d$}
+	expect 0 =	HttpGarbage	{^\rHost: foo\r\n\r\n$}
+	expect * =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+logexpect l1010 -v v1 -q "vxid == 1010" {
+	fail add *	End
+	expect * 1010	Timestamp	{^Req}
+	expect 0 =	BogoHeader	{^Header has ctrl char 0x01$}
+	expect 0 =	HttpGarbage	{^Bogo: Header\x01More\r\n\r\n$}
+	expect * =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+logexpect l1012 -v v1 -q "vxid == 1012" {
+	fail add *	End
+	expect * 1012	Timestamp	{^Req}
+	expect 0 =	BogoHeader	{^Header has ctrl char 0x0d$}
+	expect 0 =	HttpGarbage	{^Bogo: Header\r\r\n\r\n$}
+	expect * =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+logexpect l1014 -v v1 -q "vxid == 1014" {
+	fail add *	End
+	expect * 1014	Timestamp	{^Req}
+	expect 0 =	BogoHeader	{^Header has ctrl char 0x0d$}
+	expect 0 =	HttpGarbage	{^Bogo: Header\rMore\r\n\r\n$}
+	expect * =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
 logexpect l1 -v v1 -g raw {
 	expect * 1001 BogoHeader {1st header has white space:.*}
 	expect * 1003 BogoHeader {1st header has white space:.*}
-	expect * 1005 BogoHeader {Header has ctrl char 0x0d}
-	expect * 1010 BogoHeader {Header has ctrl char 0x01}
-	expect * 1012 BogoHeader {Header has ctrl char 0x0d}
-	expect * 1014 BogoHeader {Header has ctrl char 0x0d}
 	expect * 1016 BogoHeader {Missing header name:.*}
 	expect * 1018 VCL_Error  {Bad header foo:}
 } -start
@@ -108,6 +144,10 @@ client c1 {
 } -run
 
 logexpect l1 -wait
+logexpect l1005 -wait
+logexpect l1010 -wait
+logexpect l1012 -wait
+logexpect l1014 -wait
 
 varnish v1 -cliok "param.set feature -validate_headers"
 
