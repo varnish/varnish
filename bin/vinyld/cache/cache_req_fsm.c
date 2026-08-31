@@ -978,14 +978,6 @@ cnt_recv(struct worker *wrk, struct req *req)
 		return (REQ_FSM_DONE);
 	}
 
-	if (http_CountHdr(req->http0, H_Content_Length) > 1) {
-		VSLb(req->vsl, SLT_BogoHeader, "Multiple Content-Length: headers");
-		wrk->stats->client_req_400++;
-		req->doclose = SC_RX_BAD;
-		(void)req->transport->minimal_response(req, 400);
-		return (REQ_FSM_DONE);
-	}
-
 	cnt_recv_prep(req, ci);
 
 	if (req->req_body_status == BS_ERROR) {

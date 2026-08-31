@@ -663,7 +663,7 @@ int http_GetHdrToken(const struct http *hp, hdr_t,
 int http_GetHdrField(const struct http *hp, hdr_t,
     const char *field, const char **ptr);
 double http_GetHdrQ(const struct http *hp, hdr_t, const char *field);
-ssize_t http_GetContentLength(const struct http *hp);
+ssize_t http_GetContentLength(struct http *hp);
 ssize_t http_GetContentRange(const struct http *hp, ssize_t *lo, ssize_t *hi);
 const char * http_GetRange(const struct http *hp, ssize_t *lo, ssize_t *hi,
     ssize_t len);

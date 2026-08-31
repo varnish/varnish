@@ -940,25 +940,120 @@ http_GetHdrField(const struct http *hp, hdr_t hdr,
 	return (i);
 }
 
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+ * Return the content length if all Content-Length headers are well formed and
+ * agree. Remove agreeing duplicates. Normalize to no leading zeroes.
+ *
+ * Returns -1 for no content length, -2 for malformed.
+ *
+ * The surviving C-L header is normalized to not contain leading zeroes in order
+ * to support vcl like if (req.http.Content-Length ~ "^\d{3}"). If all headers
+ * had leading zeroes or list values, we generate a new one
+ */
 
 ssize_t
-http_GetContentLength(const struct http *hp)
+http_GetContentLength(struct http *hp)
 {
-	ssize_t cl;
-	const char *b;
+	const txt *first = NULL;
+	ssize_t cl = -1;	// default no length
+	uint16_t u, v;
+	int need = 1;
 
 	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
 
-	if (!http_GetHdr(hp, H_Content_Length, &b))
-		return (-1);
-	cl = VNUM_uint(b, NULL, &b);
-	if (cl < 0)
-		return (-2);
-	while (vct_isows(*b))
-		b++;
-	if (*b != '\0')
-		return (-2);
+	// basically the same outer loop as http_Unset
+	for (v = u = HTTP_HDR_FIRST; u < hp->nhd; u++) {
+		Tcheck(hp->hd[u]);
+		if (http_IsHdr(&hp->hd[u], H_Content_Length)) {
+			const char *b = hp->hd[u].b + H_Content_Length->len;
+
+			while (vct_issp(*b))
+				b++;
+
+			// leading zeroes are not canonical
+			int noncanon = (pdiff(b, hp->hd[u].e) > 1 && b[0] == '0');
+
+			ssize_t l = VNUM_uint(b, NULL, &b);
+			ssize_t ll = l;
+
+			for (;;) {
+				// malformed numbers and mismatches to previous
+				// are hard errors
+				if (l < 0 || ll != l) {
+					l = -2;
+					break;
+				}
+
+				while (vct_isows(*b))
+					b++;
+				if (*b == '\0')
+					break;
+				if (*b != ',') {
+					l = -2;
+					break;
+				}
+				b++;
+
+				// list values are not canonical
+				noncanon = 1;
+				while (vct_issp(*b))
+					b++;
+				if (*b == '\0')
+					break;
+				ll = l;
+				l = VNUM_uint(b, NULL, &b);
+			}
+
+			assert(l == -2 || l >= 0);
+			assert(cl >= -2);
+
+			// note good cl or log errors
+			if (l == -2) {
+				cl = -2;
+				VSLb(hp->vsl, SLT_HttpGarbage, "%.*s",
+				    (int)pdiff(hp->hd[u].b, hp->hd[u].e), hp->hd[u].b);
+			} else if (cl == -1)
+				cl = l;
+			else if (l != cl) {
+				cl = -2;
+
+				AN(first);
+				VSLb(hp->vsl, SLT_HttpGarbage, "mismatch: %.*s",
+				    (int)pdiff(hp->hd[u].b, hp->hd[u].e), hp->hd[u].b);
+				VSLb(hp->vsl, SLT_HttpGarbage, "first   : %.*s",
+				    (int)pdiff(first->b, first->e), first->b);
+			}
+
+			// Return early if wrong and all headers kept
+			if (cl == -2 && v == u)
+				return (cl);
+
+			// track for logging
+			if (first == NULL)
+				first = &hp->hd[u];
+
+			// decide if to keep header
+			if (cl >= 0 && need && !noncanon) {
+				need = 0;
+			} else if (cl >= 0) {
+				http_VSLH_del(hp, u);
+				continue;
+			}
+		}
+
+		if (v != u) {
+			vmemcpy(&hp->hd[v], &hp->hd[u], sizeof *hp->hd);
+			vmemcpy(&hp->hdf[v], &hp->hdf[u], sizeof *hp->hdf);
+		}
+		v++;
+	}
+	hp->nhd = v;
+
+	if (cl >= 0 && need) {
+		// we have deleted all headers above
+		http_PrintfHeader(hp, "Content-Length: %jd", cl);
+	}
+
 	return (cl);
 }
 
