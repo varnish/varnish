@@ -6,6 +6,10 @@ varnish v1 -vcl {
 	sub vcl_recv {
 		return (synth(200));
 	}
+	sub vcl_synth {
+		set resp.http.cl = req.http.Content-Length;
+		return (deliver);
+	}
 } -start
 varnish v1 -cliok "param.set debug +syncvsl"
 
@@ -35,19 +39,307 @@ varnish v1 -vsl_catchup
 varnish v1 -expect client_req_400 == 1
 varnish v1 -expect sc_rx_bad == 1
 
+############################################################
+## duplicate content length agrees
+
+# XXX would be good to have ReqUnset after headers have been dumped once, but
+# for this we need to move CL processing from protocol to the request processing
+
+logexpect l1003 -v v1 -q "vxid == 1003" {
+	fail add *	End
+	expect * 1003	Timestamp	{^Req:}
+	expect 0 =	ReqUnset	{^Content-Length: 2,$}
+	expect 2 =	ReqMethod	{^POST$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^Content-Length: 2$}
+	expect 0 =	ReqHeader	{^Host:}
+	expect 0 =	ReqHeader	{^User-Agent:}
+	expect 0 =	ReqHeader	{^X-Forwarded-For:}
+	expect 0 =	ReqHeader	{^Via:}
+	fail clear
+} -start
+
+# same as 1003, but with fill: a and first has zeroes
+logexpect l1004 -v v1 -q "vxid == 1004" {
+	fail add *	End
+	expect * 1004	Timestamp	{^Req:}
+	expect 0 =	ReqUnset	{^Content-Length: 0012$}
+	expect 2 =	ReqMethod	{^POST$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^fill: a$}
+	expect 0 =	ReqHeader	{^Content-Length: 12$}
+	expect 0 =	ReqHeader	{^Host:}
+	expect 0 =	ReqHeader	{^User-Agent:}
+	expect 0 =	ReqHeader	{^X-Forwarded-For:}
+	expect 0 =	ReqHeader	{^Via:}
+	expect 0 =	VCL_call	{^RECV$}
+	fail clear
+} -start
+
+# three agreeing, non canonical
+logexpect l1005 -v v1 -q "vxid == 1005" {
+	fail add *	End
+	expect * 1005	Timestamp	{^Req:}
+	expect 0 =	ReqUnset	{^Content-Length: 12, 12$}
+	expect 0 =	ReqUnset	{^Content-Length: 012$}
+	expect 0 =	ReqUnset	{^Content-Length: 0012$}
+	expect 0 =	ReqHeader	{^Content-Length: 12$}
+	expect 2 =	ReqMethod	{^POST$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^fill: a$}
+	expect 0 =	ReqHeader	{^fill: b$}
+	expect 0 =	ReqHeader	{^fill: c$}
+	expect 0 =	ReqHeader	{^Host: 127.0.0.1$}
+	expect 0 =	ReqHeader	{^User-Agent:}
+	expect 0 =	ReqHeader	{^Content-Length: 12$}
+	expect 0 =	ReqHeader	{^X-Forwarded-For:}
+	expect 0 =	ReqHeader	{^Via:}
+	expect 0 =	VCL_call	{^RECV$}
+	fail clear
+} -start
+
 client c1 {
-	txreq -method POST -hdr "Content-Length: 12" -hdr "Content-Length: 12" -bodylen 12
+	# 1003
+	txreq -method POST -hdr "Content-Length: 2" -hdr "Content-Length: 2," -bodylen 2
+	rxresp
+	expect resp.status == 200
+	expect resp.http.cl == 2
+
+	# 1004
+	txreq -method POST -hdr "Content-Length: 0012" -hdr "fill: a" -hdr "Content-Length: 12" -bodylen 12
+	rxresp
+	expect resp.status == 200
+	expect resp.http.cl == 12
+
+	# 1005
+	txreq -method POST \
+		-hdr "fill: a" \
+		-hdr "Content-Length: 12, 12" \
+		-hdr "fill: b" \
+		-hdr "Content-Length: 012" \
+		-hdr "fill: c" \
+		-hdr "Content-Length: 0012" \
+		-bodylen 12
+	rxresp
+	expect resp.status == 200
+	expect resp.http.cl == 12
+} -run
+
+logexpect l1003 -wait
+logexpect l1004 -wait
+logexpect l1005 -wait
+
+############################################################
+## duplicate content length wrong first/second/third
+
+logexpect l1007 -v v1 -q "vxid == 1007" {
+	fail add *	End
+	expect * 1007	Timestamp	{^Req:}
+	expect 0 =	HttpGarbage	{^Content-Length: a$}
+	expect 0 =	BogoHeader	{^Invalid Content-Length$}
+	expect 2 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+client c2 {
+	txreq -method POST \
+		-hdr "Content-Length: a" \
+		-hdr "Content-Length: 12" \
+		-hdr "Content-Length: 0012" \
+		-bodylen 12
 	rxresp
 	expect resp.status == 400
 } -run
 
+logexpect l1009 -v v1 -q "vxid == 1009" {
+	fail add *	End
+	expect * 1009	Timestamp	{^Req:}
+	expect 0 =	HttpGarbage	{^Content-Length: 12, a$}
+	expect 0 =	BogoHeader	{^Invalid Content-Length$}
+	expect 2 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+client c2 {
+	txreq -method POST \
+		-hdr "Content-Length: 12" \
+		-hdr "Content-Length: 12, a" \
+		-hdr "Content-Length: 0012" \
+		-bodylen 12
+	rxresp
+	expect resp.status == 400
+} -run
+
+logexpect l1011 -v v1 -q "vxid == 1011" {
+	fail add *	End
+	expect * 1011	Timestamp	{^Req:}
+	expect 0 =	ReqUnset	{^Content-Length: 0012$}
+	expect 0 =	HttpGarbage	{^Content-Length: 12, 13$}
+	expect 0 =	BogoHeader	{^Invalid Content-Length$}
+	expect 2 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+client c2 {
+	txreq -method POST \
+		-hdr "Content-Length: 0012" \
+		-hdr "Content-Length: 12" \
+		-hdr "Content-Length: 12, 13" \
+		-bodylen 12
+	rxresp
+	expect resp.status == 400
+} -run
+
+logexpect l1007 -wait
+logexpect l1009 -wait
+logexpect l1011 -wait
+
+############################################################
+## duplicate content mismatch second/third
+
+logexpect l1013 -v v1 -q "vxid == 1013" {
+	fail add *	End
+	expect * 1013	Timestamp	{^Req:}
+	expect 0 =	HttpGarbage	{^mismatch: Content-Length: 13$}
+	expect 0 =	HttpGarbage	{^first   : Content-Length: 12$}
+	expect 0 =	BogoHeader	{^Invalid Content-Length$}
+	expect 2 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+client c3 {
+	txreq -method POST \
+		-hdr "Content-Length: 12" \
+		-hdr "Content-Length: 13" \
+		-bodylen 12
+	rxresp
+	expect resp.status == 400
+} -run
+
+logexpect l1015 -v v1 -q "vxid == 1015" {
+	fail add *	End
+	expect * 1015	Timestamp	{^Req}
+	expect 0 =	ReqUnset	{^Content-Length: 012$}
+	expect 0 =	HttpGarbage	{^mismatch: Content-Length: 13$}
+	expect 0 =	HttpGarbage	{^first   : Content-Length: 12$}
+	expect 0 =	BogoHeader	{^Invalid Content-Length$}
+	expect 2 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+client c3 {
+	txreq -method POST \
+		-hdr "Content-Length: 12" \
+		-hdr "Content-Length: 012" \
+		-hdr "Content-Length: 13" \
+		-bodylen 12
+	rxresp
+	expect resp.status == 400
+} -run
+
+logexpect l1013 -wait
+logexpect l1015 -wait
+
+############################################################
+## zero and multiple
+
+logexpect l1017 -v v1 -q "vxid == 1017" {
+	fail add *	End
+	expect * 1017	Timestamp	{^Req:}
+	expect 2 =	ReqMethod	{^POST$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^Content-Length: 0$}
+	expect 0 =	ReqHeader	{^Host:}
+	expect 0 =	ReqHeader	{^User-Agent:}
+	expect 0 =	ReqHeader	{^X-Forwarded-For:}
+	expect 0 =	ReqHeader	{^Via:}
+	expect 0 =	VCL_call	{^RECV$}
+	fail clear
+} -start
+
+# single and ok
+client c4 {
+	txreq -method POST \
+		-hdr "Content-Length: 0"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.cl == 0
+} -run
+
+logexpect l1019 -v v1 -q "vxid == 1019" {
+	fail add *	End
+	expect * 1019	Timestamp	{^Req:}
+	expect 0 =	ReqUnset	{^Content-Length: 00$}
+	expect 2 =	ReqMethod	{^POST$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^Content-Length: 0$}
+	expect 0 =	ReqHeader	{^Host:}
+	expect 0 =	ReqHeader	{^User-Agent:}
+	expect 0 =	ReqHeader	{^X-Forwarded-For:}
+	expect 0 =	ReqHeader	{^Via:}
+	expect 0 =	VCL_call	{^RECV$}
+	fail clear
+} -start
+
+# double, one ok
+client c4 {
+	txreq -method POST \
+		-hdr "Content-Length: 00" \
+		-hdr "Content-Length: 0"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.cl == 0
+} -run
+
+logexpect l1021 -v v1 -q "vxid == 1021" {
+	fail add *	End
+	expect * 1021	Timestamp	{^Req:}
+	expect 0 =	ReqUnset	{^Content-Length: 00$}
+	expect 0 =	ReqUnset	{^Content-Length: 0,0$}
+	expect 0 =	ReqHeader	{^Content-Length: 0$}
+	expect 2 =	ReqMethod	{^POST$}
+	expect 0 =	ReqURL		{^/$}
+	expect 0 =	ReqProtocol	{^HTTP/1.1$}
+	expect 0 =	ReqHeader	{^Host:}
+	expect 0 =	ReqHeader	{^User-Agent:}
+	expect 0 =	ReqHeader	{^Content-Length: 0$}
+	expect 0 =	ReqHeader	{^X-Forwarded-For:}
+	expect 0 =	ReqHeader	{^Via:}
+	expect 0 =	VCL_call	{^RECV$}
+	fail clear
+} -start
+
+# double, none ok
+client c4 {
+	txreq -method POST \
+		-hdr "Content-Length: 00" \
+		-hdr "Content-Length: 0,0"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.cl == 0
+} -run
+
+logexpect l1017 -wait
+logexpect l1019 -wait
+logexpect l1021 -wait
+
 varnish v1 -vsl_catchup
-varnish v1 -expect client_req_400 == 2
-varnish v1 -expect sc_rx_bad == 2
+varnish v1 -expect client_req_400 == 6
+varnish v1 -expect sc_rx_bad == 1
 
 varnish v1 -cliok "param.set feature +http2"
 
-client c2 {
+client c5 {
 	stream 7 {
 		txreq -hdr host foo -hdr host bar
 		rxresp
@@ -56,7 +348,7 @@ client c2 {
 } -run
 
 varnish v1 -vsl_catchup
-varnish v1 -expect client_req_400 == 3
+varnish v1 -expect client_req_400 == 7
 
 # H2 with multiple content-length runs into thread-scheduling differences,
 # and is unnecessary, as we know the check works from H1 and that it

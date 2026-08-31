@@ -318,7 +318,7 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 /*--------------------------------------------------------------------*/
 
 static body_status_t
-http1_body_status(const struct http *hp, struct http_conn *htc, int request)
+http1_body_status(struct http *hp, struct http_conn *htc, int request)
 {
 	ssize_t cl;
 	const char *b;
