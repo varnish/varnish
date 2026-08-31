@@ -46,7 +46,7 @@
 /*lint -save -e525 -e539 */
 
 #define NODEF_NOTICE \
-    "NB: This log record is masked by default.\n\n"
+    "NB: This log record is masked by default, see ``vsl_mask`` parameter.\n\n"
 
 /*
  * REL_20190915 remove after VSLng
