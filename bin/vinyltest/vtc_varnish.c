@@ -304,11 +304,21 @@ varnishlog_thread(void *priv)
 				vtc_log(v->vl, 4, "vsl| %10ju %-15s %c [%s]",
 				    (uintmax_t)vxid, tagname, type,
 				    VSB_data(vsb) + 2);
-			} else {
-				vtc_log(v->vl, 4, "vsl| %10ju %-15s %c %.*s",
-				    (uintmax_t)vxid, tagname, type, (int)len,
-				    data);
+				continue;
 			}
+			if (VSL_tagflags[tag] & SLT_F_UNSAFE) {
+				// remove trailing NUL
+				if (len > 1 && data[len - 1] == '\0')
+					len--;
+				VSB_clear(vsb);
+				VSB_quote(vsb, data, len, VSB_QUOTE_ESCHEX);
+				AZ(VSB_finish(vsb));
+				data = VSB_data(vsb);
+				len = VSB_len(vsb);
+			}
+			vtc_log(v->vl, 4, "vsl| %10ju %-15s %c %.*s",
+			    (uintmax_t)vxid, tagname, type, (int)len,
+			    data);
 		}
 		if (i == 0) {
 			/* Nothing to do but wait */
