@@ -279,9 +279,6 @@ http1_dissect(struct worker *wrk, struct req *req)
 
 	/* If we could not even parse the request, just close */
 	if (req->err_code != 0) {
-		VSLb(req->vsl, SLT_HttpGarbage, "%.*s",
-		    (int)(req->htc->rxbuf_e - req->htc->rxbuf_b),
-		    req->htc->rxbuf_b);
 		wrk->stats->client_req_400++;
 
 		(void)Req_LogStart(wrk, req);
