@@ -103,6 +103,20 @@ HTTP1_Complete(struct http_conn *htc)
 }
 
 /*--------------------------------------------------------------------
+ * Report garbage and return the error argument
+ */
+static inline uint16_t
+http1_garbage(struct http *hp, struct http_conn *htc, const char *p, uint16_t status)
+{
+
+	if (p == NULL || htc->rxbuf_b == NULL)
+		return (status);
+	VSLb(hp->vsl, SLT_HttpGarbage, "%.*s",
+	    (int)pdiff(htc->rxbuf_b, p), p);
+	return (status);
+}
+
+/*--------------------------------------------------------------------
  * Dissect the headers of the HTTP protocol message.
  */
 
@@ -130,9 +144,10 @@ http1_dissect_hdrs(struct http *hp, struct http_conn *htc, char *p,
 			}
 			i = vct_iscrlf(r, htc->rxbuf_e);
 			if (i == 0) {
+				// b00040.vtc
 				VSLb(hp->vsl, SLT_BogoHeader,
 				    "Header has ctrl char 0x%02x", *r);
-				return (400);
+				return (http1_garbage(hp, htc, p, 400));
 			}
 			q = r;
 			r += i;
@@ -157,12 +172,14 @@ http1_dissect_hdrs(struct http *hp, struct http_conn *htc, char *p,
 			break;
 
 		if (q - p > maxhdr) {
+			// c00039.vtc
 			VSLb(hp->vsl, SLT_BogoHeader, "Header too long: %.*s",
 			    (int)(q - p > 20 ? 20 : q - p), p);
 			return (400);
 		}
 
 		if (vct_islws(*p)) {
+			// b00040.vtc
 			VSLb(hp->vsl, SLT_BogoHeader,
 			    "1st header has white space: %.*s",
 			    (int)(q - p > 20 ? 20 : q - p), p);
@@ -170,6 +187,7 @@ http1_dissect_hdrs(struct http *hp, struct http_conn *htc, char *p,
 		}
 
 		if (*p == ':') {
+			// b00040.vtc
 			VSLb(hp->vsl, SLT_BogoHeader,
 			    "Missing header name: %.*s",
 			    (int)(q - p > 20 ? 20 : q - p), p);
@@ -240,7 +258,7 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 	/* First field cannot contain SP or CTL */
 	for (; !vct_issp(*p); p++) {
 		if (vct_isctl(*p))
-			return (400);
+			return (http1_garbage(hp, htc, hp->hd[hf[0]].b, 400));
 	}
 	hp->hd[hf[0]].e = p;
 	assert(Tlen(hp->hd[hf[0]]));
@@ -249,24 +267,24 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 	/* Skip SP */
 	for (; vct_issp(*p); p++) {
 		if (vct_isctl(*p))
-			return (400);
+			return (http1_garbage(hp, htc, hp->hd[hf[0]].e + 1, 400));
 	}
 	hp->hd[hf[1]].b = p;
 
 	/* Second field cannot contain LWS or CTL */
 	for (; !vct_islws(*p); p++) {
 		if (vct_isctl(*p))
-			return (400);
+			return (http1_garbage(hp, htc, hp->hd[hf[1]].b, 400));
 	}
 	hp->hd[hf[1]].e = p;
 	if (!Tlen(hp->hd[hf[1]]))
-		return (400);
+		return (http1_garbage(hp, htc, hp->hd[hf[1]].b, 400));
 
 	/* Skip SP */
 	q = p;
 	for (; vct_issp(*p); p++) {
 		if (vct_isctl(*p))
-			return (400);
+			return (http1_garbage(hp, htc, q, 400));
 	}
 	if (q < p)
 		*q = '\0';	/* Nul guard for the 2nd field. If q == p
@@ -278,7 +296,7 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 	q = p;
 	for (; p < htc->rxbuf_e && !vct_iscrlf(p, htc->rxbuf_e); p++) {
 		if (vct_isctl(*p) && !vct_issp(*p))
-			return (400);
+			return (http1_garbage(hp, htc, q, 400));
 	}
 	if (p > q) {
 		hp->hd[hf[2]].b = q;
@@ -288,7 +306,7 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 	/* Skip CRLF */
 	i = vct_iscrlf(p, htc->rxbuf_e);
 	if (!i)
-		return (400);
+		return (http1_garbage(hp, htc, p, 400));
 	*p = '\0';
 	p += i;
 
@@ -392,7 +410,7 @@ HTTP1_DissectRequest(struct http_conn *htc, struct http *hp)
 			c = *e;
 		if (e == b) {
 			// rfc9110 4.2.1 4.2.2 reject empty host
-			return (400);
+			return (http1_garbage(hp, htc, hp->hd[HTTP_HDR_URL].b, 400));
 		}
 		http_Unset(hp, H_Host);
 		http_PrintfHeader(hp, "Host: %.*s", (int)(e - b), b);
