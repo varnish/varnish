@@ -107,7 +107,7 @@ HTTP1_Complete(struct http_conn *htc)
  */
 
 static uint16_t
-http1_dissect_hdrs(struct http *hp, char *p, struct http_conn *htc,
+http1_dissect_hdrs(struct http *hp, struct http_conn *htc, char *p,
     unsigned maxhdr)
 {
 	char *q, *r, *s;
@@ -294,7 +294,7 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 
 	http_Proto(hp);
 
-	return (http1_dissect_hdrs(hp, p, htc, maxhdr));
+	return (http1_dissect_hdrs(hp, htc, p, maxhdr));
 }
 
 /*--------------------------------------------------------------------*/
