@@ -248,13 +248,16 @@ varnishlog_thread(void *priv)
 	unsigned len, vs;
 	const char *tagname, *data;
 	int type, i, opt;
-	struct vsb *vsb = NULL;
+	struct vsb *vsb;
 
 	CAST_OBJ_NOTNULL(v, priv, VARNISH_MAGIC);
 
 	vsl = VSL_New();
 	AN(vsl);
 	vsm = v->vsm_vsl;
+
+	vsb = VSB_new_auto();
+	AN(vsb);
 
 	c = NULL;
 	opt = 0;
@@ -294,8 +297,6 @@ varnishlog_thread(void *priv)
 			data = VSL_CDATA(c->rec.ptr);
 			v->vsl_tag_count[tag]++;
 			if (VSL_tagflags[tag] & SLT_F_BINARY) {
-				if (vsb == NULL)
-					vsb = VSB_new_auto();
 				VSB_clear(vsb);
 				VSB_quote(vsb, data, len, VSB_QUOTE_HEX);
 				AZ(VSB_finish(vsb));
@@ -331,8 +332,7 @@ varnishlog_thread(void *priv)
 	if (c)
 		VSL_DeleteCursor(c);
 	VSL_Delete(vsl);
-	if (vsb != NULL)
-		VSB_destroy(&vsb);
+	VSB_destroy(&vsb);
 
 	return (NULL);
 }
