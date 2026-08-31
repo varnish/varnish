@@ -170,6 +170,8 @@ h2_new_req(struct h2_sess *h2, unsigned stream, struct req **preq)
 		CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 	}
 
+	req->http0->protover = 20;
+
 	r2 = WS_Alloc(req->ws, sizeof *r2);
 	AN(r2);
 	INIT_OBJ(r2, H2_REQ_MAGIC);
