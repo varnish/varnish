@@ -91,6 +91,7 @@
 	    " in combination with -j to write JSON logs."		\
 	)
 
+VUT_OPT_0
 NCSA_OPT_a
 NCSA_OPT_b
 NCSA_OPT_c

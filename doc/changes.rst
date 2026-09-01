@@ -43,6 +43,9 @@ Varnish-Cache NEXT (unreleased)
 
 .. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
 
+* ``varnish{log,ncsa,hist,top}`` all gained the ``-0`` dry-run argument that
+  allows testing a command line before running it for real.
+
 * A deficiency in HTTP/2 request parsing has been fixed by properly comparing
   pseudo-header names instead of doing a prefix match. (VSV00019_)
 

@@ -65,6 +65,7 @@
 	    " and cannot work as a daemon."				\
 	)
 
+VUT_OPT_0
 LOG_OPT_a
 LOG_OPT_A
 VSL_OPT_b

@@ -70,6 +70,7 @@
 	    " > doubles."						\
 	    )
 
+VUT_OPT_0
 HIS_OPT_B
 VSL_OPT_C
 VUT_OPT_d
