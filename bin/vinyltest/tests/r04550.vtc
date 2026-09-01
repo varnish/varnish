@@ -1,0 +1,21 @@
+vtest "std.strftime() NULL check"
+
+varnish v1 -vcl {
+	import std;
+
+	backend default none;
+
+	sub vcl_recv {
+		std.strftime(now, req.http.nonexist);
+		return(synth(200));
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+} -run
+
+logexpect l1 -v v1 -d 1 -g raw -q "VCL_Error" {
+		expect * * VCL_Error {std.strftime: fmt STRING can't be NULL}
+} -run
