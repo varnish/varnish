@@ -83,12 +83,6 @@ vtcp_sa_to_ascii(const void *sa, socklen_t l, char *abuf, unsigned alen,
 			(void)snprintf(pbuf, plen, "Failed");
 		return;
 	}
-	/* XXX dirty hack for v4-to-v6 mapped addresses */
-	if (abuf != NULL && strncmp(abuf, "::ffff:", 7) == 0) {
-		for (i = 0; abuf[i + 7]; ++i)
-			abuf[i] = abuf[i + 7];
-		abuf[i] = '\0';
-	}
 }
 
 /*--------------------------------------------------------------------*/

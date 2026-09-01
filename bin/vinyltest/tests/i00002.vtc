@@ -1,0 +1,42 @@
+vtest "Normalization of IPv4 compatible and mapped IPv6 addresses"
+
+feature ipv4
+feature ipv6
+
+server s1 {
+	rxreq
+	txresp -body "012345\n"
+} -start
+
+varnish v1 -proto PROXY -vcl+backend {
+
+	acl a0 {
+		"192.168/16";
+	}
+
+	acl a1 {
+		"168.192/16";
+	}
+
+	sub vcl_deliver {
+		set resp.http.ca = client.ip;
+		set resp.http.sa = server.ip;
+		set resp.http.la = local.ip;
+		set resp.http.ra = remote.ip;
+		set resp.http.cm = (client.ip ~ a0) + " - " + (client.ip ~ a1);
+		set resp.http.sm = (server.ip ~ a0) + " - " + (server.ip ~ a1);
+	}
+
+} -start
+
+client c1 -proxy1 "[::c0a8:c0a8]:1234 [::ffff:a8c0:a8c0]:5678" {
+
+	txreq -url "/1"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.ca == "192.168.192.168"
+	expect resp.http.sa == "168.192.168.192"
+	expect resp.http.cm == "true - false"
+	expect resp.http.sm == "false - true"
+
+} -run
