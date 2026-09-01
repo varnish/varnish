@@ -64,6 +64,7 @@ sub vcl_builtin_recv {
 	call vcl_req_method;
 	call vcl_req_authorization;
 	call vcl_req_cookie;
+	call vcl_req_range;
 }
 
 sub vcl_req_host {
@@ -118,6 +119,13 @@ sub vcl_req_cookie {
 	if (req.http.Cookie) {
 		# Risky to cache by default.
 		return (pass);
+	}
+}
+
+sub vcl_req_range {
+	# Ref: https://www.rfc-editor.org/rfc/rfc9110.html#section-14.2
+	if (req.method != "GET") {
+		unset req.http.Range;
 	}
 }
 
