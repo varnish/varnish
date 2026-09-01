@@ -1,0 +1,88 @@
+vtest "VSM reader reports which _.index line is malformed"
+
+# _.index is written by vinyld, so a line with the wrong field count is a bug
+# in whatever produced it. The reader refuses the index and stops, and the
+# failure names the line number, the field count against the range the format
+# allows, and the line itself, so the producer can be found.
+
+varnish v1 -vcl {
+	backend default none;
+} -start
+
+delay 0.5
+
+shell {
+	set -e
+
+	# Corrupt copies rather than v1's own workdir, which vinyltest reads
+	# itself. The two message cases only ever reach the management set, so
+	# they copy that alone: the child set is 2.3M of the 2.5M workdir, and
+	# carrying it into a case that never reads it would put that I/O on a
+	# parallel run for nothing.
+	for c in plus minus ; do
+		mkdir -p "${tmpdir}/$c"
+		cp -a "${tmpdir}/v1/_.vsm_mgt" "${tmpdir}/$c/"
+	done
+
+	# The third case does need the child set, so that a reader which
+	# published a partial view would have counters available to publish.
+	cp -a "${tmpdir}/v1" "${tmpdir}/mid"
+
+	# A '+' line with too many fields models a segment name containing
+	# whitespace, which splits into an extra field.
+	printf '+ _.Dictionary.bad na me.deadbeef 0 16 Dictionary x\n' \
+	    | cat - "${tmpdir}/plus/_.vsm_mgt/_.index" \
+	    > "${tmpdir}/plus/_.vsm_mgt/_.index.new"
+	mv "${tmpdir}/plus/_.vsm_mgt/_.index.new" \
+	    "${tmpdir}/plus/_.vsm_mgt/_.index"
+
+	printf -- '- foo bar\n' \
+	    | cat - "${tmpdir}/minus/_.vsm_mgt/_.index" \
+	    > "${tmpdir}/minus/_.vsm_mgt/_.index.new"
+	mv "${tmpdir}/minus/_.vsm_mgt/_.index.new" \
+	    "${tmpdir}/minus/_.vsm_mgt/_.index"
+
+	# The same damage further in, where the reader has already parsed
+	# usable segments before it reaches the bad line.
+	head -2 "${tmpdir}/mid/_.vsm_mgt/_.index" \
+	    > "${tmpdir}/mid/_.vsm_mgt/_.index.new"
+	printf '+ _.Dictionary.bad na me.deadbeef 0 16 Dictionary x\n' \
+	    >> "${tmpdir}/mid/_.vsm_mgt/_.index.new"
+	tail -n +3 "${tmpdir}/mid/_.vsm_mgt/_.index" \
+	    >> "${tmpdir}/mid/_.vsm_mgt/_.index.new"
+	mv "${tmpdir}/mid/_.vsm_mgt/_.index.new" \
+	    "${tmpdir}/mid/_.vsm_mgt/_.index"
+
+	# One reader run per case, kept for the assertions below.
+	for c in plus minus mid ; do
+		varnishstat -n "${tmpdir}/$c" -t 1 -1 \
+		    > "${tmpdir}/$c.out" 2> "${tmpdir}/$c.err" || true
+	done
+}
+
+# A '+' line with too many fields reports its line number and the counts.
+shell -expect "Malformed _.index line 1: 7 fields, expected 3 to 5" {
+	cat "${tmpdir}/plus.err"
+}
+
+# Splitting only happens on whitespace, so the message names that as the
+# cause of the extra fields.
+shell -expect "Whitespace in a segment name or ident" {
+	cat "${tmpdir}/plus.err"
+}
+
+# The '-' path reports the same way, here with too few fields.
+shell -expect "Malformed _.index line 1: 2 fields, expected 3 to 5" {
+	cat "${tmpdir}/minus.err"
+}
+
+# A bad line partway into the index is reported against its own line number.
+shell -expect "Malformed _.index line 3: 7 fields, expected 3 to 5" {
+	cat "${tmpdir}/mid.err"
+}
+
+# The reader publishes no counters, so a partial view of the index never
+# reaches a consumer.
+shell -expect "counters=0" {
+	echo "counters=$(grep -c '^MAIN\.' "${tmpdir}/mid.out" || true)"
+}
