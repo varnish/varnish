@@ -8,7 +8,33 @@ server s1 {
 	txresp -bodylen 5
 } -start
 
-varnish v1 -vcl+backend {} -start
+server s2 {
+	rxreq
+	send "HTTP/1.0 200 OK\r\n"
+	send "Transfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n"
+} -start
+
+server s3 {
+	rxreq
+	send "HTTP/1.0 200 OK\r\n"
+	send "Transfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n"
+} -start
+
+varnish v1 -vcl+backend {
+	sub vcl_backend_fetch {
+		if (bereq.url == "/3") {
+			set bereq.backend = s2;
+		}
+		elseif (bereq.url == "/4") {
+			set bereq.backend = s3;
+		}
+	}
+	sub vcl_backend_response {
+		if (bereq.url == "/4") {
+			return (deliver);
+		}
+	}
+} -start
 
 client c1 {
 	send "POST /1 HTTP/1.0\r\nHost: foo\r\nConnection: keep-alive\r\n"
@@ -29,38 +55,15 @@ client c2 {
 varnish v1 -expect client_req_400 == 1
 varnish v1 -expect sc_rx_junk == 1
 
-server s2 {
-	rxreq
-	send "HTTP/1.0 200 OK\r\n"
-	send "Transfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n"
-} -start
-
-varnish v2 -vcl {
-	backend te10 { .host = "${s2_sock}"; }
-} -start
-
-client c3 -connect ${v2_sock} {
+client c3 {
 	txreq -url /3
 	rxresp
 	expect resp.status == 503
 } -run
 
-varnish v2 -expect fetch_failed == 0
+varnish v1 -expect fetch_failed == 0
 
-server s3 {
-	rxreq
-	send "HTTP/1.0 200 OK\r\n"
-	send "Transfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n"
-} -start
-
-varnish v3 -vcl {
-	backend te10 { .host = "${s3_sock}"; }
-	sub vcl_backend_response {
-		return (deliver);
-	}
-} -start
-
-client c4 -connect ${v3_sock} {
+client c4 {
 	txreq -url /4
 	rxresp
 	expect resp.status == 200
