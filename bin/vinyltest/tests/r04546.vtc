@@ -1,6 +1,6 @@
 vtest "math.strfromd() refuses trailing format garbage"
 
-vinyl v1 -vcl {
+varnish v1 -vcl {
 	import math;
 
 	backend default none;
