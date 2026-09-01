@@ -171,8 +171,11 @@ vwp_main(void *priv)
 		then = Wait_HeapDue(w, &wp);
 		if (wp == NULL)
 			t = -1;
-		else
+		else {
 			t = (int)floor(1e3 * (then - VTIM_real()));
+			if (t < 0)
+				t = 0;
+		}
 		assert(vwp->hpoll > 0);
 		AN(vwp->pollfd);
 		v = poll(vwp->pollfd, vwp->hpoll, t);
