@@ -1,0 +1,22 @@
+vtest "math.strfromd() refuses trailing format garbage"
+
+vinyl v1 -vcl {
+	import math;
+
+	backend default none;
+
+	sub vcl_recv {
+		math.strfromd("%f%n", 1.5);
+		return (synth(200));
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 503
+} -run
+
+logexpect l1 -v v1 -d 1 -g raw -q "VCL_Error" {
+	expect * * VCL_Error {Invalid format}
+} -run
