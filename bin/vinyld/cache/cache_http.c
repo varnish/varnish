@@ -968,6 +968,10 @@ http_GetRange(const struct http *hp, ssize_t *lo, ssize_t *hi, ssize_t len)
 	if (!http_GetHdr(hp, H_Range, &b))
 		return (NULL);
 
+	// rfc9110,l,6481,6484
+	if (!http_method_eq(hp->wkm, WKM_GET))
+		return (NULL);
+
 	t = strchr(b, '=');
 	if (t == NULL)
 		return ("Missing '='");

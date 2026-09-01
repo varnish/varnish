@@ -1,0 +1,30 @@
+vtest "HEAD + range header"
+
+server s0 {
+        rxreq
+        txresp -bodylen 1024
+} -dispatch
+
+varnish v1 -vcl+backend { } -start
+
+client c1 {
+        txreq -req HEAD -hdr "Range: bytes=11-40"
+        rxresp -no_obj
+        expect resp.status == 200
+        expect resp.http.content-length == 1024
+        expect resp.http.content-range == <undef>
+} -run
+
+varnish v1 -vcl+backend {
+	sub vcl_req_range {
+		return;
+	}
+}
+
+client c2 {
+        txreq -url /2 -req HEAD -hdr "Range: bytes=11-40"
+        rxresp -no_obj
+        expect resp.status == 200
+        expect resp.http.content-length == 1024
+        expect resp.http.content-range == <undef>
+} -run
