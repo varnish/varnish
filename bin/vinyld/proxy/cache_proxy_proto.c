@@ -452,7 +452,12 @@ vpx_proto2(const struct worker *wrk, const struct req *req)
 			}
 			vpi->e = vpi2->e;
 		} else if (vpi->t == PP2_TYPE_CRC32C) {
-			uint32_t n_crc32c = vbe32dec(vpi->p);
+			uint32_t n_crc32c;
+			if (vpi->l != 4) {
+				vpi->e = "Length Error";
+				break;
+			}
+			n_crc32c = vbe32dec(vpi->p);
 			vbe32enc(vpi->p, 0);
 			if (crc32c(p, hdr_len) != n_crc32c) {
 				VSL(SLT_ProxyGarbage, req->sp->vxid,
