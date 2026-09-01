@@ -1,0 +1,23 @@
+vtest "blob.encode() panics on negative BYTES"
+
+varnish v1 -vcl {
+	import blob;
+	import std;
+
+	backend default none;
+
+	sub vcl_recv {
+		blob.sub(blob.decode(HEX, encoded="666f6f"), 1B - 2B);
+		return (synth(203));
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 503
+} -run
+
+logexpect l1 -v v1 -d 1 -g raw -q "VCL_Error" {
+	expect * * VCL_Error {size or offset negative in blob.sub}
+} -run
