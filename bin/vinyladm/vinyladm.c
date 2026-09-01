@@ -67,6 +67,7 @@
 #include "vapi/vsm.h"
 #include "vas.h"
 #include "vcli.h"
+#include "vin.h"
 #include "vjsn.h"
 #include "vtcp.h"
 
@@ -390,6 +391,8 @@ usage(int status)
 	fprintf(stderr,
 	    "Usage: varnishadm [-h] [-n workdir] [-p] [-S secretfile] "
 	    "[-T [address]:port] [-t timeout] [command [...]]\n");
+	fprintf(stderr,
+	    "       varnishadm [-n name] -x workdir\n");
 	fprintf(stderr, "\t-n is mutually exclusive with -S and -T\n");
 	exit(status);
 }
@@ -452,7 +455,7 @@ t_arg_timeout(const char *t_arg)
 	return (1);
 }
 
-#define OPTARG "hn:pS:T:t:"
+#define OPTARG "hn:pS:T:t:x:"
 
 int
 main(int argc, char * const *argv)
@@ -461,6 +464,7 @@ main(int argc, char * const *argv)
 	const char *S_arg = NULL;
 	const char *n_arg = NULL;
 	const char *t_arg = NULL;
+	char *wd;
 	int opt, sock;
 
 	if (argc == 2 && !strcmp(argv[1], "--optstring")) {
@@ -495,6 +499,21 @@ main(int argc, char * const *argv)
 		case 't':
 			t_arg = optarg;
 			break;
+		case 'x':
+			AN(optarg);
+			if (strcmp(optarg, "workdir")) {
+				fprintf(stderr, "Invalid -x argument\n");
+				usage(1);
+			}
+			if (argc != optind) {
+				fprintf(stderr, "-x workdir must be the last argument\n");
+				usage(1);
+			}
+			wd = VIN_n_Arg(n_arg);
+			AN(wd);
+			printf("%s\n", wd);
+			free(wd);
+			exit(0);
 		default:
 			usage(1);
 		}

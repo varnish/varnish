@@ -46,6 +46,9 @@ Varnish-Cache NEXT (unreleased)
 * A deficiency in HTTP/2 request parsing has been fixed by properly comparing
   pseudo-header names instead of doing a prefix match. (VSV00019_)
 
+* ``varnishadm -x workdir`` will print the default work directory and exit. This
+  is useful for tools that need to discover the VSM location in most setups.
+
 * ``ReqStart`` records in VSL gained a fourth field that will be either ``http``
   or ``https`` depending on whether TLS was used by the client. Thanks to this:
 
