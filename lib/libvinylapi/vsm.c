@@ -127,6 +127,7 @@ struct vsm_set {
 
 	// _.index reading state
 	struct vlu		*vlu;
+	unsigned		lineno;
 	unsigned		retval;
 	struct vsm_seg		*vg;
 
@@ -532,6 +533,26 @@ vsm_vlu_hash(struct vsm_set *vs, const char *line)
 }
 
 static int
+vsm_bad_index(struct vsm *vd, const struct vsm_set *vs, const char *line,
+    int ac, const char *err)
+{
+
+	/* av[0] is VAV_Parse's error slot, so ac is one more than the
+	 * number of fields on the line
+	 */
+	if (err != NULL)
+		return (vsm_diag(vd, "Malformed _.index line %u: %s: %s",
+		    vs->lineno, err, line));
+	if (ac > 6)
+		return (vsm_diag(vd, "Malformed _.index line %u: %d fields, "
+		    "expected 3 to 5.  Whitespace in a segment name or ident "
+		    "splits it into extra fields: %s", vs->lineno, ac - 1,
+		    line));
+	return (vsm_diag(vd, "Malformed _.index line %u: %d fields, "
+	    "expected 3 to 5: %s", vs->lineno, ac - 1, line));
+}
+
+static int
 vsm_vlu_plus(struct vsm *vd, struct vsm_set *vs, const char *line)
 {
 	char **av;
@@ -541,8 +562,7 @@ vsm_vlu_plus(struct vsm *vd, struct vsm_set *vs, const char *line)
 	av = VAV_Parse(line + 1, &ac, 0);
 
 	if (av[0] != NULL || ac < 4 || ac > 6) {
-		(void)(vsm_diag(vd, "vsm_vlu_plus: bad index (%d/%s)",
-		    ac, av[0]));
+		(void)vsm_bad_index(vd, vs, line, ac, av[0]);
 		VAV_Free(av);
 		return (-1);
 	}
@@ -590,8 +610,7 @@ vsm_vlu_minus(struct vsm *vd, struct vsm_set *vs, const char *line)
 	av = VAV_Parse(line + 1, &ac, 0);
 
 	if (av[0] != NULL || ac < 4 || ac > 6) {
-		(void)(vsm_diag(vd, "vsm_vlu_minus: bad index (%d/%s)",
-		    ac, av[0]));
+		(void)vsm_bad_index(vd, vs, line, ac, av[0]);
 		VAV_Free(av);
 		return (-1);
 	}
@@ -626,6 +645,8 @@ vsm_vlu_func(void *priv, const char *line)
 	CHECK_OBJ_NOTNULL(vd, VSM_MAGIC);
 	AN(line);
 
+	vs->lineno++;
+
 	/* Up the serial counter. This wraps at UINTPTR_MAX/2
 	 * because thats the highest value we can store in struct
 	 * vsm_fantom. */
@@ -654,13 +675,21 @@ vsm_vlu_func(void *priv, const char *line)
 static void
 vsm_readlines(struct vsm_set *vs)
 {
+	struct vsm *vd;
 	int i;
+
+	vd = vs->vsm;
+	CHECK_OBJ_NOTNULL(vd, VSM_MAGIC);
 
 	do {
 		assert(vs->fd >= 0);
 		i = VLU_Fd(vs->vlu, vs->fd);
 	} while (!i);
-	assert(i == -2);
+	if (i != -2) {
+		/* The line handler left the reason in the diag */
+		AN(vd->diag);
+		WRONG(VSB_data(vd->diag));
+	}
 }
 
 static unsigned
@@ -718,6 +747,7 @@ vsm_refresh_set(struct vsm *vd, struct vsm_set *vs)
 		if (vs->fd < 0)
 			return (vs->retval | restarted);
 		VLU_Reset(vs->vlu);
+		vs->lineno = 0;
 		AZ(fstat(vs->fd, &vs->fst));
 		vsm_readlines(vs);
 		vsm_wash_set(vs, 0);
