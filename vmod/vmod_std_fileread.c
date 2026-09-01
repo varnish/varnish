@@ -95,7 +95,7 @@ find_frfile(struct vmod_priv *priv, VCL_STRING file_name)
 {
 	struct frfile *frf = NULL;
 	char *s;
-	ssize_t sz;
+	ssize_t sz = -1;
 
 	AN(priv);
 
@@ -126,7 +126,7 @@ find_frfile(struct vmod_priv *priv, VCL_STRING file_name)
 
 	s = VFIL_readfile(NULL, file_name, &sz);
 	if (s != NULL) {
-		assert(sz > 0);
+		assert(sz >= 0);
 		ALLOC_OBJ(frf, CACHED_FILE_MAGIC);
 		AN(frf);
 		REPLACE(frf->file_name, file_name);
