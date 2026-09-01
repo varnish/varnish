@@ -338,6 +338,11 @@ vmod_strftime(VRT_CTX, VCL_TIME t, VCL_STRING fmt)
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 
+	if (fmt == NULL) {
+		VRT_fail(ctx, "std.strftime: fmt STRING can't be NULL");
+		return ("");
+	}
+
 	tt = (time_t)(intmax_t)t;
 	if (gmtime_r(&tt, &tm) == NULL)
 		return ("");
