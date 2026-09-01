@@ -1,0 +1,22 @@
+vtest "std.fileread() doesn't assert on empty file"
+
+shell {
+	touch ${tmpdir}/empty
+}
+
+varnish v1 -vcl {
+	import std;
+
+	backend default none;
+
+	sub vcl_recv {
+		std.fileread("${tmpdir}/empty");
+		return(synth(200));
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
