@@ -46,6 +46,16 @@
 	    "Print version information and exit."			\
 	)
 
+#define VUT_OPT_0							\
+	VOPT("0", "[-0]", "Check configuration",			\
+	    "Return immediately (i.e. process 0 transactions) if the "	\
+	    "configuration is valid. This option means the process will "	\
+	    "not try to write a PID file, daemonize, connect to a VSM, "\
+	    "or open a log file, but it will run all the other "	\
+	    "pre-flight operation, including validating the VSL "	\
+	    "queries."							\
+	)
+
 #define VUT_OPT_d							\
 	VOPT("d", "[-d]", "Process old log entries and exit",		\
 	    "Process log records at the head of the log and exit."	\

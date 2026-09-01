@@ -44,6 +44,7 @@ struct VUT {
 	const char	*progname;
 
 	/* Options */
+	int		dryrun_opt;
 	int		d_opt;
 	int		D_opt;
 	int		g_arg;

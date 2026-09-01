@@ -62,6 +62,7 @@
 	    " This option has no effect if -1 option is also used."	\
 	)
 
+VUT_OPT_0
 TOP_OPT_1
 VSL_OPT_b
 VSL_OPT_c

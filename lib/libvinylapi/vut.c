@@ -162,6 +162,9 @@ VUT_Arg(struct VUT *vut, int opt, const char *arg)
 	AN(opt);
 
 	switch (opt) {
+	case '0':
+		vut->dryrun_opt = 1;
+		return (1);
 	case 'd':
 		/* Head */
 		vut->d_opt = 1;
@@ -312,6 +315,9 @@ VUT_Setup(struct VUT *vut)
 		VUT_Error(vut, 1, "Query expression error:\n%s",
 		    VSL_Error(vut->vsl));
 
+	if (vut->dryrun_opt)
+		return;
+
 	/* Setup input */
 	if (vut->r_arg) {
 		c = VSL_CursorFile(vut->vsl, vut->r_arg, 0);
@@ -416,7 +422,7 @@ VUT_Main(struct VUT *vut)
 	CHECK_OBJ_NOTNULL(vut, VUT_MAGIC);
 	AN(vut->vslq);
 
-	while (!VSIG_int && !VSIG_term) {
+	while (!VSIG_int && !VSIG_term && !vut->dryrun_opt) {
 		if (VSIG_hup != vut->last_sighup) {
 			/* sighup callback */
 			vut->last_sighup = VSIG_hup;
