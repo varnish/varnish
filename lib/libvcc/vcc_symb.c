@@ -299,7 +299,7 @@ VCC_SymbolGet(struct vcc *tl, vcc_ns_t ns, vcc_kind_t kind,
 			vcc_ErrWhere(tl, tn);
 			return (NULL);
 		}
-		if (tn->tok == CSTR && !strcmp(tn->dec,"")) {
+		if (tn->tok == CSTR && !vstrcmp(tn->dec, "")) {
 			VSB_cat(tl->sb,
 			    "Illegal empty header name.\n"
 			    "At: ");
