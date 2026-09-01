@@ -299,6 +299,13 @@ VCC_SymbolGet(struct vcc *tl, vcc_ns_t ns, vcc_kind_t kind,
 			vcc_ErrWhere(tl, tn);
 			return (NULL);
 		}
+		if (tn->tok == CSTR && !strcmp(tn->dec,"")) {
+			VSB_cat(tl->sb,
+			    "Illegal empty header name.\n"
+			    "At: ");
+			vcc_ErrWhere(tl, tn);
+			return (NULL);
+		}
 		if (tn->tok == ID)
 			st = vcc_symtab_str(st, tn->b, tn->e, tn->tok);
 		else
