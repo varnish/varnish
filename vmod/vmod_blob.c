@@ -533,8 +533,6 @@ vmod_sub(VRT_CTX, VCL_BLOB b, VCL_BYTES n, VCL_BYTES off)
 {
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
-	assert(n >= 0);
-	assert(off >= 0);
 
 	CHECK_OBJ_ORNULL(b, VRT_BLOB_MAGIC);
 	if (b == NULL || b->len == 0 || b->blob == NULL) {
