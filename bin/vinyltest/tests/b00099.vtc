@@ -1,0 +1,17 @@
+vtest "vinyltest -expect parses UINT64_MAX literal as a number"
+
+# Regression: -expect must accept the literal UINT64_MAX value
+# (0xffffffffffffffff) as a numeric operand. Probeless backends report
+# .happy with all probe-history bits set, i.e. 0xffffffffffffffff, so
+# this comparison is essential for real backend health-status tests.
+#
+# Before the fix, strtoumax()'s "u != UINTMAX_MAX" overflow check fired
+# both for real overflow AND legitimate UINTMAX_MAX inputs, misinterpreting
+# the digit string as a stat field name and failing with
+# "stats field <number> unknown".
+
+server s1 { } -start
+
+varnish v1 -vcl+backend { } -start
+
+varnish v1 -expect VBE.vcl1.s1.happy == 0xffffffffffffffff

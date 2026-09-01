@@ -34,6 +34,7 @@
 
 #include <sys/socket.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <inttypes.h>
@@ -1037,8 +1038,9 @@ vinyl_expect(struct vinyl *v, char * const *av)
 	} else {
 		AN(av[1]);
 		AN(av[2]);
+		errno = 0;
 		u = strtoumax(av[2], &p, 0);
-		if (u != UINTMAX_MAX && *p == '\0')
+		if (errno != ERANGE && *p == '\0')
 			sp.rhs.val = u;
 		else
 			sp.rhs.pattern = av[2];
