@@ -56,6 +56,7 @@ struct priv_vcl {
 	struct vclref		*vclref_discard;
 	struct vclref		*vclref_cold;
 	VCL_DURATION		vcl_discard_delay;
+	VCL_DURATION		cold_stall;
 	VCL_BACKEND		be;
 	unsigned		cold_be;
 	unsigned		cooling_be;
@@ -470,6 +471,9 @@ event_cold(VRT_CTX, const struct vmod_priv *priv)
 
 	VSL(SLT_Debug, NO_VXID, "%s: VCL_EVENT_COLD", VCL_Name(ctx->vcl));
 
+	if (priv_vcl->cold_stall > 0.0)
+		VTIM_sleep(priv_vcl->cold_stall);
+
 	VRT_DelDirector(&priv_vcl->be);
 
 	if (priv_vcl->cold_be) {
@@ -546,6 +550,17 @@ xyzzy_vcl_discard_delay(VRT_CTX, struct vmod_priv *priv, VCL_DURATION delay)
 	CAST_OBJ_NOTNULL(priv_vcl, priv->priv, PRIV_VCL_MAGIC);
 	assert(delay > 0.0);
 	priv_vcl->vcl_discard_delay = delay;
+}
+
+VCL_VOID v_matchproto_(td_debug_cold_stall)
+xyzzy_cold_stall(VRT_CTX, struct vmod_priv *priv, VCL_DURATION delay)
+{
+	struct priv_vcl *priv_vcl;
+
+	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
+	CAST_OBJ_NOTNULL(priv_vcl, priv->priv, PRIV_VCL_MAGIC);
+	assert(delay > 0.0);
+	priv_vcl->cold_stall = delay;
 }
 
 VCL_VOID v_matchproto_(td_debug_test_probe)

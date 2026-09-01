@@ -1,0 +1,61 @@
+vtest "vcl.discard when the child stops answering the CLI"
+
+# Discarding a VCL first cools it, and the cold event runs on the child's
+# CLI thread. A child that stalls there misses its cli_timeout and gets
+# killed, which must leave the manager able to report the failure and
+# restart the child, not assert on the state the VCL never reached.
+
+# A warm VCL that holds up the cold event for longer than cli_timeout.
+shell {
+	cat >${tmpdir}/f1 <<-EOF
+	vcl 4.1;
+
+	import debug;
+
+	backend default none;
+
+	sub vcl_init {
+		debug.cold_stall(10s);
+	}
+	EOF
+}
+
+# The kill below makes the child panic. no_coredump keeps the resulting
+# core out of the manager's exit status, and passing it as an argument also
+# avoids a real core where RLIMIT_CORE is honoured.
+#
+# cli_timeout has to stay above the round trips of the restart further down,
+# not just above the stall.
+varnish v1 -arg "-p feature=+no_coredump -p cli_timeout=3" -vcl {
+	backend default none;
+} -start
+
+varnish v1 -cliok "param.set auto_restart on"
+
+# Loaded warm, but not active, so that it can be discarded.
+varnish v1 -cliok "vcl.load stall ${tmpdir}/f1 warm"
+varnish v1 -cliexpect "warm *warm *0 *stall" "vcl.list"
+
+# The child never answers, so the manager kills it and the command fails.
+varnish v1 -clierr 400 "vcl.discard stall"
+
+# The manager survived, and the discard went through: the VCL is gone.
+varnish v1 -clierr 106 "vcl.discard stall"
+
+# auto_restart brings the child back. Being killed for CLI silence is a
+# panic by design, so the panic is expected here.
+delay 5
+varnish v1 -cliexpect "running" "status"
+
+# Surviving to reap the child is what makes its panic reportable:
+# mgt_panic_record() runs from mgt_reap_child(). The backtrace it carries
+# names the thread that stopped answering, but its format depends on the
+# available unwinder, so only the panic itself is asserted here.
+varnish v1 -cliexpect "It's time for the big quit" "panic.show"
+varnish v1 -cliok "panic.clear"
+
+# The discarded VCL is gone, and was not left stranded in the new child.
+varnish v1 -cliexpect "active *auto *warm *0 *vcl1" "vcl.list"
+varnish v1 -cliexpect ! "stall" "vcl.list"
+
+varnish v1 -expectexit 0x40

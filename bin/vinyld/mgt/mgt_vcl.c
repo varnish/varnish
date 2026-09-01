@@ -697,8 +697,20 @@ mgt_vcl_discard(struct cli *cli, struct vclprog *vp)
 	if (mcf_is_label(vp)) {
 		AN(vp->warm);
 		vp->warm = 0;
-	} else {
-		(void)mgt_vcl_setstate(cli, vp, VCL_STATE_COLD);
+	} else if (mgt_vcl_setstate(cli, vp, VCL_STATE_COLD)) {
+		/*
+		 * Cooling cannot fail in the child, VCL_Poll() asserts as
+		 * much, so this is a CLI failure and MCH_Cli_Fail() has
+		 * signalled the child. The CLI being unusable is what matters
+		 * here: nothing can be told to the child, so finish the
+		 * discard as with none running.
+		 */
+		MGT_Complain(C_ERR,
+		    "VCL %s discarded after the child failed to cool it",
+		    vp->name);
+		VTAILQ_REMOVE(&discardhead, vp, discard_list);
+		mgt_vcl_del(vp);
+		return;
 	}
 	if (MCH_Running()) {
 		AZ(vp->warm);

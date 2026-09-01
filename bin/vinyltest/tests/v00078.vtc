@@ -1,0 +1,30 @@
+vtest "vcl.discard with no child running"
+
+# Cooling a VCL is a local operation when there is no child to tell:
+# mgt_vcl_askchild() sets the warm flag itself and reports success. This is
+# the behaviour a discard falls back on when the child has been killed for
+# not answering the CLI, see v00077.
+
+shell {
+	cat >${tmpdir}/f1 <<-EOF
+	vcl 4.1;
+	backend default none;
+	EOF
+}
+
+varnish v1 -vcl {
+	backend default none;
+} -start
+
+varnish v1 -cliok "vcl.load discardme ${tmpdir}/f1 warm"
+varnish v1 -cliexpect "warm *warm *0 *discardme" "vcl.list"
+
+varnish v1 -cliok "stop"
+varnish v1 -cliexpect "stopped" "status"
+
+varnish v1 -cliok "vcl.discard discardme"
+varnish v1 -clierr 106 "vcl.discard discardme"
+
+varnish v1 -cliok "start"
+varnish v1 -cliexpect "running" "status"
+varnish v1 -cliexpect "active *auto *warm *0 *vcl1" "vcl.list"
