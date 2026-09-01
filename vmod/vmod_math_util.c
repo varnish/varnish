@@ -82,6 +82,10 @@ valid_fmt(VCL_STRING fmt)
 		while (*fmt >= '0' && *fmt <= '9')
 			fmt++;
 	}
+
+	if (fmt[0] == '\0' || fmt[1] != '\0')
+		return (0);
+
 	switch (*fmt) {
 	case 'a':
 	case 'A':
