@@ -43,9 +43,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS += --with-unwind
 endif
 
 install-data-local:
-	if test "${VARNISH_STATE_DIR}" = "$(DESTDIR)$(localstatedir)/vinyl-cache" ; then \
-		$(install_sh) -d -m 0755 "${VARNISH_STATE_DIR}"; \
-	fi
+	$(install_sh) -d -m 0755 "${VARNISH_STATE_DIR}"
 
 distclean-local:
 	-find . '(' -name '*.gcda' -o -name '*.gcda' ')' -exec rm '{}' ';'

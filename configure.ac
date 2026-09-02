@@ -649,12 +649,10 @@ if test "x$ac_cv_have_working_close_range" = xyes; then
 	     [Define if OS has working close_range()])
 fi
 
-# Run-time directory
-if test "${localstatedir}" = '${prefix}/var' ; then
-   VARNISH_STATE_DIR='/var/run'
-else
-   VARNISH_STATE_DIR='${localstatedir}/varnish'
-fi
+AC_ARG_WITH([statedir],
+  AS_HELP_STRING([--with-statedir=DIR], [Location of the local state directory, default ${localstatedir}/varnish]),
+  [VARNISH_STATE_DIR="$withval"],
+  [VARNISH_STATE_DIR='${localstatedir}/varnish'])
 AC_SUBST(VARNISH_STATE_DIR)
 
 # Default configuration directory.
