@@ -89,7 +89,6 @@ TRANSPORTS
 
 htc_complete_f H2_prism_complete;
 void H2_PU_Sess(struct worker *, struct sess *, struct req *);
-void H2_OU_Sess(struct worker *, struct sess *, struct req *);
 
 const struct transport *XPORT_ByNumber(uint16_t no);
 void XPORT_Register(struct transport *xp);

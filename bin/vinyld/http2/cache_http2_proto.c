@@ -157,18 +157,14 @@ h2_errcheck(const struct h2_req *r2)
 /**********************************************************************/
 
 struct h2_req *
-h2_new_req(struct h2_sess *h2, unsigned stream, struct req **preq)
+h2_new_req(struct h2_sess *h2, unsigned stream)
 {
 	struct req *req;
 	struct h2_req *r2;
 
 	ASSERT_H2_SESS(h2);
-	if (preq != NULL)
-		TAKE_OBJ_NOTNULL(req, preq, REQ_MAGIC);
-	else {
-		req = Req_New(h2->sess, NULL);
-		CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
-	}
+	req = Req_New(h2->sess, NULL);
+	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 
 	r2 = WS_Alloc(req->ws, sizeof *r2);
 	AN(r2);
@@ -1082,7 +1078,7 @@ h2_procframe(struct worker *wrk, struct h2_sess *h2, h2_frame h2f)
 
 	if (h2f == H2_F_HEADERS) {
 		AZ(r2); /* We checked against highest_stream above. */
-		r2 = h2_new_req(h2, h2->rxf_stream, NULL);
+		r2 = h2_new_req(h2, h2->rxf_stream);
 		CHECK_OBJ_NOTNULL(r2, H2_REQ_MAGIC);
 		h2->highest_stream = r2->stream;
 	}
