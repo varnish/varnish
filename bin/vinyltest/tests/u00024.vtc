@@ -1,0 +1,25 @@
+vtest "varnishd -x parameter-json produces valid, well-shaped JSON"
+
+feature cmd "jq -V"
+
+shell {
+	set -e
+	varnishd -x parameter-json > result.json
+
+	jq '
+		type == "object" or error("top-level value is not an object"),
+		has("deprecated_dummy") == false or error("deprecated_dummy should not be present"),
+
+		.first_byte_timeout.units == "seconds" or error("first_byte_timeout: wrong units"),
+		.first_byte_timeout.default == "60.000" or error("first_byte_timeout: wrong default"),
+		.first_byte_timeout.minimum == "0.000" or error("first_byte_timeout: wrong minimum"),
+		(.first_byte_timeout | has("maximum")) == false or error("first_byte_timeout: unexpected maximum"),
+		(.first_byte_timeout.flags | index("timeout")) != null or error("first_byte_timeout: missing timeout flag"),
+		(.first_byte_timeout.description | type) == "string" or error("first_byte_timeout: missing description"),
+
+		.auto_restart.units == "bool" or error("auto_restart: wrong units"),
+		.auto_restart.default == "on" or error("auto_restart: wrong default"),
+		(.auto_restart | has("minimum")) == false or error("auto_restart: unexpected minimum"),
+		(.auto_restart | has("flags")) == false or error("auto_restart: unexpected flags")
+	' result.json
+}
