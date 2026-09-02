@@ -43,7 +43,7 @@ jobs:
         run: |
           ./autogen.sh
           ./configure
-          make dist
+          make -j dist
 
       - name: Upload tarball
         uses: actions/upload-artifact@v7
