@@ -3,7 +3,7 @@ name: Compile and Check
 on:
   push:
     branches:
-      - "*"
+      - "**"
     tags:
       - varnish-*
   workflow_dispatch:
