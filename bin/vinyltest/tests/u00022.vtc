@@ -17,7 +17,9 @@ shell {
 }
 
 # missing -x argument
-shell -exit 1 -match "option requires an argument -- 'x'" {
+# NB: getopt's exact wording differs across libcs (glibc/musl/BSD), so only
+# match the portable common substring.
+shell -exit 1 -match "requires an argument" {
 	varnishadm -x
 }
 
