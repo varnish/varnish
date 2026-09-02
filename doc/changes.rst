@@ -41,6 +41,10 @@ Varnish-Cache NEXT (unreleased)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+* ``tls.cert.list -j`` no longer returns an empty body with a ``200``
+  status when the child process is not running; it now returns an
+  empty JSON array (``[]``).
+
 .. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
 
 * ``varnish{log,ncsa,hist,top}`` all gained the ``-0`` dry-run argument that
