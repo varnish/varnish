@@ -881,7 +881,7 @@ http_GetContentLength(const struct http *hp)
 	cl = VNUM_uint(b, NULL, &b);
 	if (cl < 0)
 		return (-2);
-	while (vct_islws(*b))
+	while (vct_isows(*b))
 		b++;
 	if (*b != '\0')
 		return (-2);
@@ -937,7 +937,7 @@ http_GetContentRange(const struct http *hp, ssize_t *lo, ssize_t *hi)
 		if (cl <= 0)
 			return (-2);
 	}
-	while (vct_islws(*b))
+	while (vct_isows(*b))
 		b++;
 	if (*b != '\0')
 		return (-2);
@@ -996,7 +996,7 @@ http_GetRange(const struct http *hp, ssize_t *lo, ssize_t *hi, ssize_t len)
 	if (*hi >= 0 && *hi < *lo)
 		return ("high smaller than low");
 
-	while (vct_islws(*b))
+	while (vct_isows(*b))
 		b++;
 	if (*b != '\0')
 		return ("Trailing stuff");
