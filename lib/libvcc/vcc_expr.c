@@ -651,9 +651,9 @@ vcc_func(struct vcc *tl, struct expr **e, const void *priv,
 		if (fa->result == NULL && fa->type == ENUM && fa->val != NULL)
 			fa->result = vcc_do_enum(tl, cfunc, vstrlen(fa->val), fa->val);
 		if (fa->result == NULL && fa->val != NULL) {
-			if (fa->type == BOOL && fa->val[0] == 'f')
+			if (fa->type == BOOL && !vstrcmp(fa->val, "false"))
 				fa->result = vcc_mk_expr(fa->type, "0");
-			else if (fa->type == BOOL && fa->val[0] == 't')
+			else if (fa->type == BOOL && !vstrcmp(fa->val, "true"))
 				fa->result = vcc_mk_expr(fa->type, "1");
 			else
 				fa->result = vcc_mk_expr(fa->type, "%s", fa->val);
