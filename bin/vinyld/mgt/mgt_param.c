@@ -1028,7 +1028,7 @@ MCF_DumpJsonParam(void)
 			MCF_DYN_FLAGS(TYPE_TIMEOUT, "timeout");
 			MCF_DYN_FLAGS(DELAYED_EFFECT, "delayed");
 			MCF_DYN_FLAGS(MUST_RESTART, "must_restart");
-			MCF_DYN_FLAGS(MUST_RELOAD, "smust_reload");
+			MCF_DYN_FLAGS(MUST_RELOAD, "must_reload");
 			MCF_DYN_FLAGS(EXPERIMENTAL, "experimental");
 			MCF_DYN_FLAGS(WIZARD, "wizard");
 			MCF_DYN_FLAGS(ONLY_ROOT, "only_root");
