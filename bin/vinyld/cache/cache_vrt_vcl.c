@@ -538,7 +538,7 @@ VRT_VCL_Allow_Discard(struct vclref **refp)
 	/* NB: A VCL may be released by a VMOD at any time, but it must happen
 	 * after a warmup and before the end of a cooldown. The release may or
 	 * may not happen while the same thread holds the temperature lock, so
-	 * instead we check that all references are gone in VCL_Nuke.
+	 * instead we check that all references are gone in VCL_Poll().
 	 */
 
 	Lck_Lock(&vcl_mtx);
