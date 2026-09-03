@@ -858,6 +858,8 @@ ban_render(struct cli *cli, const uint8_t *bs, int quote)
 		if (BANS_HAS_ARG2_DOUBLE(bt.arg1)) {
 			vdur_render(buf, bt.arg2_double);
 			VCLI_Out(cli, "%s", buf);
+		} else if (BANS_HAS_ARG2_BOOL(bt.arg1)) {
+			VCLI_Out(cli, "%s", bt.arg2_bool ? "true" : "false");
 		} else if (quote) {
 			VCLI_Quote(cli, bt.arg2);
 		} else {
