@@ -364,6 +364,7 @@ vcc_ParseProbe(struct vcc *tl)
 	ERRCHK(tl);
 	AN(sym);
 	vcc_ParseProbeSpec(tl, sym, &p);
+	ERRCHK(tl);
 
 	if (sym->type == DEFAULT) {
 		if (tl->default_probe != NULL) {
