@@ -52,6 +52,7 @@ struct vmod_import {
 	struct vsb			*json;
 	char				*path;
 	VTAILQ_ENTRY(vmod_import)	list;
+	int				listed;
 	int				from_vext;
 	int				unimported_vext;
 
@@ -277,6 +278,7 @@ vcc_VmodLoad(struct vcc *tl, struct vmod_import *vim)
 		break;
 	}
 	VTAILQ_INSERT_TAIL(&imports, vim, list);
+	vim->listed = 1;
 
 	return (0);
 }
@@ -395,6 +397,8 @@ vcc_vim_destroy(struct vmod_import **vimp)
 	struct vmod_import *vim;
 
 	TAKE_OBJ_NOTNULL(vim, vimp, VMOD_IMPORT_MAGIC);
+	if (vim->listed)
+		VTAILQ_REMOVE(&imports, vim, list);
 	if (vim->path)
 		free(vim->path);
 	if (vim->vj)
