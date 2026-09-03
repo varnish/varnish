@@ -311,11 +311,12 @@ VRT_stevedore(const char *nm)
 ctype							\
 VRT_stevedore_##nm(VCL_STEVEDORE stv)			\
 {							\
+							\
+	CHECK_OBJ_ORNULL(stv, STEVEDORE_MAGIC);		\
 	if (stv == NULL)				\
 		return (0);				\
 	if (stv->var_##nm == NULL)			\
 		return (dval);				\
-	CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);	\
 	return (stv->var_##nm(stv));			\
 }
 #include "tbl/vrt_stv_var.h"
