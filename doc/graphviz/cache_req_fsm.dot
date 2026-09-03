@@ -28,7 +28,7 @@ digraph cache_req_fsm {
 	init [
 	      shape=record
 	      label="
-	      {VCL_Load:|
+	      {VCL_EVENT_LOAD:|
 		      {vcl_init}|
 		      {<ok>ok|<fail>fail}}"
 	]
@@ -40,7 +40,7 @@ digraph cache_req_fsm {
 	fini [
 	      shape=record
 	      label="
-	      {VCL_Nuke:|
+	      {VCL_EVENT_DISCARD:|
 		      {vcl_fini}|
 		      {<ok>ok}}"
 	]
