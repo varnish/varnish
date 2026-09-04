@@ -229,7 +229,8 @@ static const char *
 ban_add_spec(struct ban_proto *bp, const struct pvar *pv, int op, const char *a3)
 {
 
-	assert(! BANS_HAS_ARG2_DOUBLE(pv->tag));
+	assert(! BANS_HAS_ARG2_DOUBLE(pv->tag) &&
+	    ! BANS_HAS_ARG2_BOOL(pv->tag));
 
 	ban_add_lump(bp, a3, strlen(a3) + 1);
 	VSB_putc(bp->vsb, op);
@@ -253,6 +254,30 @@ ban_add_double(const struct ban_proto *bp, const struct pvar *pv, int op, double
 	vbe64enc(denc, dtmp);
 
 	ban_add_lump(bp, denc, sizeof denc);
+	VSB_putc(bp->vsb, op);
+	return (NULL);
+}
+
+static const char *
+ban_add_bool(struct ban_proto *bp, const struct pvar *pv, int op, const char *a3)
+{
+	uint8_t b;
+
+	CHECK_OBJ_NOTNULL(bp, BAN_PROTO_MAGIC);
+	AN(pv);
+	AN(a3);
+	assert(BANS_HAS_ARG2_BOOL(pv->tag));
+
+	if (!strcmp("true", a3))
+		b = 1;
+	else if (!strcmp("false", a3))
+		b = 0;
+	else {
+		return (ban_error(bp,
+		    "expected boolean (true/false), got \"%s\"", a3));
+	}
+
+	ban_add_lump(bp, &b, 1);
 	VSB_putc(bp->vsb, op);
 	return (NULL);
 }
@@ -318,6 +343,8 @@ BAN_AddTest(struct ban_proto *bp,
 
 	if (pv->flag & BANS_FLAG_DURATION)
 		return (ban_add_duration(bp, pv, op, a3));
+	else if (pv->flag & BANS_FLAG_BOOL)
+		return (ban_add_bool(bp, pv, op, a3));
 	else
 		return (ban_add_spec(bp, pv, op, a3));
 }

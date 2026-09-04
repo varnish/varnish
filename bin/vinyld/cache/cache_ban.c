@@ -60,6 +60,7 @@ uint64_t bans_persisted_fragmentation;
 struct ban_test {
 	uint8_t			oper;
 	uint8_t			arg1;
+	uint8_t			arg2_bool;
 	const char		*arg1_spec;
 	const char		*arg2;
 	double			arg2_double;
@@ -237,6 +238,9 @@ ban_iter(const uint8_t **bs, struct ban_test *bt)
 	if (BANS_HAS_ARG2_DOUBLE(bt->arg1)) {
 		dtmp = vbe64dec(lump);
 		memcpy(&bt->arg2_double, &dtmp, sizeof dtmp);
+		return;
+	} else if (BANS_HAS_ARG2_BOOL(bt->arg1)) {
+		bt->arg2_bool = *(uint8_t const *)lump;
 		return;
 	}
 	bt->arg2 = lump;
@@ -500,6 +504,7 @@ ban_evaluate(struct worker *wrk, const uint8_t *bsarg, struct objcore *oc,
 	const char *p;
 	const char *arg1;
 	double darg1, darg2;
+	int barg1, barg2;
 	hdr_t hdr;
 	int rv;
 
@@ -520,6 +525,7 @@ ban_evaluate(struct worker *wrk, const uint8_t *bsarg, struct objcore *oc,
 		ban_iter(&bs, &bt);
 		arg1 = NULL;
 		darg1 = darg2 = nan("");
+		barg1 = barg2 = -1;
 		switch (bt.arg1) {
 		case BANS_ARG_URL:
 			AN(reqhttp);
@@ -560,13 +566,28 @@ ban_evaluate(struct worker *wrk, const uint8_t *bsarg, struct objcore *oc,
 			darg1 = 0.0 - oc->last_lru;
 			darg2 = 0.0 - (ban_time(bsarg) - bt.arg2_double);
 			break;
+		case BANS_ARG_OBJHFM:
+			barg1 = oc->flags & OC_F_HFM ? 1 : 0;
+			barg2 = bt.arg2_bool;
+			break;
+		case BANS_ARG_OBJHFP:
+			barg1 = oc->flags & OC_F_HFP ? 1 : 0;
+			barg2 = bt.arg2_bool;
+			break;
+		case BANS_ARG_OBJUNCACHEABLE:
+			barg1 = (oc->flags & (OC_F_HFM | OC_F_HFP)) ? 1 : 0;
+			barg2 = bt.arg2_bool;
+			break;
 		default:
 			WRONG("Wrong BAN_ARG code");
 		}
 
 		switch (bt.oper) {
 		case BANS_OPER_EQ:
-			if (arg1 == NULL) {
+			if (barg1 != -1) {
+				if (barg1 != barg2)
+					return (0);
+			} else if (arg1 == NULL) {
 				if (isnan(darg1) || darg1 != darg2)
 					return (0);
 			} else if (strcmp(arg1, bt.arg2)) {
@@ -574,7 +595,10 @@ ban_evaluate(struct worker *wrk, const uint8_t *bsarg, struct objcore *oc,
 			}
 			break;
 		case BANS_OPER_NEQ:
-			if (arg1 == NULL) {
+			if (barg1 != -1) {
+				if (barg1 == barg2)
+					return (0);
+			} else if (arg1 == NULL) {
 				if (! isnan(darg1) && darg1 == darg2)
 					return (0);
 			} else if (!strcmp(arg1, bt.arg2)) {
