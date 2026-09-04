@@ -30,6 +30,7 @@
  */
 
 struct VSC_vbe;
+struct vco;
 
 /* cache_http1_fetch.c [V1F] */
 int V1F_SendReq(struct worker *, struct busyobj *, uint64_t *ctr_hdrbytes,
@@ -54,11 +55,9 @@ struct v1p_acct {
 
 int V1P_Enter(void);
 void V1P_Leave(void);
-stream_close_t V1P_Process(const struct req *, int fd, struct v1p_acct *,
-    vtim_real deadline);
+stream_close_t V1P_Process(const struct req *, int fd, const struct vco *,
+    void *oper_priv, struct v1p_acct *, vtim_real deadline);
 void V1P_Charge(struct req *, const struct v1p_acct *, struct VSC_vbe *);
-
-struct vco;
 
 /* cache_http1_line.c */
 void V1L_Chunked(struct v1l *v1l);

@@ -536,8 +536,9 @@ vbe_dir_http1pipe(VRT_CTX, VCL_BACKEND d)
 				deadline = cache_param->pipe_task_deadline;
 			if (deadline > 0.)
 				deadline += ctx->req->sp->t_idle;
-			retval = V1P_Process(ctx->req, *PFD_Fd(pfd), &v1a,
-			    deadline);
+			retval = V1P_Process(ctx->req, *PFD_Fd(pfd),
+			    ctx->bo->htc->oper, ctx->bo->htc->oper_priv,
+			    &v1a, deadline);
 		}
 		VSLb_ts_req(ctx->req, "PipeSess", W_TIM_real(ctx->req->wrk));
 		ctx->bo->htc->doclose = retval;
