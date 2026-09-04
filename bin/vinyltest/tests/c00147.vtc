@@ -50,5 +50,12 @@ client c3 {
 	expect resp.status == 503
 } -run
 
+client c4 {
+	txreq -url /4 -nolen -hdr "Transfer-Encoding: chunked, identity"
+	rxresp
+	expect resp.status == 400
+} -run
+
 varnish v1 -expect fetch_failed == 1
 varnish v1 -expect backend_recycle == 1
+varnish v1 -vsl_catchup
