@@ -256,10 +256,18 @@ pool_poolherder(void *priv)
 
 		while ((pp = VTAILQ_FIRST(&deadpools)) != NULL) {
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
+			int active;
 
 			AN(pp->die);
-			if (pp->nthr > 0)
+			if (pp->nthr > 0 || pp->wrk_dying > 0)
 				continue;
+
+			Lck_Lock(&pp->mtx);
+			active = (pp->nthr > 0 || pp->wrk_dying > 0) ? 1 : 0;
+			Lck_Unlock(&pp->mtx);
+
+			if (active)
+				 continue;
 
 			VTAILQ_REMOVE(&deadpools, pp, list);
 			pool_destroy(pp);

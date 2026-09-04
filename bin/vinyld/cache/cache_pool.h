@@ -42,6 +42,7 @@ struct pool {
 	VTAILQ_HEAD(,poolsock)		poolsocks;
 
 	int				die;
+	unsigned			wrk_dying;
 	pthread_cond_t			herder_cond;
 	pthread_t			herder_thr;
 
