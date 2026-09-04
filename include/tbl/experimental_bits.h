@@ -33,7 +33,7 @@
 
 /*lint -save -e525 -e539 */
 
-EXPERIMENTAL_BIT(DROP_POOLS,	drop_pools,	"Drop thread pools")
+// currently no experimental bits
 #undef EXPERIMENTAL_BIT
 
 /*lint -restore */

@@ -563,6 +563,7 @@ child_main(int sigmagic, size_t altstksz)
 		VTIM_sleep(shutdown_delay);
 
 	VCA_Shutdown();
+	cache_param->wthread_pools = 0;
 	BAN_Shutdown();
 	STV_warn();
 	VCL_Shutdown();

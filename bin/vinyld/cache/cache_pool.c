@@ -208,8 +208,7 @@ pool_poolherder(void *priv)
 				nwq++;
 				continue;
 			}
-		} else if (nwq > cache_param->wthread_pools &&
-				EXPERIMENT(EXPERIMENT_DROP_POOLS)) {
+		} else if (nwq > cache_param->wthread_pools) {
 			Lck_Lock(&pool_mtx);
 			pp = VTAILQ_FIRST(&pools);
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
@@ -219,7 +218,7 @@ pool_poolherder(void *priv)
 				nwq--;
 			Lck_Unlock(&pool_mtx);
 			if (!pp->die) {
-				VSL(SLT_Debug, NO_VXID, "XXX Kill Pool %p", pp);
+				VSL(SLT_Debug, NO_VXID, "Kill Pool %p", pp);
 				pp->die = 1;
 				VCA_DestroyPool(pp);
 				PTOK(pthread_cond_signal(&pp->herder_cond));

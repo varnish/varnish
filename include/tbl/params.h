@@ -1594,12 +1594,8 @@ PARAM_THREAD(
 	"worker pools may be required.\n"
 	"\n"
 	"Too many pools waste CPU and RAM resources, and more than one "
-	"pool for each CPU is most likely detrimental to performance.\n"
-	"\n"
-	"Can be increased on the fly, but decreases require a "
-	"restart to take effect, unless the drop_pools experimental "
-	"debug flag is set.",
-	/* flags */	EXPERIMENTAL | DELAYED_EFFECT
+	"pool for each CPU is most likely detrimental to performance.",
+	/* flags */	DELAYED_EFFECT
 )
 
 PARAM_THREAD(
