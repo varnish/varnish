@@ -86,7 +86,7 @@ typedef void cp_begin_f(struct pool *, struct pfd *, struct vsl_log *);
 typedef void cp_end_f(struct pfd *);
 typedef const struct vco *cp_oper_f(struct pfd *, void **);
 typedef void cp_name_f(const struct pfd *, char *, unsigned, char *, unsigned);
-typedef void *cp_init_f(const struct vrt_endpoint *);
+typedef void *cp_init_f(const struct vrt_endpoint *, struct vsb *);
 typedef void cp_fini_f(void *);
 
 struct cp_methods {
@@ -941,11 +941,11 @@ vtp_bssl_oper(struct pfd *pfd, void **ppriv)
 }
 
 static void * v_matchproto_(cp_init_f)
-vtp_bssl_init(const struct vrt_endpoint *vep)
+vtp_bssl_init(const struct vrt_endpoint *vep, struct vsb *err)
 {
 
 	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
-	return (BSSL_new_ssl_ctx(vep));
+	return (BSSL_new_ssl_ctx(vep, err));
 }
 
 static void v_matchproto_(cp_fini_f)
@@ -973,7 +973,7 @@ static const struct cp_methods bssl_methods = {
  */
 
 struct conn_pool *
-VCP_Ref(const struct vrt_endpoint *vep, const char *ident)
+VCP_Ref(const struct vrt_endpoint *vep, const char *ident, struct vsb *err)
 {
 	struct conn_pool *cp, *cp2;
 	struct VSHA256Context cx[1];
@@ -1035,7 +1035,7 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident)
 	else
 		cp->methods = &vtp_methods;
 	if (cp->methods->init != NULL) {
-		cp->priv = cp->methods->init(vep);
+		cp->priv = cp->methods->init(vep, err);
 		if (cp->priv == NULL) {
 			FREE_OBJ(cp->endpoint);
 			FREE_OBJ(cp);

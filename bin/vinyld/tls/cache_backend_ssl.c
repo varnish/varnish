@@ -56,17 +56,20 @@ static X509_STORE	*bssl_default_ca_store;
 static int bssl_vfy_cb(int, X509_STORE_CTX *);
 
 void *
-BSSL_new_ssl_ctx(const struct vrt_endpoint *vep)
+BSSL_new_ssl_ctx(const struct vrt_endpoint *vep, struct vsb *err)
 {
 	struct bssl_ctx *bctx;
 	SSL_CTX *ctx;
 	X509_VERIFY_PARAM *vpm;
 
 	CHECK_OBJ_NOTNULL(vep, VRT_ENDPOINT_MAGIC);
+	AN(err);
 
 	ctx = SSL_CTX_new(TLS_client_method());
-	if (ctx == NULL)
+	if (ctx == NULL) {
+		VSB_cat(err, "SSL_CTX_new() failed");
 		return (NULL);
+	}
 #ifdef SSL_OP_IGNORE_UNEXPECTED_EOF
 	/*
 	 * Many backends close TCP without TLS close_notify.
