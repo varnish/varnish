@@ -57,3 +57,5 @@ client c2 {
 } -run
 
 client c1 -wait
+server s1 -wait
+server s2 -wait

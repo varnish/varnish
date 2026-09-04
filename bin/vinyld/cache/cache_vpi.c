@@ -132,7 +132,7 @@ vpi_ref_panic(struct vsb *vsb, unsigned n, const struct vcl *vcl)
 	VSB_printf(vsb, "line = %u,\n", ref->line);
 	VSB_printf(vsb, "pos = %u,\n", ref->pos);
 	if (src != NULL) {
-		VSB_cat(vsb, "src = "); 
+		VSB_cat(vsb, "src = ");
 		VSB_quote(vsb, src, 40, VSB_QUOTE_CSTR | VSB_QUOTE_ABBREVIATE);
 		VSB_putc(vsb, '\n');
 	} else {
