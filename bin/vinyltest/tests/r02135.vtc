@@ -12,8 +12,7 @@ server s1 {
 	rxreq
 	expect req.url == "/foo"
 	barrier b1 sync
-	close
-	expect_close
+	shutdown -write
 } -start
 
 varnish v1 -vcl+backend {
@@ -32,3 +31,5 @@ client c1 {
 	expect resp.status == "503"
 	expect resp.http.url == "/foo"
 } -run
+
+server s1 -wait
