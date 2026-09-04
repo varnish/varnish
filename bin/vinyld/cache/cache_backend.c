@@ -821,6 +821,7 @@ VRT_new_backend_clustered(VRT_CTX, struct vsmw_cluster *vc,
 	const struct suckaddr *sa = NULL;
 	char abuf[VTCP_ADDRBUFSIZE];
 	const struct backend *viabe = NULL;
+	struct vsb *vsb;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(vrt, VRT_BACKEND_MAGIC);
@@ -897,10 +898,14 @@ VRT_new_backend_clustered(VRT_CTX, struct vsmw_cluster *vc,
 		vep = be->endpoint = VRT_Endpoint_Clone(vep);
 
 	AN(vep);
-	be->conn_pool = VCP_Ref(vep, vbe_proto_ident);
+	vsb = VSB_new_auto();
+	AN(vsb);
+	be->conn_pool = VCP_Ref(vep, vbe_proto_ident, vsb);
 	if (be->conn_pool == NULL) {
-		VRT_fail(ctx, "%s: Connection pool init failed",
-		    vrt->vcl_name);
+		AZ(VSB_finish(vsb));
+		VRT_fail(ctx, "%s: Connection pool init failed: %s",
+		    vrt->vcl_name, VSB_data(vsb));
+		VSB_destroy(&vsb);
 		VSC_vbe_Destroy(&be->vsc_seg);
 #define DA(x)	do { if (be->x != NULL) free(be->x); } while (0)
 #define DN(x)	/**/
@@ -911,6 +916,7 @@ VRT_new_backend_clustered(VRT_CTX, struct vsmw_cluster *vc,
 		FREE_OBJ(be);
 		return (NULL);
 	}
+	VSB_destroy(&vsb);
 
 	vbp = vrt->probe;
 	if (vbp == NULL)

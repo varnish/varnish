@@ -35,6 +35,7 @@
 struct conn_pool;
 struct pfd;
 struct vco;
+struct vsb;
 
 #define PFD_STATE_AVAIL		(1<<0)
 #define PFD_STATE_USED		(1<<1)
@@ -56,7 +57,8 @@ struct vtls_sess *PFD_TLSPriv(const struct pfd *);
  * Prototypes
  */
 
-struct conn_pool *VCP_Ref(const struct vrt_endpoint *, const char *ident);
+struct conn_pool *VCP_Ref(const struct vrt_endpoint *, const char *ident,
+    struct vsb *err);
 	/*
 	 * Get a reference to a connection pool. Either one or both of ipv4 or
 	 * ipv6 arg must be non-NULL, or uds must be non-NULL. If recycling
