@@ -261,7 +261,7 @@ pool_poolherder(void *priv)
 			if (pp->nthr > 0)
 				continue;
 
-			VTAILQ_REMOVE(&pools, pp, list);
+			VTAILQ_REMOVE(&deadpools, pp, list);
 			pool_destroy(pp);
 		}
 
