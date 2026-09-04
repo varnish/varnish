@@ -177,6 +177,23 @@ pool_mkpool(unsigned pool_no)
 	return (pp);
 }
 
+static void
+pool_destroy(struct pool *ppx)
+{
+	void *rvp;
+
+	CHECK_OBJ_NOTNULL(ppx, POOL_MAGIC);
+	PTOK(pthread_join(ppx->herder_thr, &rvp));
+	PTOK(pthread_cond_destroy(&ppx->herder_cond));
+	assert(VTAILQ_EMPTY(&ppx->poolsocks));
+	free(ppx->a_stat);
+	free(ppx->b_stat);
+	SES_DestroyPool(ppx);
+	Lck_Delete(&ppx->mtx);
+	FREE_OBJ(ppx);
+	VSC_C_main->pools--;
+}
+
 /*--------------------------------------------------------------------
  * This thread adjusts the number of pools to match the parameter.
  *
@@ -191,7 +208,6 @@ pool_poolherder(void *priv)
 	unsigned nwq;
 	struct pool *pp, *ppx;
 	uint64_t u;
-	void *rvp;
 
 	THR_SetName("pool_poolherder");
 	THR_Init();
@@ -241,15 +257,7 @@ pool_poolherder(void *priv)
 			(void)Lck_CondWaitTimeout(&cond, &pool_mtx, 1.0);
 		if (ppx != NULL) {
 			VTAILQ_REMOVE(&pools, ppx, list);
-			PTOK(pthread_join(ppx->herder_thr, &rvp));
-			PTOK(pthread_cond_destroy(&ppx->herder_cond));
-			assert(VTAILQ_EMPTY(&ppx->poolsocks));
-			free(ppx->a_stat);
-			free(ppx->b_stat);
-			SES_DestroyPool(ppx);
-			Lck_Delete(&ppx->mtx);
-			FREE_OBJ(ppx);
-			VSC_C_main->pools--;
+			pool_destroy(ppx);
 		}
 		Lck_Unlock(&pool_mtx);
 	}
