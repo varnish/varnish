@@ -43,6 +43,30 @@ Varnish-Cache NEXT (unreleased)
 
 .. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
 
+* The ``synthetic()`` VCL action has been removed. Since Varnish Cache 5.0.0,
+  body data can be created by setting ``beresp.body`` in ``vcl_backend_error
+  {}`` and by setting ``resp.body`` in ``vcl_synth {}``, and these continue to
+  be available as the one way to create body data, as in these examples:
+
+  - ``set resp.body = "string" + " more strings";``
+  - ``set resp.body += " appending even " + "more strings";``
+  - ``set resp.body = :blob:;``
+  - ``set resp.body += :blobappend:;``
+
+  These examples equally work on ``beresp.body`` in ``vcl_backend_error {}``.
+
+  The direct replacement for ``synthetic(<string>);`` is ``set resp.body +=
+  <string>;`` in ``vcl_synth {}`` and ``set beresp.body += <string>;`` in
+  ``vcl_backend_error {}``.
+
+  The only difference in behavior is that ``synthetic(<nullstring>)`` would
+  create the string ``(null)`` for ``<nullstring>`` being a ``NULL`` pointer
+  internally, while ``set resp.body = <nullstring>`` creates the empty string
+  ``""`` and ``set resp.body += <nullstring>`` is a NOOP.
+
+* The functions ``VRT_synth_strands()``, ``VRT_synth_blob()``,
+  ``VRT_synth_page()`` and ``VRT_Stv()`` have been removed from the runtime.
+
 * ``varnish{log,ncsa,hist,top}`` all gained the ``-0`` dry-run argument that
   allows testing a command line before running it for real.
 

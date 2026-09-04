@@ -93,9 +93,9 @@ varnish v1 -errvcl "Symbol not found" {
 	sub vcl_recv { kluf ; }
 }
 
-varnish v1 -errvcl {Unknown token '<<' when looking for STRING} {
+varnish v1 -errvcl {Unknown token '<<' when looking for BODY} {
 	backend b { .host = "${localhost}"; }
-	sub vcl_synth { synthetic( << "foo"; }
+	sub vcl_synth { set resp.body = << "foo"; }
 }
 
 varnish v1 -errvcl {Missing argument.} {
@@ -117,7 +117,7 @@ varnish v1 -errvcl {Expected return action name.} {
 varnish v1 -errvcl {Not a valid action in subroutine 'vcl_recv'} {
 	backend foo { .host = "${localhost}"; }
 	sub vcl_recv {
-		synthetic("XXX");
+		hash_data("XXX");
 		return (synth(503));
 	}
 }

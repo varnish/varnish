@@ -412,27 +412,6 @@ vcc_act_return(struct vcc *tl, struct token *t, struct symbol *sym)
 
 /*--------------------------------------------------------------------*/
 
-static void v_matchproto_(sym_act_f)
-vcc_act_synthetic(struct vcc *tl, struct token *t, struct symbol *sym)
-{
-
-	(void)t;
-	(void)sym;
-	ExpectErr(tl, '(');
-	ERRCHK(tl);
-	vcc_NextToken(tl);
-
-	Fb(tl, 1, "VRT_synth_strands(ctx, ");
-	vcc_Expr(tl, STRANDS);
-	ERRCHK(tl);
-	Fb(tl, 1, ");\n");
-
-	SkipToken(tl, ')');
-	SkipToken(tl, ';');
-}
-
-/*--------------------------------------------------------------------*/
-
 // The pp[] trick is to make the length of #name visible to flexelint.
 #define ACT(name, func, mask)						\
 	do {								\
@@ -458,7 +437,5 @@ vcc_Action_Init(struct vcc *tl)
 		VCL_MET_INIT);
 	ACT(return,	vcc_act_return,	0);
 	ACT(set,	vcc_act_set,	0);
-	ACT(synthetic,	vcc_act_synthetic,
-		VCL_MET_SYNTH | VCL_MET_BACKEND_ERROR);
 	ACT(unset,	vcc_act_unset,	0);
 }

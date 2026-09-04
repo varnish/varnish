@@ -84,7 +84,7 @@ varnish v1 -vcl {
 			}
 			debug.call(foo);
 		} else if (req.url == "/checkwrong") {
-			synthetic(debug.check_call(bar));
+			set resp.body = debug.check_call(bar);
 			set resp.status = 500;
 		}
 		return (deliver);
