@@ -519,6 +519,10 @@ Pool_Work_Thread(struct pool *pp, struct worker *wrk)
 		wrk->seen_methods = 0;
 	}
 	wrk->pool = NULL;
+	Lck_Lock(&pp->mtx);
+	AN(pp->wrk_dying);
+	pp->wrk_dying--;
+	Lck_Unlock(&pp->mtx);
 }
 
 /*--------------------------------------------------------------------
@@ -683,6 +687,8 @@ pool_herder(void *priv)
 					pp->nidle--;
 					wrk->task->func = pool_kiss_of_death;
 					PTOK(pthread_cond_signal(&wrk->cond));
+					pp->nthr--;
+					pp->wrk_dying++;
 				} else {
 					delay = wrk->lastused - t_idle;
 					wrk = NULL;
@@ -691,7 +697,6 @@ pool_herder(void *priv)
 			Lck_Unlock(&pp->mtx);
 
 			if (wrk != NULL) {
-				pp->nthr--;
 				Lck_Lock(&pool_mtx);
 				VSC_C_main->threads--;
 				VSC_C_main->threads_destroyed++;
