@@ -41,6 +41,7 @@
 #include <stdlib.h>
 
 #include <sys/mman.h>
+#include <sys/resource.h>
 
 #ifdef HAVE_PTHREAD_NP_H
 #  include <pthread_np.h>
@@ -570,5 +571,11 @@ child_main(int sigmagic, size_t altstksz)
 	EXP_Shutdown();
 	STV_close();
 
-	printf("Child dies\n");
+	struct rusage usage = {0};
+	if (! getrusage(RUSAGE_SELF, &usage)) {
+		printf("Child dies usr=%f sys=%f\n",
+		    tv_vtim(usage.ru_utime),
+		    tv_vtim(usage.ru_stime));
+	} else
+		printf("Child dies\n");
 }

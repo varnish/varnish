@@ -223,8 +223,9 @@ return a string, e.g. ``1234``.
 Real numbers
 ~~~~~~~~~~~~
 
-VCL understands real numbers. In string context they return a string
-with their value rounded to 3 decimal places, e.g. ``3.142``.
+VCL understands real numbers. In string context they return a string with their
+value rounded to 3 decimal places, e.g. ``3.142``. See :ref:`math.strfromd()
+<math.strfromd()>` for an alternative formatting option.
 
 Regular Expressions
 -------------------

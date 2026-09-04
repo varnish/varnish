@@ -5,31 +5,37 @@ barrier b1 cond 3
 server s1 {
 	rxreq
 	expect req.http.foobar == "1"
-	txresp -hdr "Vary: Foobar" -hdr "Snafu: 1" -body "1111\n"
+	txresp -hdr "Vary: Foobar" -hdr "Snafu: 1" -hdr "Connection: close" -body "1111\n"
 
+	accept
 	rxreq
 	expect req.http.foobar == "2"
-	txresp -hdr "Vary: Foobar" -hdr "Snafu: 2" -body "2222\n"
+	txresp -hdr "Vary: Foobar" -hdr "Snafu: 2" -hdr "Connection: close" -body "2222\n"
 
+	accept
 	rxreq
 	expect req.http.foobar == "3"
-	txresp -hdr "Vary: Foobar" -hdr "Snafu: 3" -body "3333\n"
+	txresp -hdr "Vary: Foobar" -hdr "Snafu: 3" -hdr "Connection: close" -body "3333\n"
 
+	accept
 	rxreq
 	expect req.http.foobar == <undef>
-	txresp -hdr "Vary: Foobar" -hdr "Snafu: 4" -body "4444\n"
+	txresp -hdr "Vary: Foobar" -hdr "Snafu: 4" -hdr "Connection: close" -body "4444\n"
 
+	accept
 	rxreq
 	expect req.http.foobar == ""
-	txresp -hdr "Vary: Foobar" -hdr "Snafu: 5" -body "5555\n"
+	txresp -hdr "Vary: Foobar" -hdr "Snafu: 5" -hdr "Connection: close" -body "5555\n"
 
 	# #3858 test vary prediction turning out wrong
 	# no Vary, HFM and waitinglist
+	accept
 	rxreq
 	expect req.http.foobar == "x"
 	barrier b1 sync
-	txresp -hdr "Cache-Control: no-cache"
+	txresp -hdr "Cache-Control: no-cache" -hdr "Connection: close"
 
+	accept
 	rxreq
 	expect req.http.foobar == "x"
 	txresp -hdr "Cache-Control: no-cache"

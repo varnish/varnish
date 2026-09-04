@@ -1,0 +1,216 @@
+
+#-
+# This document is licensed under the same conditions as Varnish Cache itself.
+# See LICENSE for details.
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+# Author: Nils Goroll <nils.goroll@uplex.de>
+
+$ABI vrt
+$Module math 3 "VMOD wrapping math.h"
+
+.. THIS CODE IS AUTO-GENERATED. DO NOT EDIT HERE. see vmod_math_gen.py
+
+DESCRIPTION
+===========
+
+This VMOD wraps the functions in `math.h(7)`, provides additional utilities and
+includes functions to access macros and constants from `math.h(7)` and
+`float.h(7)`.
+
+Utility functions
+-----------------
+
+.. source is in vmod_math_util.c
+
+$Function BOOL approx(REAL a, REAL b, REAL maxDiff = 0.0, REAL maxRelDiff = 0.0)
+
+.. _`Comparing Floating Point Numbers, 2012 Edition`: https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+
+Return true if the two numbers *a* and *b* are approximately equal per the
+``AlmostEqualRelativeAndAbs`` function from `Comparing Floating Point Numbers,
+2012 Edition`_ given the additional parameters *maxDiff* and *maxRelDiff*. Read
+the blog post for details on why the seemingly simple question of two floating
+point numbers being equal has no simple answers.
+
+For their default values of 0, the two additional parameters are initialized to:
+
+- *maxDiff*: ``4 * DBL_EPSILON``
+- *maxRelDiff*: ``DBL_EPSILON``
+
+$Function STRING strfromd(STRING format, REAL fp)
+
+Convert the value *fp* into a string using *format*, see `strfromd(3)`.
+
+An invalid format string results in a VCL error and the ``NULL`` invalid string
+returned.
+
+.. Internally, vsnprintf() is called via WS_Printf(). The difference to
+   VRT_REAL_string() is the free format and missing call to VRT_REAL_is_valid()
+
+Access to macros and constants
+------------------------------
+
+
+$Function REAL constant(ENUM { DBL_MANT_DIG, DBL_DIG, DBL_MIN_EXP, DBL_MIN_10_EXP, DBL_MAX_EXP, DBL_MAX_10_EXP, DBL_MAX, DBL_EPSILON, DBL_MIN, HUGE_VAL, M_E, M_LOG2E, M_LOG10E, M_LN2, M_LN10, M_PI, M_PI_2, M_PI_4, M_1_PI, M_2_PI, M_2_SQRTPI, M_SQRT2, M_SQRT1_2 } name)
+
+
+Return the value of the named constant. For ``DBL_*`` see `float.h(7)`,
+otherwise `math.h(7)` for details.
+
+
+$Function INT fpclass(ENUM { FP_INFINITE, FP_NAN, FP_NORMAL, FP_SUBNORMAL, FP_ZERO } name)
+
+
+Return the value of the named constant for comparisons of `math.fpclassify()`_
+return values.
+
+
+
+
+math.h functions
+----------------
+
+The semantics of functions mapping directly to `math.h(7)` are not documented
+herein, see the system documentation instead (for example using ``man
+<function>``).
+
+
+$Function INT fpclassify(REAL  x)
+
+$Function INT isfinite(REAL  x)
+
+$Function INT isgreater(REAL  x, REAL  y)
+
+$Function INT isgreaterequal(REAL  x, REAL  y)
+
+$Function INT isinf(REAL  x)
+
+$Function INT isless(REAL  x, REAL  y)
+
+$Function INT islessequal(REAL  x, REAL  y)
+
+$Function INT islessgreater(REAL  x, REAL  y)
+
+$Function INT isnan(REAL  x)
+
+$Function INT isnormal(REAL  x)
+
+$Function INT isunordered(REAL  x, REAL  y)
+
+$Function INT signbit(REAL  x)
+
+$Function REAL acos(REAL x)
+
+$Function REAL acosh(REAL x)
+
+$Function REAL asin(REAL x)
+
+$Function REAL asinh(REAL x)
+
+$Function REAL atan(REAL x)
+
+$Function REAL atan2(REAL y, REAL x)
+
+$Function REAL atanh(REAL x)
+
+$Function REAL cbrt(REAL x)
+
+$Function REAL ceil(REAL x)
+
+$Function REAL copysign(REAL x, REAL y)
+
+$Function REAL cos(REAL x)
+
+$Function REAL cosh(REAL x)
+
+$Function REAL erf(REAL x)
+
+$Function REAL erfc(REAL x)
+
+$Function REAL exp(REAL x)
+
+$Function REAL exp2(REAL x)
+
+$Function REAL expm1(REAL x)
+
+$Function REAL fabs(REAL x)
+
+$Function REAL fdim(REAL x, REAL y)
+
+$Function REAL floor(REAL x)
+
+$Function REAL fma(REAL x, REAL y, REAL z)
+
+$Function REAL fmax(REAL x, REAL y)
+
+$Function REAL fmin(REAL x, REAL y)
+
+$Function REAL fmod(REAL x, REAL y)
+
+$Function REAL hypot(REAL x, REAL y)
+
+$Function INT ilogb(REAL x)
+
+$Function REAL j0(REAL x)
+
+$Function REAL j1(REAL x)
+
+$Function REAL jn(INT x, REAL y)
+
+$Function REAL ldexp(REAL x, INT e)
+
+$Function REAL lgamma(REAL x)
+
+$Function REAL log(REAL x)
+
+$Function REAL log10(REAL x)
+
+$Function REAL log1p(REAL x)
+
+$Function REAL log2(REAL x)
+
+$Function REAL logb(REAL x)
+
+$Function INT lrint(REAL x)
+
+$Function INT lround(REAL x)
+
+$Function REAL nan(STRING tag)
+
+$Function REAL nearbyint(REAL x)
+
+$Function REAL nextafter(REAL x, REAL y)
+
+$Function REAL pow(REAL x, REAL y)
+
+$Function REAL remainder(REAL x, REAL y)
+
+$Function REAL rint(REAL x)
+
+$Function REAL round(REAL x)
+
+$Function REAL scalbln(REAL x, INT e)
+
+$Function REAL scalbn(REAL x, INT y)
+
+$Function REAL sin(REAL x)
+
+$Function REAL sinh(REAL x)
+
+$Function REAL sqrt(REAL x)
+
+$Function REAL tan(REAL x)
+
+$Function REAL tanh(REAL x)
+
+$Function REAL tgamma(REAL x)
+
+$Function REAL trunc(REAL x)
+
+$Function REAL y0(REAL x)
+
+$Function REAL y1(REAL x)
+
+$Function REAL yn(INT n, REAL x)

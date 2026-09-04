@@ -29,6 +29,12 @@
 # SUCH DAMAGE.
 #
 # generate vmod_math vcc and c files from opengroup spec html
+#
+# to update the generated code:
+#
+# curl -o vmod_math_spec.html https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/math.h.html
+# python vmod_math_gen.py vmod_math_spec.html vmod_math.vcc vmod_math.c
+
 
 import re
 import sys

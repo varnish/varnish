@@ -799,6 +799,8 @@ tweak_debug(struct vsb *vsb, const struct parspec *par, const char *arg)
  * The experimental parameter
  */
 
+//lint --e{766} not used - remove this linter suppression when adding back exp bits
+
 static const char * const experimental_tags[] = {
 #  define EXPERIMENTAL_BIT(U, l, d) [EXPERIMENT_##U] = #l,
 #  include "tbl/experimental_bits.h"

@@ -446,12 +446,14 @@ vjs_waive(int jail)
 static void
 vjs_setuid(void)
 {
+	static int once = 0;
 	if (priv_ineffect(PRIV_PROC_SETID)) {
 		AZ(setppriv(PRIV_OFF, PRIV_EFFECTIVE, vjs_proc_setid));
 		AZ(setppriv(PRIV_OFF, PRIV_PERMITTED, vjs_proc_setid));
-	} else {
+	} else if (once == 0) {
 		MGT_Complain(C_SECURITY, "%s missing, uid/gid unchanged",
 		    PRIV_PROC_SETID);
+		once = 1;
 	}
 }
 

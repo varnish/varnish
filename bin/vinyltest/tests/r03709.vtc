@@ -3,6 +3,8 @@ vtest "h2 req limits"
 varnish v1 -cliok "param.set feature +http2"
 varnish v1 -cliok "param.set http_req_hdr_len 40b"
 varnish v1 -cliok "param.set http_req_size 512b"
+varnish v1 -cliok "param.set h2_max_header_list_size 542b"
+
 varnish v1 -cliok "param.set http_max_hdr 32"
 varnish v1 -vcl {
 	backend be none;
@@ -36,8 +38,7 @@ client c1 {
 			-hdr hdr10 ${string,repeat,3,/123456789} \
 			-hdr hdr11 ${string,repeat,3,/123456789} \
 			-hdr hdr12 ${string,repeat,3,/123456789} \
-			-hdr hdr13 ${string,repeat,3,/123456789} \
-			-hdr hdr14 ${string,repeat,3,/123456789}
+			-hdr hdr13 ${string,repeat,3,/123456789}
 		rxrst
 		expect rst.err == ENHANCE_YOUR_CALM
 	} -run
@@ -76,6 +77,29 @@ client c1 {
 		rxrst
 		expect rst.err == ENHANCE_YOUR_CALM
 	} -run
+	stream next {
+		txreq -url "/h2_max_header_list_size" \
+			-hdr hdr1 ${string,repeat,3,/123456789} \
+			-hdr hdr2 ${string,repeat,3,/123456789} \
+			-hdr hdr3 ${string,repeat,3,/123456789} \
+			-hdr hdr4 ${string,repeat,3,/123456789} \
+			-hdr hdr5 ${string,repeat,3,/123456789} \
+			-hdr hdr6 ${string,repeat,3,/123456789} \
+			-hdr hdr7 ${string,repeat,3,/123456789} \
+			-hdr hdr8 ${string,repeat,3,/123456789} \
+			-hdr hdr9 ${string,repeat,3,/123456789} \
+			-hdr hdr10 ${string,repeat,3,/123456789} \
+			-hdr hdr11 ${string,repeat,3,/123456789} \
+			-hdr hdr12 ${string,repeat,3,/123456789} \
+			-hdr hdr13 ${string,repeat,3,/123456789} \
+			-hdr hdr14 ${string,repeat,3,/123456789} \
+			-hdr hdr15 ${string,repeat,3,/123456789}
+	} -run
+	stream 0 {
+		rxgoaway
+		expect goaway.err == ENHANCE_YOUR_CALM
+	} -run
+	expect_close
 } -run
 
 logexpect l1 -wait

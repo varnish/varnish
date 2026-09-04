@@ -34,6 +34,7 @@
 /*lint -save -e525 -e539 */
 
 // currently no experimental bits
+EXPERIMENTAL_BIT(DUMMY,   dummy,     "placeholder dummy")
 #undef EXPERIMENTAL_BIT
 
 /*lint -restore */

@@ -375,6 +375,8 @@ HTTP1_Session(struct worker *wrk, struct req *req)
 			i = http1_dissect(wrk, req);
 			req->acct.req_hdrbytes +=
 			    req->htc->rxbuf_e - req->htc->rxbuf_b;
+			req->htc->rxbuf_b = NULL;
+			req->htc->rxbuf_e = NULL;
 			if (i) {
 				assert(req->doclose != SC_NULL);
 				SES_Close(req->sp, req->doclose);

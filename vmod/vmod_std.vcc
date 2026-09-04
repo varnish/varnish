@@ -45,12 +45,17 @@ Numeric functions
 
 $Function REAL random(REAL lo, REAL hi)
 
-Returns a random real number between *lo* and *hi*.
+Returns a random real number from the uniform distribution between *lo*
+(inclusive) and *hi* (exclusive), in other words, from the half-closed,
+half-open interval [*lo*, *hi*).
 
 This function uses the "testable" random generator in `varnishd` which
 enables deterministic tests to be run (See ``debug.srandom`` CLI
 command).  This function should not be used for cryptographic
 applications.
+
+Note that, when formatted for output, any ``REAL`` number is rounded to three
+decimal digits, see :ref:`vcl(7)`.
 
 Example::
 

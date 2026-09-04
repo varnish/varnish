@@ -1,7 +1,7 @@
 vtest "Session pipelining exceeding available workspace"
 
 server s1 {
-	loop 2 {
+	loop 3 {
 		rxreq
 		expect req.bodylen == 32769
 		txresp
@@ -30,12 +30,20 @@ content-length: 32769
 ${string,repeat,1024,abcdefghijklmnopqrstuvwxyz012345}
 POST / HTTP/1.1
 host: ${localhost}
+transfer-encoding: chunked
+
+8001
+${string,repeat,1024,abcdefghijklmnopqrstuvwxyz012345}x
+0
+
+POST / HTTP/1.1
+host: ${localhost}
 content-length: 32769
 
 ${string,repeat,1024,abcdefghijklmnopqrstuvwxyz012345}
 }
 
-	loop 2 {
+	loop 3 {
 		rxresp
 		expect resp.status == 200
 	}
