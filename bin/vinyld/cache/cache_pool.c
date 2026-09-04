@@ -205,7 +205,7 @@ pool_destroy(struct pool *ppx)
 static void * v_matchproto_()
 pool_poolherder(void *priv)
 {
-	unsigned nwq;
+	unsigned nwq, poolno;
 	struct pool *pp, *ppx;
 	uint64_t u;
 
@@ -213,15 +213,18 @@ pool_poolherder(void *priv)
 	THR_Init();
 	(void)priv;
 
-	nwq = 0;
+	nwq = poolno = 0;
 	while (cache_param->wthread_pools > 0 || VTAILQ_FIRST(&pools)) {
 		if (nwq < cache_param->wthread_pools) {
-			pp = pool_mkpool(nwq);
+			// die before we would wrap
+			assert(poolno < UINT_MAX);
+			pp = pool_mkpool(poolno);
 			if (pp != NULL) {
 				Lck_Lock(&pool_mtx);
 				VTAILQ_INSERT_TAIL(&pools, pp, list);
 				Lck_Unlock(&pool_mtx);
 				VSC_C_main->pools++;
+				poolno++;
 				nwq++;
 				continue;
 			}
