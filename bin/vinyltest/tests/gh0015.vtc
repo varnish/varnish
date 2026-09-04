@@ -12,6 +12,12 @@ varnish v1 -vcl {
 	}
 
 	sub vcl_synth {
+		# storage.Synth allocates from the client workspace, which
+		# would collide with this test deliberately starving it
+		# below, so pin the synth body to Transient instead -- this
+		# test is about pipelining, not synth storage.
+		set resp.storage = storage.Transient;
+
 		# Consume most of workspace_client, which should not
 		# interfere with pipelining also happening on the same
 		# workspace.
