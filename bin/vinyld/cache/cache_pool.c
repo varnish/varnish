@@ -90,11 +90,16 @@ Pool_Task_Any(struct pool_task *task, enum task_prio prio)
 	if (pp != NULL) {
 		VTAILQ_REMOVE(&pools, pp, list);
 		VTAILQ_INSERT_TAIL(&pools, pp, list);
+		AZ(pp->die);
 	}
 	Lck_Unlock(&pool_mtx);
 	if (pp == NULL)
 		return (-1);
-	// NB: When we remove pools, is there a race here ?
+
+	// We never see a dying pool here, but it might die right after the
+	// Unlock, in which case Pool_Task races for a worker, but because of
+	// the destruction delay it is highly unlikely that all threads are gone
+
 	return (Pool_Task(pp, task, prio));
 }
 
@@ -205,8 +210,9 @@ pool_destroy(struct pool *ppx)
 static void * v_matchproto_()
 pool_poolherder(void *priv)
 {
+	VTAILQ_HEAD(,pool) deadpools = VTAILQ_HEAD_INITIALIZER(deadpools);
 	unsigned nwq, poolno;
-	struct pool *pp, *ppx;
+	struct pool *pp;
 	uint64_t u;
 
 	THR_SetName("pool_poolherder");
@@ -214,7 +220,9 @@ pool_poolherder(void *priv)
 	(void)priv;
 
 	nwq = poolno = 0;
-	while (cache_param->wthread_pools > 0 || VTAILQ_FIRST(&pools)) {
+	while (cache_param->wthread_pools > 0 ||
+	    VTAILQ_FIRST(&pools) ||
+	    VTAILQ_FIRST(&deadpools)) {
 		if (nwq < cache_param->wthread_pools) {
 			// die before we would wrap
 			assert(poolno < UINT_MAX);
@@ -233,35 +241,40 @@ pool_poolherder(void *priv)
 			pp = VTAILQ_FIRST(&pools);
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 			VTAILQ_REMOVE(&pools, pp, list);
-			VTAILQ_INSERT_TAIL(&pools, pp, list);
-			if (!pp->die)
-				nwq--;
+			AZ(pp->die);
 			Lck_Unlock(&pool_mtx);
-			if (!pp->die) {
-				VSL(SLT_Debug, NO_VXID, "Kill Pool %p", pp);
-				pp->die = 1;
-				VCA_DestroyPool(pp);
-				PTOK(pthread_cond_signal(&pp->herder_cond));
-				continue;
-			}
+
+			VTAILQ_INSERT_TAIL(&deadpools, pp, list);
+			AN(nwq);
+			nwq--;
+			VSL(SLT_Debug, NO_VXID, "Kill Pool %p", pp);
+			pp->die = 1;
+			VCA_DestroyPool(pp);
+			PTOK(pthread_cond_signal(&pp->herder_cond));
+			continue;
 		}
+
+		while ((pp = VTAILQ_FIRST(&deadpools)) != NULL) {
+			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
+
+			AN(pp->die);
+			if (pp->nthr > 0)
+				continue;
+
+			VTAILQ_REMOVE(&pools, pp, list);
+			pool_destroy(pp);
+		}
+
 		u = 0;
 		Lck_Lock(&pool_mtx);
-		ppx = NULL;
 		VTAILQ_FOREACH(pp, &pools, list) {
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 
-			if (pp->die && pp->nthr == 0)
-				ppx = pp;
 			u += pp->lqueue;
 		}
 		VSC_C_main->thread_queue_len = u;
-		if (nwq > 0 || cache_param->wthread_pools > 0 || ppx == NULL)
+		if (nwq > 0 || cache_param->wthread_pools > 0)
 			(void)Lck_CondWaitTimeout(&cond, &pool_mtx, 1.0);
-		if (ppx != NULL) {
-			VTAILQ_REMOVE(&pools, ppx, list);
-			pool_destroy(ppx);
-		}
 		Lck_Unlock(&pool_mtx);
 	}
 	return (NULL);
