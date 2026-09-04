@@ -142,6 +142,21 @@ deactivated, the others have no effect.
     If set to 0, this allows a backend to use an invalid
     certificate.
 
+``.ssl_ca_file`` [default: none]
+    Path to a PEM file with one or more CA certificates to verify the
+    backend certificate against, instead of the system default CA
+    store::
+
+        .ssl_ca_file = "/etc/varnish/backend-ca.pem";
+
+    The file must exist and be readable when the VCL is loaded, or the
+    load will fail.
+
+    The file is read when the backend's connection pool is created.
+    Changes to it on disk take effect only once all VCLs referencing
+    the backend are discarded, or `varnishd` is restarted. The same
+    applies to the system default CA store, which is read at startup.
+
 Timeout Attributes
 ------------------
 
