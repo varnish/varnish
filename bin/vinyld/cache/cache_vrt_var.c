@@ -212,10 +212,12 @@ VRT_r_beresp_##field(VRT_CTX)						\
 
 /*--------------------------------------------------------------------
  * bereq bool-fields
+ *
+ * for macro compatiblity with the client side, r is "req" for bereq
  */
 
 #define VBEREQR0(field, str)
-#define VBEREQR1(field, str)						\
+#define VBEREQRreq(field, str)						\
 VCL_BOOL								\
 VRT_r_bereq_##field(VRT_CTX)						\
 {									\
@@ -229,7 +231,7 @@ VRT_r_bereq_##field(VRT_CTX)						\
 #include "tbl/bereq_flags.h"
 
 #undef VBEREQR0
-#undef VBEREQR1
+#undef VBEREQRreq
 /*--------------------------------------------------------------------*/
 
 VCL_BOOL
@@ -926,33 +928,48 @@ VRT_r_sess_xid(VRT_CTX)
 }
 
 /*--------------------------------------------------------------------
- * req fields
+ * req/resp fields, both stored in struct req
  */
 
-#define VREQW0(field)
-#define VREQW1(field)							\
+#define VREQW(where, field)						\
 VCL_VOID								\
-VRT_l_req_##field(VRT_CTX, VCL_BOOL a)					\
+VRT_l_##where##_##field(VRT_CTX, VCL_BOOL a)				\
 {									\
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);				\
 	CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);				\
 	ctx->req->field = a ? 1 : 0;					\
 }
 
-#define VREQR0(field)
-#define VREQR1(field)							\
+#define VREQR(where, field)						\
 VCL_BOOL								\
-VRT_r_req_##field(VRT_CTX)						\
+VRT_r_##where##_##field(VRT_CTX)					\
 {									\
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);				\
 	CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);				\
 	return (ctx->req->field);					\
 }
 
+#define VREQW0(field)
+#define VREQR0(field)
+#define VREQWreq(field)		VREQW(req, field)
+#define VREQRreq(field)		VREQR(req, field)
+#define VREQWresp(field)	VREQW(resp, field)
+#define VREQRresp(field)	VREQR(resp, field)
+
 #define REQ_FLAG(l, r, w, d) \
 	VREQR##r(l) \
 	VREQW##w(l)
 #include "tbl/req_flags.h"
+
+#undef VREQW
+#undef VREQR
+#undef VREQW0
+#undef VREQR0
+#undef VREQWreq
+#undef VREQRreq
+#undef VREQWresp
+#undef VREQRresp
+
 
 /*--------------------------------------------------------------------*/
 

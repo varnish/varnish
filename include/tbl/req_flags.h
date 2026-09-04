@@ -32,16 +32,17 @@
 /*lint -save -e525 -e539 */
 
 /* lower, vcl_r, vcl_w, doc */
-REQ_FLAG(disable_esi,		0, 0, "")
-REQ_FLAG(hash_ignore_busy,	1, 1, "")
-REQ_FLAG(hash_ignore_vary,	1, 1, "")
-REQ_FLAG(hash_always_miss,	1, 1, "")
-REQ_FLAG(is_hit,		0, 0, "")
-REQ_FLAG(want100cont,		0, 0, "")
-REQ_FLAG(late100cont,		0, 0, "")
-REQ_FLAG(req_reset,		0, 0, "")
-REQ_FLAG(res_esi,		0, 0, "")
-REQ_FLAG(res_pipe,		0, 0, "")
+REQ_FLAG(disable_esi,		0,    0,    "")
+REQ_FLAG(hash_ignore_busy,	req,  req,  "")
+REQ_FLAG(hash_ignore_vary,	req,  req,  "")
+REQ_FLAG(hash_always_miss,	req,  req,  "")
+REQ_FLAG(is_hit,		0,    0,    "")
+REQ_FLAG(want100cont,		0,    0,    "")
+REQ_FLAG(late100cont,		0,    0,    "")
+REQ_FLAG(req_reset,		0,    0,    "")
+REQ_FLAG(res_esi,		0,    0,    "")
+REQ_FLAG(res_pipe,		0,    0,    "")
+REQ_FLAG(esi_include_onerror,	resp, resp, "")
 #define REQ_BEREQ_FLAG(lower, vcl_r, vcl_w, doc) \
 	REQ_FLAG(lower, vcl_r, vcl_w, doc)
 #include "tbl/req_bereq_flags.h"
