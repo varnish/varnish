@@ -276,13 +276,14 @@ Tuning options
   `List of Parameters`_ for details. This option can be used multiple
   times to specify multiple parameters.
 
--s <[name=]type[,options]>
+-s <[name=]kind[,options]>
 
-  Use the specified storage backend. See `Storage Backend`_ section.
+  Use the specified storage backend. See `ref-varnishd-opt_s` and the `Storage
+  Backend`_ section.
 
-  This option can be used multiple times to specify multiple storage
-  files. Name is referenced in logs, VCL, statistics, etc. If name
-  is not specified, "s0", "s1" and so forth is used.
+  This option can be used multiple times to define multiple storage backends.
+  *name* is referenced in logs, VCL, statistics, etc. If *name* is not
+  specified, "s0", "s1" and so forth are used.
 
 -l <vsl>
 
@@ -396,9 +397,9 @@ The argument format to define storage backends is:
 
   For *kind* and *options* see details below.
 
-Storages can be used in vcl as ``storage.``\ *name*, so, for
-example if ``myStorage`` was defined by ``-s myStorage=malloc,5G``, it
-could be used in VCL like so::
+Storages are available in vcl as ``storage.``\ *name*, so, for example if
+``myStorage`` was defined by ``-s myStorage=malloc,5G``, it could be used in VCL
+like so::
 
   set beresp.storage = storage.myStorage;
 
@@ -410,17 +411,18 @@ If no ``-s`` options are given, the default is::
 
 	-s default,100m
 
-If no ``Transient`` storage is defined, the default is an unbound
-``default`` storage as if defined as::
+If no ``Transient`` storage is defined, the ``default`` storage is used as if
+defined as::
 
 	-s Transient=default
 
 
-The following storage types and options are available:
+Storage *kind*\ s (stevedores) can be provided by extensions. The following
+storage *kind*\ s and options are built in:
 
 -s <default[,size]>
 
-  The default storage type resolves to ``umem`` where available and
+  The default storage kind resolves to ``umem`` where available and
   ``malloc`` otherwise.
 
 -s <malloc[,size]>

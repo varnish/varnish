@@ -5,12 +5,14 @@
 
 .. _guide-storage:
 
+================
 Storage backends
-----------------
+================
 
 
+-----
 Intro
-~~~~~
+-----
 
 Varnish has pluggable storage backends. It can store data in various
 backends which can have different performance characteristics. The default
@@ -18,28 +20,38 @@ configuration is to use the malloc backend with a limited size. For a
 serious Varnish deployment you probably would want to adjust the storage
 settings.
 
-All built-in storage backends cache full objects only, so, for example, to
-support *n* concurrent cache hits on 1GB sized objects, the storage backend
-should be configured to provide at least *n*\ GB of storage. For uncacheable
-objects, the rule of thumb is *n* x ``transit_buffer``.
+While some storage backends can be created dynamically, for most applications a
+global definition is advised using the ``-s`` parameter to :ref:`varnishd(1)`, as
+documented in detail under :ref:`ref-varnishd-opt_s`::
 
-Storage backends are also called stevedores.
+    [-s [name=]kind[,options]]
 
 .. _vmods: https://www.varnish-cache.org/vmods
 
-Besides the built-in storage backends, separately distributed extensions exist,
+*kind* refers to the storage implementation, also called stevedore. Some storage
+implementations are built in and additional ones are provided by extensions,
+which can be found on the `vmods`_ page by searching for "stevedore".
+
+All built-in storage implementations cache full objects only, so, for example,
+to support *n* concurrent cache hits on 1GB sized objects, the storage backend
+should be configured to provide at least *n*\ GB of storage. For uncacheable
+objects, the rule of thumb is *n* x ``transit_buffer``.
 
 Storage Selection
-~~~~~~~~~~~~~~~~~
+-----------------
 
 By default, Varnish will store short-lived and passed objects in a storage
 called `Transient`, described below.
 
-For other objects, it will rotate between all the non-transient storages,
-unless the VCL variable `beresp.storage` is explicitly set.
+For other objects, it selects from all the non-transient storages in a
+round-robin fashion, unless the VCL variable `beresp.storage` is explicitly set.
+
+-------------------------
+Built in storage backends
+-------------------------
 
 default
-~~~~~~~
+-------
 
 syntax: default[,size]
 
@@ -47,11 +59,11 @@ The default storage backend is an alias to umem, where available, or
 malloc otherwise.
 
 malloc
-~~~~~~
+------
 
 syntax: malloc[,size]
 
-Malloc is a virtual memory based storage backend. Each object will be allocated
+Malloc is a virtual memory based storage backend, which allocates each object
 using whatever ``malloc()`` implementation is in effect. If configured, virtual
 memory might get paged in and out to swap space by the operating system.
 
@@ -81,14 +93,14 @@ fragmentation, the amount of memory actually used by the malloc implementation
 might be substantially higher by a factor of typically **two to four times**.
 Specific optimizations like :ref:`platform-thp` can amplify this effect.
 
-malloc's performance is bound to memory speed, so it is very fast. If
-the dataset is bigger than available memory, performance will
-depend on the operating system's ability to page effectively.
+malloc's performance is bound to memory speed, so it is very fast. If the
+dataset is bigger than available memory, performance depends on the operating
+system's ability to page effectively.
 
 .. _guide-storage_umem:
 
 umem
-~~~~
+----
 
 syntax: umem[,size]
 
@@ -136,7 +148,7 @@ be reconfigured once loaded.
 .. _libumem: http://dtrace.org/blogs/ahl/2004/07/13/number-11-of-20-libumem/
 
 file
-~~~~
+----
 
 syntax: file,path[,size[,granularity[,advice]]]
 
@@ -168,12 +180,12 @@ suffixes:
 
       T, t    The size is expressed in tebibytes.
 
-If 'path' points to an existing file and no size is specified, the
-size of the existing file will be used. If 'path' does not point to an
-existing file it is an error to not specify the size.
+If 'path' points to an existing file and no size is specified, the size of the
+existing file is used. If 'path' does not point to an existing file it is an
+error to not specify the size.
 
-If the backing file already exists, it will be truncated or expanded
-to the specified size.
+If the backing file already exists, it is truncated or expanded to the specified
+size.
 
 Note that if `varnishd` has to create or expand the file, it will not
 pre-allocate the added space, leading to fragmentation, which may
@@ -204,7 +216,7 @@ On Linux, large objects and rotational disk should benefit from
 "sequential".
 
 deprecated_persistent
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 syntax: deprecated_persistent,path,size {experimental}
 
@@ -239,8 +251,12 @@ the silo was offline will not be applied to the silo when it reenters
 the cache. Consequently enabling previously banned objects to
 reappear.
 
-Transient Storage
------------------
+---------------------
+Special Storage names
+---------------------
+
+Transient
+---------
 
 If you name any of your storage backend "Transient" it will be used
 for transient (short lived) objects. This includes the temporary
