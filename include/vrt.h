@@ -48,7 +48,7 @@
 
 #define VRT_MAJOR_VERSION	22U
 
-#define VRT_MINOR_VERSION	1U
+#define VRT_MINOR_VERSION	2U
 
 /***********************************************************************
  * Major and minor VRT API versions.
@@ -57,7 +57,9 @@
  * Whenever something is deleted or changed in a way which is not
  * binary/load-time compatible, increment MAJOR version
  *
- * 22.1 (trunk)
+ * 22.2 (trunk)
+ *	struct vrt_endpoint.ssl_ca_file added
+ * 22.1
  *	"vcl_name" member added to vrt_backend_probe{}
  *	VRT_PROBE_string() added
  * 22.0 (2025-09-15)
@@ -665,6 +667,7 @@ struct vrt_endpoint {
 	const struct vrt_blob		*preamble;
 	unsigned			sslflags;
 	const char			*hosthdr;
+	const char			*ssl_ca_file;
 };
 
 #define VRT_BACKEND_FIELDS(rigid)				\

@@ -188,6 +188,15 @@ Varnish connects to the backend:
     that is used instead. If set to 0, this allows a backend to use an invalid
     certificate.
 
+``.ssl_ca_file`` [default: none]
+    Path to a PEM file with one or more CA certificates to verify the
+    backend certificate against, instead of the system default CA
+    store. The file must exist and be readable when the VCL is loaded,
+    or the load will fail. The file is read when the backend's
+    connection pool is created; changes to it on disk take effect only
+    once all VCLs referencing the backend are discarded, or `varnishd`
+    is restarted.
+
 
 
 Connecting Through a Proxy
