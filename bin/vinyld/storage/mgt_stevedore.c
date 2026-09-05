@@ -57,10 +57,12 @@ static struct stevedore_head pre_stevedores =
 static struct stevedore_head stevedores =
     VTAILQ_HEAD_INITIALIZER(stevedores);
 
-/* Name of transient storage */
-#define TRANSIENT_STORAGE	"Transient"
+/* Name of special storages */
+#define TRANSIENT_STORAGE	"Transient"	// passes
+#define SYNTH_STORAGE		"Synth"		// vcl_synth resp.body
 
 struct stevedore *stv_transient;
+struct stevedore *stv_synth;
 
 const char *mgt_stv_h2_rxbuf;
 
@@ -240,14 +242,22 @@ STV_Config(const char *spec)
 void
 STV_Config_Final(void)
 {
+	unsigned have_transient = 0, have_synth = 0;
 	struct stevedore *stv;
 	ASSERT_MGT();
 
 	VCLS_AddFunc(mgt_cls, cli_stv);
-	STV_Foreach(stv)
+	STV_Foreach(stv) {
 		if (!strcmp(stv->ident, TRANSIENT_STORAGE))
-			return;
-	STV_Config(TRANSIENT_STORAGE "=default");
+			have_transient = 1;
+		else if (!strcmp(stv->ident, SYNTH_STORAGE))
+			have_synth = 1;
+	}
+
+	if (! have_transient)
+		STV_Config(TRANSIENT_STORAGE "=default");
+	if (! have_synth)
+		STV_Config(SYNTH_STORAGE "=default");
 }
 
 /*--------------------------------------------------------------------
@@ -302,10 +312,15 @@ STV_Init(void)
 		if (!strcmp(stv->ident, TRANSIENT_STORAGE)) {
 			AZ(stv_transient);
 			stv_transient = stv;
+		} else if (!strcmp(stv->ident, SYNTH_STORAGE)) {
+			AZ(stv_synth);
+			stv_synth = stv;
 		} else
 			VTAILQ_INSERT_TAIL(&stevedores, stv, list);
 		/* NB: Do not free av, stevedore gets to keep it */
 	}
 	AN(stv_transient);
 	VTAILQ_INSERT_TAIL(&stevedores, stv_transient, list);
+	AN(stv_synth);
+	VTAILQ_INSERT_TAIL(&stevedores, stv_synth, list);
 }

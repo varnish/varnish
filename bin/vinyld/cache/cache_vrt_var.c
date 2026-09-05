@@ -450,7 +450,9 @@ VRT_r_resp_storage(VRT_CTX)
 	if (oc == NULL)
 		VRT_l_resp_storage(ctx, NULL);
 	oc = ctx->req->objcore;
-	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
+	if (oc == NULL)
+		return (NULL);
+	CHECK_OBJ(oc, OBJCORE_MAGIC);
 	return (oc->stobj->stevedore);
 }
 
@@ -460,7 +462,7 @@ VRT_l_resp_storage(VRT_CTX, VCL_STEVEDORE stv)
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	if (stv == NULL)
-		stv = stv_transient;
+		stv = stv_synth;
 	if (! Resp_l_storage(ctx->req, stv))
 		VRT_fail(ctx, "Storage %s failed", stv->vclname);
 }
@@ -482,10 +484,6 @@ VRT_l_beresp_storage(VRT_CTX, VCL_STEVEDORE stv)
 	CHECK_OBJ_NOTNULL(ctx->bo, BUSYOBJ_MAGIC);
 	ctx->bo->storage = stv;
 }
-
-/*--------------------------------------------------------------------
- * VCL <= 4.0 ONLY
- */
 
 /*--------------------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 vtest "Check set resp.body & storage in vcl_synth"
 
-varnish v1 -arg "-sTransient=debug,lessspace -smalloc=malloc" -vcl {
+varnish v1 -arg "-sSynth=debug,lessspace -smalloc=malloc" -vcl {
 	backend foo {
 		.host = "${bad_backend}";
 	}
@@ -25,7 +25,7 @@ client c1 {
 	expect resp.http.connection != close
 	expect resp.bodylen == 23
 	expect resp.body == "Custom vcl_synth's body"
-	expect resp.http.storage == "storage.Transient"
+	expect resp.http.storage == "storage.Synth"
 
 	txreq -url "/" -hdr "malloc: true"
 	rxresp
