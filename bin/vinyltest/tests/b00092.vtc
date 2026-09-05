@@ -2,11 +2,16 @@ vtest "Use multiple objects for a single request"
 
 server s0 {
 	rxreq
-	txresp -hdr "method: O1_METHOD"
+	expect req.url == /
+	txresp -hdr "url: /2" -hdr "method: O1_METHOD" -hdr "bodypart: head,"
+
 	rxreq
-	txresp -hdr "url: /o2_url"
+	expect req.url == /2
+	txresp -hdr "url: /o2_url" -hdr "bodypart: arms,"
+
 	rxreq
-	txresp -hdr "val: 3"
+	expect req.url == /o2_url
+	txresp -hdr "val: 3" -body "all the rest"
 } -start
 
 
@@ -19,23 +24,35 @@ varnish v1 -vcl+backend {
 	import debug;
 
 	sub vcl_recv {
+		if (req.http.cache) {
+			return (hash);
+		}
 		return (pass);
 	}
 	sub vcl_deliver {
 		if (req.restarts == 0) {
 			set req.method = resp.http.method;
+			set req.url = resp.http.url;
 			debug.log_strands("resp.http.method", resp.http.method);
+			debug.body_prefix(resp.http.bodypart);
 		} else if (req.restarts == 1) {
 			set req.url = resp.http.url;
 			debug.log_strands("resp.http.url", resp.http.url);
+			debug.body_prefix(resp.http.bodypart);
 		} else {
 			set resp.http.method = req.method;
 			set resp.http.url = req.url;
 			debug.log_strands("req.method", req.method);
 			debug.log_strands("req.url", req.url);
+			set resp.filters = "debug.body_prefix";
 			return (deliver);
 		}
 		return (restart);
+	}
+
+	sub vcl_backend_response {
+		set beresp.ttl = 1s;
+		set beresp.grace = 0s;
 	}
 } -start
 
@@ -45,4 +62,24 @@ client c1 {
 	expect resp.http.method == O1_METHOD
 	expect resp.http.url == /o2_url
 	expect resp.http.val == 3
+	expect resp.body == "head,arms,all the rest"
 } -run
+server s0 -wait
+
+# check that we do not leak references: as soon as the request is done with, all
+# three objects need to be deleted (because pass)
+varnish v1 -expect n_object == 0
+
+## re-run with cached objects, just to be sure
+
+server s0 -start
+client c1 {
+	txreq -hdr "cache: 1"
+	rxresp
+	expect resp.http.method == O1_METHOD
+	expect resp.http.url == /o2_url
+	expect resp.http.val == 3
+	expect resp.body == "head,arms,all the rest"
+} -run
+varnish v1 -expect n_object == 0
+server s0 -wait

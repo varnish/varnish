@@ -70,7 +70,7 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 	uint64_t bytes, hdrbytes;
 	struct http_conn *htc;
 	struct vdp_ctx vdc[1] = {{ 0 }};
-	intmax_t cl;
+	intmax_t cl, ocl;
 	const char *err = NULL;
 	struct v1l *v1l = NULL;
 
@@ -96,7 +96,7 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 	}
 	else
 		cl = 0;
-
+	ocl = cl;
 	VDP_Init(vdc, wrk, bo->vsl, NULL, bo, &cl);
 	if (bo->vdp_filter_list != NULL &&
 	    VCL_StackVDP(vdc, bo->vcl, bo->vdp_filter_list, NULL, bo))
@@ -125,8 +125,15 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 
 
 	assert(cl >= -1);
-	if (cl < 0)
-		http_PrintfHeader(hp, "Transfer-Encoding: chunked");
+	if (cl < 0) {
+		http_Unset(hp, H_Content_Length);
+		http_ForceHeader(hp, H_Transfer_Encoding, "chunked");
+	} else if (ocl != cl) {
+		assert(cl >= 0);
+		http_Unset(hp, H_Transfer_Encoding);
+		http_Unset(hp, H_Content_Length);
+		http_PrintfHeader(hp, "Content-Length: %ju", cl);
+	}
 
 	VTCP_blocking(*htc->rfd);	/* XXX: we should timeout instead */
 	hdrbytes = HTTP1_Write(v1l, hp, HTTP1_Req);
@@ -134,12 +141,15 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 	/* Deal with any message-body the request might (still) have */
 	i = 0;
 
-	if (bo->bereq_body != NULL) {
+	if (cl != 0 && bo->bereq_body != NULL) {
 		AZ(bo->req);
-		assert(cl >= 0);
+		if (cl < 0)
+			V1L_Chunked(v1l);
 		(void)ObjIterate(bo->wrk, bo->bereq_body,
 		    vdc, VDP_ObjIterate, 0);
-	} else if (bo->req != NULL &&
+		if (cl < 0)
+			V1L_EndChunk(v1l);
+	} else if (cl != 0 && bo->req != NULL &&
 	    bo->req->req_body_status != BS_NONE) {
 		if (cl < 0)
 			V1L_Chunked(v1l);
