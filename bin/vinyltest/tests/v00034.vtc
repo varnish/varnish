@@ -25,6 +25,15 @@ varnish v1 -errvcl {Probe 'p1' redefined} {
 	backend s1 { .host = "${localhost}"; .probe = p1;}
 }
 
+varnish v1 -errvcl "Only one default probe possible." {
+	probe default { }
+	probe default { }
+}
+
+varnish v1 -errvcl "Expected '{' got ';'" {
+	probe p;
+}
+
 varnish v1 -errvcl {Expected '(' got ';'} {
 	backend s1 { .host = "${localhost}"; }
 	sub vcl_recv { return; }
