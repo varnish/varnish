@@ -48,7 +48,6 @@ client c1 {
 
 # Three failures, one for obj2, one for vcl_backend_error{}, one for synth objcore
 varnish v1 -expect SM?.Transient.c_fail == 2
-varnish v1 -expect SM?.Synth.c_fail == 0
 
 client c1 {
 	# Check that varnishd is still alive

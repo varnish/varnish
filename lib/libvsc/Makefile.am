@@ -14,6 +14,7 @@ VSC_SRC = \
 	VSC_sma.vsc \
 	VSC_smf.vsc \
 	VSC_smu.vsc \
+	VSC_ssy.vsc \
 	VSC_vbe.vsc \
 	VSC_vcp.vsc \
 	VSC_waiter.vsc

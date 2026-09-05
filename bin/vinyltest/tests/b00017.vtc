@@ -1,20 +1,32 @@
 vtest "Check set resp.body & storage in vcl_synth"
 
-varnish v1 -arg "-sSynth=debug,lessspace -smalloc=malloc" -vcl {
-	backend foo {
-		.host = "${bad_backend}";
-	}
+varnish v1 -arg "-sTransient=debug,lessspace" -vcl {
+	import std;
+	backend foo none;
 	sub vcl_recv {
+		if (req.url == "/cov-backend") {
+			return (hash);
+		}
+		if (req.url == "/cov-reqbody") {
+			set req.storage = storage.Synth;
+			std.cache_req_body(1M);
+		}
 		return (synth(888));
 	}
-
 	sub vcl_synth {
-		if (req.http.malloc) {
-			set resp.storage = storage.malloc;
+		if (! req.http.synth) {
+			set resp.storage = storage.Transient;
 		}
-		set resp.body = "Custom vcl_synth's body";
+		set resp.body = "Custom vcl_synth's " + now + " body";
 		set resp.http.storage = resp.storage;
 		return (deliver);
+	}
+	sub vcl_backend_fetch {
+		return (error(200));
+	}
+	sub vcl_backend_error {
+		set beresp.storage = storage.Synth;
+		set beresp.ttl = 1h;
 	}
 } -start
 
@@ -23,17 +35,29 @@ client c1 {
 	rxresp
 	expect resp.status == 888
 	expect resp.http.connection != close
-	expect resp.bodylen == 23
-	expect resp.body == "Custom vcl_synth's body"
-	expect resp.http.storage == "storage.Synth"
+	expect resp.bodylen >= 52
+	expect resp.bodylen <= 53
+	expect resp.body ~ "^Custom vcl_synth's .* body$"
+	expect resp.http.storage == "storage.Transient"
 
-	txreq -url "/" -hdr "malloc: true"
+	txreq -url "/" -hdr "synth: true"
 	rxresp
 	expect resp.status == 888
 	expect resp.http.connection != close
-	expect resp.bodylen == 23
-	expect resp.body == "Custom vcl_synth's body"
-	expect resp.http.storage == "storage.malloc"
+	expect resp.bodylen >= 52
+	expect resp.bodylen <= 53
+	expect resp.body ~ "^Custom vcl_synth's .* body$"
+	expect resp.http.storage == "storage.Synth"
+
+	txreq -url "/cov-backend"
+	rxresp
+	expect resp.status == 200
+
+	txreq -req "POST" -url "/cov-reqbody" -bodylen 64
+	rxresp
+	expect resp.status == 400
 } -run
 
 varnish v1 -expect s_synth == 2
+varnish v1 -expect SSY.synth.c_allocobj_success == 1
+varnish v1 -expect SSY.synth.c_getspace_success == 1
