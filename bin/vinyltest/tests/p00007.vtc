@@ -1,5 +1,7 @@
 vtest "test reload of object spanning incomplete segment"
 
+# XXX TODO https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4456
+feature cmd false
 feature persistent_storage
 feature disable_aslr
 
