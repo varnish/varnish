@@ -192,3 +192,23 @@ varnish v1 -errvcl {Expected a flag at} {
 	backend b { .host = "${localhost}"; }
 	include +
 }
+
+# Error spanning multiple sources (includes or built-in)
+shell {printf 'vcl 4.1;\nbackend b.' > ${tmpdir}/no_newline.vcl}
+
+shell -err -expect {contains illegal character} {
+	varnishd -C -f ${tmpdir}/no_newline.vcl
+}
+
+shell {printf 'backend b.' > ${tmpdir}/no_newline_inc.vcl}
+
+varnish v1 -errvcl {contains illegal character} {
+	include "${tmpdir}/no_newline_inc.vcl";
+	sub vcl_recv { }
+}
+
+shell {printf 'vcl 4.1;\nbackend b.\n' > ${tmpdir}/newline.vcl}
+
+shell -err -expect {contains illegal character} {
+	varnishd -C -f ${tmpdir}/newline.vcl
+}
