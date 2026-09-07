@@ -686,13 +686,20 @@ vsm_readlines(struct vsm_set *vs)
 	} while (!i);
 	if (i != -2) {
 		/* The line handler left the reason in the diag */
-		AN(vd->diag);
-		fprintf(
-		    stderr,
-		    "Malformed _.index line (%u): %s\n",
-		    vs->lineno,
-		    VSB_data(vd->diag)
-		);
+		if (vd->diag != NULL) {
+			fprintf(
+			    stderr,
+			    "Malformed _.index line (%u): %s\n",
+			    vs->lineno,
+			    VSB_data(vd->diag)
+			);
+		} else {
+			fprintf(
+			    stderr,
+			    "Could not read _.index:\nPossibly relevant: %s",
+			    strerror(errno)
+			);
+		}
 		exit(2);
 	}
 }
