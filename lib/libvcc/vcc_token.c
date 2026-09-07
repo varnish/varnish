@@ -212,6 +212,10 @@ vcc_ErrWhere2(struct vcc *tl, const struct token *t, const struct token *t2)
 	t2 = VTAILQ_PREV(t2, tokenhead, list);
 	vcc_iline(t2, &l2, 1);
 
+	if (t->src != t2->src) {
+		vcc_ErrWhere(tl, t);
+		return;
+	}
 
 	if (l1 == l2) {
 		vcc_icoord(tl->sb, t, 0);
