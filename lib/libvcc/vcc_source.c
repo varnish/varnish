@@ -157,7 +157,7 @@ vcc_lex_include(struct vcc *tl, const struct source *src_sp, struct token *t)
 	tok1 = VTAILQ_NEXT(t, src_list);
 	AN(tok1);
 
-	while (1) {
+	while (tok1->tok != EOI) {
 		t = VTAILQ_NEXT(tok1, src_list);
 		AN(t);
 		i = vcc_IsFlagRaw(tl, tok1, t);
