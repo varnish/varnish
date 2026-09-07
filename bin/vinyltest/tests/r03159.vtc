@@ -16,9 +16,11 @@ process p1 -log {
 
 shell {
 	# wait for startup vcl.load to complete
-	varnishadm -n ${tmpdir}/t ping ||
-	varnishadm -n ${tmpdir}/t ping ||
-	varnishadm -n ${tmpdir}/t ping ||
+	t=50
+	while [ "$t" -gt 0 ] && ! varnishadm -n ${tmpdir}/t ping ; do
+		sleep 0.1
+		t=$(($t - 1))
+	done
 	varnishadm -n ${tmpdir}/t ping
 }
 
