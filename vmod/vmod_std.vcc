@@ -602,13 +602,15 @@ Example::
 
 $Restrict client
 
-$Function VOID rollback(HTTP h)
+$Function VOID rollback(HTTP h=0)
 
-Restores the *h* HTTP headers to their original state.
+Restores the current task to its original state.
+
+The *h* argument is obsolete and ignored.
 
 Example::
 
-	std.rollback(bereq);
+	std.rollback();
 
 $Restrict backend vcl_recv vcl_pass vcl_hash vcl_purge vcl_miss vcl_hit vcl_deliver vcl_synth
 
