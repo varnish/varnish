@@ -809,7 +809,7 @@ VCL_VOID VRT_trace(VRT_CTX, VCL_BOOL);
 VCL_VOID VRT_fail(VRT_CTX, const char *fmt, ...) v_printflike_(2,3) v_cold_;
 VCL_VOID VRT_hashdata(VRT_CTX, VCL_STRANDS);
 
-VCL_VOID VRT_Rollback(VRT_CTX, VCL_HTTP);
+VCL_VOID VRT_Rollback(VRT_CTX);
 
 /***********************************************************************
  * VDI - Director API
