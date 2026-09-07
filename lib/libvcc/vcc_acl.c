@@ -695,7 +695,7 @@ vcc_acl_emit(struct vcc *tl, const struct symbol *sym)
 		no = n;
 
 	if (no < n)
-		nw = vcc_acl_emit_tables(tl, n - no, sym->name);
+		nw = vcc_acl_emit_tables(tl, n - no, sym->rname);
 
 
 	Fh(tl, 0, "\nstatic int v_matchproto_(acl_match_f)\n");
@@ -780,9 +780,9 @@ vcc_acl_emit(struct vcc *tl, const struct symbol *sym)
 		Fh(tl, 0, "\treturn(\n\t    VPI_acl_table(ctx,\n");
 		Fh(tl, 0, "\t\tp,\n");
 		Fh(tl, 0, "\t\t%u, %u,\n", n - no, nw);
-		Fh(tl, 0, "\t\tacl_tbl_%s,\n", sym->name);
+		Fh(tl, 0, "\t\tacl_tbl_%s,\n", sym->rname);
 		if (tl->acl->flag_log)
-			Fh(tl, 0, "\t\tacl_str_%s,\n", sym->name);
+			Fh(tl, 0, "\t\tacl_str_%s,\n", sym->rname);
 		else
 			Fh(tl, 0, "\t\tNULL,\n");
 		Fh(tl, 0, "\t\t\"NO MATCH %s\"\n\t    )\n\t);\n", sym->name);
