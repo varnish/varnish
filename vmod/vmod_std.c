@@ -229,7 +229,9 @@ vmod_port(VRT_CTX, VCL_IP ip)
 VCL_VOID v_matchproto_(td_std_rollback)
 vmod_rollback(VRT_CTX, VCL_HTTP hp)
 {
-	VRT_Rollback(ctx, hp);
+
+	(void)hp;
+	VRT_Rollback(ctx);
 }
 
 VCL_VOID v_matchproto_(td_std_timestamp)
