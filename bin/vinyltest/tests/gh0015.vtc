@@ -12,6 +12,7 @@ varnish v1 -vcl {
 	}
 
 	sub vcl_synth {
+		set resp.storage = storage.Transient;
 		# Consume most of workspace_client, which should not
 		# interfere with pipelining also happening on the same
 		# workspace.
