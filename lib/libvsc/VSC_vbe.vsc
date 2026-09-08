@@ -104,6 +104,86 @@
 
 	Number of times the max_connections limit was reached
 
+.. vinyl_vsc:: closed
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed
+
+.. vinyl_vsc:: closed_err
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed with error
+
+.. vinyl_vsc:: rem_close
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed by backend
+
+.. vinyl_vsc:: req_close
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closure requested by backend
+
+.. vinyl_vsc:: req_http10
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for proto < HTTP/1.1
+
+.. vinyl_vsc:: rx_bad
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for received bad response
+
+.. vinyl_vsc:: rx_body
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for failed receiving request body
+
+.. vinyl_vsc:: rx_junk
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for received junk data
+
+.. vinyl_vsc:: rx_overflow
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for receive buffer overflow
+
+.. vinyl_vsc:: rx_timeout
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for receive timeout
+
+.. vinyl_vsc:: tx_proxy
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for proxy transaction
+
+.. vinyl_vsc:: tx_pipe
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for piped transaction
+
+.. vinyl_vsc:: tx_error
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for error transaction
+
+.. vinyl_vsc:: tx_eof
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for EOF transmission
+
+.. vinyl_vsc:: resp_close
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for backend/VCL requested close
+
+.. vinyl_vsc:: overload
+	:type:	counter
+	:level: info
+	:oneliner:	Connection closed for out of some resource
+
 ..
 	=== Anything below is actually per VCP entry, but collected per
 	=== backend for simplicity
