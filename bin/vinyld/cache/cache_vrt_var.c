@@ -450,7 +450,9 @@ VRT_r_resp_storage(VRT_CTX)
 	if (oc == NULL)
 		VRT_l_resp_storage(ctx, NULL);
 	oc = ctx->req->objcore;
-	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
+	if (oc == NULL)
+		return (NULL);
+	CHECK_OBJ(oc, OBJCORE_MAGIC);
 	return (oc->stobj->stevedore);
 }
 
