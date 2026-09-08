@@ -902,6 +902,17 @@ main(int argc, char * const *argv)
 	if (o)
 		ARGV_EXIT;
 
+	if (! C_flag) {
+		VTAILQ_FOREACH(alp, &arglist, list) {
+			if (!vstrcmp(alp->arg, "P"))
+				alp->priv = create_pid_file(&pid, "%s", alp->val);
+		}
+
+		/* Implicit -P argument */
+		alp = arg_list_add('P', NULL);
+		alp->priv = create_pid_file(&pid, "%s/_.pid", workdir);
+	}
+
 	VJ_master(JAIL_MASTER_SYSTEM);
 #ifdef RLIMIT_MEMLOCK
 	/* try to raise to max (ignore error), then set _cur to whatever we got */
@@ -955,15 +966,6 @@ main(int argc, char * const *argv)
 	}
 	if (C_flag)
 		exit(u);
-
-	VTAILQ_FOREACH(alp, &arglist, list) {
-		if (!vstrcmp(alp->arg, "P"))
-			alp->priv = create_pid_file(&pid, "%s", alp->val);
-	}
-
-	/* Implicit -P argument */
-	alp = arg_list_add('P', NULL);
-	alp->priv = create_pid_file(&pid, "%s/_.pid", workdir);
 
 	if (VTAILQ_EMPTY(&heritage.socks))
 		VCA_Arg(":80\0");	// XXX: extra NUL for FlexeLint

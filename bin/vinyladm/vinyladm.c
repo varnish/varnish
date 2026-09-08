@@ -544,7 +544,7 @@ main(int argc, char * const *argv)
 		NEEDLESS(exit(0));
 	}
 
-	if (isatty(0) && !p_arg)
+	if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && !p_arg)
 		interactive(sock);
 	else
 		pass(sock);

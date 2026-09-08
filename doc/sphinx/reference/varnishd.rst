@@ -339,6 +339,12 @@ Advanced, development and debugging options
   to compile with the -f option. Either -f or -b must be used with -C,
   and -C cannot be used with -F or -d.
 
+  -C should not be used with -n, as the given working directory will be cleaned
+  out and overwritten. By default, -C creates a working directory either in
+  TMPDIR or in /tmp. If control over the working directory used by -C is
+  required, it is recommended to set TMPDIR and use -n only with controlled
+  values.
+
 -V
 
   Display the version number and exit. This must be the only option.

@@ -1,13 +1,13 @@
 vtest "debug storage"
 
 shell -err -expect {Error: Only one -sdebug instance supported} \
-	"varnishd -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v1 -sdebug -sdebug"
+	"varnishd -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v0a -sdebug -sdebug"
 
 shell -err -expect {Error: -sdebug conflicting options} \
-	"varnishd -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v1 -sdebug,lessspace,maxspace=1KB" 
+	"varnishd -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v0b -sdebug,lessspace,maxspace=1KB"
 
 shell -err -expect {Error: Unknown BYTES} \
-	"varnishd -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v1 -sdebug,maxspace=1DJT"
+	"varnishd -b none -a ${tmpdir}/vtc.sock -n ${tmpdir}/v0c -sdebug,maxspace=1DJT"
 
 # lessspace is implicitly tested in b00017.vtc
 

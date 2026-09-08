@@ -180,6 +180,38 @@ herein, see the system documentation instead (for example using ``man
             continue
         gen_func(match, vcc_fh, c_fh)
 
+    # Build code coverage function which calls all other functions.
+
+    vcc_fh.write("$Function BOOL code_coverage(REAL x)\n")
+
+    c_fh.write("\nVCL_BOOL\n")
+    c_fh.write("vmod_code_coverage(VRT_CTX, VCL_REAL x)\n")
+    c_fh.write("{\n")
+    c_fh.write("\tdouble a = 0.;\n")
+    for match in re_spec_funcs.finditer(spec):
+        f = match.group(0)
+        if re_func_disregard.search(f):
+            continue
+
+        c_fh.write("\ta += vmod_" + match.group(2) + "(ctx, ")
+        l = []
+        for arg in match.group(3).split(","):
+            i = {
+                "double": "x/113.",
+                "real-floating x": "x/113.",
+                "real-floating y": "x/355.",
+                "long": "24L",
+                "int": "12",
+                "const char *": '"0x3141"',
+            }.get(arg.strip())
+            if i:
+                l.append(i)
+            else:
+                print("???", arg, match)
+        c_fh.write(", ".join(l) + ");\n")
+    c_fh.write("\treturn (isnan(a));\n")
+    c_fh.write("}\n")
+
 
 def gen_enumfunc(ret, func, enums, doc, vcc_fh, c_fh):
     enumcomma = ", ".join(enums)

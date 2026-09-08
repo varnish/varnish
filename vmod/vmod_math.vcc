@@ -214,3 +214,4 @@ $Function REAL y0(REAL x)
 $Function REAL y1(REAL x)
 
 $Function REAL yn(INT n, REAL x)
+$Function BOOL code_coverage(REAL x)

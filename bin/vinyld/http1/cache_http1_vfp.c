@@ -87,8 +87,6 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
 			return (i);
 		}
 		assert(i <= len);
-		if (i == 0)
-			htc->doclose = SC_RESP_CLOSE;
 	}
 	assert(i >= 0);
 	assert(l >= 0);
@@ -337,8 +335,10 @@ v1f_eof_pull(struct vfp_ctx *vc, struct vfp_entry *vfe, void *p, ssize_t *lp)
 	lr = v1f_read(vc, htc, p, l);
 	if (lr < 0)
 		return (VFP_Error(vc, "eof socket fail"));
-	if (lr == 0)
+	if (lr == 0) {
+		htc->doclose = SC_RESP_CLOSE;
 		return (VFP_END);
+	}
 	*lp = lr;
 	return (VFP_OK);
 }
