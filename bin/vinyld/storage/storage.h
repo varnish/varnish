@@ -113,7 +113,7 @@ struct stevedore {
 	 */
 	storage_open_f			*open;
 	storage_close_f			*close;
-	storage_allocobj_f		*allocobj;
+	storage_allocobj_f		*allocobj;	// XXX add ws ptr or VRT_CTX?
 	storage_baninfo_f		*baninfo;
 	storage_banexport_f		*banexport;
 	storage_panic_f			*panic;
@@ -170,6 +170,7 @@ void LRU_Touch(struct worker *, struct objcore *, vtim_real now);
 /*--------------------------------------------------------------------*/
 extern const struct stevedore smu_stevedore;
 extern const struct stevedore sma_stevedore;
+extern const struct stevedore ssy_stevedore;
 extern const struct stevedore smd_stevedore;
 extern const struct stevedore smf_stevedore;
 extern const struct stevedore smp_stevedore;
