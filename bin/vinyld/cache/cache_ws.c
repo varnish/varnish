@@ -70,7 +70,7 @@ WS_Allocated(const struct ws *ws, const void *ptr, ssize_t len)
 
 	WS_Assert(ws);
 	if (len < 0)
-		len = strlen(p) + 1;
+		len = vstrlen(p) + 1;
 	assert(!(p > ws->f && p <= ws->e));
 	return (p >= ws->s && (p + len) <= ws->f);
 }
@@ -193,7 +193,7 @@ WS_Copy(struct ws *ws, const void *str, int len)
 	assert(ws->r == NULL);
 
 	if (len == -1)
-		len = strlen(str) + 1;
+		len = vstrlen(str) + 1;
 	assert(len > 0);
 
 	bytes = PRNDUP((unsigned)len);

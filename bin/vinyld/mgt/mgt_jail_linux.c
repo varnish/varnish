@@ -50,14 +50,14 @@ vjl_set_thp(const char *arg, struct vsb *vsb)
 {
 	int r, val, must;
 
-	if (!strcmp(arg, "ignore"))
+	if (!vstrcmp(arg, "ignore"))
 		return (0);
 	must = 1;
-	if (!strcmp(arg, "enable"))
+	if (!vstrcmp(arg, "enable"))
 		val = 0;
-	else if (!strcmp(arg, "disable"))
+	else if (!vstrcmp(arg, "disable"))
 		val = 1;
-	else if (!strcmp(arg, "try-disable")) {
+	else if (!vstrcmp(arg, "try-disable")) {
 		arg = "disable";
 		val = 1;
 		must = 0;
@@ -174,8 +174,8 @@ vjl_make_workdir(const char *dname, const char *what, struct vsb *vsb)
 		return (1);
 	}
 	if (info.f_type != TMPFS_MAGIC) {
-		VSB_printf(vsb, "Working directory not mounted on"
-		    " tmpfs partition\n");
+		VSB_cat(vsb, "Working directory not mounted on"
+			" tmpfs partition\n");
 	}
 	vjl_master(JAIL_MASTER_LOW);
 	return (0);

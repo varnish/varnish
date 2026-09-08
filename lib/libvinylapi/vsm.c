@@ -466,7 +466,7 @@ vsm_cmp_av(char * const *a1, char * const *a2)
 			return (0);
 		if (*a1 == NULL || *a2 == NULL)
 			return (1);
-		if (strcmp(*a1, *a2))
+		if (vstrcmp(*a1, *a2))
 			return (1);
 		a1++;
 		a2++;
@@ -481,7 +481,7 @@ vsm_findcluster(const struct vsm_set *vs, const char *cnam)
 	AN(cnam);
 	VTAILQ_FOREACH(vg, &vs->clusters, clist) {
 		AN(vg->av[1]);
-		if (!strcmp(cnam, vg->av[1]))
+		if (!vstrcmp(cnam, vg->av[1]))
 			return (vg);
 	}
 	return (NULL);
@@ -999,7 +999,7 @@ VSM_Map(struct vsm *vd, struct vsm_fantom *vf)
 		return (0);
 	}
 
-	CHECK_OBJ_NOTNULL(vgc, VSM_SEG_MAGIC);
+	CHECK_OBJ(vgc, VSM_SEG_MAGIC);
 	assert(vgc->flags & VSM_FLAG_CLUSTER);
 	assert(vg->s == NULL);
 	assert(vg->sz == 0);
@@ -1040,7 +1040,7 @@ VSM_Unmap(struct vsm *vd, struct vsm_fantom *vf)
 	vg = vsm_findseg(vd, vf);
 	if (vg == NULL)
 		return (vsm_diag(vd, "VSM_Unmap: bad fantom"));
-	CHECK_OBJ_NOTNULL(vg, VSM_SEG_MAGIC);
+	CHECK_OBJ(vg, VSM_SEG_MAGIC);
 	assert(vg->refs > 0);
 	vg->refs--;
 	vf->b = NULL;
@@ -1094,9 +1094,9 @@ VSM_Get(struct vsm *vd, struct vsm_fantom *vf,
 	CHECK_OBJ_NOTNULL(vd, VSM_MAGIC);
 	AN(vd->attached);
 	VSM_FOREACH(vf, vd) {
-		if (strcmp(vf->category, category))
+		if (vstrcmp(vf->category, category))
 			continue;
-		if (ident != NULL && strcmp(vf->ident, ident))
+		if (ident != NULL && vstrcmp(vf->ident, ident))
 			continue;
 		return (1);
 	}
@@ -1115,9 +1115,9 @@ VSM_Dup(struct vsm *vd, const char *category, const char *ident)
 	CHECK_OBJ_NOTNULL(vd, VSM_MAGIC);
 	AN(vd->attached);
 	VSM_FOREACH(&vf, vd) {
-		if (strcmp(vf.category, category))
+		if (vstrcmp(vf.category, category))
 			continue;
-		if (ident != NULL && strcmp(vf.ident, ident))
+		if (ident != NULL && vstrcmp(vf.ident, ident))
 			continue;
 		AZ(VSM_Map(vd, &vf));
 		AN(vf.b);

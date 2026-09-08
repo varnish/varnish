@@ -57,7 +57,7 @@ strands_len(const struct strands *s)
 	for (i = 0; i < s->n; i++) {
 		if (s->p[i] == NULL || *s->p[i] == '\0')
 			continue;
-		r += strlen(s->p[i]);
+		r += vstrlen(s->p[i]);
 	}
 
 	return (r);
@@ -82,7 +82,7 @@ strands_cat(char *buf, unsigned bufl, const struct strands *s)
 	for (i = 0; i < s->n && bufl > 0; i++) {
 		if (s->p[i] == NULL || *s->p[i] == '\0')
 			continue;
-		ll = vmin_t(unsigned, strlen(s->p[i]), bufl);
+		ll = vmin_t(unsigned, vstrlen(s->p[i]), bufl);
 		memcpy(buf, s->p[i], ll);
 		l += ll;
 		buf += ll;
@@ -306,7 +306,7 @@ VSLv(enum VSL_tag_e tag, vxid_t vxid, const char *fmt, va_list ap)
 		return;
 
 	if (strchr(fmt, '%') == NULL) {
-		vslr(tag, vxid, fmt, strlen(fmt) + 1);
+		vslr(tag, vxid, fmt, vstrlen(fmt) + 1);
 	} else {
 		n = vsnprintf(buf, mlen, fmt, ap);
 		n = vmin(n, mlen - 1);
@@ -401,7 +401,7 @@ vslb_simple(struct vsl_log *vsl, enum VSL_tag_e tag,
 	char *p;
 
 	if (length == 0)
-		length = strlen(str);
+		length = vstrlen(str);
 	length += 1; // NUL
 	p = vslb_get(vsl, tag, &length);
 	memcpy(p, str, length - 1);
@@ -473,7 +473,7 @@ VSLbv(struct vsl_log *vsl, enum VSL_tag_e tag, const char *fmt, va_list ap)
 	/*
 	 * If the format is trivial, deal with it directly
 	 */
-	if (!strcmp(fmt, "%s")) {
+	if (!vstrcmp(fmt, "%s")) {
 		p1 = va_arg(ap, char *);
 		vslb_simple(vsl, tag, 0, p1);
 		return;

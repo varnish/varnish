@@ -159,8 +159,8 @@ VPF_Write(const struct vpf_fh *pfh)
 	AZ(ftruncate(pfh->pf_fd, 0));
 
 	bprintf(pidstr, "%jd", (intmax_t)getpid());
-	assert(pwrite(pfh->pf_fd, pidstr, strlen(pidstr), 0) ==
-	    (ssize_t)strlen(pidstr));
+	assert(pwrite(pfh->pf_fd, pidstr, vstrlen(pidstr), 0) ==
+	       (ssize_t) vstrlen(pidstr));
 }
 
 void

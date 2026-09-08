@@ -709,7 +709,7 @@ vtx_parse_link(const char *str, enum VSL_transaction_e *ptype,
 
 	/* transaction type */
 	for (et = VSL_t_unknown; et < VSL_t__MAX; et++)
-		if (!strcmp(type, vsl_t_names[et]))
+		if (!vstrcmp(type, vsl_t_names[et]))
 			break;
 	if (et >= VSL_t__MAX)
 		et = VSL_t_unknown;
@@ -725,7 +725,7 @@ vtx_parse_link(const char *str, enum VSL_transaction_e *ptype,
 
 	/* transaction reason */
 	for (er = VSL_r_unknown; er < VSL_r__MAX; er++)
-		if (!strcmp(reason, vsl_r_names[er]))
+		if (!vstrcmp(reason, vsl_r_names[er]))
 			break;
 	if (er >= VSL_r__MAX)
 		er = VSL_r_unknown;
@@ -849,7 +849,7 @@ vtx_scan_link(struct VSLQ *vslq, struct vtx *vtx, const uint32_t *ptr)
 		return (0);
 	}
 
-	CHECK_OBJ_NOTNULL(c_vtx, VTX_MAGIC);
+	CHECK_OBJ(c_vtx, VTX_MAGIC);
 	if (c_vtx->parent == vtx)
 		/* Link already exists */
 		return (0);

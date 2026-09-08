@@ -83,16 +83,16 @@ xyzzy_author(VRT_CTX, VCL_ENUM person, VCL_ENUM someone)
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	if (person == VENUM(phk))
 		return ("Poul-Henning");
-	assert(strcmp(person, "phk"));
+	assert(vstrcmp(person, "phk"));
 	if (person == VENUM(des))
 		return ("Dag-Erling");
-	assert(strcmp(person, "des"));
+	assert(vstrcmp(person, "des"));
 	if (person == VENUM(kristian))
 		return ("Kristian");
-	assert(strcmp(person, "kristian"));
+	assert(vstrcmp(person, "kristian"));
 	if (person == VENUM(mithrandir))
 		return ("Tollef");
-	assert(strcmp(person, "mithrandir"));
+	assert(vstrcmp(person, "mithrandir"));
 	WRONG("Illegal VMOD enum");
 }
 
@@ -133,7 +133,7 @@ xyzzy_test_priv_call(VRT_CTX, struct vmod_priv *priv)
 		priv->methods = xyzzy_test_priv_call_methods;
 	} else {
 		assert(priv->methods == xyzzy_test_priv_call_methods);
-		assert(!strcmp(priv->priv, "BAR"));
+		assert(!vstrcmp(priv->priv, "BAR"));
 	}
 }
 
@@ -160,7 +160,7 @@ xyzzy_test_priv_task(VRT_CTX, struct vmod_priv *priv, VCL_STRING s)
 		    priv, priv->priv);
 	} else {
 		char *n = realloc(priv->priv,
-		    strlen(priv->priv) + strlen(s) + 2);
+		    vstrlen(priv->priv) + vstrlen(s) + 2);
 		if (n == NULL)
 			return (NULL);
 		strcat(n, " ");
@@ -297,7 +297,7 @@ priv_vcl_fini(VRT_CTX, void *priv)
 	struct priv_vcl *priv_vcl;
 
 	CAST_OBJ_NOTNULL(priv_vcl, priv, PRIV_VCL_MAGIC);
-	AZ(close(priv_vcl->tmpf));
+	closefd(&priv_vcl->tmpf);
 	AN(priv_vcl->foo);
 	AZ(unlink(priv_vcl->foo));
 	free(priv_vcl->foo);
@@ -336,7 +336,7 @@ event_load(VRT_CTX, struct vmod_priv *priv)
 	AN(priv_vcl->foo);
 	priv_vcl->tmpf = mkstemp(priv_vcl->foo);
 	assert(priv_vcl->tmpf >= 0);
-	AN(write(priv_vcl->tmpf, priv_vcl->foo, strlen(priv_vcl->foo)));
+	AN(write(priv_vcl->tmpf, priv_vcl->foo, vstrlen(priv_vcl->foo)));
 	priv->priv = priv_vcl;
 	priv->methods = priv_vcl_methods;
 
@@ -636,7 +636,7 @@ xyzzy_concat__init(VRT_CTX, struct xyzzy_debug_concat **concatp,
 
 	for (int i = 0; i < s->n; i++)
 		if (s->p[i] != NULL)
-			sz += strlen(s->p[i]);
+			sz += vstrlen(s->p[i]);
 	p = malloc(sz + 1);
 	AN(p);
 	(void)VRT_Strands(p, sz + 1, s);
@@ -1273,7 +1273,7 @@ resolve_cb(void *priv, const struct suckaddr *sa)
 	CHECK_OBJ_NOTNULL(p->vsb, VSB_MAGIC);
 	AN(sa);
 	VTCP_name(sa, abuf, sizeof abuf, pbuf, sizeof pbuf);
-	if (p->fail_port != NULL && !strcmp(p->fail_port, pbuf)) {
+	if (p->fail_port != NULL && !vstrcmp(p->fail_port, pbuf)) {
 		*(p->errp) = "bad port";
 		return (-1);
 	}
@@ -1387,7 +1387,8 @@ xyzzy_log_strands(VRT_CTX, VCL_STRING prefix, VCL_STRANDS subject, VCL_INT nn)
 	for (i = 0; i < subject->n; i++) {
 		const char *p = subject->p[i];
 		mylog(ctx->vsl, SLT_Debug, "%s[%d]: (%s) %p %.*s%s", prefix, i,
-		    ptr_where(ctx, p), p, n, p, strlen(p) > (unsigned)n ? "..." : "");
+		    ptr_where(ctx, p), p, n, p,
+		    vstrlen(p) > (unsigned)n ? "..." : "");
 	}
 }
 

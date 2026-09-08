@@ -87,7 +87,7 @@ VCLI_WriteResult(int fd, unsigned status, const char *result)
 	assert(status >= 100);
 	assert(status <= 999);		/*lint !e650 const out of range */
 
-	len = strlen(result);
+	len = vstrlen(result);
 
 	i = snprintf(res, sizeof res, "%-3d %-8zd\n", status, len);
 	assert(i == CLI_LINE0_LEN);

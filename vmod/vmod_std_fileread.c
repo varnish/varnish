@@ -104,7 +104,7 @@ find_frfile(struct vmod_priv *priv, VCL_STRING file_name)
 
 	if (priv->priv != NULL) {
 		CAST_OBJ_NOTNULL(frf, priv->priv, CACHED_FILE_MAGIC);
-		if (!strcmp(file_name, frf->file_name))
+		if (!vstrcmp(file_name, frf->file_name))
 			return (frf);
 	}
 
@@ -112,7 +112,7 @@ find_frfile(struct vmod_priv *priv, VCL_STRING file_name)
 	if (frf != NULL)
 		frf->refcount--;
 	VTAILQ_FOREACH(frf, &frlist, list) {
-		if (!strcmp(file_name, frf->file_name)) {
+		if (!vstrcmp(file_name, frf->file_name)) {
 			frf->refcount++;
 			break;
 		}

@@ -149,7 +149,7 @@ vsmw_idx_head(const struct vsmw *vsmw, int fd)
 
 	bprintf(buf, "# %jd %jd\n", (intmax_t)vsmw->pid, (intmax_t)vsmw->birth);
 	// XXX handle ENOSPC? #2764
-	assert(write(fd, buf, strlen(buf)) == strlen(buf));
+	assert(write(fd, buf, vstrlen(buf)) == vstrlen(buf));
 }
 
 #define ASSERT_SEG_STR(x) do {			\

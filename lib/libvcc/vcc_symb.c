@@ -133,7 +133,7 @@ vcc_symtab_new(const char *name)
 	ALLOC_OBJ(st, SYMTAB_MAGIC);
 	AN(st);
 	st->name = name;
-	st->nlen = strlen(st->name);
+	st->nlen = vstrlen(st->name);
 	VTAILQ_INIT(&st->children);
 	VTAILQ_INIT(&st->symbols);
 	return (st);
@@ -213,7 +213,7 @@ vcc_sym_in_tab(struct vcc *tl, struct symtab *st,
 		if (kind == SYM_NONE && kind == sym->kind &&
 		    sym->wildcard == NULL)
 			continue;
-		if (tl->syntax < VCL_41 && strcmp(sym->name, "default") &&
+		if (tl->syntax < VCL_41 && vstrcmp(sym->name, "default") &&
 		     kind != SYM_NONE && kind != sym->kind &&
 		     sym->wildcard == NULL)
 			continue;

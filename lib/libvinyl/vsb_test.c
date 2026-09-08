@@ -163,7 +163,7 @@ main(int argc, char *argv[])
 		VSB_cat(vsbo, " (");
 		VSB_quote(vsbo, tc->out, -1, VSB_QUOTE_ESCHEX);
 		VSB_cat(vsbo, ")");
-		if (strcmp(VSB_data(vsb), tc->out)) {
+		if (vstrcmp(VSB_data(vsb), tc->out)) {
 			VSB_cat(vsbo, "\nShould have been:\n\t");
 			VSB_quote(vsbo, tc->out, -1, VSB_QUOTE_HEX);
 			VSB_cat(vsbo, "\nThat's:\n\t");

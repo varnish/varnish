@@ -814,7 +814,7 @@ xyzzy_string_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 	}
 	AN(p->priv);
 	*priv = p->priv;
-	*vdc->clen = strlen(*priv);
+	*vdc->clen = vstrlen(*priv);
 	return (0);
 }
 
@@ -829,7 +829,7 @@ xyzzy_string_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 	(void)ptr;
 	(void)len;
 
-	r = VDP_bytes(vdc, VDP_END, *priv, strlen(*priv));
+	r = VDP_bytes(vdc, VDP_END, *priv, vstrlen(*priv));
 	if (r != 0)
 		return (r);
 	// only to be called once
@@ -891,7 +891,7 @@ xyzzy_vdp_body_prefix_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 
 	l = 0;
 	VSTAILQ_FOREACH(bps, &bp->head, list)
-		l += strlen(bps->s);
+		l += vstrlen(bps->s);
 	*vdc->clen += l;
 
 	return (0);
@@ -909,7 +909,7 @@ xyzzy_vdp_body_prefix_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **pri
 
 	while ((bps = VSTAILQ_FIRST(&bp->head)) != NULL) {
 		VSTAILQ_REMOVE_HEAD(&bp->head, list);
-		if (VDP_bytes(vdc, VDP_NULL, bps->s, strlen(bps->s)))
+		if (VDP_bytes(vdc, VDP_NULL, bps->s, vstrlen(bps->s)))
 			return (vdc->retval);
 	}
 

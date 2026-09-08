@@ -241,7 +241,7 @@ arg_list_count(const char *arg)
 	struct arg_list *alp;
 
 	VTAILQ_FOREACH(alp, &arglist, list) {
-		if (!strcmp(alp->arg, arg))
+		if (!vstrcmp(alp->arg, arg))
 			retval++;
 	}
 	return (retval);
@@ -382,19 +382,19 @@ mgt_initialize(struct cli *cli)
 static void
 mgt_x_arg(const char *x_arg)
 {
-	if (!strcmp(x_arg, "parameter"))
+	if (!vstrcmp(x_arg, "parameter"))
 		MCF_DumpRstParam();
-	else if (!strcmp(x_arg, "parameter-json"))
+	else if (!vstrcmp(x_arg, "parameter-json"))
 		MCF_DumpJsonParam();
-	else if (!strcmp(x_arg, "vsl"))
+	else if (!vstrcmp(x_arg, "vsl"))
 		mgt_DumpRstVsl();
-	else if (!strcmp(x_arg, "cli"))
+	else if (!vstrcmp(x_arg, "cli"))
 		mgt_DumpRstCli();
-	else if (!strcmp(x_arg, "builtin"))
+	else if (!vstrcmp(x_arg, "builtin"))
 		mgt_DumpBuiltin();
-	else if (!strcmp(x_arg, "optstring"))
+	else if (!vstrcmp(x_arg, "optstring"))
 		(void)printf("%s\n", opt_spec);
-	else if (!strcmp(x_arg, "options"))
+	else if (!vstrcmp(x_arg, "options"))
 		mgt_DumpOptions();
 	else
 		ARGV_ERR("Invalid -x argument\n");
@@ -652,7 +652,7 @@ main(int argc, char * const *argv)
 	int first_arg = 1;
 	struct vsb *vsb;
 
-	if (argc == 2 && !strcmp(argv[1], "--optstring")) {
+	if (argc == 2 && !vstrcmp(argv[1], "--optstring")) {
 		printf("%s\n", opt_spec);
 		exit(0);
 	}
@@ -865,7 +865,7 @@ main(int argc, char * const *argv)
 		n_arg = p;
 	}
 
-	if (S_arg != NULL && !strcmp(S_arg, "none")) {
+	if (S_arg != NULL && !vstrcmp(S_arg, "none")) {
 		fprintf(stderr,
 		    "Warning: CLI authentication disabled.\n");
 	} else if (S_arg != NULL) {
@@ -950,14 +950,14 @@ main(int argc, char * const *argv)
 
 	u = 0;
 	VTAILQ_FOREACH(alp, &arglist, list) {
-		if (!strcmp(alp->arg, "f") && alp->priv != NULL)
+		if (!vstrcmp(alp->arg, "f") && alp->priv != NULL)
 			u |= mgt_process_f_arg(cli, C_flag, &alp->priv);
 	}
 	if (C_flag)
 		exit(u);
 
 	VTAILQ_FOREACH(alp, &arglist, list) {
-		if (!strcmp(alp->arg, "P"))
+		if (!vstrcmp(alp->arg, "P"))
 			alp->priv = create_pid_file(&pid, "%s", alp->val);
 	}
 
@@ -976,15 +976,15 @@ main(int argc, char * const *argv)
 
 	mgt_SHM_Init();
 
-	mgt_SHM_static_alloc(i_arg, strlen(i_arg) + 1L, "Arg", "-i");
+	mgt_SHM_static_alloc(i_arg, vstrlen(i_arg) + 1L, "Arg", "-i");
 	VSC_C_mgt = VSC_mgt_New(NULL, NULL, "");
 
 	VTAILQ_FOREACH(alp, &arglist, list) {
-		if (!strcmp(alp->arg, "M"))
+		if (!vstrcmp(alp->arg, "M"))
 			mgt_cli_master(alp->val);
-		else if (!strcmp(alp->arg, "T") && strcmp(alp->val, "none"))
+		else if (!vstrcmp(alp->arg, "T") && vstrcmp(alp->val, "none"))
 			mgt_cli_telnet(alp->val);
-		else if (!strcmp(alp->arg, "P"))
+		else if (!vstrcmp(alp->arg, "P"))
 			VPF_Write(alp->priv);
 	}
 
@@ -1000,7 +1000,7 @@ main(int argc, char * const *argv)
 	if (d_flag)
 		mgt_cli_setup(0, 1, 1, "debug", mgt_stdin_close, NULL);
 
-	if (strcmp(S_arg, "none"))
+	if (vstrcmp(S_arg, "none"))
 		mgt_cli_secret(S_arg);
 
 	memset(&sac, 0, sizeof sac);
@@ -1081,7 +1081,7 @@ main(int argc, char * const *argv)
 	(void)rmdir("vext_cache");
 	VJ_master(JAIL_MASTER_LOW);
 	VTAILQ_FOREACH(alp, &arglist, list) {
-		if (!strcmp(alp->arg, "P"))
+		if (!vstrcmp(alp->arg, "P"))
 			VPF_Remove(alp->priv);
 	}
 	exit(exit_status);

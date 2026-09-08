@@ -163,8 +163,9 @@ vcc_strands_edit(const struct expr *e1, const struct expr *e2)
 
 	if (e2->fmt == STRANDS)
 		VSB_cat(e1->vsb, VSB_data(e2->vsb));
-	else if (e2->nstr == 0)
-		VSB_printf(e1->vsb, "vrt_null_strands");
+	else if (e2->nstr == 0) {
+		VSB_cat(e1->vsb, "vrt_null_strands");
+	}
 	else if (e2->nstr == 1)
 		VSB_printf(e1->vsb, "TOSTRAND(%s)", VSB_data(e2->vsb));
 	else {
@@ -413,10 +414,10 @@ vcc_priv_arg(struct vcc *tl, const char *p, struct symbol *sym)
 	AN(sym);
 	AN(sym->vmod_name);
 
-	if (!strcmp(p, "PRIV_VCL"))
+	if (!vstrcmp(p, "PRIV_VCL"))
 		return (vcc_mk_expr(VOID, "&vmod_priv_%s", sym->vmod_name));
 
-	if (!strcmp(p, "PRIV_CALL")) {
+	if (!vstrcmp(p, "PRIV_CALL")) {
 		bprintf(buf, "vmod_priv_%u", tl->unique++);
 		ifp = New_IniFin(tl);
 		Fh(tl, 0, "static struct vmod_priv %s;\n", buf);
@@ -424,9 +425,9 @@ vcc_priv_arg(struct vcc *tl, const char *p, struct symbol *sym)
 		return (vcc_mk_expr(VOID, "&%s", buf));
 	}
 
-	if (!strcmp(p, "PRIV_TASK"))
+	if (!vstrcmp(p, "PRIV_TASK"))
 		f = "task";
-	else if (!strcmp(p, "PRIV_TOP")) {
+	else if (!vstrcmp(p, "PRIV_TOP")) {
 		f = "top";
 		sym->r_methods &= VCL_MET_TASK_C;
 	} else {
@@ -648,7 +649,7 @@ vcc_func(struct vcc *tl, struct expr **e, const void *priv,
 			e1 = vcc_expr_edit(tl, e1->fmt, ssa, e1, NULL);
 		}
 		if (fa->result == NULL && fa->type == ENUM && fa->val != NULL)
-			fa->result = vcc_do_enum(tl, cfunc, strlen(fa->val), fa->val);
+			fa->result = vcc_do_enum(tl, cfunc, vstrlen(fa->val), fa->val);
 		if (fa->result == NULL && fa->val != NULL) {
 			if (fa->type == BOOL && fa->val[0] == 'f')
 				fa->result = vcc_mk_expr(fa->type, "0");

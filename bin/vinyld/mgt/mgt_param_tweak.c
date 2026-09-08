@@ -140,7 +140,7 @@ tweak_timeout(struct vsb *vsb, const struct parspec *par, const char *arg)
 {
 	volatile double *dest = par->priv;
 
-	if (arg != NULL && !strcmp(arg, "never")) {
+	if (arg != NULL && !vstrcmp(arg, "never")) {
 		*dest = INFINITY;
 		return (0);
 	}
@@ -299,7 +299,7 @@ tweak_uint_orzero(struct vsb *vsb, const struct parspec *par, const char *arg)
 	volatile unsigned *dest;
 
 	dest = par->priv;
-	if (arg != NULL && arg != JSON_FMT && ! strcmp(arg, "0")) {
+	if (arg != NULL && arg != JSON_FMT && ! vstrcmp(arg, "0")) {
 		VSB_cat(vsb, "0");
 		*dest = 0;
 		return (0);
@@ -586,8 +586,8 @@ tweak_storage(struct vsb *vsb, const struct parspec *par, const char *arg)
 	if (arg == NULL || arg == JSON_FMT)
 		return (tweak_string(vsb, par, arg));
 
-	if (!strcmp(arg, "Transient") ||
-	    !strcmp(arg, "Synth")) {
+	if (!vstrcmp(arg, "Transient") ||
+	    !vstrcmp(arg, "Synth")) {
 		/* Always allow setting the special names
 		 *
 		 * There will always be a stevedore with each of these names,
@@ -598,7 +598,7 @@ tweak_storage(struct vsb *vsb, const struct parspec *par, const char *arg)
 		 * stevedore */
 		STV_Foreach(stv) {
 			CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);
-			if (!strcmp(stv->ident, arg))
+			if (!vstrcmp(stv->ident, arg))
 				break;
 		}
 		if (stv == NULL) {
@@ -677,19 +677,19 @@ bit_tweak(struct vsb *vsb, uint8_t *p, unsigned l, const char *arg,
 	}
 	for (i = 1; av[i] != NULL; i++) {
 		s = av[i];
-		if (sign == '+' && !strcmp(s, "none")) {
+		if (sign == '+' && !vstrcmp(s, "none")) {
 			bit_clear(p, l);
 			continue;
 		}
-		if (sign == '+' && !strcmp(s, "all")) {
+		if (sign == '+' && !vstrcmp(s, "all")) {
 			bit_set(p, l);
 			continue;
 		}
-		if (sign == '-' && !strcmp(s, "all")) {
+		if (sign == '-' && !vstrcmp(s, "all")) {
 			bit_clear(p, l);
 			continue;
 		}
-		if (sign == '-' && !strcmp(s, "none")) {
+		if (sign == '-' && !vstrcmp(s, "none")) {
 			bit_set(p, l);
 			continue;
 		}
@@ -728,7 +728,7 @@ tweak_generic_bits(struct vsb *vsb, const struct parspec *par, const char *arg,
 {
 	unsigned j, all;
 
-	if (arg != NULL && !strcmp(arg, "default")) {
+	if (arg != NULL && !vstrcmp(arg, "default")) {
 		/* XXX: deprecated in favor of param.reset */
 		return (tweak_generic_bits(vsb, par, par->def, p, l, tags,
 		    desc, sign));
@@ -853,13 +853,13 @@ tweak_vcc_feature(struct vsb *vsb, const struct parspec *par, const char *arg)
 	int val;
 
 	if (arg != NULL && arg != JSON_FMT &&
-	    strcmp(par->name, "vcc_feature")) {
+	    vstrcmp(par->name, "vcc_feature")) {
 		orig = TRUST_ME(par->priv);
 		val = parse_boolean(vsb, arg);
 		if (val < 0)
 			return (-1);
 		bprintf(buf, "%c%s", val ? '+' : '-',
-		    par->name + strlen("vcc_"));
+		    par->name + vstrlen("vcc_"));
 		return (tweak_vcc_feature(vsb, orig, buf));
 	}
 	return (tweak_generic_bits(vsb, par, arg, mgt_param.vcc_feature_bits,

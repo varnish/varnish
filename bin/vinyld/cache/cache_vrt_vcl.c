@@ -390,7 +390,7 @@ VRT_LookupDirector(VRT_CTX, VCL_STRING name)
 	vdire_start_iter(vdire);
 	VTAILQ_FOREACH(vdir, &vdire->directors, directors_list) {
 		dd = vdir->dir;
-		if (strcmp(dd->vcl_name, name))
+		if (vstrcmp(dd->vcl_name, name))
 			continue;
 		d = dd;
 		break;

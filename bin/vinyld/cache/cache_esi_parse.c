@@ -229,7 +229,7 @@ vep_match(const struct vep_state *vep, const char *b, const char *e)
 
 	AN(vep->match);
 	for (vm = vep->match; vm->match != NULL; vm++) {
-		assert(strlen(vm->match) <= sizeof (vep->tag));
+		assert(vstrlen(vm->match) <= sizeof (vep->tag));
 		r = b;
 		for (q = vm->match; *q != '\0' && r < e; q++, r++)
 			if (*q != *r)
@@ -466,7 +466,7 @@ static void
 include_attr_onerror(struct vep_state *vep)
 {
 
-	vep->include_continue = !strcmp("continue", VSB_data(vep->attr_vsb));
+	vep->include_continue = !vstrcmp("continue", VSB_data(vep->attr_vsb));
 	VSB_destroy(&vep->attr_vsb);
 }
 
@@ -481,11 +481,11 @@ vep_do_include(struct vep_state *vep, enum dowhat what)
 	if (what == DO_ATTR) {
 		Debug("ATTR (%s) (%s)\n", vep->match_hit->match,
 			VSB_data(vep->attr_vsb));
-		if (!strcmp("src=", vep->match_hit->match)) {
+		if (!vstrcmp("src=", vep->match_hit->match)) {
 			include_attr_src(vep);
 			return;
 		}
-		if (!strcmp("onerror=", vep->match_hit->match)) {
+		if (!vstrcmp("onerror=", vep->match_hit->match)) {
 			include_attr_onerror(vep);
 			return;
 		}
@@ -965,7 +965,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 			vep->match_hit = vm;
 			if (vm != NULL) {
 				if (vm->match != NULL)
-					p += strlen(vm->match);
+					p += vstrlen(vm->match);
 				vep->state = *vm->state;
 				vep->match = NULL;
 				vep->tag_i = 0;
@@ -1003,7 +1003,7 @@ VEP_Parse(struct vep_state *vep, const char *p, size_t l)
 				vep->match_hit = vm;
 				vep->state = *vm->state;
 				if (vm->match != NULL) {
-					i = strlen(vm->match);
+					i = vstrlen(vm->match);
 					if (i > vep->tag_i)
 						p += i - vep->tag_i;
 				}

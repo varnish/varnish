@@ -122,7 +122,7 @@ vrt_addfilter(VRT_CTX, const struct vfp *vfp, const struct vdp *vdp)
 	vp->vfp = vfp;
 	vp->vdp = vdp;
 	vp->name = name;
-	vp->nlen = strlen(name);
+	vp->nlen = vstrlen(name);
 	VTAILQ_INSERT_TAIL(hd, vp, list);
 	return (err);
 }

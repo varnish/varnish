@@ -83,7 +83,7 @@ mcf_vcl_parse_state(struct cli *cli, const char *s)
 {
 	if (s != NULL) {
 #define VCL_STATE(sym, str)				\
-		if (!strcmp(s, str))			\
+		if (!vstrcmp(s, str))			\
 			return (VCL_STATE_ ## sym);
 #include "tbl/vcl_states.h"
 	}
@@ -98,7 +98,7 @@ mcf_vcl_byname(const char *name)
 	struct vclprog *vp;
 
 	VTAILQ_FOREACH(vp, &vclhead, list)
-		if (!strcmp(name, vp->name))
+		if (!vstrcmp(name, vp->name))
 			return (vp);
 	return (NULL);
 }
@@ -292,7 +292,7 @@ mgt_has_vcl(void)
 		return ("No VCL loaded");
 	if (mgt_vcl_active == NULL)
 		return ("No active VCL");
-	CHECK_OBJ_NOTNULL(mgt_vcl_active, VCLPROG_MAGIC);
+	CHECK_OBJ(mgt_vcl_active, VCLPROG_MAGIC);
 	AN(mgt_vcl_active->warm);
 	return (NULL);
 }

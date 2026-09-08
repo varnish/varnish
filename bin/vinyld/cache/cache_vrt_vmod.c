@@ -76,7 +76,7 @@ vmod_abi_mismatch(const struct vmod_data *d)
 {
 
 	if (d->vrt_major == 0 && d->vrt_minor == 0)
-		return (d->abi == NULL || strcmp(d->abi, VMOD_ABI_Version));
+		return (d->abi == NULL || vstrcmp(d->abi, VMOD_ABI_Version));
 
 	return (d->vrt_major != VRT_MAJOR_VERSION ||
 	    d->vrt_minor > VRT_MINOR_VERSION);
@@ -118,7 +118,7 @@ VPI_Vmod_Init(VRT_CTX, struct vmod **hdl, unsigned nbr, void *ptr, int len,
 		d = dlsym(v->hdl, buf);
 		if (d == NULL ||
 		    d->file_id == NULL ||
-		    strcmp(d->file_id, file_id)) {
+		    vstrcmp(d->file_id, file_id)) {
 			VSB_printf(ctx->msg, "Loading vmod %s from %s (%s):\n",
 			    nm, backup, path);
 			VSB_cat(ctx->msg,
@@ -130,7 +130,7 @@ VPI_Vmod_Init(VRT_CTX, struct vmod **hdl, unsigned nbr, void *ptr, int len,
 		}
 		if (vmod_abi_mismatch(d) ||
 		    d->name == NULL ||
-		    strcmp(d->name, nm) ||
+		    vstrcmp(d->name, nm) ||
 		    d->func == NULL ||
 		    d->func_len <= 0 ||
 		    d->proto != NULL ||

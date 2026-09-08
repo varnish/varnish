@@ -124,8 +124,8 @@ vbt_execinfo(struct vsb *vsb)
 			VSB_cat(vsb, "(?)");
 		} else {
 			p = strings[0];
-			if (!memcmp(buf, p, strlen(buf))) {
-				p += strlen(buf);
+			if (!memcmp(buf, p, vstrlen(buf))) {
+				p += vstrlen(buf);
 				if (*p == ':')
 					p++;
 				while (*p == ' ')
@@ -166,7 +166,7 @@ VBT_dump(size_t len, char buf[len])
 	if (VSB_init(vsb, buf, len) == NULL)
 		return (-1);
 
-	VSB_printf(vsb, "Backtrace:\n");
+	VSB_cat(vsb, "Backtrace:\n");
 	VSB_indent(vsb, 2);
 	VBT_format(vsb);
 	VSB_indent(vsb, -2);

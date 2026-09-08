@@ -208,7 +208,7 @@ vex_New(const char *query, struct vsb *sb, unsigned options)
 	AN(sb);
 	vxp = vxp_New(sb);
 	vxp->b = query;
-	vxp->e = query + strlen(query);
+	vxp->e = query + vstrlen(query);
 	vxp->vex_options = options;
 	if (options & VEX_OPT_CASELESS)
 		vxp->vre_options |= VRE_CASELESS;

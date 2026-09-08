@@ -170,7 +170,8 @@ dbg_sendbody(struct worker *wrk, void *arg)
 	CNT_Embark(wrk, req);
 	req->vdc->wrk = wrk;	// move to CNT_Embark?
 
-	chunked = http_GetHdr(req->resp, H_Transfer_Encoding, &p) && strcmp(p, "chunked") == 0;
+	chunked = http_GetHdr(req->resp, H_Transfer_Encoding, &p) &&
+	    vstrcmp(p, "chunked") == 0;
 	if (chunked)
 		V1L_Chunked(v1l);
 	err = VDP_DeliverObj(req->vdc, req->objcore);

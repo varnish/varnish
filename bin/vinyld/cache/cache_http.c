@@ -559,7 +559,7 @@ http_CollectHdrSep(struct http *hp, hdr_t hdr, const char *sep)
 
 	if (sep == NULL || *sep == '\0')
 		sep = ", ";
-	lsep = strlen(sep);
+	lsep = vstrlen(sep);
 
 	f = http_findhdr(hp, hdr->len - 1, hdr->str);
 	if (f == 0)
@@ -709,7 +709,7 @@ http_split(const char **src, const char *stop, const char *sep,
 static int
 http_istoken(const char **bp, const char *e, const char *token)
 {
-	int fl = strlen(token);
+	int fl = vstrlen(token);
 	const char *b;
 
 	AN(bp);
@@ -1166,7 +1166,7 @@ http_ForceField(struct http *to, unsigned n, const char *t)
 	AN(t);
 
 	/* NB: method names and protocol versions are case-sensitive. */
-	if (to->hd[n].b == NULL || strcmp(to->hd[n].b, t)) {
+	if (to->hd[n].b == NULL || vstrcmp(to->hd[n].b, t)) {
 		i = (HTTP_HDR_UNSET - HTTP_HDR_METHOD);
 		i += to->logtag;
 		/* XXX: this is a dead branch */
@@ -1377,13 +1377,13 @@ HTTP_GetHdrPack(struct worker *wrk, struct objcore *oc, hdr_t hdr)
 		ptr += 4;	/* Skip nhd and status */
 
 		/* XXX: should we also have h2_hdr_eq() ? */
-		if (!strcmp(hdr->str, ":proto:"))
+		if (!vstrcmp(hdr->str, ":proto:"))
 			return (ptr);
 		ptr = strchr(ptr, '\0') + 1;
-		if (!strcmp(hdr->str, ":status:"))
+		if (!vstrcmp(hdr->str, ":status:"))
 			return (ptr);
 		ptr = strchr(ptr, '\0') + 1;
-		if (!strcmp(hdr->str, ":reason:"))
+		if (!vstrcmp(hdr->str, ":reason:"))
 			return (ptr);
 		WRONG("Unknown magic packed header");
 	}
@@ -1595,7 +1595,7 @@ http_TimeHeader(struct http *to, const char *fmt, vtim_real now)
 		http_fail(to);
 		return;
 	}
-	p = WS_Alloc(to->ws, strlen(fmt) + VTIM_FORMAT_SIZE);
+	p = WS_Alloc(to->ws, vstrlen(fmt) + VTIM_FORMAT_SIZE);
 	if (p == NULL) {
 		http_fail(to);
 		VSLbs(to->vsl, SLT_LostHeader, TOSTRAND(fmt));

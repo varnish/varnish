@@ -362,7 +362,7 @@ shardcfg_backend_cmp(const struct shard_backend *a,
 
 	AN(ai);
 	AN(bi);
-	return (strcmp(ai, bi));
+	return (vstrcmp(ai, bi));
 }
 
 /* for removal, we delete all instances if the backend matches */

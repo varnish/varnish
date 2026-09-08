@@ -460,7 +460,7 @@ vjsn_child(const struct vjsn_val *vv, const char *key)
 	CHECK_OBJ_NOTNULL(vv, VJSN_VAL_MAGIC);
 	AN(key);
 	VTAILQ_FOREACH(vc, &vv->children, list) {
-		if (vc->name != NULL && !strcmp(vc->name, key))
+		if (vc->name != NULL && !vstrcmp(vc->name, key))
 			return (vc);
 	}
 	return (NULL);
@@ -477,11 +477,11 @@ vjsn_dump_i(const struct vjsn_val *jsv, FILE *fo, int indent)
 		printf("[\"%s\"]: ", jsv->name);
 	printf("{%s}", jsv->type);
 	if (jsv->value != NULL) {
-		if (strlen(jsv->value) < 20)
+		if (vstrlen(jsv->value) < 20)
 			printf(" <%s", jsv->value);
 		else
 			printf(" <%.10s[...#%zu]",
-			    jsv->value, strlen(jsv->value + 10));
+			    jsv->value, vstrlen(jsv->value + 10));
 		printf(">");
 	}
 	printf("\n");

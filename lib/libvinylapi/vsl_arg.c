@@ -65,12 +65,12 @@ VSL_Name2Tag(const char *name, int l)
 	int i, n;
 
 	if (l == -1)
-		l = strlen(name);
+		l = vstrlen(name);
 	n = -1;
 	for (i = 0; i < SLT__MAX; i++) {
 		if (VSL_tags[i] != NULL &&
 		    !strncasecmp(name, VSL_tags[i], l)) {
-			if (strlen(VSL_tags[i]) == l) {
+			if (vstrlen(VSL_tags[i]) == l) {
 				/* Exact match */
 				return (i);
 			}
@@ -189,11 +189,11 @@ VSLQ_Name2Grouping(const char *name, int l)
 
 	AN(name);
 	if (l == -1)
-		l = strlen(name);
+		l = vstrlen(name);
 	n = -1;
 	for (i = 0; i < VSL_g__MAX; i++) {
 		if (!strncasecmp(name, VSLQ_grouping[i], l)) {
-			if (strlen(VSLQ_grouping[i]) == l) {
+			if (vstrlen(VSLQ_grouping[i]) == l) {
 				/* Exact match */
 				return (i);
 			}
@@ -336,7 +336,7 @@ vsl_R_arg(struct VSL_data *vsl, const char *arg)
 	if (*p != '/' || p[1] == '\0')
 		return (vsl_diag(vsl, "-R: Syntax error"));
 	p++;
-	if (strlen(p) > sizeof(buf) - 2)
+	if (vstrlen(p) > sizeof(buf) - 2)
 		return (vsl_diag(vsl, "-R: Syntax error"));
 	if (!isdigit(*p))
 		strcat(buf, "1");

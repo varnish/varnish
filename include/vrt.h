@@ -786,7 +786,7 @@ typedef const struct {
 	do {								\
 		AN(hdr);						\
 		assert((hdr)->len > 0);					\
-		assert((hdr)->len == strlen((hdr)->str));		\
+		assert((hdr)->len == vstrlen((hdr)->str));		\
 		assert((hdr)->str[(hdr)->len - 1] == ':');		\
 	} while (0)
 

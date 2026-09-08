@@ -192,7 +192,7 @@ STV_open(void)
 		AN(stv->vclname);
 		if (stv->open != NULL)
 			stv->open(stv);
-		if (!strcmp(stv->ident, mgt_stv_h2_rxbuf))
+		if (!vstrcmp(stv->ident, mgt_stv_h2_rxbuf))
 			stv_h2_rxbuf = stv;
 	}
 	AN(stv_h2_rxbuf);
@@ -278,7 +278,7 @@ stv_find(const char *nm)
 	struct stevedore *stv;
 
 	STV_Foreach(stv)
-		if (!strcmp(stv->ident, nm))
+		if (!vstrcmp(stv->ident, nm))
 			return (stv);
 	return (NULL);
 }
@@ -288,7 +288,7 @@ VRT_STEVEDORE_string(VCL_STEVEDORE s)
 {
 	if (s == NULL)
 		return (NULL);
-	CHECK_OBJ_NOTNULL(s, STEVEDORE_MAGIC);
+	CHECK_OBJ(s, STEVEDORE_MAGIC);
 	return (s->vclname);
 }
 
@@ -304,9 +304,9 @@ VRT_stevedore_##nm(VCL_STEVEDORE stv)			\
 {							\
 	if (stv == NULL)				\
 		return (0);				\
+	CHECK_OBJ(stv, STEVEDORE_MAGIC);		\
 	if (stv->var_##nm == NULL)			\
 		return (dval);				\
-	CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);	\
 	return (stv->var_##nm(stv));			\
 }
 #include "tbl/vrt_stv_var.h"

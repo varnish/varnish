@@ -157,7 +157,7 @@ vxp_expr_lhs(struct vxp *vxp, struct vex_lhs **plhs)
 		AN(vxp->t->dec);
 		(*plhs)->prefix = strdup(vxp->t->dec);
 		AN((*plhs)->prefix);
-		(*plhs)->prefixlen = strlen((*plhs)->prefix);
+		(*plhs)->prefixlen = vstrlen((*plhs)->prefix);
 		vxp_NextToken(vxp);
 	}
 
@@ -249,7 +249,7 @@ vxp_expr_str(struct vxp *vxp, struct vex_rhs **prhs)
 	(*prhs)->type = VEX_STRING;
 	(*prhs)->val_string = strdup(vxp->t->dec);
 	AN((*prhs)->val_string);
-	(*prhs)->val_stringlen = strlen((*prhs)->val_string);
+	(*prhs)->val_stringlen = vstrlen((*prhs)->val_string);
 	vxp_NextToken(vxp);
 }
 
@@ -669,7 +669,7 @@ vex_print(const struct vex *vex, int indent)
 		vex_print_tags(vex->lhs->tags);
 		fprintf(stderr, ")");
 		if (vex->lhs->prefix) {
-			assert(vex->lhs->prefixlen == strlen(vex->lhs->prefix));
+			assert(vex->lhs->prefixlen == vstrlen(vex->lhs->prefix));
 			fprintf(stderr, ":%s", vex->lhs->prefix);
 		}
 		if (vex->lhs->field > 0)

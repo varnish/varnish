@@ -357,7 +357,7 @@ exp_expire(struct exp_priv *ep, vtim_real now)
 	VSLb(&ep->vsl, SLT_ExpKill, "EXP_Inspect p=%p e=%.6f f=0x%x", oc,
 	    oc->timer_when - now, oc->flags);
 
-	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
+	CHECK_OBJ(oc, OBJCORE_MAGIC);
 
 	/* Ready ? */
 	if (oc->timer_when > now)

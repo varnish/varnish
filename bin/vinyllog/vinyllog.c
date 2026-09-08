@@ -73,7 +73,7 @@ openout(int append)
 
 	AN(LOG.w_arg);
 	if (LOG.A_opt) {
-		if (!strcmp(LOG.w_arg, "-"))
+		if (!vstrcmp(LOG.w_arg, "-"))
 			LOG.fo = stdout;
 		else
 			LOG.fo = fopen(LOG.w_arg, append ? "a" : "w");
@@ -151,7 +151,7 @@ main(int argc, char * const *argv)
 	if (vut->D_opt && !LOG.w_arg)
 		VUT_Error(vut, 1, "Missing -w option");
 
-	if (vut->D_opt && !strcmp(LOG.w_arg, "-"))
+	if (vut->D_opt && !vstrcmp(LOG.w_arg, "-"))
 		VUT_Error(vut, 1, "Daemon cannot write to stdout");
 
 	/* Setup output */

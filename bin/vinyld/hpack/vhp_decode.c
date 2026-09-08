@@ -640,7 +640,7 @@ match(const char *b, size_t l, ...)
 		m = va_arg(ap, const char *);
 		if (m == NULL)
 			break;
-		l = strlen(m);
+		l = vstrlen(m);
 		if (e - b <= l || b[l] != '\0' || strncmp(b, m, l)) {
 			printf("%.*s != %s\n", (int)(e - b), b, m);
 			r = -1;
@@ -1179,7 +1179,7 @@ test_c6(unsigned mode)
 int
 main(int argc, char **argv)
 {
-	if (argc == 2 && !strcmp(argv[1], "-v"))
+	if (argc == 2 && !vstrcmp(argv[1], "-v"))
 		verbose = 1;
 	else if (argc != 1) {
 		fprintf(stderr, "Usage: %s [-v]\n", argv[0]);

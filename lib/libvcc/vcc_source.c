@@ -235,8 +235,8 @@ vcc_lex_source(struct vcc *tl, struct source *src_sp, int eoi)
 	CHECK_OBJ_NOTNULL(src_sp, SOURCE_MAGIC);
 
 	for (sp1 = src_sp->parent; sp1 != NULL; sp1 = sp1->parent) {
-		if (!strcmp(sp1->name, src_sp->name) &&
-		    !strcmp(sp1->kind, src_sp->kind)) {
+		if (!vstrcmp(sp1->name, src_sp->name) &&
+		    !vstrcmp(sp1->kind, src_sp->kind)) {
 			VSB_printf(tl->sb,
 			    "Recursive use of %s \"%s\"\n\n",
 			    src_sp->kind, src_sp->name);

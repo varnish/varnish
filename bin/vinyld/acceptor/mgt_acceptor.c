@@ -76,7 +76,7 @@ VCA_Find(const char *name)
 	VCA_Foreach(vca) {
 		CHECK_OBJ_NOTNULL(vca, ACCEPTOR_MAGIC);
 
-		if (!strcmp(vca->name, name))
+		if (!vstrcmp(vca->name, name))
 			return (vca);
 	}
 

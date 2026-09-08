@@ -226,7 +226,7 @@ STV_Config(const char *spec)
 	}
 
 	VTAILQ_FOREACH(stv, &pre_stevedores, list)
-		if (!strcmp(stv->ident, ident))
+		if (!vstrcmp(stv->ident, ident))
 			ARGV_ERR("(-s %s) '%s' is already defined\n",
 			    spec, ident);
 
@@ -249,9 +249,9 @@ STV_Config_Final(void)
 
 	VCLS_AddFunc(mgt_cls, cli_stv);
 	STV_Foreach(stv) {
-		if (!strcmp(stv->ident, TRANSIENT_STORAGE))
+		if (!vstrcmp(stv->ident, TRANSIENT_STORAGE))
 			have_transient = 1;
-		else if (!strcmp(stv->ident, SYNTH_STORAGE))
+		else if (!vstrcmp(stv->ident, SYNTH_STORAGE))
 			have_synth = 1;
 	}
 
@@ -288,7 +288,7 @@ STV_Init(void)
 			continue;
 
 		VTAILQ_FOREACH(stv2, &proto_stevedores, list)
-			if (!strcmp(stv2->ident, av[1]))
+			if (!vstrcmp(stv2->ident, av[1]))
 				break;
 		if (stv2 == NULL)
 			ARGV_ERR("Unknown stevedore method \"%s\"\n", av[1]);
@@ -310,10 +310,10 @@ STV_Init(void)
 		AN(stv->allocobj);
 		AN(stv->methods);
 
-		if (!strcmp(stv->ident, TRANSIENT_STORAGE)) {
+		if (!vstrcmp(stv->ident, TRANSIENT_STORAGE)) {
 			AZ(stv_transient);
 			stv_transient = stv;
-		} else if (!strcmp(stv->ident, SYNTH_STORAGE)) {
+		} else if (!vstrcmp(stv->ident, SYNTH_STORAGE)) {
 			AZ(stv_synth);
 			stv_synth = stv;
 		} else

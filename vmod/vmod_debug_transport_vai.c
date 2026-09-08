@@ -61,7 +61,7 @@ vdpio_hello_init(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
 	if (*vdc->clen < 0)
 		return (capacity);
 
-	*vdc->clen += strlen(HELLO);
+	*vdc->clen += vstrlen(HELLO);
 	http_Unset(vdc->hp, H_Content_Length);
 	http_PrintfHeader(vdc->hp, "Content-Length: %jd", *vdc->clen);
 	return (capacity);
@@ -78,7 +78,7 @@ vdpio_hello_lease(struct vdp_ctx *vdc, struct vdp_entry *this,
 		return (0);
 	//lint -e{446} side effects in initializer - uh?
 	VSCARAB_ADD_IOV_NORET(scarab, ((struct iovec)
-	    {.iov_base = TRUST_ME(HELLO), .iov_len = strlen(HELLO)}));
+	    {.iov_base = TRUST_ME(HELLO), .iov_len = vstrlen(HELLO)}));
 	r = vdpio_pull(vdc, this, scarab);
 
 	(void) VDPIO_Close1(vdc, this);
@@ -363,7 +363,8 @@ dbg_vai_deliverobj(struct worker *wrk, void *arg)
 	CNT_Embark(wrk, req);
 	req->vdc->wrk = wrk;	// move to CNT_Embark?
 
-	chunked = http_GetHdr(req->resp, H_Transfer_Encoding, &p) && strcmp(p, "chunked") == 0;
+	chunked = http_GetHdr(req->resp, H_Transfer_Encoding, &p) &&
+	    vstrcmp(p, "chunked") == 0;
 	if (chunked)
 		V1L_Chunked(v1l);
 	err = VDP_DeliverObj(req->vdc, req->objcore);
@@ -392,8 +393,8 @@ dbg_vai_notify_init(struct dbg_vai_notify *sn)
 {
 
 	INIT_OBJ(sn, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_init(&sn->mtx, NULL));
-	AZ(pthread_cond_init(&sn->cond, NULL));
+	PTOK(pthread_mutex_init(&sn->mtx, NULL));
+	PTOK(pthread_cond_init(&sn->cond, NULL));
 }
 
 static void
@@ -401,8 +402,8 @@ dbg_vai_notify_fini(struct dbg_vai_notify *sn)
 {
 
 	CHECK_OBJ_NOTNULL(sn, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_destroy(&sn->mtx));
-	AZ(pthread_cond_destroy(&sn->cond));
+	PTOK(pthread_mutex_destroy(&sn->mtx));
+	PTOK(pthread_cond_destroy(&sn->cond));
 }
 
 static void v_matchproto_(vai_notify_cb)
@@ -412,10 +413,10 @@ dbg_vai_notify(vai_hdl hdl, void *priv)
 
 	(void) hdl;
 	CAST_OBJ_NOTNULL(sn, priv, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_lock(&sn->mtx));
+	PTOK(pthread_mutex_lock(&sn->mtx));
 	sn->hasmore = 1;
-	AZ(pthread_cond_signal(&sn->cond));
-	AZ(pthread_mutex_unlock(&sn->mtx));
+	PTOK(pthread_cond_signal(&sn->cond));
+	PTOK(pthread_mutex_unlock(&sn->mtx));
 
 }
 
@@ -424,12 +425,12 @@ dbg_vai_notify_wait(struct dbg_vai_notify *sn)
 {
 
 	CHECK_OBJ_NOTNULL(sn, DBG_VAI_NOTIFY_MAGIC);
-	AZ(pthread_mutex_lock(&sn->mtx));
+	PTOK(pthread_mutex_lock(&sn->mtx));
 	while (sn->hasmore == 0)
-		AZ(pthread_cond_wait(&sn->cond, &sn->mtx));
+		PTOK(pthread_cond_wait(&sn->cond, &sn->mtx));
 	AN(sn->hasmore);
 	sn->hasmore = 0;
-	AZ(pthread_mutex_unlock(&sn->mtx));
+	PTOK(pthread_mutex_unlock(&sn->mtx));
 }
 
 static void
@@ -468,7 +469,8 @@ dbg_vai_lease(struct worker *wrk, void *arg)
 	VSCARAB_LOCAL(scarab, cap);
 	VSCARET_LOCAL(scaret, cap);
 
-	chunked = http_GetHdr(req->resp, H_Transfer_Encoding, &p) && strcmp(p, "chunked") == 0;
+	chunked = http_GetHdr(req->resp, H_Transfer_Encoding, &p) &&
+	    vstrcmp(p, "chunked") == 0;
 	if (chunked)
 		V1L_Chunked(v1l);
 

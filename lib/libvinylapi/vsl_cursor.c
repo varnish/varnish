@@ -536,7 +536,7 @@ VSL_CursorFile(struct VSL_data *vsl, const char *name, unsigned options)
 	AN(name);
 	(void)options;
 
-	if (!strcmp(name, "-"))
+	if (!vstrcmp(name, "-"))
 		fd = STDIN_FILENO;
 	else {
 		fd = open(name, O_RDONLY);

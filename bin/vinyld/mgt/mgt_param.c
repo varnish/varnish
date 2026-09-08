@@ -128,7 +128,7 @@ mcf_findpar(const char *name)
 
 	AN(name);
 	VTAILQ_FOREACH(pl, &phead, list)
-		if (!strcmp(pl->spec->name, name))
+		if (!vstrcmp(pl->spec->name, name))
 			return (pl->spec);
 	return (NULL);
 }
@@ -143,7 +143,7 @@ mcf_addpar(struct parspec *ps)
 	AN(pl);
 	pl->spec = ps;
 	VTAILQ_FOREACH(pl2, &phead, list) {
-		i = strcmp(pl2->spec->name, pl->spec->name);
+		i = vstrcmp(pl2->spec->name, pl->spec->name);
 		if (i == 0) {
 			fprintf(stderr, "Duplicate param: %s\n", ps->name);
 			exit(4);
@@ -680,7 +680,7 @@ mcf_init_params(void)
 			exit(4);
 		}
 		mcf_addpar(pp);
-		margin2 = vmax_t(int, margin2, strlen(pp->name) + 1);
+		margin2 = vmax_t(int, margin2, vstrlen(pp->name) + 1);
 	}
 }
 
@@ -747,7 +747,7 @@ mcf_wash_param(struct cli *cli, struct parspec *pp, enum mcf_which_e which,
 	err = pp->func(vsb, pp, NULL);
 	AZ(err);
 	AZ(VSB_finish(vsb));
-	if (strcmp(val, VSB_data(vsb)))
+	if (vstrcmp(val, VSB_data(vsb)))
 		mcf_dyn_vsb(which, pp, vsb);
 }
 
@@ -879,7 +879,7 @@ MCF_DumpRstParam(void)
 		    continue;
 		printf(".. _ref_param_%s:\n\n", pp->name);
 		printf("%s\n", pp->name);
-		for (z = 0; z < strlen(pp->name); z++)
+		for (z = 0; z < vstrlen(pp->name); z++)
 			printf("~");
 		printf("\n");
 

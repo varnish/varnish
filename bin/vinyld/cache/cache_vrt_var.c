@@ -1084,7 +1084,7 @@ VRT_r_resp_is_streaming(VRT_CTX)
 	CHECK_OBJ_NOTNULL(ctx->req, REQ_MAGIC);
 	if (ctx->req->objcore == NULL)
 		return (0);	/* When called from vcl_synth */
-	CHECK_OBJ_NOTNULL(ctx->req->objcore, OBJCORE_MAGIC);
+	CHECK_OBJ(ctx->req->objcore, OBJCORE_MAGIC);
 	return (ctx->req->objcore->boc == NULL ? 0 : 1);
 }
 
@@ -1212,7 +1212,7 @@ VRT_l_resp_body(VRT_CTX, enum lbody_e type,
 		viov = VSCARAB_GET(scarab);
 		AN(viov);	// ObjGetSpace ensures
 		viov->iov.iov_base = TRUST_ME(str);
-		viov->iov.iov_len = strlen(str);
+		viov->iov.iov_len = vstrlen(str);
 	}
 
 	s = body;
@@ -1231,7 +1231,7 @@ VRT_l_resp_body(VRT_CTX, enum lbody_e type,
 		}
 		AN(viov);
 		viov->iov.iov_base = TRUST_ME(s->p[n]);
-		viov->iov.iov_len = strlen(s->p[n]);
+		viov->iov.iov_len = vstrlen(s->p[n]);
 	}
 }
 

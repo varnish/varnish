@@ -429,7 +429,7 @@ test_run(const struct test_case *tc, int *ret)
 	char **argv, *tmp;
 	int argc, i;
 
-	i = strlen(tc->str);
+	i = vstrlen(tc->str);
 	if (i == 0) {
 		argv = VAV_Parse(tc->str, &argc, tc->flag);
 	} else {
@@ -453,7 +453,7 @@ test_run(const struct test_case *tc, int *ret)
 	}
 
 	for (i = 1; i < argc && tc->argv[i] != NULL && argv[i] != NULL; i++) {
-		if (!strcmp(tc->argv[i], argv[i]))
+		if (!vstrcmp(tc->argv[i], argv[i]))
 			continue;
 		printf(
 		    "ERROR: Parsing string <%s> with flags %x, "

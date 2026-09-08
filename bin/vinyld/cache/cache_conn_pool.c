@@ -839,7 +839,7 @@ vus_name(const struct pfd *pfd, char *addr, unsigned alen, char *pbuf,
 	 unsigned plen)
 {
 	(void) pfd;
-	assert(alen > strlen("0.0.0.0"));
+	assert(alen > vstrlen("0.0.0.0"));
 	assert(plen > 1);
 	strcpy(addr, "0.0.0.0");
 	strcpy(pbuf, "0");
@@ -984,12 +984,12 @@ VCP_Ref(const struct vrt_endpoint *vep, const char *ident, struct vsb *err)
 	AN(vsc);
 
 	VSHA256_Init(cx);
-	VSHA256_Update(cx, ident, strlen(ident) + 1); // include \0
+	VSHA256_Update(cx, ident, vstrlen(ident) + 1); // include \0
 	if (vep->uds_path != NULL) {
 		AZ(vep->ipv4);
 		AZ(vep->ipv6);
 		VSHA256_Update(cx, "UDS", 4); // include \0
-		VSHA256_Update(cx, vep->uds_path, strlen(vep->uds_path));
+		VSHA256_Update(cx, vep->uds_path, vstrlen(vep->uds_path));
 	} else {
 		assert(vep->ipv4 != NULL || vep->ipv6 != NULL);
 		if (vep->ipv4 != NULL) {

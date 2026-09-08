@@ -263,7 +263,7 @@ pan_objcore(struct vsb *vsb, const char *typ, const struct objcore *oc)
 	VSB_printf(vsb, "stevedore = %p", oc->stobj->stevedore);
 	if (oc->stobj->stevedore != NULL) {
 		VSB_printf(vsb, " (%s", oc->stobj->stevedore->name);
-		if (strlen(oc->stobj->stevedore->ident))
+		if (vstrlen(oc->stobj->stevedore->ident))
 			VSB_printf(vsb, " %s", oc->stobj->stevedore->ident);
 		VSB_cat(vsb, ")");
 		if (oc->stobj->stevedore->panic) {
@@ -696,7 +696,7 @@ pan_ic(const char *func, const char *file, int line, const char *cond,
 
 	assert (VSB_len(pan_vsb) == 0);
 
-	AZ(pthread_setspecific(panic_key, pan_vsb));
+	PTOK(pthread_setspecific(panic_key, pan_vsb));
 
 	/*
 	 * should we trigger a SIGSEGV while handling a panic, our sigsegv
@@ -806,7 +806,7 @@ ccf_panic(struct cli *cli, const char * const *av, void *priv)
 	(void)cli;
 	(void)av;
 	AZ(priv);
-	AZ(strcmp("", "You asked for it"));
+	AZ(vstrcmp("", "You asked for it"));
 	/* NOTREACHED */
 	abort();
 }

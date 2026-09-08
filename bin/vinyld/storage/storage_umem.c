@@ -398,7 +398,7 @@ static void v_matchproto_(storage_open_f)
 smu_open(struct stevedore *st)
 {
 	struct smu_sc *smu_sc;
-	char ident[strlen(st->ident) + 1];
+	char ident[vstrlen(st->ident) + 1];
 
 	ASSERT_CLI();
 	st->lru = LRU_Alloc();

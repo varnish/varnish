@@ -117,7 +117,7 @@ V1F_SendReq(struct worker *wrk, struct busyobj *bo, uint64_t *ctr_hdrbytes,
 			(void) V1L_Close(&v1l, &bytes);
 		if (VALID_OBJ(vdc, VDP_CTX_MAGIC))
 			(void) VDP_Close(vdc, NULL, NULL);
-		VSLb(bo->vsl, SLT_FetchError, "%s", err);
+		VSLbs(bo->vsl, SLT_FetchError, TOSTRAND(err));
 		VSLb_ts_busyobj(bo, "Bereq", W_TIM_real(wrk));
 		htc->doclose = SC_OVERLOAD;
 		return (-1);

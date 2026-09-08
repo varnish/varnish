@@ -249,11 +249,11 @@ VUT_Init(const char *progname, int argc, char * const *argv,
 	VSIG_Arm_term();
 	VSIG_Arm_usr1();
 
-	if (argc == 2 && !strcmp(argv[1], "--synopsis"))
+	if (argc == 2 && !vstrcmp(argv[1], "--synopsis"))
 		exit(vut_synopsis(voc));
-	if (argc == 2 && !strcmp(argv[1], "--options"))
+	if (argc == 2 && !vstrcmp(argv[1], "--options"))
 		exit(vut_options(voc));
-	if (argc == 2 && !strcmp(argv[1], "--optstring")) {
+	if (argc == 2 && !vstrcmp(argv[1], "--optstring")) {
 		(void)printf("%s\n", voc->vopt_optstring);
 		exit(0);
 	}
@@ -305,7 +305,7 @@ VUT_Setup(struct VUT *vut)
 	    (vut->r_arg == NULL ? 0 : 2) > 2)
 		VUT_Error(vut, 1, "Only one of -n and -r options may be used");
 
-	if (vut->r_arg != NULL && !strcmp(vut->r_arg, "-") && vut->D_opt)
+	if (vut->r_arg != NULL && !vstrcmp(vut->r_arg, "-") && vut->D_opt)
 		VUT_Error(vut, 1, "Daemon cannot read from stdin");
 
 	/* Create and validate the query expression */
@@ -549,7 +549,7 @@ print_nobrackets(const char *s)
 	/* Remove whitespace */
 	while (isspace(*s))
 		s++;
-	e = s + strlen(s);
+	e = s + vstrlen(s);
 	while (e > s && isspace(e[-1]))
 		e--;
 

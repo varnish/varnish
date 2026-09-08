@@ -163,7 +163,7 @@ mch_cli_panic_clear(struct cli *cli, const char * const *av, void *priv)
 {
 	(void)priv;
 
-	if (av[2] != NULL && strcmp(av[2], "-z")) {
+	if (av[2] != NULL && vstrcmp(av[2], "-z")) {
 		VCLI_SetResult(cli, CLIS_PARAM);
 		VCLI_Out(cli, "Unknown parameter \"%s\".", av[2]);
 		return;

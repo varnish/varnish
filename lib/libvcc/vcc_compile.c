@@ -115,7 +115,7 @@ TlDup(struct vcc *tl, const char *s)
 {
 	char *p;
 
-	p = TlAlloc(tl, strlen(s) + 1);
+	p = TlAlloc(tl, vstrlen(s) + 1);
 	AN(p);
 	strcpy(p, s);
 	return (p);
@@ -955,9 +955,9 @@ VCC_Predef(struct vcc *vcc, const char *type, const char *name)
 {
 
 	CHECK_OBJ_NOTNULL(vcc, VCC_MAGIC);
-	if (!strcmp(type, "VCL_STEVEDORE"))
+	if (!vstrcmp(type, "VCL_STEVEDORE"))
 		vcc_stevedore(vcc, name);
-	else if (!strcmp(type, "VCL_VCL"))
+	else if (!vstrcmp(type, "VCL_VCL"))
 		vcc_predef_vcl(vcc, name);
 	else
 		WRONG("Unknown VCC predef type");

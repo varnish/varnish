@@ -328,7 +328,7 @@ VSB_cat(struct vsb *s, const char *str)
 		str += l;
 	}
 
-	l = strlen(str);
+	l = vstrlen(str);
 	return (VSB_bcat(s, str, l));
 }
 
@@ -545,15 +545,15 @@ VSB_quote_pfx(struct vsb *s, const char *pfx, const void *v, int len, int how)
 	assert(p != NULL);
 	if (how & VSB_QUOTE_ABBREVIATE) {
 		assert (len > 5);
-		if (strlen(v) < (unsigned)len) {
-			len = strlen(v);
+		if (vstrlen(v) < (unsigned)len) {
+			len = vstrlen(v);
 			how &= ~VSB_QUOTE_ABBREVIATE;
 		} else {
 			len -= 5;
 		}
 	}
 	if (len == -1)
-		len = strlen(v);
+		len = vstrlen(v);
 
 	if (len == 0 && (how & VSB_QUOTE_CSTR)) {
 		VSB_printf(s, "%s\"\"", pfx);

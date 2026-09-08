@@ -483,7 +483,7 @@ BAN_Time(const struct ban *b)
 	if (b == NULL)
 		return (0.0);
 
-	CHECK_OBJ_NOTNULL(b, BAN_MAGIC);
+	CHECK_OBJ(b, BAN_MAGIC);
 	return (ban_time(b->spec));
 }
 
@@ -569,7 +569,7 @@ ban_evaluate(struct worker *wrk, const uint8_t *bsarg, struct objcore *oc,
 			if (arg1 == NULL) {
 				if (isnan(darg1) || darg1 != darg2)
 					return (0);
-			} else if (strcmp(arg1, bt.arg2)) {
+			} else if (vstrcmp(arg1, bt.arg2)) {
 				return (0);
 			}
 			break;
@@ -577,7 +577,7 @@ ban_evaluate(struct worker *wrk, const uint8_t *bsarg, struct objcore *oc,
 			if (arg1 == NULL) {
 				if (! isnan(darg1) && darg1 == darg2)
 					return (0);
-			} else if (!strcmp(arg1, bt.arg2)) {
+			} else if (!vstrcmp(arg1, bt.arg2)) {
 				return (0);
 			}
 			break;
@@ -748,7 +748,7 @@ ccf_ban(struct cli *cli, const char * const *av, void *priv)
 		return;
 	}
 	for (i = 3; i < narg; i += 4) {
-		if (strcmp(av[i + 2], "&&")) {
+		if (vstrcmp(av[i + 2], "&&")) {
 			VCLI_Out(cli, "Found \"%s\" expected &&", av[i + 2]);
 			VCLI_SetResult(cli, CLIS_PARAM);
 			return;
@@ -946,7 +946,7 @@ ccf_ban_list(struct cli *cli, const char * const *av, void *priv)
 	bl->refcount++;
 	Lck_Unlock(&ban_mtx);
 
-	if (av[2] != NULL && strcmp(av[2], "-j") == 0)
+	if (av[2] != NULL && vstrcmp(av[2], "-j") == 0)
 		ban_list_json(cli, av, bl);
 	else
 		ban_list(cli, bl);

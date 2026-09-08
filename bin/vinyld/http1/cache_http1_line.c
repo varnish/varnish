@@ -217,7 +217,7 @@ V1L_Flush(struct v1l *v1l)
 		if (v1l->ciov < v1l->siov && v1l->cliov > 0) {
 			/* Add chunk head & tail */
 			bprintf(cbuf, "00%zx\r\n", v1l->cliov);
-			sz = strlen(cbuf);
+			sz = vstrlen(cbuf);
 			v1l->iov[v1l->ciov].iov_base = cbuf;
 			v1l->iov[v1l->ciov].iov_len = sz;
 			v1l->liov += sz;
@@ -304,7 +304,7 @@ V1L_Write(struct v1l *v1l, const void *ptr, ssize_t alen)
 	if (alen > 0)
 		len = (size_t)alen;
 	else if (alen == -1)
-		len = strlen(ptr);
+		len = vstrlen(ptr);
 	else
 		WRONG("alen");
 

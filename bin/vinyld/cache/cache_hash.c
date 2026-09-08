@@ -219,7 +219,7 @@ HSH_AddString(struct req *req, void *ctx, const char *str)
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 	AN(ctx);
 	if (str != NULL) {
-		VSHA256_Update(ctx, str, strlen(str));
+		VSHA256_Update(ctx, str, vstrlen(str));
 		VSLbs(req->vsl, SLT_Hash, TOSTRAND(str));
 	} else
 		VSHA256_Update(ctx, &str, 1);
