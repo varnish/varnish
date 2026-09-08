@@ -515,6 +515,10 @@ $Function VOID body_string(STRING)
 
 Set the string to send as the body with the ``debug.string`` filter.
 
+$Function VOID body_prefix(STRING)
+
+Add this string to the prefix sent by the body_prefix filter
+
 DEPRECATED
 ==========
 
