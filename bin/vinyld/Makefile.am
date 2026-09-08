@@ -234,6 +234,11 @@ vhp_decode_test_SOURCES = hpack/vhp_decode.c hpack/vhp_table.c
 vhp_decode_test_CFLAGS = -DDECODE_TEST_DRIVER
 vhp_decode_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
 
+TESTS += http1_vfp_test
+http1_vfp_test_SOURCES = http1/cache_http1_vfp.c
+http1_vfp_test_CFLAGS = -DTEST_DRIVER
+http1_vfp_test_LDADD = $(top_builddir)/lib/libvinyl/libvarnish.la
+
 noinst_PROGRAMS += esi_parse_fuzzer
 esi_parse_fuzzer_SOURCES = \
 	cache/cache_ws_emu.c \
