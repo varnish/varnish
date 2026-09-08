@@ -1,35 +1,111 @@
-vtest "Connection: close in vcl_synth{}"
+vtest "Connection: close all the cases"
 
 server s1 {
 	rxreq
-	txresp -status 400
+	txresp -status 200
 } -start
 
 varnish v1 -vcl+backend {
-	sub vcl_miss {
-		if (req.url == "/333") {
-			return (synth(333, "FOO"));
-		} else {
-			return (synth(334, "BAR"));
+	sub vcl_recv {
+		if (req.http.req) {
+			set req.http.Connection = req.http.req;
+		}
+		if (req.url == "/synth") {
+			return (synth(200));
 		}
 	}
 
-	sub vcl_synth {
-		if (resp.status == 333) {
-			set resp.http.connection = "close";
+	sub do_resp {
+		if (req.http.resp) {
+			set resp.http.Connection = req.http.resp;
 		}
+	}
+
+	sub vcl_deliver {
+		call do_resp;
+	}
+
+	sub vcl_synth {
+		call do_resp;
 	}
 } -start
 
 client c1 {
-	txreq -url /334
+	txreq
 	rxresp
-	expect resp.status == 334
-	txreq -url /334
+	expect resp.http.Connection == keep-alive
+
+	txreq -url /synth
 	rxresp
-	expect resp.status == 334
-	txreq -url /333
+	expect resp.http.Connection == keep-alive
+} -start
+
+# Simple cases were the header is just "close"
+client c2 {
+	txreq -hdr "req: close"
 	rxresp
-	expect resp.status == 333
+	expect resp.http.Connection == close
 	expect_close
-} -run
+} -start
+
+client c3 {
+	txreq -url /synth -hdr "req: close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+client c4 {
+	txreq -hdr "resp: close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+client c5 {
+	txreq -url /synth -hdr "resp: close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+# Additional header name in Connection:
+client c12 {
+	txreq -hdr "req: foo, close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+client c13 {
+	txreq -url /synth -hdr "req: foo, close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+client c14 {
+	txreq -hdr "resp: foo, close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+client c15 {
+	txreq -url /synth -hdr "resp: foo, close"
+	rxresp
+	expect resp.http.Connection == close
+	expect_close
+} -start
+
+client c1 -wait
+
+client c2 -wait
+client c3 -wait
+client c4 -wait
+client c5 -wait
+
+client c12 -wait
+client c13 -wait
+client c14 -wait
+client c15 -wait

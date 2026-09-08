@@ -375,10 +375,11 @@ cnt_synth(struct worker *wrk, struct req *req)
 	http_PrintfHeader(req->resp, "Content-Length: %zd",
 	    VSB_len(synth_body));
 
-	if (req->doclose == SC_NULL &&
-	    (http_HdrIs(req->resp, H_Connection, "close") ||
-	    http_HdrIs(req->http, H_Connection, "close")))
-		req->doclose = SC_RESP_CLOSE;
+	// also happens in cnt_transmit, but we need req->doclose earlier for VRB_Ignore
+	if (req->doclose == SC_NULL)
+		req->doclose = http_DoConnection(req->http, SC_REQ_CLOSE);
+	if (req->doclose == SC_NULL)
+		req->doclose = http_DoConnection(req->resp, SC_RESP_CLOSE);
 
 	/* Discard any lingering request body before delivery */
 	(void)VRB_Ignore(req);
@@ -446,6 +447,11 @@ cnt_transmit(struct worker *wrk, struct req *req)
 	AZ(req->res_pipe | req->res_esi);
 	AZ(req->boc);
 	req->req_step = R_STP_FINISH;
+
+	if (req->doclose == SC_NULL)
+		req->doclose = http_DoConnection(req->http, SC_REQ_CLOSE);
+	if (req->doclose == SC_NULL)
+		req->doclose = http_DoConnection(req->resp, SC_RESP_CLOSE);
 
 	/* Grab a ref to the bo if there is one (=streaming) */
 	req->boc = HSH_RefBoc(req->objcore);
