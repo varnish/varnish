@@ -332,6 +332,26 @@ typedef struct {
 #  define __has_builtin(x) 0
 #endif
 
+// string builtins in order of documentation
+
+#if __has_builtin(__builtin_memchr)
+#  define vmemchr(s, c, n) __builtin_memchr(s, c, n)
+#else
+#  define vmemchr(s, c, n) memchr(s, c, n)
+#endif
+
+#if __has_builtin(__builtin_memcmp)
+#  define vmemcmp(s1, s2, n) __builtin_memcmp(s1, s2, n)
+#else
+#  define vmemcmp(s1, s2, n) memcmp(s1, s2, n)
+#endif
+
+#if __has_builtin(__builtin_strchr)
+#  define vstrchr(s, c, n) __builtin_strchr(s, c, n)
+#else
+#  define vstrchr(s, c, n) strchr(s, c, n)
+#endif
+
 #if __has_builtin(__builtin_strcmp)
 #  define vstrcmp(s1, s2) __builtin_strcmp(s1, s2)
 #else
@@ -344,10 +364,22 @@ typedef struct {
 #  define vstrlen(s) strlen(s)
 #endif
 
-#if __has_builtin(__builtin_memcmp)
-#  define vmemcmp(s1, s2, n) __builtin_memcmp(s1, s2, n)
+#if __has_builtin(__builtin_strncmp)
+#  define vstrncmp(s1, s2, n) __builtin_strncmp(s1, s2, n)
 #else
-#  define vmemcmp(s1, s2, n) memcmp(s1, s2, n)
+#  define vstrncmp(s1, s2, n) strncmp(s1, s2, n)
+#endif
+
+#if __has_builtin(__builtin_memcpy)
+#  define vmemcpy(d, s, n) __builtin_memcpy(d, s, n)
+#else
+#  define vmemcpy(d, s, n) memcpy(d, s, n)
+#endif
+
+#if __has_builtin(__builtin_memmove)
+#  define vmemmove(d, s, n) __builtin_memmove(d, s, n)
+#else
+#  define vmemmove(d, s, n) memmove(d, s, n)
 #endif
 
 // ... to be extended
