@@ -1,8 +1,8 @@
 /*-
- * Copyright (c) 2011 Varnish Software AS
+ * Copyright 2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
- * Author: Poul-Henning Kamp <phk@phk.freebsd.dk>
+ * Author: Nils Goroll <nils.goroll@uplex.de>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  *
@@ -29,30 +29,16 @@
  *
  */
 
-#define	VEC_GZ	(0x21)
-#define	VEC_V1	(0x40 + 1)
-#define	VEC_V2	(0x40 + 2)
-#define	VEC_V8	(0x40 + 8)
-#define	VEC_C1	(0x50 + 1)
-#define	VEC_C2	(0x50 + 2)
-#define	VEC_C8	(0x50 + 8)
-#define	VEC_S1	(0x60 + 1)
-#define	VEC_S2	(0x60 + 2)
-#define	VEC_S8	(0x60 + 8)
-#define	VEC_IA	(0x40 + 9)
-#define	VEC_IC	(0x60 + 9)
+/*lint -save -e525 -e539 */
 
-typedef ssize_t vep_callback_t(struct vfp_ctx *, void *priv, ssize_t l,
-    enum vgz_flag flg);
+/*
+ * esi flags: defaults inherited from feature flag
+ *
+ * lower, feature, doc */
+BERESP_ESI_FLAG(esi_disable_xml_check, FEATURE_ESI_DISABLE_XML_CHECK, "")
+BERESP_ESI_FLAG(esi_ignore_https, FEATURE_ESI_IGNORE_HTTPS, "")
+BERESP_ESI_FLAG(esi_ignore_other_elements, FEATURE_ESI_IGNORE_OTHER_ELEMENTS, "")
+BERESP_ESI_FLAG(esi_remove_bom, FEATURE_ESI_REMOVE_BOM, "")
+#undef BERESP_ESI_FLAG
 
-// flags inherited from bo BEREQ_FLAGS
-struct vep_flags {
-#define BERESP_ESI_FLAG(lower, feature, doc) \
-	unsigned lower:1;
-#include "tbl/beresp_esi_flags.h"
-};
-
-struct vep_state *VEP_Init(struct vfp_ctx *vc, const struct http *req,
-    vep_callback_t *cb, void *cb_priv, struct vep_flags flags);
-void VEP_Parse(struct vep_state *, const char *p, size_t l);
-struct vsb *VEP_Finish(struct vep_state *);
+/*lint -restore */

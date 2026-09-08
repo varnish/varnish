@@ -61,6 +61,17 @@ struct vef_priv {
 	ssize_t			ibuf_sz;
 };
 
+static struct vep_flags
+vep_flags(const struct busyobj *bo) {
+	struct vep_flags flags = {0};
+
+	CHECK_OBJ_NOTNULL(bo, BUSYOBJ_MAGIC);
+#define BERESP_ESI_FLAG(lower, feature, doc) \
+	flags.lower = bo->lower;
+#include "tbl/beresp_esi_flags.h"
+	return (flags);
+}
+
 static ssize_t
 vfp_vep_callback(struct vfp_ctx *vc, void *priv, ssize_t l, enum vgz_flag flg)
 {
@@ -174,7 +185,8 @@ vfp_esi_gzip_init(VRT_CTX, struct vfp_ctx *vc, struct vfp_entry *vfe)
 	if (vef == NULL)
 		return (VFP_ERROR);
 	vc->obj_flags |= OF_GZIPED | OF_CHGCE | OF_ESIPROC;
-	vef->vep = VEP_Init(vc, vc->req, vfp_vep_callback, vef);
+	vef->vep = VEP_Init(vc, vc->req, vfp_vep_callback, vef,
+	    vep_flags(ctx->bo));
 	if (vef->vep == NULL) {
 		FREE_OBJ(vef);
 		return (VFP_ERROR);
@@ -257,7 +269,7 @@ vfp_esi_init(VRT_CTX, struct vfp_ctx *vc, struct vfp_entry *vfe)
 		    "Attempted ESI on partial (206) response");
 		return (VFP_ERROR);
 	}
-	vep = VEP_Init(vc, vc->req, NULL, NULL);
+	vep = VEP_Init(vc, vc->req, NULL, NULL, vep_flags(ctx->bo));
 	if (vep == NULL)
 		return (VFP_ERROR);
 	ALLOC_OBJ(vef, VEF_MAGIC);
