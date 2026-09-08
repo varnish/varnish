@@ -282,11 +282,15 @@ int
 ObjVAIbuffer(struct worker *wrk, vai_hdl vhdl, struct vscarab *scarab)
 {
 	struct vai_hdl_preamble *vaip = vhdl;
+	int r;
 
 	AN(vaip);
 	assert(vaip->magic2 == VAI_HDL_PREAMBLE_MAGIC2);
 	AN(vaip->vai_buffer);
-	return (vaip->vai_buffer(wrk, vhdl, scarab));
+	r = vaip->vai_buffer(wrk, vhdl, scarab);
+	// returning no reason for failure is a bug
+	assert(r != 0);
+	return (r);
 }
 
 void

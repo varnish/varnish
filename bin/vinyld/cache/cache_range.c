@@ -58,7 +58,7 @@ vrg_range_fini(struct vdp_ctx *vdc, void **priv)
 	if (vrg_priv->req->resp_len >= 0 &&
 	    vrg_priv->range_off < vrg_priv->range_high) {
 		Req_Fail(vrg_priv->req, SC_RANGE_SHORT);
-		vrg_priv->req->vdc->retval = -1;
+		vdc->retval = -1;
 	}
 	/* struct on ws, no need to free */
 	return (0);
@@ -116,6 +116,7 @@ vrg_dorange(struct req *req, intmax_t *clen, void **priv)
 	if (low < 0 || high < 0)
 		return (NULL);		// Allow 200 response
 
+	http_Unset(req->resp, H_Content_Range);
 	if (*clen >= 0) {
 		http_PrintfHeader(req->resp, "Content-Range: bytes %jd-%jd/%jd",
 		    (intmax_t)low, (intmax_t)high, *clen);
@@ -223,6 +224,7 @@ vrg_range_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 		return (*priv == NULL ? 1 : 0);
 
 	VSLb(vdc->vsl, SLT_Debug, "RANGE_FAIL %s", err);
+	http_Unset(ctx->req->resp, H_Content_Range);
 	if (*vdc->clen >= 0)
 		http_PrintfHeader(ctx->req->resp,
 		    "Content-Range: bytes */%jd", *vdc->clen);

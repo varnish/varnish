@@ -140,11 +140,11 @@ VRT_VSC_Allocv(struct vsmw_cluster *vc, struct vsc_seg **sg,
     const unsigned char *jp, size_t sj, const char *fmt, va_list va)
 {
 	struct vsc_seg *vsg, *dvsg;
-	uintptr_t jjp;
+	uintmax_t jjp;
 
 	vsc_lock();
 
-	jjp = (uintptr_t)jp;
+	jjp = (uintmax_t)jp;	// This is a nonce
 
 	VTAILQ_FOREACH(dvsg, &vsc_seglist, list) {
 		if (dvsg->vsm != heritage.proc_vsmw)

@@ -77,10 +77,10 @@ typedef void sml_free_f(struct storage *);
 
 /* VAI helpers -------------------------------------------------------*/
 
-static inline uint64_t
+static inline uintptr_t
 ptr2lease(const void *ptr)
 {
-	uint64_t r = (uintptr_t)ptr;
+	uintptr_t r = (uintptr_t)ptr;
 
 	if (sizeof(void *) < 8) //lint !e506 !e774
 		r <<= 1;
@@ -89,7 +89,7 @@ ptr2lease(const void *ptr)
 }
 
 static inline void *
-lease2ptr(uint64_t l)
+lease2ptr(uintptr_t l)
 {
 
 	if (sizeof(void *) < 8) //lint !e506 !e774

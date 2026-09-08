@@ -2,33 +2,13 @@ vtest "VMOD vfp & vdp - request bodies"
 
 # this test mirrors m00048.vtc with directions reversed
 
-server s1 {
+server s1 -repeat 2 {
 	rxreq
 	expect req.http.Content-Length == "28"
 	expect req.http.Transfer-Encoding == <undef>
 	expect req.body == "Cbagb Snpgb, Pnrfne Genafvg!"
 	txresp
-} -start
 
-varnish v1 -vcl+backend {
-	import debug;
-
-	sub vcl_backend_fetch {
-		set bereq.filters = "rot13 debug.pedantic";
-	}
-} -start
-
-client c1 {
-	txreq -req POST -body "Ponto Facto, Caesar Transit!"
-	rxresp
-	expect resp.status == 200
-} -run
-
-server s1 -wait
-
-# ---
-
-server s1 {
 	rxreq
 	expect req.http.Content-Length == <undef>
 	expect req.http.Transfer-Encoding == "chunked"
@@ -38,19 +18,42 @@ server s1 {
 
 varnish v1 -vcl+backend {
 	import debug;
+	import std;
+
+	sub vcl_recv {
+		if (req.http.cached) {
+			std.cache_req_body(1KB);
+		}
+	}
 
 	sub vcl_backend_fetch {
-		set bereq.filters = "rot13 debug.pedantic debug.chunked";
+		set bereq.filters = "rot13";
+		if (bereq.http.chunked) {
+			set bereq.filters += " debug.chunked";
+		}
+		set bereq.filters += " debug.pedantic";
 	}
-}
+} -start
 
 client c1 {
 	txreq -req POST -body "Ponto Facto, Caesar Transit!"
 	rxresp
 	expect resp.status == 200
+
+	txreq -req POST -hdr "chunked: 1" -body "Ponto Facto, Caesar Transit!"
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -hdr "cached: 1" -body "Ponto Facto, Caesar Transit!"
+	rxresp
+	expect resp.status == 200
+
+	txreq -req POST -hdr "cached: 1" -hdr "chunked: 1" -body "Ponto Facto, Caesar Transit!"
+	rxresp
+	expect resp.status == 200
 } -run
 
-# ---
+server s1 -wait
 
 varnish v1 -vsl_catchup
 
@@ -68,8 +71,6 @@ client c1 {
 	expect resp.status == 503
 } -run
 
-
-server s1 -wait
 
 server s1 -repeat 4 {
 	rxreq

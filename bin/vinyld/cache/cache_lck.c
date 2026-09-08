@@ -62,7 +62,7 @@ static void
 Lck_Witness_Lock(const struct ilck *il, const char *p, int l,
     const char *attempt)
 {
-	char *q, t[10];	//lint -e429
+	char *q, t[10];	//lint !e429
 	int emit;
 
 	AN(p);

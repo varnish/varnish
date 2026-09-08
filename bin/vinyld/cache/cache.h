@@ -798,7 +798,7 @@ typedef void vai_notify_cb(vai_hdl, void *priv);
  * an array of viovs, elsewhere also called an siov or sarray
  */
 struct viov {
-	uint64_t	lease;
+	uintptr_t	lease;
 	struct iovec	iov;
 };
 
@@ -808,6 +808,12 @@ struct viov {
  */
 #define IOV_NIL ((struct iovec){.iov_base = TRUST_ME(0x42), .iov_len = 0})
 
+/*
+ * rules for vscarabs:
+ * used marks the portion of the s array which is in use
+ * used viovs must not have a NULL iov_base, use IOV_NIL
+ * free viovs must be all zero (lease=0, iov_base=NULL, iov_len=0)
+ */
 struct vscarab {
 	unsigned	magic;
 #define VSCARAB_MAGIC	0x05ca7ab0
@@ -851,8 +857,9 @@ struct vscarab {
 // declare, allocate and initialize a local VFLA
 // the additional VLA buf declaration avoids
 // "Variable-sized object may not be initialized"
+//lint -emacro(413, VFLA_LOCAL_)
 #define VFLA_LOCAL_(type, name, mag, fam, cap, bufname)				\
-	char bufname[VFLA_SIZE(type, fam, cap)];				\
+	uintptr_t bufname[(VFLA_SIZE(type, fam, cap) + sizeof(uintptr_t) -1) / sizeof(uintptr_t)]; \
 	struct type *name = (void *)bufname;					\
 	VFLA_INIT(type, name, mag, fam, cap)
 #define VFLA_LOCAL(type, name, mag, fam, cap)					\
@@ -915,7 +922,7 @@ struct vscaret {
 #define VSCARET_MAGIC	0x9c1f3d7b
 	unsigned	capacity;
 	unsigned	used;
-	uint64_t	lease[] v_counted_by_(capacity);
+	uintptr_t	lease[] v_counted_by_(capacity);
 };
 
 #define VSCARET_SIZE(cap) VFLA_SIZE(vscaret, lease, cap)

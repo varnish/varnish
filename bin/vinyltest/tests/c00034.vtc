@@ -185,6 +185,10 @@ varnish v1 -vcl+backend {
 			set beresp.do_gzip = true;
 		}
 	}
+	sub vcl_deliver {
+		# WRONG, test code code unset of Content-Range
+		set resp.http.Content-Range = "bytes 1-2/5";
+	}
 }
 
 client c4 {

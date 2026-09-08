@@ -139,7 +139,11 @@ vrb_pull(struct req *req, ssize_t maxsize, objiterate_f *func, void *priv)
 				if (vfps == VFP_END)
 					flush |= OBJ_ITER_END;
 				r = func(priv, flush, ptr, l);
-				if (r)
+				// ending delivery early is not an error,
+				// continue sucking
+				if (r > 0)
+					func = NULL;
+				else if (r)
 					break;
 			} else {
 				ObjExtend(req->wrk, req->body_oc, l,
@@ -150,9 +154,11 @@ vrb_pull(struct req *req, ssize_t maxsize, objiterate_f *func, void *priv)
 	} while (vfps == VFP_OK);
 	req->acct.req_bodybytes += VFP_Close(vfc);
 	VSLb_ts_req(req, "ReqBody", VTIM_real());
-	if (func != NULL) {
+	if (func != NULL || r > 0) {
 		HSH_DerefBoc(req->wrk, req->body_oc);
 		AZ(HSH_DerefObjCore(req->wrk, &req->body_oc));
+		if (r > 0)
+			return (r);
 		if (vfps == VFP_END && r == 0 && (flush & OBJ_ITER_END) == 0)
 			r = func(priv, flush | OBJ_ITER_END, NULL, 0);
 		if (vfps != VFP_END) {
