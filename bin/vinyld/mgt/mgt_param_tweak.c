@@ -586,10 +586,12 @@ tweak_storage(struct vsb *vsb, const struct parspec *par, const char *arg)
 	if (arg == NULL || arg == JSON_FMT)
 		return (tweak_string(vsb, par, arg));
 
-	if (!strcmp(arg, "Transient")) {
-		/* Always allow setting to the special name
-		 * "Transient". There will always be a stevedore with this
-		 * name, but it may not have been configured at the time
+	if (!strcmp(arg, "Transient") ||
+	    !strcmp(arg, "Synth")) {
+		/* Always allow setting the special names
+		 *
+		 * There will always be a stevedore with each of these names,
+		 * but they may not have been configured at the time
 		 * this is called. */
 	} else {
 		/* Only allow setting the value to a known configured
