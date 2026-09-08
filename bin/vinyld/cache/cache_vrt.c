@@ -888,41 +888,6 @@ VRT_Rollback(VRT_CTX, VCL_HTTP hp)
 
 /*--------------------------------------------------------------------*/
 
-VCL_VOID
-VRT_synth_strands(VRT_CTX, VCL_STRANDS s)
-{
-	struct vsb *vsb;
-	int i;
-
-	CAST_OBJ_NOTNULL(vsb, ctx->specific, VSB_MAGIC);
-	CHECK_OBJ_NOTNULL(s, STRANDS_MAGIC);
-	for (i = 0; i < s->n; i++) {
-		if (s->p[i] != NULL)
-			VSB_cat(vsb, s->p[i]);
-		else
-			VSB_cat(vsb, "(null)");
-	}
-}
-
-VCL_VOID
-VRT_synth_blob(VRT_CTX, VCL_BLOB b)
-{
-	struct vsb *vsb;
-	CAST_OBJ_NOTNULL(vsb, ctx->specific, VSB_MAGIC);
-
-	CHECK_OBJ_NOTNULL(b, VRT_BLOB_MAGIC);
-	if (b->len > 0 && b->blob != NULL)
-		VSB_bcat(vsb, b->blob, b->len);
-}
-
-VCL_VOID
-VRT_synth_page(VRT_CTX, VCL_STRANDS s)
-{
-	VRT_synth_strands(ctx, s);
-}
-
-/*--------------------------------------------------------------------*/
-
 static VCL_STRING
 vrt_ban_error(VRT_CTX, VCL_STRING err)
 {

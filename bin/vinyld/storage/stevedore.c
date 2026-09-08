@@ -283,15 +283,6 @@ stv_find(const char *nm)
 	return (NULL);
 }
 
-int
-VRT_Stv(const char *nm)
-{
-
-	if (stv_find(nm) != NULL)
-		return (1);
-	return (0);
-}
-
 const char * v_matchproto_()
 VRT_STEVEDORE_string(VCL_STEVEDORE s)
 {

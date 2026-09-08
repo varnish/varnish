@@ -251,9 +251,16 @@ of the following keywords:
 vcl_synth
 ~~~~~~~~~
 
-Called to deliver a synthetic object. A synthetic object is generated
-in VCL, not fetched from the backend. Its body may be constructed using
-the ``synthetic()`` function.
+Called to deliver a synthetic object. A synthetic object is generated in VCL,
+not fetched from the backend. Its body can be constructed by assigning a string
+or blob to ``resp.body`` using ``=``, or by appending a string or blob to
+``resp.body`` using ``+=``, as in these examples::
+
+  - ``set resp.body = "string";``
+  - ``set resp.body = "string " + "and another";``
+  - ``set resp.body += " appending " + "more strings";``
+  - ``set resp.body = :blob:;``
+  - ``set resp.body += :blobappend==:;``
 
 A `vcl_synth` defined object never enters the cache, contrary to a
 :ref:`vcl_backend_error` defined object, which may end up in cache.
@@ -420,19 +427,26 @@ The `vcl_backend_response` subroutine may terminate with calling
 vcl_backend_error
 ~~~~~~~~~~~~~~~~~
 
-This subroutine is called if we fail the backend fetch or if
-*max_retries* has been exceeded.
+This subroutine is called if we fail the backend fetch, if *max_retries* has
+been exceeded, or if explicitly transitioned to with ``return(error(status code,
+reason))``.
 
 Returning with :ref:`abandon` does not leave a cache object.
 
-If returning with ``deliver`` and ``beresp.uncacheable == false``, a
-synthetic cache object is generated in VCL, whose body may be constructed
-using the ``synthetic()`` function.
+If returning with ``deliver``, a synthetic body can be constructed by assigning
+a string or blob to ``beresp.body`` using ``=``, or by appending a string or
+blob to ``beresp.body`` using ``+=``, as in these examples::
 
-Since these synthetic objects are cached in these special circumstances,
-be cautious with putting private information there. If you really must,
-then you need to explicitly set ``beresp.uncacheable`` to ``true`` in
-``vcl_backend_error``.
+  - ``set beresp.body = "string";``
+  - ``set beresp.body = "string " + "and another";``
+  - ``set beresp.body += " appending " + "more strings";``
+  - ``set beresp.body = :blob:;``
+  - ``set beresp.body += :blobappend==:;``
+
+For ``return(deliver)`` with ``beresp.uncacheable == false``, the constructed
+object is cached, so be cautious with putting private information in headers or
+the body of such a cached object. When in doubt, explicitly set
+``beresp.uncacheable`` to ``true`` in ``vcl_backend_error`` to avoid caching.
 
 The `vcl_backend_error` subroutine may terminate with calling ``return()``
 with one of the following keywords:
