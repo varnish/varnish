@@ -351,6 +351,7 @@ void
 vcc_ParseProbe(struct vcc *tl)
 {
 	struct symbol *sym;
+	struct token *t;
 	char *p;
 
 	vcc_NextToken(tl);			/* ID: probe */
@@ -358,14 +359,22 @@ vcc_ParseProbe(struct vcc *tl)
 	vcc_ExpectVid(tl, "backend probe");	/* ID: name */
 	ERRCHK(tl);
 
+	t = tl-> t;
 	sym = VCC_HandleSymbol(tl, PROBE);
 	ERRCHK(tl);
 	AN(sym);
 	vcc_ParseProbeSpec(tl, sym, &p);
+	ERRCHK(tl);
 
-	if (sym->type == DEFAULT)
+	if (sym->type == DEFAULT) {
+		if (tl->default_probe != NULL) {
+			VSB_cat(tl->sb, "Only one default probe possible.\n");
+			vcc_ErrWhere(tl, t);
+			free(p);
+			return;
+		}
 		tl->default_probe = p;
-	else
+	} else
 		free(p);
 }
 

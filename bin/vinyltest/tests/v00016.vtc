@@ -166,3 +166,49 @@ varnish v1 -syntax 4.0 -errvcl {Symbol not found: 'foo'} {
 		new bar = foo;
 	}
 }
+
+# Incomplete include at EOI
+varnish v1 -errvcl {include not followed by string constant} {
+	backend b { .host = "${localhost}"; }
+	include
+}
+
+# Same, with an include flag consumed before running off the end.
+varnish v1 -errvcl {include not followed by string constant} {
+	backend b { .host = "${localhost}"; }
+	include +glob
+}
+
+# Same, at the end of an included file.
+shell {echo include > ${tmpdir}/eof_include.vcl}
+
+varnish v1 -errvcl {include not followed by string constant} {
+	backend b { .host = "${localhost}"; }
+	include "${tmpdir}/eof_include.vcl";
+}
+
+# An incomplete flag is diagnosed before the walk runs off the end.
+varnish v1 -errvcl {Expected a flag at} {
+	backend b { .host = "${localhost}"; }
+	include +
+}
+
+# Error spanning multiple sources (includes or built-in)
+shell {printf 'vcl 4.1;\nbackend b.' > ${tmpdir}/no_newline.vcl}
+
+shell -err -expect {contains illegal character} {
+	varnishd -C -f ${tmpdir}/no_newline.vcl
+}
+
+shell {printf 'backend b.' > ${tmpdir}/no_newline_inc.vcl}
+
+varnish v1 -errvcl {contains illegal character} {
+	include "${tmpdir}/no_newline_inc.vcl";
+	sub vcl_recv { }
+}
+
+shell {printf 'vcl 4.1;\nbackend b.\n' > ${tmpdir}/newline.vcl}
+
+shell -err -expect {contains illegal character} {
+	varnishd -C -f ${tmpdir}/newline.vcl
+}
