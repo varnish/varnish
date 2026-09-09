@@ -144,7 +144,7 @@ VRT_VSC_Allocv(struct vsmw_cluster *vc, struct vsc_seg **sg,
 
 	vsc_lock();
 
-	jjp = (uintmax_t)jp;	// This is a nonce
+	jjp = (uintmax_t)(uintptr_t)jp;	// This is a nonce
 
 	VTAILQ_FOREACH(dvsg, &vsc_seglist, list) {
 		if (dvsg->vsm != heritage.proc_vsmw)

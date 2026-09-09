@@ -799,8 +799,14 @@ typedef void vai_notify_cb(vai_hdl, void *priv);
  *
  * an array of viovs, elsewhere also called an siov or sarray
  */
+#ifdef __CHERI__
+typedef uintptr_t viov_lease_t;
+#else
+typedef uint64_t viov_lease_t;
+#endif
+
 struct viov {
-	uintptr_t	lease;
+	viov_lease_t	lease;
 	struct iovec	iov;
 };
 
@@ -924,7 +930,7 @@ struct vscaret {
 #define VSCARET_MAGIC	0x9c1f3d7b
 	unsigned	capacity;
 	unsigned	used;
-	uintptr_t	lease[] v_counted_by_(capacity);
+	viov_lease_t	lease[] v_counted_by_(capacity);
 };
 
 #define VSCARET_SIZE(cap) VFLA_SIZE(vscaret, lease, cap)
@@ -984,26 +990,10 @@ void VSLbt(struct vsl_log *, enum VSL_tag_e tag, txt t);
 void VSLbs(struct vsl_log *, enum VSL_tag_e tag, const struct strands *s);
 void VSLb_ts(struct vsl_log *, const char *event, vtim_real first,
     vtim_real *pprev, vtim_real now);
+void VSLb_ts_req(struct req *req, const char *event, vtim_real now);
+void VSLb_ts_busyobj(struct busyobj *bo, const char *event, vtim_real now);
 void VSLb_bin(struct vsl_log *, enum VSL_tag_e, ssize_t, const void*);
 int VSL_tag_is_masked(enum VSL_tag_e tag);
-
-static inline void
-VSLb_ts_req(struct req *req, const char *event, vtim_real now)
-{
-
-	if (isnan(req->t_first) || req->t_first == 0.)
-		req->t_first = req->t_prev = now;
-	VSLb_ts(req->vsl, event, req->t_first, &req->t_prev, now);
-}
-
-static inline void
-VSLb_ts_busyobj(struct busyobj *bo, const char *event, vtim_real now)
-{
-
-	if (isnan(bo->t_first) || bo->t_first == 0.)
-		bo->t_first = bo->t_prev = now;
-	VSLb_ts(bo->vsl, event, bo->t_first, &bo->t_prev, now);
-}
 
 /* cache_vcl.c */
 const char *VCL_Name(const struct vcl *);
@@ -1029,31 +1019,23 @@ uintptr_t WS_Snapshot(struct ws *ws);
 int WS_Allocated(const struct ws *ws, const void *ptr, ssize_t len);
 unsigned WS_Dump(const struct ws *ws, char, size_t off, void *buf, size_t len);
 
-static inline void *
-WS_Reservation(const struct ws *ws)
-{
+#define WS_Reservation(ws) (void *)({	\
+	WS_Assert(ws);			\
+	AN((ws)->r);			\
+	AN((ws)->f);			\
+	(ws)->f;			\
+})
 
-	WS_Assert(ws);
-	AN(ws->r);
-	AN(ws->f);
-	return (ws->f);
-}
+#define WS_ReservationSize(ws) ({	\
+	AN((ws)->r);			\
+	AN((ws)->r >= (ws)->f);		\
+	(unsigned)((ws)->r - (ws)->f);	\
+})
 
-static inline unsigned
-WS_ReservationSize(const struct ws *ws)
-{
-
-	AN(ws->r);
-	return (ws->r - ws->f);
-}
-
-static inline unsigned
-WS_ReserveLumps(struct ws *ws, size_t sz)
-{
-
-	AN(sz);
-	return (WS_ReserveAll(ws) / sz);
-}
+#define WS_ReserveLumps(ws, sz) ({	\
+	AN(sz);				\
+	WS_ReserveAll(ws) / (sz);	\
+})
 
 /* cache_ws_common.c */
 void WS_MarkOverflow(struct ws *ws);

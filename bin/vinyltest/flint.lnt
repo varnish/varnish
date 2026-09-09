@@ -50,3 +50,9 @@
 -efile(451, vmods.h)
 -efile(451, programs.h)
 -efile(451, vtc_h2_stattbl.h)
+
+-emacro(778, ARGN)
+-esym(123, TDVAR)	// Macro defined with args
+-esym(123, TDSAVE)	// Macro defined with args
+-esym(759, add_cmd)	// Could be moved from header to module
+-esym(765, add_cmd)	// Could be made static

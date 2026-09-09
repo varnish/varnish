@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "vgz.h"
 #include "vsl_priv.h"
 #include "vmb.h"
 
@@ -538,6 +537,24 @@ VSLb_ts(struct vsl_log *vsl, const char *event, vtim_real first,
 	VSLb(vsl, SLT_Timestamp, "%s: " Tf6 " " Tf6 " " Tf6,
 	    event, Ta6(now), Ta6(now - first), Ta6(now - *pprev));
 	*pprev = now;
+}
+
+void
+VSLb_ts_req(struct req *req, const char *event, vtim_real now)
+{
+
+	if (isnan(req->t_first) || req->t_first == 0.)
+		req->t_first = req->t_prev = now;
+	VSLb_ts(req->vsl, event, req->t_first, &req->t_prev, now);
+}
+
+void
+VSLb_ts_busyobj(struct busyobj *bo, const char *event, vtim_real now)
+{
+
+	if (isnan(bo->t_first) || bo->t_first == 0.)
+		bo->t_first = bo->t_prev = now;
+	VSLb_ts(bo->vsl, event, bo->t_first, &bo->t_prev, now);
 }
 
 void

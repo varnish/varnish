@@ -3,8 +3,9 @@ vtest req.hash_ignore_vary
 server s1 {
 	rxreq
 	expect req.http.cookie ~ ab=a
-	txresp -hdr "vary: cookie" -body a
+	txresp -hdr "vary: cookie" -hdr "connection: close" -body a
 
+	accept
 	rxreq
 	expect req.http.cookie ~ ab=b
 	txresp -hdr "vary: cookie" -body b

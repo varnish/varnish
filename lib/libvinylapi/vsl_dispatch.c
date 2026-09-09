@@ -545,8 +545,7 @@ vtx_retire(struct VSLQ *vslq, struct vtx **pvtx)
 	AN(vslq);
 	TAKE_OBJ_NOTNULL(vtx, pvtx, VTX_MAGIC);
 
-	AN(vtx->flags & VTX_F_COMPLETE);
-	AN(vtx->flags & VTX_F_READY);
+	assert((vtx->flags & (VTX_F_COMPLETE | VTX_F_READY)) == (VTX_F_COMPLETE | VTX_F_READY));
 	AZ(vtx->parent);
 
 	while (!VTAILQ_EMPTY(&vtx->child)) {
@@ -917,8 +916,7 @@ static void
 vtx_force(struct VSLQ *vslq, struct vtx *vtx, const char *reason)
 {
 
-	AZ(vtx->flags & VTX_F_COMPLETE);
-	AZ(vtx->flags & VTX_F_READY);
+	AZ(vtx->flags & (VTX_F_COMPLETE | VTX_F_READY));
 	vtx_scan(vslq, vtx);
 	if (!(vtx->flags & VTX_F_BEGIN))
 		vtx_synth_rec(vtx, SLT_Begin, "%s %u synth",

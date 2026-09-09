@@ -651,9 +651,8 @@ cnt_lookup(struct worker *wrk, struct req *req)
 	assert(lr == HSH_HIT || lr == HSH_GRACE);
 
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
-	AZ(oc->flags & OC_F_BUSY);
+	AZ(oc->flags & (OC_F_BUSY | OC_F_HFM));
 	req->objcore = oc;
-	AZ(oc->flags & OC_F_HFM);
 
 	VCL_hit_method(req->vcl, wrk, req, NULL, NULL);
 

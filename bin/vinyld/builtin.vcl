@@ -97,7 +97,8 @@ sub vcl_req_method {
 	    req.method != "TRACE" &&
 	    req.method != "OPTIONS" &&
 	    req.method != "DELETE" &&
-	    req.method != "PATCH") {
+	    req.method != "PATCH" &&
+	    req.method != "QUERY") {
 		# Non-RFC2616 or CONNECT which is weird.
 		set req.http.Connection = "close";
 		return (synth(501));

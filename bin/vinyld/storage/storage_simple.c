@@ -40,6 +40,7 @@
 
 #include "storage/storage.h"
 #include "storage/storage_simple.h"
+#include "storage/storage_vai.h"
 
 #include "vtim.h"
 
@@ -548,7 +549,7 @@ sml_ai_return_buffers(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 {
 	struct storage *st;
 	struct sml_hdl *hdl;
-	uintptr_t *p;
+	viov_lease_t *p;
 
 	(void) wrk;
 	CAST_VAI_HDL_NOTNULL(hdl, vhdl, SML_HDL_MAGIC);
@@ -570,7 +571,7 @@ sml_ai_return(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 {
 	struct storage *st;
 	struct sml_hdl *hdl;
-	uintptr_t *p;
+	viov_lease_t *p;
 
 	(void) wrk;
 	CAST_VAI_HDL_NOTNULL(hdl, vhdl, SML_HDL_MAGIC);

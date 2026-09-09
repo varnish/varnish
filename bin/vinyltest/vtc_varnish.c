@@ -841,10 +841,10 @@ varnish_cli(struct varnish *v, const char *cli, unsigned exp, const char *re,
 static const char *
 vcl_prepend(void)
 {
-	const char *vcl_prepend;
+	const char *vcl_pfx;
 
-	vcl_prepend = getenv("VTEST_VARNISH_VCL_PREPEND");
-	return vcl_prepend ? vcl_prepend : "";
+	vcl_pfx = getenv("VTEST_VARNISH_VCL_PREPEND");
+	return vcl_pfx ? vcl_pfx : "";
 }
 
 /**********************************************************************
