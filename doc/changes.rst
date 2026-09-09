@@ -41,6 +41,128 @@ Varnish-Cache NEXT (unreleased)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+* The argument to ``std.rollback()`` is now obsolete and ignored, the appropriate
+  headers to be rolled back is now inferred from the call site. This also fixes
+  a panic when ``resp`` or ``beresp`` was passed.
+
+* HTTP/1 message framing checks have been tightened:
+
+  - Backend responses with invalid body framing now fail the fetch.
+
+  - Multiple ``Transfer-Encoding`` fields are now considered as a whole, such
+    that duplicate ``chunked`` codings are refused.
+
+  - Multiple ``Content-Length`` fields and values are now accepted if they all
+    agree (leading zeroes are tolerated) and consolidated into a single
+    canonical header, any disagreement is refused.
+
+  - ``Transfer-Encoding`` on an HTTP/1.0 request is now refused.
+
+  - The backend connection is now closed when the range check of a response
+    fails, to avoid reusing a connection with an unread body.
+
+* Handling of ``Connection: close`` has been made more consistent if the
+  ``Connection`` header also contains other tokens.
+
+* Worker pool shutdown has been reworked: Acceptor tasks and waiters now
+  terminate promptly, dying pools no longer starve queued tasks and worker
+  threads are waited for before a pool is dismantled. The worker process now
+  ignores ``SIGUSR1``, which is used internally to interrupt blocking
+  ``accept(2)`` calls.
+
+* VCC now refuses empty quoted header names as in ``req.http.""``, which
+  could previously result in a C compiler error.
+
+* HTTP header parsing now only accepts SP and TAB as optional white space.
+
+* ``std.collect_all()`` has been added to combine all multiple headers of
+  ``req``, ``resp``, ``bereq`` or ``beresp`` according to the HTTP RFCs:
+  ``Set-Cookie`` is not combined, ``Cookie`` is combined with ``"; "`` and all
+  other headers with ``", "``.
+
+* The lock witness facility is now disabled at compile time by default and
+  needs to be enabled with the ``--enable-witness`` ``configure`` option.
+
+* Fixed a manager abort when the worker process failed to cool a VCL being
+  discarded, which also prevented ``auto_restart`` from taking effect.
+
+* ``std.strftime()`` now errors out it given a NULL format string.
+
+* ``math.strfromd()``: format strings cannot contain extra data after the
+  formatter.
+
+* ``blob.sub()`` now properly errors out if given a negative offset or size.
+
+* Malformed lines in the VSM ``_.index`` file are now reported with a
+  meaningful diagnostic instead of a bare assertion failure in VSM readers like
+  ``varnishstat`` and ``varnishlog``.
+
+* Fixed a panic when a delivery processor (VDP) failed to initialize before
+  allocating the private pointer.
+
+* Fixed a bug causing ``std.fileread()`` to panic when pointed at a 0-length
+  file.
+
+* ``blob.transcode()`` now limits its stack usage by decoding large inputs
+  piecemeal, avoiding a potential stack overflow.
+
+* Range processing is now only applied to ``GET`` requests as mandated by RFC
+  9110, and the builtin VCL removes the ``Range`` header from other requests.
+
+* Setting ``req.max_age = 0s`` now forces a cache miss with request coalescing,
+  where it previously had no effect.
+
+* The HTTP ``QUERY`` method has been added to the well known request methods
+  and is passed by default in the builtin VCL.
+
+* ``varnishadm`` now only uses libedit if both stdin and stdout are terminals.
+
+* ``varnishd`` now checks for an already running instance before modifying the
+  working directory.
+
+* ``varnishtest`` gained the ``VTEST_VARNISH_VCL_PREPEND`` environment variable
+  to inject VCL code into all VCL loaded by ``varnish`` instances.
+
+* ``std.getenv()`` gained an optional *fallback* argument which is returned if
+  the environment variable is not set.
+
+* Fixed the alphabet of the built-in base64 encoder used when converting BLOBs
+  to strings.
+
+* Starting sub-processes has become faster on systems with a high file
+  descriptor limit by only closing file descriptors which are actually open.
+
+* Counters for backend connection closes have been added:
+  ``MAIN.backend_closed``, ``MAIN.backend_closed_err`` and the equivalent
+  per-backend ``VBE.*.closed`` and ``VBE.*.closed_err`` counters.
+
+* The ``Tstrcmp()`` macro has been removed from ``vdef.h``, ``Tstreq()`` is to
+  be used for equality checks.
+
+* A new ``synth`` storage engine has been added, which avoids copying data for
+  synthetic response bodies by referencing the constituents directly.
+
+* A new ``resp.storage`` VCL variable was added to select which storage the
+  synth response body gets created on, available from ``vcl_synth {}``.
+
+* Failed objects no longer get added to LRU.
+
+* IPv4 compatible and IPv4 mapped IPv6 addresses now get rewritten to IPv4
+  addresses: IPv6 addresses ``::<ip4>`` and ``::ffff:<ip4>`` are now turned into
+  just ``<ip4>``, which is relevant for ACL matches in particular.
+
+  For example, ``::c0a8:c0a8 == ::192.168.192.168`` becomes ``192.168.192.168``
+  and ``::ffff:a8c0:a8c0 == ::ffff:168.192.168.192`` becomes
+  ``168.192.168.192``.
+
+* During build, the new ``configure`` option ``--with-statedir`` now allows to
+  set the ``VARNISH_STATE_DIR`` directly, which is the default for
+  ``VARNISH_DEFAULT_N``, which, in turn, is the default for the ``-n`` argument
+  to ``varnishd`` and ``varnish{log,ncsa,hist,top}``.
+
+* The default for ``VARNISH_STATE_DIR`` has been changed back to
+  ``${localstatedir}/varnish``.
+
 .. _VSV00019: https://vinyl-cache.org/security/VSV00019.html
 
 * The ``synthetic()`` VCL action has been removed. Since Varnish Cache 5.0.0,
