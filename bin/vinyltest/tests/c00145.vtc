@@ -1,0 +1,150 @@
+vtest "test ban obj.hfm"
+
+server s0 {
+	rxreq
+	txresp -bodylen 5
+} -dispatch
+
+varnish v1 -vcl+backend {
+	sub vcl_deliver {
+		set resp.http.X-hitmiss = req.is_hitmiss;
+		set resp.http.X-hit = (obj.hits != 0);
+	}
+
+	sub vcl_backend_response {
+		if (bereq.url ~ "^/hfm") {
+			set beresp.uncacheable = true;
+		}
+		set beresp.ttl = 1h;
+	}
+} -start
+
+
+# obj.hfm only accepts == and !=
+varnish v1 -clierr 106 "ban obj.hfm > true"
+varnish v1 -clierr 106 "ban obj.hfm ~ true"
+# and only the true/false arguments
+varnish v1 -clierr 106 "ban obj.hfm == maybe"
+varnish v1 -clierr 106 "ban obj.hfm != 1"
+
+
+varnish v1 -cliok "param.set ban_lurker_age 0"
+varnish v1 -cliok "param.set ban_lurker_sleep 0.01"
+
+# Hit-for-miss object: obj.hfm is true.
+
+client c1 {
+	txreq -url "/hfm1"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
+
+varnish v1 -expect n_object == 1
+
+# Neither of these matches a hit-for-miss object.
+varnish v1 -cliok "ban obj.hfm == false"
+varnish v1 -cliok "ban obj.hfm != true"
+varnish v1 -expect bans_lurker_obj_killed == 0
+varnish v1 -expect n_object == 1
+
+# This one matches
+varnish v1 -cliok "ban obj.hfm == true"
+varnish v1 -expect bans_lurker_obj_killed == 1
+varnish v1 -expect n_object == 0
+
+
+client c1 {
+	txreq -url "/hfm1"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
+
+# Another hit-for-miss object, this time killed by "!= false".
+
+client c2 {
+	txreq -url "/hfm2"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
+
+varnish v1 -expect n_object == 2
+varnish v1 -cliok "ban obj.hfm != false"
+varnish v1 -expect bans_lurker_obj_killed == 3
+varnish v1 -expect n_object == 0
+
+# Regular cacheable object killed by "== false".
+client c3 {
+	txreq -url "/cache1"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
+
+varnish v1 -expect n_object == 1
+
+# Neither of these matches a cacheable object.
+varnish v1 -cliok "ban obj.hfm == true"
+varnish v1 -cliok "ban obj.hfm != false"
+varnish v1 -expect bans_lurker_obj_killed == 3
+varnish v1 -expect n_object == 1
+
+client c3 {
+	txreq -url "/cache1"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == true
+} -run
+
+# This one matches
+varnish v1 -cliok "ban obj.hfm == false"
+varnish v1 -expect bans_lurker_obj_killed == 4
+varnish v1 -expect n_object == 0
+
+client c3 {
+	txreq -url "/cache1"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
+
+# Another cacheable object, this time killed by "!= true".
+
+client c4 {
+	txreq -url "/cache2"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
+
+varnish v1 -expect n_object == 2
+
+client c4 {
+	txreq -url "/cache2"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == true
+} -run
+
+varnish v1 -cliok "ban obj.hfm != true"
+varnish v1 -expect bans_lurker_obj_killed == 6
+varnish v1 -expect n_object == 0
+
+
+client c4 {
+	txreq -url "/cache2"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-hitmiss == false
+	expect resp.http.X-hit == false
+} -run
