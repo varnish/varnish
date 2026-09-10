@@ -9,7 +9,9 @@ barrier b5 sock 3
 server s1 {
 	rxreq
 	expect req.url == /nosync
-	txresp
+	txresp -hdr "connection: close"
+
+	accept
 	rxreq
 	expect req.url == /sync
 	txresp

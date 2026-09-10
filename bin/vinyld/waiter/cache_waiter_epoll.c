@@ -156,7 +156,7 @@ vwe_thread(void *priv)
 			else
 				Wait_Call(w, wp, WAITER_REMCLOSE, now);
 		}
-		if (vwe->nwaited == 0 && vwe->die)
+		if (vwe->die)
 			break;
 	}
 	free(ev);

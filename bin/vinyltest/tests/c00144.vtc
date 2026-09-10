@@ -41,4 +41,13 @@ shell -expect {Malformed _.index line (9): Wrong number of fields (7)} -exit 2 {
 	varnishstat -n ${tmpdir}/twin -t 1 -1 > ${tmpdir}/_out
 }
 
+shell {
+	rm -f ${tmpdir}/twin/_.vsm_mgt/_.index
+	mkdir ${tmpdir}/twin/_.vsm_mgt/_.index
+}
+
+shell -expect {Could not read _.index} -exit 2 {
+	vinylstat -n ${tmpdir}/twin -t 1 -1 > ${tmpdir}/_out
+}
+
 shell {rm -rf ${tmpdir}/twin}

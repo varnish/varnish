@@ -49,6 +49,7 @@ static pthread_t		thr_pool_herder;
 static struct lock		wstat_mtx;
 struct lock			pool_mtx;
 static VTAILQ_HEAD(,pool)	pools = VTAILQ_HEAD_INITIALIZER(pools);
+static pthread_cond_t		cond = PTHREAD_COND_INITIALIZER;
 
 /*--------------------------------------------------------------------
  * Summing of stats into global stats counters
@@ -89,11 +90,16 @@ Pool_Task_Any(struct pool_task *task, enum task_prio prio)
 	if (pp != NULL) {
 		VTAILQ_REMOVE(&pools, pp, list);
 		VTAILQ_INSERT_TAIL(&pools, pp, list);
+		AZ(pp->die);
 	}
 	Lck_Unlock(&pool_mtx);
 	if (pp == NULL)
 		return (-1);
-	// NB: When we remove pools, is there a race here ?
+
+	// We never see a dying pool here, but it might die right after the
+	// Unlock, in which case Pool_Task races for a worker, but because of
+	// the destruction delay it is highly unlikely that all threads are gone
+
 	return (Pool_Task(pp, task, prio));
 }
 
@@ -176,6 +182,23 @@ pool_mkpool(unsigned pool_no)
 	return (pp);
 }
 
+static void
+pool_destroy(struct pool *ppx)
+{
+	void *rvp;
+
+	CHECK_OBJ_NOTNULL(ppx, POOL_MAGIC);
+	PTOK(pthread_join(ppx->herder_thr, &rvp));
+	PTOK(pthread_cond_destroy(&ppx->herder_cond));
+	assert(VTAILQ_EMPTY(&ppx->poolsocks));
+	free(ppx->a_stat);
+	free(ppx->b_stat);
+	SES_DestroyPool(ppx);
+	Lck_Delete(&ppx->mtx);
+	FREE_OBJ(ppx);
+	VSC_C_main->pools--;
+}
+
 /*--------------------------------------------------------------------
  * This thread adjusts the number of pools to match the parameter.
  *
@@ -187,24 +210,29 @@ pool_mkpool(unsigned pool_no)
 static void * v_matchproto_()
 pool_poolherder(void *priv)
 {
-	unsigned nwq;
-	struct pool *pp, *ppx;
+	VTAILQ_HEAD(,pool) deadpools = VTAILQ_HEAD_INITIALIZER(deadpools);
+	unsigned nwq, poolno;
+	struct pool *pp;
 	uint64_t u;
-	void *rvp;
 
 	THR_SetName("pool_poolherder");
 	THR_Init();
 	(void)priv;
 
-	nwq = 0;
-	while (1) {
+	nwq = poolno = 0;
+	while (cache_param->wthread_pools > 0 ||
+	    VTAILQ_FIRST(&pools) ||
+	    VTAILQ_FIRST(&deadpools)) {
 		if (nwq < cache_param->wthread_pools) {
-			pp = pool_mkpool(nwq);
+			// die before we would wrap
+			assert(poolno < UINT_MAX);
+			pp = pool_mkpool(poolno);
 			if (pp != NULL) {
 				Lck_Lock(&pool_mtx);
 				VTAILQ_INSERT_TAIL(&pools, pp, list);
 				Lck_Unlock(&pool_mtx);
 				VSC_C_main->pools++;
+				poolno++;
 				nwq++;
 				continue;
 			}
@@ -213,43 +241,51 @@ pool_poolherder(void *priv)
 			pp = VTAILQ_FIRST(&pools);
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 			VTAILQ_REMOVE(&pools, pp, list);
-			VTAILQ_INSERT_TAIL(&pools, pp, list);
-			if (!pp->die)
-				nwq--;
+			AZ(pp->die);
 			Lck_Unlock(&pool_mtx);
-			if (!pp->die) {
-				VSL(SLT_Debug, NO_VXID, "Kill Pool %p", pp);
-				pp->die = 1;
-				VCA_DestroyPool(pp);
-				PTOK(pthread_cond_signal(&pp->herder_cond));
-			}
+
+			VTAILQ_INSERT_TAIL(&deadpools, pp, list);
+			AN(nwq);
+			nwq--;
+			VSL(SLT_Debug, NO_VXID, "Kill Pool %p", pp);
+			pp->die = 1;
+			VCA_DestroyPool(pp);
+			PTOK(pthread_cond_signal(&pp->herder_cond));
+			continue;
 		}
-		(void)sleep(1);
+
+		while ((pp = VTAILQ_FIRST(&deadpools)) != NULL) {
+			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
+			int active;
+
+			AN(pp->die);
+			if (pp->nthr > 0 || pp->wrk_dying > 0)
+				continue;
+
+			Lck_Lock(&pp->mtx);
+			active = (pp->nthr > 0 || pp->wrk_dying > 0) ? 1 : 0;
+			Lck_Unlock(&pp->mtx);
+
+			if (active)
+				 continue;
+
+			VTAILQ_REMOVE(&deadpools, pp, list);
+			pool_destroy(pp);
+		}
+
 		u = 0;
-		ppx = NULL;
 		Lck_Lock(&pool_mtx);
 		VTAILQ_FOREACH(pp, &pools, list) {
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 
-			if (pp->die && pp->nthr == 0)
-				ppx = pp;
 			u += pp->lqueue;
 		}
-		if (ppx != NULL) {
-			VTAILQ_REMOVE(&pools, ppx, list);
-			PTOK(pthread_join(ppx->herder_thr, &rvp));
-			PTOK(pthread_cond_destroy(&ppx->herder_cond));
-			free(ppx->a_stat);
-			free(ppx->b_stat);
-			SES_DestroyPool(ppx);
-			Lck_Delete(&ppx->mtx);
-			FREE_OBJ(ppx);
-			VSC_C_main->pools--;
-		}
-		Lck_Unlock(&pool_mtx);
 		VSC_C_main->thread_queue_len = u;
+		if (nwq > 0 || cache_param->wthread_pools > 0)
+			(void)Lck_CondWaitTimeout(&cond, &pool_mtx, 1.0);
+		Lck_Unlock(&pool_mtx);
 	}
-	NEEDLESS(return (NULL));
+	return (NULL);
 }
 
 /*--------------------------------------------------------------------*/
@@ -284,4 +320,19 @@ Pool_Init(void)
 	PTOK(pthread_create(&thr_pool_herder, NULL, pool_poolherder, NULL));
 	while (!VSC_C_main->pools)
 		VTIM_sleep(0.01);
+}
+
+void
+Pool_Stop(void)
+{
+	Lck_Lock(&pool_mtx);
+	cache_param->wthread_pools = 0;
+	PTOK(pthread_cond_signal(&cond));
+	Lck_Unlock(&pool_mtx);
+}
+
+void
+Pool_Fini(void)
+{
+	AZ(pthread_join(thr_pool_herder, NULL));
 }

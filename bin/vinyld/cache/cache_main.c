@@ -392,6 +392,13 @@ cli_quit(int sig)
 	WRONG("It's time for the big quit");
 }
 
+static void
+child_sig_nore(int sig)
+{
+
+	(void)sig;
+}
+
 /*=====================================================================
  * XXX Generalize?
  */
@@ -479,6 +486,7 @@ child_main(int sigmagic, size_t altstksz)
 	(void)signal(SIGINT, SIG_DFL);
 	(void)signal(SIGTERM, SIG_DFL);
 	(void)signal(SIGQUIT, cli_quit);
+	(void)signal(SIGUSR1, child_sig_nore);
 
 #if defined(__FreeBSD__) && __FreeBSD_version >= 1000000
 	malloc_message = child_malloc_fail;
@@ -567,12 +575,13 @@ child_main(int sigmagic, size_t altstksz)
 		VTIM_sleep(shutdown_delay);
 
 	VCA_Shutdown();
-	cache_param->wthread_pools = 0;
+	Pool_Stop();
 	BAN_Shutdown();
 	STV_warn();
 	VCL_Shutdown();
 	EXP_Shutdown();
 	STV_close();
+	Pool_Fini();
 
 	struct rusage usage = {0};
 	if (! getrusage(RUSAGE_SELF, &usage)) {

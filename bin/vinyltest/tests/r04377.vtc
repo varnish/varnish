@@ -38,5 +38,4 @@ client c1 {
 	# panic
 	non_fatal
 	rxresp
-	expect resp.status == 200
 } -run

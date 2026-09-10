@@ -663,7 +663,7 @@ int http_GetHdrToken(const struct http *hp, hdr_t,
 int http_GetHdrField(const struct http *hp, hdr_t,
     const char *field, const char **ptr);
 double http_GetHdrQ(const struct http *hp, hdr_t, const char *field);
-ssize_t http_GetContentLength(const struct http *hp);
+ssize_t http_GetContentLength(struct http *hp);
 ssize_t http_GetContentRange(const struct http *hp, ssize_t *lo, ssize_t *hi);
 const char * http_GetRange(const struct http *hp, ssize_t *lo, ssize_t *hi,
     ssize_t len);
@@ -686,6 +686,7 @@ int HTTP_IterHdrPack(struct worker *, struct objcore *, const char **);
 	 for ((ptr) = NULL; HTTP_IterHdrPack(wrk, oc, &(ptr));)
 const char *HTTP_GetHdrPack(struct worker *, struct objcore *, hdr_t);
 stream_close_t http_DoConnection(struct http *hp, stream_close_t sc_close);
+stream_close_t http_EnsureConnection(struct http *hp, stream_close_t sc_close);
 int http_IsFiltered(const struct http *hp, unsigned u, unsigned how);
 void http_SetWellKnownMethod(struct http *hp);
 

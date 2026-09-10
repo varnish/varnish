@@ -318,7 +318,7 @@ http1_splitline(struct http *hp, struct http_conn *htc, const int *hf,
 /*--------------------------------------------------------------------*/
 
 static body_status_t
-http1_body_status(const struct http *hp, struct http_conn *htc, int request)
+http1_body_status(struct http *hp, struct http_conn *htc, int request)
 {
 	ssize_t cl;
 	const char *b;
@@ -345,6 +345,18 @@ http1_body_status(const struct http *hp, struct http_conn *htc, int request)
 			/* RFC 9112 6.3 is more lenient, we are strict */
 			VSLb(hp->vsl, SLT_BogoHeader,
 			    "Transfer-Encoding with Content-Length");
+			return (BS_ERROR);
+		}
+		if (http_CountHdr(hp, H_Transfer_Encoding) > 1) {
+			/* RFC 9110 5.3, the checks above saw only the first */
+			VSLb(hp->vsl, SLT_BogoHeader,
+			    "Multiple Transfer-Encoding: headers");
+			return (BS_ERROR);
+		}
+		if (request && hp->protover < 11) {
+			/* RFC 9112 6.1 faulty framing */
+			VSLb(hp->vsl, SLT_BogoHeader,
+			    "Transfer-Encoding on HTTP/1.0 request");
 			return (BS_ERROR);
 		}
 		return (BS_CHUNKED);
@@ -488,7 +500,15 @@ HTTP1_DissectResponse(struct http_conn *htc, struct http *hp,
 	if (retval != 0) {
 		VSLb(hp->vsl, SLT_HttpGarbage, "%.*s",
 		    (int)(htc->rxbuf_e - htc->rxbuf_b), htc->rxbuf_b);
-		assert(retval >= 100 && retval <= 999);
+	}
+
+	if (retval == 0)
+		htc->body_status = http1_body_status(hp, htc, 0);
+
+	if (retval == 0 && htc->body_status == BS_ERROR)
+		retval = 503;
+
+	if (retval != 0) {
 		assert(retval == 503);
 		http_SetStatus(hp, 503, NULL);
 	}
@@ -498,8 +518,6 @@ HTTP1_DissectResponse(struct http_conn *htc, struct http *hp,
 		http_SetH(hp, HTTP_HDR_REASON,
 		    http_Status2Reason(hp->status, NULL));
 	}
-
-	htc->body_status = http1_body_status(hp, htc, 0);
 
 	return (retval);
 }

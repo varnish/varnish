@@ -268,15 +268,21 @@ client c7 {
 	expect resp.http.accept-ranges == foobar
 } -run
 
+# A rejected range check closes the origin connection, so each fetch
+# needs one of its own.
 server s1 {
 	rxreq
 	expect req.http.range == "bytes=10-19"
 	txresp -status 206 -hdr "content-range: bytes 0-49/100" -bodylen 40
+	expect_close
 
+	accept
 	rxreq
 	expect req.http.range == "bytes=10-19"
 	txresp -status 206 -hdr "content-range: bytes 10-19/100" -bodylen 40
+	expect_close
 
+	accept
 	rxreq
 	expect req.http.range == "bytes=90-119"
 	txresp -status 416 -hdr "content-range: bytes */100" -bodylen 100
@@ -285,20 +291,27 @@ server s1 {
 	expect req.url == "/?unexpected=content-range"
 	expect req.http.range == <undef>
 	txresp -hdr "content-range: bytes 0-49/100" -bodylen 40
+	expect_close
 
+	accept
 	rxreq
 	expect req.url == "/?unexpected=unsatisfied-range"
 	expect req.http.range == <undef>
 	txresp -hdr "content-range: bytes */100" -bodylen 100
+	expect_close
 
+	accept
 	rxreq
 	expect req.url == "/?invalid=content-range"
 	expect req.http.range == <undef>
 	txresp -hdr "content-range: bytes=0-99/100" -bodylen 100
+	expect_close
 
+	accept
 	rxreq
 	expect req.http.range == "bytes=0-0"
 	txresp -hdr "content-range: bytes */*" -bodylen 100
+	expect_close
 } -start
 
 varnish v1 -vcl+backend {

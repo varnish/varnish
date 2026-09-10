@@ -126,7 +126,7 @@ vwk_thread(void *priv)
 			else
 				Wait_Call(w, wp, WAITER_ACTION, now);
 		}
-		if (vwk->nwaited == 0 && vwk->die)
+		if (vwk->die)
 			break;
 	}
 	closefd(&vwk->pipe[0]);

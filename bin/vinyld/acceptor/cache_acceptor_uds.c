@@ -392,10 +392,11 @@ vca_uds_accept_task(struct worker *wrk, void *arg)
 	/* Return any cached resources from previous task */
 	WRK_Cleanup(wrk);
 
-	while (!pool_accepting)
+	while (!pool_accepting && ls->sock != -2 && !ps->pool->die)
 		VTIM_sleep(.1);
 
-	while (!ps->pool->die) {
+	ps->thread = pthread_self();
+	while (ls->sock != -2 && !ps->pool->die) {
 		INIT_OBJ(&wa, WRK_ACCEPT_MAGIC);
 		wa.acceptlsock = ls;
 
@@ -407,14 +408,8 @@ vca_uds_accept_task(struct worker *wrk, void *arg)
 			    &wa.acceptaddrlen);
 		} while (i < 0 && errno == EAGAIN && !ps->pool->die);
 
-		if (i < 0 && ps->pool->die)
+		if (i < 0 && (ls->sock == -2 || ps->pool->die))
 			break;
-
-		if (i < 0 && ls->sock == -2) {
-			/* Shut down in progress */
-			sleep(2);
-			continue;
-		}
 
 		if (i < 0) {
 			switch (errno) {
@@ -456,6 +451,7 @@ vca_uds_accept_task(struct worker *wrk, void *arg)
 
 		if (!Pool_Task_Arg(wrk, TASK_QUEUE_REQ,
 		    vca_uds_make_session, &wa, sizeof wa)) {
+			ps->thread = cli_thread;
 			/*
 			 * We couldn't get another thread, so we will handle
 			 * the request in this worker thread, but first we
@@ -472,8 +468,12 @@ vca_uds_accept_task(struct worker *wrk, void *arg)
 			VTIM_sleep(2.0);
 
 	}
+	ps->thread = cli_thread;
 
 	VSL(SLT_Debug, NO_VXID, "XXX Accept thread dies %p", ps);
+	Lck_Lock(&ps->pool->mtx);
+	VTAILQ_REMOVE(&ps->pool->poolsocks, ps, list);
+	Lck_Unlock(&ps->pool->mtx);
 	FREE_OBJ(ps);
 }
 
@@ -492,7 +492,11 @@ vca_uds_accept(struct pool *pp)
 		ps->task->func = vca_uds_accept_task;
 		ps->task->priv = ps;
 		ps->pool = pp;
+		// we use cli_thread as a marker for "not accepting"
+		ps->thread = cli_thread;
+		Lck_Lock(&pp->mtx);
 		VTAILQ_INSERT_TAIL(&pp->poolsocks, ps, list);
+		Lck_Unlock(&pp->mtx);
 		AZ(Pool_Task(pp, ps->task, TASK_QUEUE_VCA));
 	}
 }

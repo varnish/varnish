@@ -1,6 +1,7 @@
 /*-
  * Copyright (c) 2006 Verdens Gang AS
  * Copyright (c) 2006-2017 Varnish Software AS
+ * Copyright 2026 UPLEX - Nils Goroll Systemoptimierung
  * All rights reserved.
  *
  * Author: Poul-Henning Kamp <phk@phk.freebsd.dk>
@@ -939,25 +940,120 @@ http_GetHdrField(const struct http *hp, hdr_t hdr,
 	return (i);
 }
 
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+ * Return the content length if all Content-Length headers are well formed and
+ * agree. Remove agreeing duplicates. Normalize to no leading zeroes.
+ *
+ * Returns -1 for no content length, -2 for malformed.
+ *
+ * The surviving C-L header is normalized to not contain leading zeroes in order
+ * to support vcl like if (req.http.Content-Length ~ "^\d{3}"). If all headers
+ * had leading zeroes or list values, we generate a new one
+ */
 
 ssize_t
-http_GetContentLength(const struct http *hp)
+http_GetContentLength(struct http *hp)
 {
-	ssize_t cl;
-	const char *b;
+	const txt *first = NULL;
+	ssize_t cl = -1;	// default no length
+	uint16_t u, v;
+	int need = 1;
 
 	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
 
-	if (!http_GetHdr(hp, H_Content_Length, &b))
-		return (-1);
-	cl = VNUM_uint(b, NULL, &b);
-	if (cl < 0)
-		return (-2);
-	while (vct_isows(*b))
-		b++;
-	if (*b != '\0')
-		return (-2);
+	// basically the same outer loop as http_Unset
+	for (v = u = HTTP_HDR_FIRST; u < hp->nhd; u++) {
+		Tcheck(hp->hd[u]);
+		if (http_IsHdr(&hp->hd[u], H_Content_Length)) {
+			const char *b = hp->hd[u].b + H_Content_Length->len;
+
+			while (vct_issp(*b))
+				b++;
+
+			// leading zeroes are not canonical
+			int noncanon = (pdiff(b, hp->hd[u].e) > 1 && b[0] == '0');
+
+			ssize_t l = VNUM_uint(b, NULL, &b);
+			ssize_t ll = l;
+
+			for (;;) {
+				// malformed numbers and mismatches to previous
+				// are hard errors
+				if (l < 0 || ll != l) {
+					l = -2;
+					break;
+				}
+
+				while (vct_isows(*b))
+					b++;
+				if (*b == '\0')
+					break;
+				if (*b != ',') {
+					l = -2;
+					break;
+				}
+				b++;
+
+				// list values are not canonical
+				noncanon = 1;
+				while (vct_issp(*b))
+					b++;
+				if (*b == '\0')
+					break;
+				ll = l;
+				l = VNUM_uint(b, NULL, &b);
+			}
+
+			assert(l == -2 || l >= 0);
+			assert(cl >= -2);
+
+			// note good cl or log errors
+			if (l == -2) {
+				cl = -2;
+				VSLb(hp->vsl, SLT_HttpGarbage, "%.*s",
+				    (int)pdiff(hp->hd[u].b, hp->hd[u].e), hp->hd[u].b);
+			} else if (cl == -1)
+				cl = l;
+			else if (l != cl) {
+				cl = -2;
+
+				AN(first);
+				VSLb(hp->vsl, SLT_HttpGarbage, "mismatch: %.*s",
+				    (int)pdiff(hp->hd[u].b, hp->hd[u].e), hp->hd[u].b);
+				VSLb(hp->vsl, SLT_HttpGarbage, "first   : %.*s",
+				    (int)pdiff(first->b, first->e), first->b);
+			}
+
+			// Return early if wrong and all headers kept
+			if (cl == -2 && v == u)
+				return (cl);
+
+			// track for logging
+			if (first == NULL)
+				first = &hp->hd[u];
+
+			// decide if to keep header
+			if (cl >= 0 && need && !noncanon) {
+				need = 0;
+			} else if (cl >= 0) {
+				http_VSLH_del(hp, u);
+				continue;
+			}
+		}
+
+		if (v != u) {
+			vmemcpy(&hp->hd[v], &hp->hd[u], sizeof *hp->hd);
+			vmemcpy(&hp->hdf[v], &hp->hdf[u], sizeof *hp->hdf);
+		}
+		v++;
+	}
+	hp->nhd = v;
+
+	if (cl >= 0 && need) {
+		// we have deleted all headers above
+		http_PrintfHeader(hp, "Content-Length: %jd", cl);
+	}
+
 	return (cl);
 }
 
@@ -1144,6 +1240,74 @@ http_DoConnection(struct http *hp, stream_close_t sc_close)
 	}
 	CHECK_OBJ_NOTNULL(retval, STREAM_CLOSE_MAGIC);
 	return (retval);
+}
+
+// Set the correct Connection header for closing or not
+// Existing Connection: close has precedence
+stream_close_t
+http_EnsureConnection(struct http *hp, stream_close_t sc_close)
+{
+	const char *h, *b, *e;
+	struct vsb vsb[1];
+	unsigned has_keep = 0, has_close = 0;
+	unsigned u, n = 0;
+
+	CHECK_OBJ_NOTNULL(hp, HTTP_MAGIC);
+	http_CollectHdr(hp, H_Connection);
+	if (!http_GetHdr(hp, H_Connection, &h)) {
+		if (sc_close == SC_NULL)
+			http_SetHeader(hp, "Connection: keep-alive");
+		else
+			http_SetHeader(hp, "Connection: close");
+		return (sc_close);
+	}
+
+	WS_VSB_new(vsb, hp->ws);
+	AN(h);
+	while (http_split(&h, NULL, ",", &b, &e)) {
+		u = pdiff(b, e);
+		if (u == 5 && http_hdr_at(b, "close", u)) {
+			has_close = 1;
+			continue;
+		}
+		if (u == 10 && http_hdr_at(b, "keep-alive", u)) {
+			has_keep = 1;
+			continue;
+		}
+		if (n++ == 0)
+			VSB_cat(vsb, "Connection: ");
+		else
+			VSB_cat(vsb, ", ");
+		VSB_bcat(vsb, b, u);
+	}
+	if (sc_close == SC_NULL && has_close)
+		sc_close = SC_RESP_CLOSE;
+	//lint -e{731} Boolean argument to equal/not equal
+	if (has_keep ^ has_close && (sc_close == SC_NULL) == (has_keep == 1)) {
+		// already correct
+		WS_Release(hp->ws, 0);
+		return (sc_close);
+	}
+	http_Unset(hp, H_Connection);
+	if (n == 0 && sc_close == SC_NULL) {
+		WS_Release(hp->ws, 0);
+		http_SetHeader(hp, "Connection: keep-alive");
+		return (sc_close);
+	}
+	if (n == 0) {
+		WS_Release(hp->ws, 0);
+		http_SetHeader(hp, "Connection: close");
+		return (sc_close);
+	}
+	if (sc_close == SC_NULL)
+		VSB_cat(vsb, ", keep-alive");
+	else
+		VSB_cat(vsb, ", close");
+	h = WS_VSB_finish(vsb, hp->ws, NULL);
+	if (h == NULL)
+		return (SC_OVERLOAD);
+	http_SetHeader(hp, h);
+	return (sc_close);
 }
 
 /*--------------------------------------------------------------------*/

@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <signal.h>
 
 #include "cache/cache_int.h"
 #include "acceptor/cache_acceptor.h"
@@ -136,9 +137,19 @@ VCA_DestroyPool(struct pool *pp)
 {
 	struct poolsock *ps;
 
-	while (!VTAILQ_EMPTY(&pp->poolsocks)) {
-		ps = VTAILQ_FIRST(&pp->poolsocks);
-		VTAILQ_REMOVE(&pp->poolsocks, ps, list);
+	while (1) {
+		Lck_Lock(&pp->mtx);
+		VTAILQ_FOREACH(ps, &pp->poolsocks, list) {
+			pthread_t thr = ps->thread;
+			// We use cli_thread as a "not accepting" marker
+			if (pthread_equal(thr, cli_thread))
+				continue;
+			(void)pthread_kill(thr, SIGUSR1);
+		}
+		Lck_Unlock(&pp->mtx);
+		if (VTAILQ_EMPTY(&pp->poolsocks))
+			break;
+		usleep (100);
 	}
 }
 
