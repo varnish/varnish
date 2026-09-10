@@ -733,3 +733,39 @@ AC_DEFUN([VARNISH_PREREQ], [
 	varnish_version_required ${VARNISH_VERSION} m4_join([ ], $@) ||
 		AC_MSG_ERROR([Varnish version not supported.])
 ])
+
+AC_DEFUN([VCACHE_REQUIRE1], [
+	AC_REQUIRE([_VARNISH_VERSION_REQUIRED])
+	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "$1[]api" ; then
+		AC_MSG_CHECKING([$1])
+		have=$($PKG_CONFIG --modversion "$1[]api" 2>/dev/null)
+		if test "x$have" = "x" ; then
+			AC_MSG_RESULT([not found])
+			if test "x$vcacheapi" != "x" ; then
+				vcacheapi="_"
+			fi
+		elif varnish_version_required ${have} m4_map_args_sep([m4_normalize(], [)], [ ], m4_shift($@)) ; then
+			vcacheapi="$1[]api"
+		elif test "x$vcacheapi" != "x" ; then
+			# varnish_version_required has output AC_MSG_RESULT
+			vcacheapi="_"
+		fi
+	fi
+])
+
+AC_DEFUN([VCACHE_REQUIRE], [
+	AC_REQUIRE([_VARNISH_PKG_CONFIG])
+
+	m4_map([VCACHE_REQUIRE1], [$@])
+	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "_" ; then
+		AC_MSG_ERROR([no supported vcache project found])
+	fi
+
+	# note: it is possible for varnish_pkg_config to have run before the
+	# above, in which case the VCACHE_REQUIRE1 only checked that the api has
+	# the right version, if supported.
+	#
+	# Also, if you run --with-vcache=iknowbetter, it does not get version
+	# checked. This is deliberate to keep the user in control
+	varnish_pkg_config
+])
