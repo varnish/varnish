@@ -16,6 +16,8 @@ AM_CPPFLAGS = \
 
 bin_PROGRAMS =	varnishtest
 
+lib_LTLIBRARIES = libvtest_ext_varnish.la
+
 # for -i invocation / a00000.vtc
 all-local: vtest
 
@@ -25,9 +27,18 @@ vtest: varnishtest
 install-exec-hook:
 	ln -f $(DESTDIR)$(bindir)/varnishtest$(EXEEXT) \
 	   $(DESTDIR)$(bindir)/vtest$(EXEEXT)
+	ln -sf libvtest_ext_varnish.so \
+	   $(DESTDIR)$(libdir)/libvtest_ext_vcache.so
 
 uninstall-hook:
-	rm -f $(DESTDIR)$(bindir)/vtest$(EXEEXT)
+	rm -f \
+	    $(DESTDIR)$(bindir)/vtest$(EXEEXT)	\
+	    $(DESTDIR)$(libdir)/libvtest_ext_vcache.so
+
+varnishspecific_src = \
+		vtest2/src/vtc_logexp.c \
+		vtest2/src/vtc_vsm.c \
+		vtc_varnish.c
 
 varnishtest_SOURCES = \
 		vtest2/src/hpack.h \
@@ -54,7 +65,6 @@ varnishtest_SOURCES = \
 		vtest2/src/vtc_http2.c \
 		vtest2/src/vtc_log.h \
 		vtest2/src/vtc_log.c \
-		vtest2/src/vtc_logexp.c \
 		vtest2/src/vtc_misc.c \
 		vtest2/src/vtc_main.c \
 		vtest2/src/vtc_process.c \
@@ -66,11 +76,10 @@ varnishtest_SOURCES = \
 		vtest2/src/vtc_tls.c \
 		vtest2/src/builtin_cert.h \
 		vtest2/src/vtc_tunnel.c \
-		vtest2/src/vtc_vsm.c \
 		vtest2/src/vtest_api.h \
 		vtest2/lib/vudp.h \
 		vtest2/lib/vudp.c \
-		vtc_varnish.c
+		$(varnishspecific_src)
 
 varnishtest_LDADD = \
 		$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
@@ -85,6 +94,17 @@ varnishtest_CFLAGS = \
 		-DVTEST_WITH_VTC_VSM \
 		-DTOP_BUILDDIR='"${top_builddir}"' \
 		${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
+
+# would only be needed for vtest, but as both are the same atm...
+varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic
+
+libvtest_ext_varnish_la_SOURCES = \
+		vtest_ext_varnish.c \
+		$(varnishspecific_src)
+
+libvtest_ext_varnish_la_LIBADD = $(varnishtest_LDADD)
+
+libvtest_ext_varnish_la_CFLAGS = $(varnishtest_CFLAGS)
 
 EXTRA_DIST = \
 	tests/*.vtc \
