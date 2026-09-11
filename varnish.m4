@@ -91,6 +91,26 @@ varnish_version_required() {
 }
 ])
 
+AC_DEFUN([_VARNISH_VCACHE_VAR], [
+	VARNISH$1="${VCACHE$1}"
+	AC_SUBST(VARNISH$1)
+])# _VCACHE_ALIAS
+
+AC_DEFUN([_VARNISH_ALIAS], [
+	_VARNISH_VCACHE_VAR([API_BINDIR])
+	_VARNISH_VCACHE_VAR([API_CFLAGS])
+	_VARNISH_VCACHE_VAR([API_DATAROOTDIR])
+	_VARNISH_VCACHE_VAR([API_LIBDIR])
+	_VARNISH_VCACHE_VAR([API_LIBS])
+	_VARNISH_VCACHE_VAR([API_PREFIX])
+	_VARNISH_VCACHE_VAR([API_SBINDIR])
+	_VARNISH_VCACHE_VAR([API_VCLDIR])
+	_VARNISH_VCACHE_VAR([API_VMODDIR])
+	_VARNISH_VCACHE_VAR([_LIBRARY_PATH])
+	_VARNISH_VCACHE_VAR([_TEST_PATH])
+	_VARNISH_VCACHE_VAR([_VERSION])
+])
+
 # _VCACHE_PKG_CONFIG
 # --------------------
 #
@@ -116,32 +136,32 @@ varnish_pkg_config() {
 	if test "x$vcacheapi" = "x" ; then
 		vcacheapi="varnishapi"
 	fi
-	PKG_CHECK_MODULES([VARNISHAPI], [${vcacheapi}])
-	AC_SUBST([VARNISH_VERSION], [$($PKG_CONFIG --modversion ${vcacheapi})])
+	PKG_CHECK_MODULES([VCACHEAPI], [${vcacheapi}])
+	AC_SUBST([VCACHE_VERSION], [$($PKG_CONFIG --modversion ${vcacheapi})])
 
-	PKG_CHECK_VAR([VARNISHAPI_PREFIX], [${vcacheapi}], [prefix])
-	PKG_CHECK_VAR([VARNISHAPI_DATAROOTDIR], [${vcacheapi}], [datarootdir])
-	PKG_CHECK_VAR([VARNISHAPI_LIBDIR], [${vcacheapi}], [libdir])
-	PKG_CHECK_VAR([VARNISHAPI_BINDIR], [${vcacheapi}], [bindir])
-	PKG_CHECK_VAR([VARNISHAPI_SBINDIR], [${vcacheapi}], [sbindir])
-	PKG_CHECK_VAR([VARNISHAPI_VCLDIR], [${vcacheapi}], [vcldir])
-	PKG_CHECK_VAR([VARNISHAPI_VMODDIR], [${vcacheapi}], [vmoddir])
+	PKG_CHECK_VAR([VCACHEAPI_PREFIX], [${vcacheapi}], [prefix])
+	PKG_CHECK_VAR([VCACHEAPI_DATAROOTDIR], [${vcacheapi}], [datarootdir])
+	PKG_CHECK_VAR([VCACHEAPI_LIBDIR], [${vcacheapi}], [libdir])
+	PKG_CHECK_VAR([VCACHEAPI_BINDIR], [${vcacheapi}], [bindir])
+	PKG_CHECK_VAR([VCACHEAPI_SBINDIR], [${vcacheapi}], [sbindir])
+	PKG_CHECK_VAR([VCACHEAPI_VCLDIR], [${vcacheapi}], [vcldir])
+	PKG_CHECK_VAR([VCACHEAPI_VMODDIR], [${vcacheapi}], [vmoddir])
 
 	PKG_CHECK_VAR([VMODTOOL], [${vcacheapi}], [vmodtool])
 	PKG_CHECK_VAR([VSCTOOL], [${vcacheapi}], [vsctool])
 
-	AC_SUBST([VARNISH_LIBRARY_PATH],
-		[$VARNISHAPI_LIBDIR])
+	AC_SUBST([VCACHE_LIBRARY_PATH],
+		[$VCACHEAPI_LIBDIR])
 
-	AC_SUBST([VARNISH_TEST_PATH],
-		[$VARNISHAPI_SBINDIR:$VARNISHAPI_BINDIR:$PATH])
+	AC_SUBST([VCACHE_TEST_PATH],
+		[$VCACHEAPI_SBINDIR:$VCACHEAPI_BINDIR:$PATH])
 
 	dnl Inherit Varnish's prefix if undefined
 	dnl Also the libdir for multi-lib systems
 	if test "$prefix" = NONE
 	then
-		ac_default_prefix=$VARNISHAPI_PREFIX
-		libdir=$VARNISHAPI_LIBDIR
+		ac_default_prefix=$VCACHEAPI_PREFIX
+		libdir=$VCACHEAPI_LIBDIR
 	fi
 
 	dnl Define the VCL directory for automake
@@ -151,6 +171,8 @@ varnish_pkg_config() {
 
 	dnl Define the VCL directory for this package
 	AC_SUBST([pkgvcldir], [\${vcldir}/\${PACKAGE}])
+
+	_VARNISH_ALIAS
 }
 ])
 
@@ -161,7 +183,7 @@ AC_DEFUN([_VCACHE_CHECK_DEVEL], [
 	AC_REQUIRE([_VCACHE_PKG_CONFIG])
 
 	[_orig_cppflags=$CPPFLAGS]
-	[CPPFLAGS=$VARNISHAPI_CFLAGS]
+	[CPPFLAGS=$VCACHEAPI_CFLAGS]
 
 	AC_CHECK_HEADERS([vsha256.h cache/cache.h], [],
 		[AC_MSG_ERROR([Missing Varnish development files.])])
@@ -214,10 +236,10 @@ AC_DEFUN([_VCACHE_VMOD_CONFIG], [
 	])
 
 	dnl Expose the location of the std and directors VMODs
-	AC_SUBST([VARNISHAPI_VMODDIR])
+	AC_SUBST([VCACHEAPI_VMODDIR])
 
 	dnl Expose Varnish's aclocal directory to automake
-	AC_SUBST([VARNISHAPI_DATAROOTDIR])
+	AC_SUBST([VCACHEAPI_DATAROOTDIR])
 
 	dnl Define the VMOD directory for libtool
 	vmoddir=$($PKG_CONFIG --define-variable=libdir=$libdir \
@@ -235,7 +257,7 @@ AC_DEFUN([_VCACHE_VMOD_CONFIG], [
 	AC_SUBST([AM_V_VMODTOOL])
 
 	dnl Substitute an alias for compatibility reasons
-	AC_SUBST([VMOD_TEST_PATH], [$VARNISH_TEST_PATH])
+	AC_SUBST([VMOD_TEST_PATH], [$VCACHE_TEST_PATH])
 ])
 
 # _VCACHE_VMOD(NAME, MODE)
@@ -300,15 +322,15 @@ clean-vmod-$1:
 # to build the modules:
 #
 # - VMOD_LDFLAGS (the recommended flags to link VMODs)
-# - VMOD_TEST_PATH (an alias for VARNISH_TEST_PATH)
+# - VMOD_TEST_PATH (an alias for VCACHE_TEST_PATH)
 # - VMODTOOL (to generate a VMOD's interface)
 # - vmoddir (the install prefix for VMODs)
 # - vmod_*_vcldir (the install prefix for the VMODs VCL files)
 #
 # Configuring your VMOD build with libtool can be as simple as:
 #
-#     AM_CFLAGS = $(VARNISHAPI_CFLAGS)
-#     AM_LDFLAGS = $(VARNISHAPI_LIBS) $(VMOD_LDFLAGS)
+#     AM_CFLAGS = $(VCACHEAPI_CFLAGS)
+#     AM_LDFLAGS = $(VCACHEAPI_LIBS) $(VMOD_LDFLAGS)
 #
 #     vmod_LTLIBRARIES = libvmod_foo.la
 #
@@ -355,14 +377,14 @@ clean-vmod-$1:
 #
 # Two notable variables are exposed from Varnish's pkg-config:
 #
-# - VARNISHAPI_VMODDIR (locate vmod-std and vmod-directors in your tests)
-# - VARNISHAPI_DATAROOTDIR (for when aclocal is called from a Makefile)
+# - VCACHEAPI_VMODDIR (locate vmod-std and vmod-directors in your tests)
+# - VCACHEAPI_DATAROOTDIR (for when aclocal is called from a Makefile)
 #
 # For example in your root Makefile.am:
 #
-#     ACLOCAL_AMFLAGS = -I m4 -I ${VARNISHAPI_DATAROOTDIR}/aclocal
+#     ACLOCAL_AMFLAGS = -I m4 -I ${VCACHEAPI_DATAROOTDIR}/aclocal
 #
-# The VARNISH_VERSION variable will be set even if the VCACHE_PREREQ macro
+# The VCACHE_VERSION variable will be set even if the VCACHE_PREREQ macro
 # wasn't called. Although many things are set up to facilitate out-of-tree
 # VMOD maintenance, initialization of autoconf, automake and libtool is
 # still the maintainer's responsibility. It cannot be avoided.
@@ -372,8 +394,8 @@ clean-vmod-$1:
 # is a minimal setup:
 #
 #     AM_TESTS_ENVIRONMENT = \
-#         PATH="$(VARNISH_TEST_PATH):$(PATH)" \
-#         LD_LIBRARY_PATH="$(VARNISH_LIBRARY_PATH)"
+#         PATH="$(VCACHE_TEST_PATH):$(PATH)" \
+#         LD_LIBRARY_PATH="$(VCACHE_LIBRARY_PATH)"
 #     TEST_EXTENSIONS = .vtc
 #     VTC_LOG_COMPILER = varnishtest -v
 #     AM_VTC_LOG_FLAGS = -Dvmod_foo="$(VMOD_FOO)" -Dvmod_bar="$(VMOD_BAR)"
@@ -675,10 +697,10 @@ AC_DEFUN([VCACHE_UTILITIES], [
 # Since: Varnish 4.1.4
 #
 # Since Varnish 5.1.0:
-# - VARNISH_TEST_PATH added
-# - VARNISH_LIBRARY_PATH added
-# - VARNISHAPI_LIBDIR added
-# - VARNISHAPI_VCLDIR added
+# - VCACHE_TEST_PATH added
+# - VCACHE_LIBRARY_PATH added
+# - VCACHEAPI_LIBDIR added
+# - VCACHEAPI_VCLDIR added
 # - vcldir added
 # - pkgvcldir added
 #
@@ -692,22 +714,22 @@ AC_DEFUN([VCACHE_UTILITIES], [
 # Once the requirements are met, the following variables can be used in
 # Makefiles:
 #
-# - VARNISH_TEST_PATH (for the test suite environment)
-# - VARNISH_LIBRARY_PATH (for both public and private libraries)
-# - VARNISH_VERSION (also available in autoconf)
+# - VCACHE_TEST_PATH (for the test suite environment)
+# - VCACHE_LIBRARY_PATH (for both public and private libraries)
+# - VCACHE_VERSION (also available in autoconf)
 #
 # The following variables are available in autoconf, read from the varnish
 # pkg-config:
 #
-# - VARNISHAPI_CFLAGS
-# - VARNISHAPI_LIBS
-# - VARNISHAPI_PREFIX
-# - VARNISHAPI_DATAROOTDIR
-# - VARNISHAPI_LIBDIR
-# - VARNISHAPI_BINDIR
-# - VARNISHAPI_SBINDIR
-# - VARNISHAPI_VCLDIR
-# - VARNISHAPI_VMODDIR
+# - VCACHEAPI_CFLAGS
+# - VCACHEAPI_LIBS
+# - VCACHEAPI_PREFIX
+# - VCACHEAPI_DATAROOTDIR
+# - VCACHEAPI_LIBDIR
+# - VCACHEAPI_BINDIR
+# - VCACHEAPI_SBINDIR
+# - VCACHEAPI_VCLDIR
+# - VCACHEAPI_VMODDIR
 # - VMODTOOL
 # - VSCTOOL
 #
@@ -730,7 +752,7 @@ AU_DEFUN([VARNISH_PREREQ], [
 
 	varnish_pkg_config
 	AC_MSG_CHECKING([Varnish])
-	varnish_version_required ${VARNISH_VERSION} m4_join([ ], $@) ||
+	varnish_version_required ${VCACHE_VERSION} m4_join([ ], $@) ||
 		AC_MSG_ERROR([Varnish version not supported.])
 ], [Please migrate to VCACHE_REQUIRE])
 
