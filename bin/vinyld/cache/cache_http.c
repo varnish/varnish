@@ -954,7 +954,7 @@ http_GetHdrField(const struct http *hp, hdr_t hdr,
 ssize_t
 http_GetContentLength(struct http *hp)
 {
-	const txt *first = NULL;
+	txt first = { NULL, NULL };
 	ssize_t cl = -1;	// default no length
 	uint16_t u, v;
 	int need = 1;
@@ -1017,20 +1017,21 @@ http_GetContentLength(struct http *hp)
 			else if (l != cl) {
 				cl = -2;
 
-				AN(first);
+				AN(first.b);
 				VSLb(hp->vsl, SLT_HttpGarbage, "mismatch: %.*s",
 				    (int)pdiff(hp->hd[u].b, hp->hd[u].e), hp->hd[u].b);
 				VSLb(hp->vsl, SLT_HttpGarbage, "first   : %.*s",
-				    (int)pdiff(first->b, first->e), first->b);
+				    (int)pdiff(first.b, first.e), first.b);
 			}
 
 			// Return early if wrong and all headers kept
 			if (cl == -2 && v == u)
 				return (cl);
 
-			// track for logging
-			if (first == NULL)
-				first = &hp->hd[u];
+			// track for logging, by value because the
+			// compaction below can move this slot
+			if (first.b == NULL)
+				first = hp->hd[u];
 
 			// decide if to keep header
 			if (cl >= 0 && need && !noncanon) {
