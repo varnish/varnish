@@ -1,7 +1,9 @@
 # Copyright (c) 2016-2020 Varnish Software AS
+# Copyright 2026 UPLEX - Nils Goroll Systemoptimierung
 # All rights reserved.
 #
-# Author: Dridi Boukelmoune <dridi.boukelmoune@gmail.com>
+# Authors: Dridi Boukelmoune <dridi.boukelmoune@gmail.com>
+#	   Nils Goroll <nils.goroll@uplex.de>
 #
 # SPDX-License-Identifier: BSD-2-Clause
 #
@@ -31,18 +33,38 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # varnish.m4 - Macros to build against Varnish.         -*- Autoconf -*-
-# serial 12 (varnish-7.5.0)
+# serial 13 (varnish-9.1)
 #
 # This collection of macros helps create VMODs or tools interacting with
-# Varnish Cache using the GNU build system (autotools). In order to work
-# from a source checkout, recommended versions of autotools are 2.68 for
-# autoconf, 1.12 for automake and 2.2.6 for libtool. For pkg-config, at
+# Varnish using the GNU build system (autotools). In order to work
+# from a source checkout, recommended versions of autotools are 2.69 for
+# autoconf, 1.16.5 for automake and 2.4.7 for libtool. For pkg-config, at
 # least version 0.21 is required ; it should be available even on old
 # platforms. Only pkg-config is needed when building from a dist archive.
 #
 # Macros whose name start with an underscore are private and may change at
 # any time. Public macros starting with VCACHE_ are documented and will
-# maintain backwards compatibility with older versions of Varnish Cache.
+# maintain backwards compatibility with older versions of Varnish.
+#
+# As of 2026-09, we are adopting the cross-project VCACHE macro rename
+# introduced by Vinyl Cache 9.1 (see
+# https://vinyl-cache.org/organization/on_vinyl_cache_and_varnish_cache.html):
+# public macros and variables previously starting with VARNISH now start
+# with VCACHE, with aliases for all of them so existing consumers continue
+# to work unmodified (but we still recommend to use VCACHE, see below).
+#
+# This rename makes it easier for VMOD authors to provide compatibility with
+# Varnish and other Vinyl Cache based projects. The basic steps to enable
+# cross-project compatibility should be:
+#
+# - Use vcache instead of varnish in VTCs
+#
+# - Use vtest instead of varnishtest
+#
+# - Use VCACHE* instead of VARNISH* variables and macros in Makefiles and
+#   configure.ac
+#
+# - Use VCACHE_REQUIRE instead of VARNISH_PREREQ to declare supported versions
 
 # _VCACHE_CHECK_LIB(LIB, FUNC)
 # -----------------------------
@@ -384,12 +406,12 @@ clean-vmod-$1:
 #
 #     ACLOCAL_AMFLAGS = -I m4 -I ${VCACHEAPI_DATAROOTDIR}/aclocal
 #
-# The VCACHE_VERSION variable will be set even if the VCACHE_PREREQ macro
+# The VCACHE_VERSION variable will be set even if the VCACHE_REQUIRE macro
 # wasn't called. Although many things are set up to facilitate out-of-tree
 # VMOD maintenance, initialization of autoconf, automake and libtool is
 # still the maintainer's responsibility. It cannot be avoided.
 #
-# Once your VMOD is built, you can use varnishtest to run test cases. For
+# Once your VMOD is built, you can use vtest to run test cases. For
 # that you can rely on automake's default test driver, and all you need
 # is a minimal setup:
 #
@@ -397,7 +419,7 @@ clean-vmod-$1:
 #         PATH="$(VCACHE_TEST_PATH):$(PATH)" \
 #         LD_LIBRARY_PATH="$(VCACHE_LIBRARY_PATH)"
 #     TEST_EXTENSIONS = .vtc
-#     VTC_LOG_COMPILER = varnishtest -v
+#     VTC_LOG_COMPILER = vtest -v
 #     AM_VTC_LOG_FLAGS = -Dvmod_foo="$(VMOD_FOO)" -Dvmod_bar="$(VMOD_BAR)"
 #
 # Setting up the different paths is mostly relevant when you aren't building
@@ -409,7 +431,7 @@ clean-vmod-$1:
 # VMOD was built in the same directory as the test runner. With the example
 # above you could import VMODs this way in a test case:
 #
-#     varnish v1 -vcl+backend {
+#     vcache v1 -vcl+backend {
 #         import std;
 #         import ${vmod_bar};
 #
@@ -694,25 +716,62 @@ AC_DEFUN([VCACHE_UTILITIES], [
 
 # VARNISH_PREREQ(MINIMUM-VERSION, [MAXIMUM-VERSION])
 # --------------------------------------------------
-# Since: Varnish 4.1.4
 #
-# Since Varnish 5.1.0:
-# - VCACHE_TEST_PATH added
-# - VCACHE_LIBRARY_PATH added
-# - VCACHEAPI_LIBDIR added
-# - VCACHEAPI_VCLDIR added
-# - vcldir added
-# - pkgvcldir added
+# Deprecated. Use VCACHE_REQUIRE
+AU_DEFUN([VARNISH_PREREQ], [
+	AC_REQUIRE([_VCACHE_PKG_CONFIG])
+	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
+
+	varnish_pkg_config
+	AC_MSG_CHECKING([Varnish])
+	varnish_version_required ${VCACHE_VERSION} m4_join([ ], $@) ||
+		AC_MSG_ERROR([Varnish version not supported.])
+], [Please migrate to VCACHE_REQUIRE])
+
+AC_DEFUN([VCACHE_REQUIRE1], [
+	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
+	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "$1[]api" ; then
+		AC_MSG_CHECKING([$1])
+		have=$($PKG_CONFIG --modversion "$1[]api" 2>/dev/null)
+		if test "x$have" = "x" ; then
+			AC_MSG_RESULT([not found])
+			if test "x$vcacheapi" != "x" ; then
+				vcacheapi="_"
+			fi
+		elif varnish_version_required ${have} m4_map_args_sep([m4_normalize(], [)], [ ], m4_shift($@)) ; then
+			vcacheapi="$1[]api"
+		elif test "x$vcacheapi" != "x" ; then
+			# varnish_version_required has output AC_MSG_RESULT
+			vcacheapi="_"
+		fi
+	fi
+])
+
+# VCACHE_REQUIRE(DEF1, [DEF2, [DEF3, ...]])
+# ------------------------------------------
+# Since: Varnish 9.1
 #
-# Since Varnish 5.2.0:
-# - VSCTOOL added
+# DEFn: [PROJECT, MINIMUM-VERSION, [MAXIMUM-VERSION]]
 #
-# Verify that the version of Varnish Cache found by pkg-config is at least
-# MINIMUM-VERSION. If MAXIMUM-VERSION is specified, verify that the version
-# is strictly below MAXIMUM-VERSION.
+# For example, if a VMOD prefers Varnish with a version of 9.0.0 or greater,
+# but also supports Foo Cache with a version between 1.0.0 and 2.0.0 (inclusive),
+# it can use this in configure.ac:
 #
-# Once the requirements are met, the following variables can be used in
-# Makefiles:
+# VCACHE_REQUIRE(
+#         [[varnish], [9.0.0]],
+#         [[foo], [1.0.0], [2.0.0]],
+# )
+#
+# Users can override the preference with --with-vcache. For example, if both varnish
+# and foo are installed, but the user prefers foo, they can use --with-vcache=foo.
+#
+# Users can also override to build against a vcache flavor which is not declared
+# by the vmod by using --with-vcache=iknowbetter (iknowbetter obivously being the
+# name of the flavor, which has iknowbetterapi.pc installed).
+#
+# If no --with-vcache argument is given, the first supported flavor is used.
+#
+# The following variables can be used in Makefiles:
 #
 # - VCACHE_TEST_PATH (for the test suite environment)
 # - VCACHE_LIBRARY_PATH (for both public and private libraries)
@@ -746,15 +805,6 @@ AC_DEFUN([VCACHE_UTILITIES], [
 # This provides a namespace facility for installed VCL files needing including
 # other VCL files, which can be overridden if the package name is not desired.
 #
-AU_DEFUN([VARNISH_PREREQ], [
-	AC_REQUIRE([_VCACHE_PKG_CONFIG])
-	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
-
-	varnish_pkg_config
-	AC_MSG_CHECKING([Varnish])
-	varnish_version_required ${VCACHE_VERSION} m4_join([ ], $@) ||
-		AC_MSG_ERROR([Varnish version not supported.])
-], [Please migrate to VCACHE_REQUIRE])
 
 AC_DEFUN([VCACHE_REQUIRE1], [
 	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
