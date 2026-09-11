@@ -93,9 +93,15 @@ varnish_version_required() {
 
 # _VARNISH_PKG_CONFIG
 # --------------------
+#
+# generate the varnish_pkg_config function, which needs to be called explicitly
 AC_DEFUN([_VARNISH_PKG_CONFIG], [
 	PKG_PROG_PKG_CONFIG([0.21])
-
+varnish_pkg_config() {
+	# run only once
+	if test "x$vcldir" != "x" ; then
+		return
+	fi
 	PKG_CHECK_MODULES([VARNISHAPI], [varnishapi])
 	AC_SUBST([VARNISH_VERSION], [$($PKG_CONFIG --modversion varnishapi)])
 
@@ -131,6 +137,7 @@ AC_DEFUN([_VARNISH_PKG_CONFIG], [
 
 	dnl Define the VCL directory for this package
 	AC_SUBST([pkgvcldir], [\${vcldir}/\${PACKAGE}])
+}
 ])
 
 # _VARNISH_CHECK_DEVEL
@@ -185,6 +192,8 @@ AC_DEFUN([_VARNISH_VMOD_CONFIG], [
 
 	AC_REQUIRE([AC_PROG_CPP])
 	AC_REQUIRE([AC_PROG_CPP_WERROR])
+
+	varnish_pkg_config
 
 	AS_IF([test -z "$RST2MAN"], [
 		AC_MSG_ERROR([rst2man is needed to build VMOD manuals.])
@@ -434,6 +443,8 @@ AC_DEFUN([_VARNISH_VSC_CONFIG], [
 	AC_REQUIRE([_VARNISH_PKG_CONFIG])
 	AC_REQUIRE([_VARNISH_CHECK_DEVEL])
 	AC_REQUIRE([_VARNISH_CHECK_PYTHON])
+
+	varnish_pkg_config
 
 	dnl Define an automake silent execution for vmodtool
 	[am__v_VSCTOOL_0='@echo "  VSCTOOL " $''@;']
@@ -702,6 +713,8 @@ AC_DEFUN([VARNISH_UTILITIES], [
 AC_DEFUN([VARNISH_PREREQ], [
 	AC_REQUIRE([_VARNISH_PKG_CONFIG])
 	AC_REQUIRE([_VARNISH_VERSION_REQUIRED])
+
+	varnish_pkg_config
 	AC_MSG_CHECKING([Varnish])
 	varnish_version_required ${VARNISH_VERSION} m4_join([ ], $@) ||
 		AC_MSG_ERROR([Varnish version not supported.])
