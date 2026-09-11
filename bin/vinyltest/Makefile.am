@@ -27,13 +27,9 @@ vtest: varnishtest
 install-exec-hook:
 	ln -f $(DESTDIR)$(bindir)/varnishtest$(EXEEXT) \
 	   $(DESTDIR)$(bindir)/vtest$(EXEEXT)
-	ln -sf libvtest_ext_varnish.so \
-	   $(DESTDIR)$(libdir)/libvtest_ext_vcache.so
 
 uninstall-hook:
-	rm -f \
-	    $(DESTDIR)$(bindir)/vtest$(EXEEXT)	\
-	    $(DESTDIR)$(libdir)/libvtest_ext_vcache.so
+	rm -f $(DESTDIR)$(bindir)/vtest$(EXEEXT)
 
 varnishspecific_src = \
 		vtest2/src/vtc_logexp.c \

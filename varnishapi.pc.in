@@ -14,6 +14,7 @@ vcldir=${pkgdatadir}/vcl
 vmoddir=${libdir}/@PACKAGE@/vmods
 vmodtool=${pkgdatadir}/vmodtool.py
 vsctool=${pkgdatadir}/vsctool.py
+vtestext=${libdir}/libvtest_ext_varnish.so
 
 Name: VarnishAPI
 Description: Varnish API
