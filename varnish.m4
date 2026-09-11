@@ -41,12 +41,12 @@
 # platforms. Only pkg-config is needed when building from a dist archive.
 #
 # Macros whose name start with an underscore are private and may change at
-# any time. Public macros starting with VARNISH_ are documented and will
+# any time. Public macros starting with VCACHE_ are documented and will
 # maintain backwards compatibility with older versions of Varnish Cache.
 
-# _VARNISH_CHECK_LIB(LIB, FUNC)
+# _VCACHE_CHECK_LIB(LIB, FUNC)
 # -----------------------------
-AC_DEFUN([_VARNISH_CHECK_LIB], [
+AC_DEFUN([_VCACHE_CHECK_LIB], [
 	save_LIBS="${LIBS}"
 	LIBS=""
 	AC_CHECK_LIB([$1], [$2])
@@ -54,9 +54,9 @@ AC_DEFUN([_VARNISH_CHECK_LIB], [
 	LIBS="${save_LIBS}"
 ])
 
-# _VARNISH_SEARCH_LIBS(VAR, FUNC, LIBS)
+# _VCACHE_SEARCH_LIBS(VAR, FUNC, LIBS)
 # -------------------------------------
-AC_DEFUN([_VARNISH_SEARCH_LIBS], [
+AC_DEFUN([_VCACHE_SEARCH_LIBS], [
 	save_LIBS="${LIBS}"
 	LIBS=""
 	AC_SEARCH_LIBS([$2], [$3])
@@ -64,7 +64,7 @@ AC_DEFUN([_VARNISH_SEARCH_LIBS], [
 	LIBS="${save_LIBS}"
 ])
 
-# _VARNISH_VERSION_REQUIRED
+# _VCACHE_VERSION_REQUIRED
 # -----------------------
 # Generate the shell function varnish_version_required
 #
@@ -73,7 +73,7 @@ AC_DEFUN([_VARNISH_SEARCH_LIBS], [
 # Return 0 if requirements satisfied
 #
 # AC_MSG_CHECKING should have been called prior to calling the shell function
-AC_DEFUN([_VARNISH_VERSION_REQUIRED], [
+AC_DEFUN([_VCACHE_VERSION_REQUIRED], [
 varnish_version_required() {
 	AS_VERSION_COMPARE($[]1, $[]2, [
 		AC_MSG_RESULT([$[]1 lower than minimum version $[]2])
@@ -91,11 +91,11 @@ varnish_version_required() {
 }
 ])
 
-# _VARNISH_PKG_CONFIG
+# _VCACHE_PKG_CONFIG
 # --------------------
 #
 # generate the varnish_pkg_config function, which needs to be called explicitly
-AC_DEFUN([_VARNISH_PKG_CONFIG], [
+AC_DEFUN([_VCACHE_PKG_CONFIG], [
 
 	# the following macros expand outside the shell function, because they
 	# do need to run always, just once and outside the function
@@ -154,11 +154,11 @@ varnish_pkg_config() {
 }
 ])
 
-# _VARNISH_CHECK_DEVEL
+# _VCACHE_CHECK_DEVEL
 # --------------------
-AC_DEFUN([_VARNISH_CHECK_DEVEL], [
+AC_DEFUN([_VCACHE_CHECK_DEVEL], [
 
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
+	AC_REQUIRE([_VCACHE_PKG_CONFIG])
 
 	[_orig_cppflags=$CPPFLAGS]
 	[CPPFLAGS=$VARNISHAPI_CFLAGS]
@@ -169,9 +169,9 @@ AC_DEFUN([_VARNISH_CHECK_DEVEL], [
 	[CPPFLAGS=$_orig_cppflags]
 ])
 
-# _VARNISH_CHECK_PYTHON
+# _VCACHE_CHECK_PYTHON
 # ---------------------
-AC_DEFUN([_VARNISH_CHECK_PYTHON], [
+AC_DEFUN([_VCACHE_CHECK_PYTHON], [
 	m4_define_default([_AM_PYTHON_INTERPRETER_LIST],
 		[python3 python3.10 python3.9 python3.8 python3.7 python3.6 dnl
 		python3.5 python3.4 python])
@@ -181,28 +181,28 @@ AC_DEFUN([_VARNISH_CHECK_PYTHON], [
 
 ])
 
-# _VARNISH_VMOD_LDFLAGS
+# _VCACHE_VMOD_LDFLAGS
 # ---------------------
-AC_DEFUN([_VARNISH_VMOD_LDFLAGS], [
+AC_DEFUN([_VCACHE_VMOD_LDFLAGS], [
 
 	AC_SUBST([VMOD_LDFLAGS],
 		"-module -export-dynamic -avoid-version -shared")
 
 ])
 
-# _VARNISH_VMOD_CONFIG
+# _VCACHE_VMOD_CONFIG
 # --------------------
-AC_DEFUN([_VARNISH_VMOD_CONFIG], [
+AC_DEFUN([_VCACHE_VMOD_CONFIG], [
 	dnl Check the VMOD toolchain
 	AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 	AC_REQUIRE([AC_LANG_C])
 	AC_REQUIRE([AC_PROG_CC])
 	AC_REQUIRE([AC_PROG_CC_C99])
 
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
-	AC_REQUIRE([_VARNISH_CHECK_DEVEL])
-	AC_REQUIRE([_VARNISH_CHECK_PYTHON])
-	AC_REQUIRE([_VARNISH_VMOD_LDFLAGS])
+	AC_REQUIRE([_VCACHE_PKG_CONFIG])
+	AC_REQUIRE([_VCACHE_CHECK_DEVEL])
+	AC_REQUIRE([_VCACHE_CHECK_PYTHON])
+	AC_REQUIRE([_VCACHE_VMOD_LDFLAGS])
 
 	AC_REQUIRE([AC_PROG_CPP])
 	AC_REQUIRE([AC_PROG_CPP_WERROR])
@@ -238,11 +238,11 @@ AC_DEFUN([_VARNISH_VMOD_CONFIG], [
 	AC_SUBST([VMOD_TEST_PATH], [$VARNISH_TEST_PATH])
 ])
 
-# _VARNISH_VMOD(NAME, MODE)
+# _VCACHE_VMOD(NAME, MODE)
 # -------------------------
-AC_DEFUN([_VARNISH_VMOD], [
+AC_DEFUN([_VCACHE_VMOD], [
 
-	AC_REQUIRE([_VARNISH_VMOD_CONFIG])
+	AC_REQUIRE([_VCACHE_VMOD_CONFIG])
 
 	VMOD_FILE="\$(abs_builddir)/.libs/libvmod_$1.so"
 	AC_SUBST(m4_toupper(VMOD_$1_FILE), [$VMOD_FILE])
@@ -288,7 +288,7 @@ clean-vmod-$1:
 	m4_popdef([VCC_SRC])dnl
 ])
 
-# VARNISH_VMODS(NAMES)
+# VCACHE_VMODS(NAMES)
 # --------------------
 # Since: Varnish 4.1.4
 #
@@ -320,7 +320,7 @@ clean-vmod-$1:
 #
 # For example, if you define the following in configure.ac:
 #
-#     VARNISH_VMODS([foo bar])
+#     VCACHE_VMODS([foo bar])
 #
 # Two build rules will be available for use in Makefile.am for vmod-foo
 # and vmod-bar:
@@ -362,7 +362,7 @@ clean-vmod-$1:
 #
 #     ACLOCAL_AMFLAGS = -I m4 -I ${VARNISHAPI_DATAROOTDIR}/aclocal
 #
-# The VARNISH_VERSION variable will be set even if the VARNISH_PREREQ macro
+# The VARNISH_VERSION variable will be set even if the VCACHE_PREREQ macro
 # wasn't called. Although many things are set up to facilitate out-of-tree
 # VMOD maintenance, initialization of autoconf, automake and libtool is
 # still the maintainer's responsibility. It cannot be avoided.
@@ -424,39 +424,39 @@ clean-vmod-$1:
 #
 # Now, you can focus on writing this VMOD of yours.
 #
-AC_DEFUN([VARNISH_VMODS], [
+AC_DEFUN([VCACHE_VMODS], [
 	m4_foreach([_vmod_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_VMOD(_vmod_name, [static])])
+		[_VCACHE_VMOD(_vmod_name, [static])])
 ])
 
-# VARNISH_VMODS_GENERATED(NAMES)
+# VCACHE_VMODS_GENERATED(NAMES)
 # ------------------------------
 # Since: Varnish 6.5.0
 #
 # Varnish 6.5 adds the possibility to transparently work with a generated VCC
 # file. The VCC file would then be created in the build directory, which is
-# incompatible with how the VARNISH_VMODS macro operates.
+# incompatible with how the VCACHE_VMODS macro operates.
 #
 # If that VCC file only needs to be generated once and is distributed, builds
 # from the dist archive will have the VCC file in the source directory.
 #
 # With Varnish's ability to run VMODTOOL in a VPATH build both scenarios are
-# taken care of. This macro works otherwise exactly like VARNISH_VMODS.
+# taken care of. This macro works otherwise exactly like VCACHE_VMODS.
 #
-AC_DEFUN([VARNISH_VMODS_GENERATED], [
+AC_DEFUN([VCACHE_VMODS_GENERATED], [
 	m4_foreach([_vmod_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_VMOD(_vmod_name, [generated])])
+		[_VCACHE_VMOD(_vmod_name, [generated])])
 ])
 
-# _VARNISH_VSC_CONFIG
+# _VCACHE_VSC_CONFIG
 # --------------------
-AC_DEFUN([_VARNISH_VSC_CONFIG], [
+AC_DEFUN([_VCACHE_VSC_CONFIG], [
 
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
-	AC_REQUIRE([_VARNISH_CHECK_DEVEL])
-	AC_REQUIRE([_VARNISH_CHECK_PYTHON])
+	AC_REQUIRE([_VCACHE_PKG_CONFIG])
+	AC_REQUIRE([_VCACHE_CHECK_DEVEL])
+	AC_REQUIRE([_VCACHE_CHECK_PYTHON])
 
 	varnish_pkg_config
 
@@ -471,11 +471,11 @@ AC_DEFUN([_VARNISH_VSC_CONFIG], [
 	AC_SUBST([AM_V_VSCTOOL])
 ])
 
-# _VARNISH_COUNTER(NAME)
+# _VCACHE_COUNTER(NAME)
 # ----------------------
-AC_DEFUN([_VARNISH_COUNTER], [
+AC_DEFUN([_VCACHE_COUNTER], [
 
-	AC_REQUIRE([_VARNISH_VSC_CONFIG])
+	AC_REQUIRE([_VCACHE_VSC_CONFIG])
 
 	VSC_RULES="
 
@@ -501,7 +501,7 @@ clean-vsc-$1:
 	AM_SUBST_NOTMAKE(m4_toupper(BUILD_VSC_$1))
 ])
 
-# VARNISH_COUNTERS(NAMES)
+# VCACHE_COUNTERS(NAMES)
 # -----------------------
 # Since: Varnish 6.0.0
 #
@@ -510,7 +510,7 @@ clean-vsc-$1:
 # to declare sets of counters, but does not associate them automatically
 # with their respective VMODs:
 #
-#     VARNISH_COUNTERS([foo bar])
+#     VCACHE_COUNTERS([foo bar])
 #
 # Two build rules will be available for use in Makefile.am for the counters
 # foo and bar:
@@ -547,15 +547,15 @@ clean-vsc-$1:
 #
 # That should be all you need to do to start implementing custom counters.
 #
-AC_DEFUN([VARNISH_COUNTERS], [
+AC_DEFUN([VCACHE_COUNTERS], [
 	m4_foreach([_vsc_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_COUNTER(_vsc_name)])
+		[_VCACHE_COUNTER(_vsc_name)])
 ])
 
-# _VARNISH_UTILITY(NAME)
+# _VCACHE_UTILITY(NAME)
 # ----------------------
-AC_DEFUN([_VARNISH_UTILITY], [
+AC_DEFUN([_VCACHE_UTILITY], [
 
 	VUT_RULES="
 
@@ -581,7 +581,7 @@ clean-vut-$1:
 
 ])
 
-# VARNISH_UTILITIES(NAMES)
+# VCACHE_UTILITIES(NAMES)
 # ------------------------
 # Since: Varnish 5.2.0
 #
@@ -596,7 +596,7 @@ clean-vut-$1:
 #
 # For example, if you define the following in configure.ac:
 #
-#     VARNISH_UTILITIES([foo bar])
+#     VCACHE_UTILITIES([foo bar])
 #
 # Two build rules will be available for use in Makefile.am for the programs
 # foo and bar:
@@ -664,10 +664,10 @@ clean-vut-$1:
 # when the source directory is different from the build directory. It is the
 # maintainer's responsibility to build the actual manuals.
 #
-AC_DEFUN([VARNISH_UTILITIES], [
+AC_DEFUN([VCACHE_UTILITIES], [
 	m4_foreach([_vut_name],
 		m4_split(m4_normalize([$1])),
-		[_VARNISH_UTILITY(_vut_name)])
+		[_VCACHE_UTILITY(_vut_name)])
 ])
 
 # VARNISH_PREREQ(MINIMUM-VERSION, [MAXIMUM-VERSION])
@@ -724,18 +724,18 @@ AC_DEFUN([VARNISH_UTILITIES], [
 # This provides a namespace facility for installed VCL files needing including
 # other VCL files, which can be overridden if the package name is not desired.
 #
-AC_DEFUN([VARNISH_PREREQ], [
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
-	AC_REQUIRE([_VARNISH_VERSION_REQUIRED])
+AU_DEFUN([VARNISH_PREREQ], [
+	AC_REQUIRE([_VCACHE_PKG_CONFIG])
+	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
 
 	varnish_pkg_config
 	AC_MSG_CHECKING([Varnish])
 	varnish_version_required ${VARNISH_VERSION} m4_join([ ], $@) ||
 		AC_MSG_ERROR([Varnish version not supported.])
-])
+], [Please migrate to VCACHE_REQUIRE])
 
 AC_DEFUN([VCACHE_REQUIRE1], [
-	AC_REQUIRE([_VARNISH_VERSION_REQUIRED])
+	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
 	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "$1[]api" ; then
 		AC_MSG_CHECKING([$1])
 		have=$($PKG_CONFIG --modversion "$1[]api" 2>/dev/null)
@@ -754,7 +754,7 @@ AC_DEFUN([VCACHE_REQUIRE1], [
 ])
 
 AC_DEFUN([VCACHE_REQUIRE], [
-	AC_REQUIRE([_VARNISH_PKG_CONFIG])
+	AC_REQUIRE([_VCACHE_PKG_CONFIG])
 
 	m4_map([VCACHE_REQUIRE1], [$@])
 	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "_" ; then
@@ -769,3 +769,9 @@ AC_DEFUN([VCACHE_REQUIRE], [
 	# checked. This is deliberate to keep the user in control
 	varnish_pkg_config
 ])
+
+# backwards compatibility & deprecation notices for renamed macros
+AU_ALIAS([VARNISH_VMODS], [VCACHE_VMODS])
+AU_ALIAS([VARNISH_VMODS_GENERATED], [VCACHE_VMODS_GENERATED])
+AU_ALIAS([VARNISH_COUNTERS], [VCACHE_COUNTERS])
+AU_ALIAS([VARNISH_UTILITIES], [VCACHE_UTILITIES])
