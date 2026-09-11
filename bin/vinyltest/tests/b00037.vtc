@@ -245,15 +245,40 @@ client c3 {
 	expect resp.status == 400
 } -run
 
+# first is non canonical and deleted, so the slot it occupied is taken
+# over by the header after it
+logexpect l1017 -v v1 -q "vxid == 1017" {
+	fail add *	End
+	expect * 1017	Timestamp	{^Req}
+	expect 0 =	ReqUnset	{^Content-Length: 012$}
+	expect 0 =	HttpGarbage	{^mismatch: Content-Length: 13$}
+	expect 0 =	HttpGarbage	{^first   : Content-Length: 012$}
+	expect 0 =	BogoHeader	{^Invalid Content-Length$}
+	expect 2 =	RespStatus	{^400$}
+	expect 0 =	RespReason	{^Bad Request$}
+	fail clear
+} -start
+
+client c3 {
+	txreq -req POST \
+		-hdr "Content-Length: 012" \
+		-hdr "fill: a" \
+		-hdr "Content-Length: 13" \
+		-bodylen 12
+	rxresp
+	expect resp.status == 400
+} -run
+
 logexpect l1013 -wait
 logexpect l1015 -wait
+logexpect l1017 -wait
 
 ############################################################
 ## zero and multiple
 
-logexpect l1017 -v v1 -q "vxid == 1017" {
+logexpect l1019 -v v1 -q "vxid == 1019" {
 	fail add *	End
-	expect * 1017	Timestamp	{^Req:}
+	expect * 1019	Timestamp	{^Req:}
 	expect 2 =	ReqMethod	{^POST$}
 	expect 0 =	ReqURL		{^/$}
 	expect 0 =	ReqProtocol	{^HTTP/1.1$}
@@ -275,9 +300,9 @@ client c4 {
 	expect resp.http.cl == 0
 } -run
 
-logexpect l1019 -v v1 -q "vxid == 1019" {
+logexpect l1021 -v v1 -q "vxid == 1021" {
 	fail add *	End
-	expect * 1019	Timestamp	{^Req:}
+	expect * 1021	Timestamp	{^Req:}
 	expect 0 =	ReqUnset	{^Content-Length: 00$}
 	expect 2 =	ReqMethod	{^POST$}
 	expect 0 =	ReqURL		{^/$}
@@ -301,9 +326,9 @@ client c4 {
 	expect resp.http.cl == 0
 } -run
 
-logexpect l1021 -v v1 -q "vxid == 1021" {
+logexpect l1023 -v v1 -q "vxid == 1023" {
 	fail add *	End
-	expect * 1021	Timestamp	{^Req:}
+	expect * 1023	Timestamp	{^Req:}
 	expect 0 =	ReqUnset	{^Content-Length: 00$}
 	expect 0 =	ReqUnset	{^Content-Length: 0,0$}
 	expect 0 =	ReqHeader	{^Content-Length: 0$}
@@ -329,12 +354,12 @@ client c4 {
 	expect resp.http.cl == 0
 } -run
 
-logexpect l1017 -wait
 logexpect l1019 -wait
 logexpect l1021 -wait
+logexpect l1023 -wait
 
 varnish v1 -vsl_catchup
-varnish v1 -expect client_req_400 == 6
+varnish v1 -expect client_req_400 == 7
 varnish v1 -expect sc_rx_bad == 1
 
 varnish v1 -cliok "param.set feature +http2"
@@ -348,7 +373,7 @@ client c5 {
 } -run
 
 varnish v1 -vsl_catchup
-varnish v1 -expect client_req_400 == 7
+varnish v1 -expect client_req_400 == 8
 
 # H2 with multiple content-length runs into thread-scheduling differences,
 # and is unnecessary, as we know the check works from H1 and that it
