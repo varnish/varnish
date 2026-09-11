@@ -96,25 +96,39 @@ varnish_version_required() {
 #
 # generate the varnish_pkg_config function, which needs to be called explicitly
 AC_DEFUN([_VARNISH_PKG_CONFIG], [
+
+	# the following macros expand outside the shell function, because they
+	# do need to run always, just once and outside the function
 	PKG_PROG_PKG_CONFIG([0.21])
+
+	AC_ARG_WITH([vcache],
+		AS_HELP_STRING(
+			[--with-vcache=<flavor>],
+			[project to build for (e.g. vinyl or varnish), will look for <flavor>api pkg-config module]),
+		[vcacheapi="${withval}api"],
+		[unset vcacheapi])
+
 varnish_pkg_config() {
 	# run only once
 	if test "x$vcldir" != "x" ; then
 		return
 	fi
-	PKG_CHECK_MODULES([VARNISHAPI], [varnishapi])
-	AC_SUBST([VARNISH_VERSION], [$($PKG_CONFIG --modversion varnishapi)])
+	if test "x$vcacheapi" = "x" ; then
+		vcacheapi="varnishapi"
+	fi
+	PKG_CHECK_MODULES([VARNISHAPI], [${vcacheapi}])
+	AC_SUBST([VARNISH_VERSION], [$($PKG_CONFIG --modversion ${vcacheapi})])
 
-	PKG_CHECK_VAR([VARNISHAPI_PREFIX], [varnishapi], [prefix])
-	PKG_CHECK_VAR([VARNISHAPI_DATAROOTDIR], [varnishapi], [datarootdir])
-	PKG_CHECK_VAR([VARNISHAPI_LIBDIR], [varnishapi], [libdir])
-	PKG_CHECK_VAR([VARNISHAPI_BINDIR], [varnishapi], [bindir])
-	PKG_CHECK_VAR([VARNISHAPI_SBINDIR], [varnishapi], [sbindir])
-	PKG_CHECK_VAR([VARNISHAPI_VCLDIR], [varnishapi], [vcldir])
-	PKG_CHECK_VAR([VARNISHAPI_VMODDIR], [varnishapi], [vmoddir])
+	PKG_CHECK_VAR([VARNISHAPI_PREFIX], [${vcacheapi}], [prefix])
+	PKG_CHECK_VAR([VARNISHAPI_DATAROOTDIR], [${vcacheapi}], [datarootdir])
+	PKG_CHECK_VAR([VARNISHAPI_LIBDIR], [${vcacheapi}], [libdir])
+	PKG_CHECK_VAR([VARNISHAPI_BINDIR], [${vcacheapi}], [bindir])
+	PKG_CHECK_VAR([VARNISHAPI_SBINDIR], [${vcacheapi}], [sbindir])
+	PKG_CHECK_VAR([VARNISHAPI_VCLDIR], [${vcacheapi}], [vcldir])
+	PKG_CHECK_VAR([VARNISHAPI_VMODDIR], [${vcacheapi}], [vmoddir])
 
-	PKG_CHECK_VAR([VMODTOOL], [varnishapi], [vmodtool])
-	PKG_CHECK_VAR([VSCTOOL], [varnishapi], [vsctool])
+	PKG_CHECK_VAR([VMODTOOL], [${vcacheapi}], [vmodtool])
+	PKG_CHECK_VAR([VSCTOOL], [${vcacheapi}], [vsctool])
 
 	AC_SUBST([VARNISH_LIBRARY_PATH],
 		[$VARNISHAPI_LIBDIR])
@@ -132,7 +146,7 @@ varnish_pkg_config() {
 
 	dnl Define the VCL directory for automake
 	vcldir=$($PKG_CONFIG --define-variable=datadir=$datadir \
-		--variable=vcldir varnishapi)
+		--variable=vcldir ${vcacheapi})
 	AC_SUBST([vcldir])
 
 	dnl Define the VCL directory for this package
