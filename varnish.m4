@@ -171,12 +171,15 @@ varnish_pkg_config() {
 
 	PKG_CHECK_VAR([VMODTOOL], [${vcacheapi}], [vmodtool])
 	PKG_CHECK_VAR([VSCTOOL], [${vcacheapi}], [vsctool])
+	PKG_CHECK_VAR([VTESTEXT], [${vcacheapi}], [vtestext])
 
 	AC_SUBST([VCACHE_LIBRARY_PATH],
 		[$VCACHEAPI_LIBDIR])
 
 	AC_SUBST([VCACHE_TEST_PATH],
 		[$VCACHEAPI_SBINDIR:$VCACHEAPI_BINDIR:$PATH])
+
+	AC_SUBST([VTESTEXT])
 
 	dnl Inherit Varnish's prefix if undefined
 	dnl Also the libdir for multi-lib systems
@@ -419,7 +422,7 @@ clean-vmod-$1:
 #         PATH="$(VCACHE_TEST_PATH):$(PATH)" \
 #         LD_LIBRARY_PATH="$(VCACHE_LIBRARY_PATH)"
 #     TEST_EXTENSIONS = .vtc
-#     VTC_LOG_COMPILER = vtest -v
+#     VTC_LOG_COMPILER = vtest -v -E$(VTESTEXT)
 #     AM_VTC_LOG_FLAGS = -Dvmod_foo="$(VMOD_FOO)" -Dvmod_bar="$(VMOD_BAR)"
 #
 # Setting up the different paths is mostly relevant when you aren't building
@@ -791,6 +794,7 @@ AC_DEFUN([VCACHE_REQUIRE1], [
 # - VCACHEAPI_VMODDIR
 # - VMODTOOL
 # - VSCTOOL
+# - VTESTEXT: vtest should be called as vtest -E@VTESTEXT@
 #
 # In addition, two directories are set up for installation in automake:
 #
