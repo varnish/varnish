@@ -32,8 +32,8 @@ uninstall-hook:
 	rm -f $(DESTDIR)$(bindir)/vtest$(EXEEXT)
 
 varnishspecific_src = \
-		vtest2/src/vtc_logexp.c \
-		vtest2/src/vtc_vsm.c \
+		vtc_logexp.c \
+		vtc_vsm.c \
 		vtc_varnish.c
 
 varnishtest_SOURCES = \
