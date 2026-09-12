@@ -268,7 +268,7 @@ AC_DEFUN([_VCACHE_VMOD_CONFIG], [
 
 	dnl Define the VMOD directory for libtool
 	vmoddir=$($PKG_CONFIG --define-variable=libdir=$libdir \
-		--variable=vmoddir varnishapi)
+		--variable=vmoddir ${vcacheapi})
 	AC_SUBST([vmoddir])
 
 	dnl Define an automake silent execution for vmodtool
