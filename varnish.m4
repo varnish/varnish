@@ -247,14 +247,13 @@ AC_DEFUN([_VCACHE_VMOD_CONFIG], [
 	AC_REQUIRE([AC_PROG_CC_C99])
 
 	AC_REQUIRE([_VCACHE_PKG_CONFIG])
+	varnish_pkg_config
 	AC_REQUIRE([_VCACHE_CHECK_DEVEL])
 	AC_REQUIRE([_VCACHE_CHECK_PYTHON])
 	AC_REQUIRE([_VCACHE_VMOD_LDFLAGS])
 
 	AC_REQUIRE([AC_PROG_CPP])
 	AC_REQUIRE([AC_PROG_CPP_WERROR])
-
-	varnish_pkg_config
 
 	AS_IF([test -z "$RST2MAN"], [
 		AC_MSG_ERROR([rst2man is needed to build VMOD manuals.])
@@ -502,10 +501,9 @@ AC_DEFUN([VCACHE_VMODS_GENERATED], [
 AC_DEFUN([_VCACHE_VSC_CONFIG], [
 
 	AC_REQUIRE([_VCACHE_PKG_CONFIG])
+	varnish_pkg_config
 	AC_REQUIRE([_VCACHE_CHECK_DEVEL])
 	AC_REQUIRE([_VCACHE_CHECK_PYTHON])
-
-	varnish_pkg_config
 
 	dnl Define an automake silent execution for vmodtool
 	[am__v_VSCTOOL_0='@echo "  VSCTOOL " $''@;']
