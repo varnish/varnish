@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -x
+
+# rewrite _PREREQ into VCACHE_REQUIRE
+sed -i 's:^ *\(VARNISH\|VINYL\)_PREREQ(\(.*\)):VCACHE_REQUIRE([[varnish], \2], [[vinyl], \2]):' configure.ac
+# rename other _PREREQ uses, like m4_ifdef
+sed -i 's:\(VARNISH\|VINYL\)_PREREQ:VCACHE_REQUIRE:g' configure.ac
+# generic rename of variables / macros
+sed -i 's:\(VARNISH\|VINYL\)\(API\)\?_:VCACHE\2_:g' $(git grep -lE '(VARNISH|VINYL)(API)?_')
+# vtest in test cases
+sed -i 's:^\(varnish\|vinyl\)test:vtest:;s:^\(varnish\|vinyl\):vcache:;' $(find . -name \*.vtc)
+# vtest extensionn
+sed -i '/VTC_LOG_COMPILER/s:\(varnish\|vinyl\)test:vtest -E@VTESTEXT@:;' $(git grep -l VTC_LOG_COMPILER)
+# not really vcachizing, more 9.1izing, but helpful anyway
+sed -i 's:cache/cache_\(varnish\|vinyl\)d.h:cache/cache_int.h:' $(git grep -lE 'cache/cache_(varnish|vinyl)d.h')
+# pkg-config invocation
+sed -i 's:\(pkg-config --.* \)\(varnish\|vinyl\)api\([^;)]*\):\1vinylapi\3 || \1varnishapi\3:' \
+	$(git grep -l pkg-config)
