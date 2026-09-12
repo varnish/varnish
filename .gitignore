@@ -39,6 +39,7 @@ _*
 /missing
 /stamp-h1
 /varnishapi.pc
+/varnishapi-uninstalled.pc
 TAGS
 tags
 cscope.*out
