@@ -10,13 +10,40 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
 	-I$(top_builddir) \
-	-I$(top_srcdir)/lib/libvgz \
-	-I$(srcdir)/vtest2/lib \
-	-I$(srcdir)/vtest2/src
+	-I$(top_srcdir)/lib/libvgz
 
-bin_PROGRAMS =	varnishtest
+AM_CFLAGS = \
+	-DVTEST_WITH_VTC_LOGEXPECT \
+	-DVTEST_WITH_VTC_VARNISH \
+	-DVTEST_WITH_VTC_VSM \
+	-DTOP_BUILDDIR='"${top_builddir}"' \
+	${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
+
+# used in LDADD and LIBADD
+addlibs = \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
+	$(top_builddir)/lib/libvinyl/libvarnish.la \
+	$(top_builddir)/lib/libvgz/libvgz.la \
+	${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
+	${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
+
+varnishspecific_src = \
+	vtc_logexp.c \
+	vtc_vsm.c \
+	vtc_varnish.c
+
+EXTRA_DIST = \
+	$(top_srcdir)/bin/vinyltest/tests/*.vtc \
+	$(top_srcdir)/bin/vinyltest/tests/common.pem \
+	$(top_srcdir)/bin/vinyltest/tests/README \
+	test_assets/*.bin
 
 lib_LTLIBRARIES = libvtest_ext_varnish.la
+
+############################################################
+## varnishtest from submodule
+
+bin_PROGRAMS =	varnishtest
 
 # for -i invocation / a00000.vtc
 all-local: vtest
@@ -30,11 +57,6 @@ install-exec-hook:
 
 uninstall-hook:
 	rm -f $(DESTDIR)$(bindir)/vtest$(EXEEXT)
-
-varnishspecific_src = \
-		vtc_logexp.c \
-		vtc_vsm.c \
-		vtc_varnish.c
 
 varnishtest_SOURCES = \
 		vtest2/src/hpack.h \
@@ -77,45 +99,16 @@ varnishtest_SOURCES = \
 		vtest2/lib/vudp.c \
 		$(varnishspecific_src)
 
-varnishtest_LDADD = \
-		$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
-		$(top_builddir)/lib/libvinyl/libvarnish.la \
-		$(top_builddir)/lib/libvgz/libvgz.la \
-		${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
-		${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
+VTEST_CPPFLAGS = -I$(srcdir)/vtest2/src
 
-varnishtest_CFLAGS = \
-		-DVTEST_WITH_VTC_LOGEXPECT \
-		-DVTEST_WITH_VTC_VARNISH \
-		-DVTEST_WITH_VTC_VSM \
-		-DTOP_BUILDDIR='"${top_builddir}"' \
-		${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
+varnishtest_CPPFLAGS = $(AM_CPPFLAGS) \
+	-I$(srcdir)/vtest2/lib \
+	$(VTEST_CPPFLAGS)
+
+varnishtest_LDADD = ${addlibs}
 
 # would only be needed for vtest, but as both are the same atm...
 varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic
-
-libvtest_ext_varnish_la_SOURCES = \
-		vtest_ext_varnish.c \
-		$(varnishspecific_src)
-
-libvtest_ext_varnish_la_LIBADD = $(varnishtest_LDADD)
-
-libvtest_ext_varnish_la_CFLAGS = $(varnishtest_CFLAGS)
-
-EXTRA_DIST = \
-	tests/*.vtc \
-	tests/common.pem \
-	tests/README \
-	test_assets/*.bin \
-	vtest2/tests/*.vtc \
-	vtest2/src/gensequences \
-	vtest2/src/sequences \
-	vtest2/src/teken.3 \
-	vtest2/src/huffman_gen.py \
-	vtest2/src/tbl/tls_alert_tbl.h \
-	vtest2/src/tbl/tls_cmds_tbl.h \
-	vtest2/src/tbl/tls_proto_tbl.h \
-	vtest2/src/tbl/vhp_huffman.h
 
 teken.c: teken_state.h
 
@@ -130,6 +123,18 @@ vtc_h2_dectbl.h: $(srcdir)/vtest2/src/huffman_gen.py $(srcdir)/vtest2/src/tbl/vh
 	    $(srcdir)/vtest2/src/tbl/vhp_huffman.h > $@_
 	mv $@_ $@
 
+# this path is weird, but does seem to make sense to clean up until we remove
+# varnishtest from submodule
+EXTRA_DIST += $(srcdir)/vtest2/src/../tests/*.vtc \
+	vtest2/src/gensequences \
+	vtest2/src/sequences \
+	vtest2/src/teken.3 \
+	vtest2/src/huffman_gen.py \
+	vtest2/src/tbl/tls_alert_tbl.h \
+	vtest2/src/tbl/tls_cmds_tbl.h \
+	vtest2/src/tbl/tls_proto_tbl.h \
+	vtest2/src/tbl/vhp_huffman.h
+
 BUILT_SOURCES = \
 	teken_state.h \
 	vtc_h2_dectbl.h
@@ -137,6 +142,20 @@ BUILT_SOURCES = \
 CLEANFILES = \
 	$(BUILT_SOURCES)		\
 	vtest
+
+############################################################
+## libvtest_ext_varnish
+
+libvtest_ext_varnish_la_SOURCES = \
+		vtest_ext_varnish.c \
+		$(varnishspecific_src)
+
+libvtest_ext_varnish_la_CPPFLAGS = $(AM_CPPFLAGS) $(VTEST_CPPFLAGS)
+
+libvtest_ext_varnish_la_LIBADD = $(addlibs)
+
+############################################################
+## maintainer convenience
 
 .PHONY: flint flint-local
 
