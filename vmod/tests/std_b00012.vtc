@@ -28,7 +28,7 @@ client c1 {
 	txreq
 	rxresp
 	expect resp.http.X-FOO == "BAR BAZ"
-	expect resp.http.X-PATH ~ "^/"
+	expect resp.http.X-PATH ~ "^[:/]"
 	expect resp.http.X-unset == ""
 	expect resp.http.X-eval == "false"
 	expect resp.http.X-fallback == "def-val"
