@@ -45,4 +45,12 @@ register_varnish_top_cmds(void)
 	CMDS
 	#undef CMD_TOP
 	add_cmd("vcache", cmd_varnish, CMDS_F_NONE);
+
+	// XXX rename & remove from vtc_main when vtest transition is complete
+#ifdef PACKAGE_VERSION
+        extmacro_def("pkg_version", NULL, PACKAGE_VERSION);
+#endif
+#ifdef PACKAGE_BRANCH
+        extmacro_def("pkg_branch", NULL, PACKAGE_BRANCH);
+#endif
 }

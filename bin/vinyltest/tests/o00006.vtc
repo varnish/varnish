@@ -6,7 +6,8 @@ vtest "SES_Reserve_proto_priv() overflow"
 # on SunOS
 feature cmd "uname -s | grep -v SunOS"
 
-feature 64bit ipv4
+vcache_builtwith 64bit
+feature ipv4
 
 server s1 {
 	rxreq

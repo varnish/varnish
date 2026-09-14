@@ -1,6 +1,6 @@
 vtest "Test Basic persistence"
 
-feature persistent_storage
+vcache_builtwith persistent_storage
 
 process p1 -dump {
 	varnishd -spersistent -b ${localhost} -n${tmpdir}/v1 -a :0 -d 2>&1

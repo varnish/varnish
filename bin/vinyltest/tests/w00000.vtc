@@ -1,6 +1,6 @@
 vtest "Does anything get through at all ?"
 
-feature witness
+vcache_builtwith witness
 feature ipv4
 feature ipv6
 

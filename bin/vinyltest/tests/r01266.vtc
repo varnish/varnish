@@ -1,6 +1,6 @@
 vtest "#1266 - Check persisted truncated completed bans"
 
-feature persistent_storage
+vcache_builtwith persistent_storage
 
 # Test that bans which has been completed, truncated and persisted works
 

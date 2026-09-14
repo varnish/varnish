@@ -1,6 +1,6 @@
 vtest "Unformattable VCL_TIME"
 
-feature 64bit
+vcache_builtwith 64bit
 
 server s1 {
 	rxreq

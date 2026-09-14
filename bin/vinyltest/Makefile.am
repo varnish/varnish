@@ -30,7 +30,8 @@ addlibs = \
 varnishspecific_src = \
 	vtc_logexp.c \
 	vtc_vsm.c \
-	vtc_varnish.c
+	vtc_varnish.c \
+	vtest_ext_varnish_builtwith.c
 
 EXTRA_DIST = \
 	$(top_srcdir)/bin/vinyltest/tests/*.vtc \

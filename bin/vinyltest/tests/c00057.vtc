@@ -2,7 +2,7 @@ vtest	"test sigsegv handler"
 
 # Under ASAN, the stack layout is different and STACK OVERFLOW is
 # never printed.
-feature !asan
+vcache_builtwith !asan
 
 # On platforms with large pages (e.g. ppc64le with 64KB pages),
 # pthread stack allocation rounds up, giving more usable stack
