@@ -152,18 +152,27 @@
 
 #include "config.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <pthread.h>
+#include <signal.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "vapi/vsm.h"
 #include "vapi/vsl.h"
 
-#include "vtc.h"
+#include "vdef.h"
 
-#include "vtim.h"
+#include "vas.h"
+#include "miniobj.h"
+#include "vqueue.h"
 #include "vre.h"
+#include "vsb.h"
+#include "vtim.h"
+
+#include <vtest_api.h>
+#include "vtest_ext_varnish.h"
 
 #define LE_ANY   (-1)
 #define LE_LAST  (-2)

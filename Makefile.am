@@ -95,6 +95,7 @@ witness: witness.svg
 update:
 	git submodule sync
 	git submodule update --remote bin/vinyltest/vtest2
-	git commit -m 'Update vtest2' bin/vinyltest/vtest2 || true
+	(cd bin/vinyltest/vtest2 && git describe) >vtest.version
+	git commit -m 'Update vtest2' bin/vinyltest/vtest2 vtest.version || true
 
 .PHONY: cscope witness.dot update

@@ -45,20 +45,20 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "vdef.h"
-#include "vas.h"
-#include "miniobj.h"
+#include "vapi/vsig.h"
+#include "vapi/vsm.h"
 
+#include "vdef.h"
+
+#include "miniobj.h"
+#include "vas.h"
 #include "vav.h"
 #include "vin.h"
 #include "vlu.h"
+#include "vqueue.h"
 #include "vsb.h"
 #include "vsm_priv.h"
-#include "vqueue.h"
 #include "vtim.h"
-
-#include "vapi/vsig.h"
-#include "vapi/vsm.h"
 
 #ifndef MAP_HASSEMAPHORE
 #  define MAP_HASSEMAPHORE 0 /* XXX Linux */
