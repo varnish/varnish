@@ -28,6 +28,9 @@ AM_COND_IF([HAVE_VTEST], [], [
   AS_VERSION_COMPARE([$($VTEST -V 2>/dev/null)], [$(cat vtest.version)],
 	[AC_MSG_ERROR([vtest outdated, need at least $(cat vtest.version)])])
 
+  if test "x$VTEST_CPPFLAGS" = "x"; then
+    VTEST_CPPFLAGS="${VTEST_CFLAGS}"
+  fi
   # support vtest install at generic prefix without pkg-config
   if test "x$VTEST_CPPFLAGS" = "x"; then
     VTEST_CPPFLAGS="-I$(dirname $(which $VTEST))/../include"
