@@ -6,13 +6,42 @@ Copyright 2026 The Varnish Cache Project])
 AC_REVISION([$Id$])
 AC_INIT([Varnish], [trunk], [opensource@varnish-software.com], [varnish])
 AC_CONFIG_SRCDIR(include/miniobj.h)
-if ! test -f "${srcdir}/bin/vinyltest/vtest2/src/vtc_main.c" ; then
-  AC_MSG_ERROR([vtest2 seems to be missing, use "git clone --recursive" or "git submodule update --init"])
-fi
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_USE_SYSTEM_EXTENSIONS
+
+m4_ifndef([PKG_PROG_PKG_CONFIG], [m4_fatal([pkg.m4 missing, please install pkg-config])])
+PKG_PROG_PKG_CONFIG
+
+AM_CONDITIONAL([HAVE_VTEST],
+  [test -f "${srcdir}/bin/vinyltest/vtest2/src/vtc_main.c"])
+AM_COND_IF([HAVE_VTEST], [], [
+  AC_ARG_VAR([VTEST], [The vtest program from VTest2])
+  # : argument: don't fail
+  PKG_CHECK_MODULES([VTEST], [vtest], [], [:])
+  AC_CHECK_PROGS([VTEST], [vtest], [no])
+  if test "x$VTEST" = "xno"; then
+    AC_MSG_ERROR([vtest is required. Set VTEST, or add it to PATH])
+  fi
+  AS_VERSION_COMPARE([$($VTEST -V 2>/dev/null)], [$(cat vtest.version)],
+	[AC_MSG_ERROR([vtest outdated, need at least $(cat vtest.version)])])
+
+  # support vtest install at generic prefix without pkg-config
+  if test "x$VTEST_CPPFLAGS" = "x"; then
+    VTEST_CPPFLAGS="-I$(dirname $(which $VTEST))/../include"
+  fi
+
+  # we only run the "can include" test (- argument), because of vtest_api req'd
+  # include
+  save_CPPFLAGS="${CPPFLAGS}"
+  CPPFLAGS="${CPPFLAGS} ${VTEST_CPPFLAGS}"
+  AC_CHECK_HEADERS([vtest_api.h], [],
+    [AC_MSG_ERROR([vtest_api.h not found with $VTEST_CPPFLAGS"])], [-])
+  CPPFLAGS="${save_CPPFLAGS}"
+  AC_SUBST([VTEST_CPPFLAGS])
+  ])
 
 PACKAGE_BRANCH=${PACKAGE_VERSION%.*}
 AC_SUBST([PACKAGE_BRANCH])
@@ -118,9 +147,6 @@ AC_CHECK_HEADERS([stdatomic.h])
 # XXX: This _may_ be for OS/X
 LT_LIB_M
 AC_SUBST(LIBM)
-
-m4_ifndef([PKG_PROG_PKG_CONFIG], [m4_fatal([pkg.m4 missing, please install pkg-config])])
-PKG_PROG_PKG_CONFIG
 
 # OpenSSL/libcrypto for vtest2 TLS support
 PKG_CHECK_MODULES([OPENSSL], [libssl])
@@ -908,7 +934,9 @@ AC_DEFINE_UNQUOTED([VCC_CC],"$VCC_CC",[C compiler command line for VCL code])
 AC_DEFINE_UNQUOTED([VCC_WARN],"$VCC_WARN",[C compiler warnings for VCL code])
 
 # Stupid automake needs this
-VTC_TESTS="$(cd $srcdir/bin/vinyltest && echo vtest2/tests/*.vtc tests/*.vtc)"
+AM_COND_IF([HAVE_VTEST],
+	[VTC_TESTS="$(cd $srcdir/bin/vinyltest && echo vtest2/tests/*.vtc tests/*.vtc)"],
+	[VTC_TESTS="$(cd $srcdir/bin/vinyltest && echo tests/*.vtc)"])
 AC_SUBST(VTC_TESTS)
 AM_SUBST_NOTMAKE(VTC_TESTS)
 

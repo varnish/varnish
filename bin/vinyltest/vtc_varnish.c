@@ -38,23 +38,34 @@
 #include <fcntl.h>
 #include <fnmatch.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <poll.h>
+#include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "vtc.h"
-
 #include "vapi/vsc.h"
 #include "vapi/vsl.h"
 #include "vapi/vsm.h"
+
+#include "vdef.h"
+#include "vqueue.h"
+
+#include "miniobj.h"
+#include "vas.h"
 #include "vcli.h"
 #include "vjsn.h"
 #include "vre.h"
+#include "vsb.h"
 #include "vsub.h"
 #include "vtcp.h"
 #include "vtim.h"
+
+#include <vtest_api.h>
+#include "vtest_ext_varnish.h"
 
 struct varnish {
 	unsigned		magic;

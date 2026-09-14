@@ -40,10 +40,11 @@ EXTRA_DIST = \
 
 lib_LTLIBRARIES = libvtest_ext_varnish.la
 
+bin_PROGRAMS =	varnishtest
+
+if HAVE_VTEST
 ############################################################
 ## varnishtest from submodule
-
-bin_PROGRAMS =	varnishtest
 
 # for -i invocation / a00000.vtc
 all-local: vtest
@@ -58,7 +59,7 @@ install-exec-hook:
 uninstall-hook:
 	rm -f $(DESTDIR)$(bindir)/vtest$(EXEEXT)
 
-varnishtest_SOURCES = \
+nodist_varnishtest_SOURCES = \
 		vtest2/src/hpack.h \
 		vtest2/src/cmds.h \
 		vtest2/src/vtc.h \
@@ -99,11 +100,13 @@ varnishtest_SOURCES = \
 		vtest2/lib/vudp.c \
 		$(varnishspecific_src)
 
-VTEST_CPPFLAGS = -I$(srcdir)/vtest2/src
+VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src
 
 varnishtest_CPPFLAGS = $(AM_CPPFLAGS) \
 	-I$(srcdir)/vtest2/lib \
 	$(VTEST_CPPFLAGS)
+
+varnishtest_CFLAGS = $(AM_CFLAGS)
 
 varnishtest_LDADD = ${addlibs}
 
@@ -143,16 +146,42 @@ CLEANFILES = \
 	$(BUILT_SOURCES)		\
 	vtest
 
+else !HAVE_VTEST
+############################################################
+## external vtest - varnishtest wrapper
+
+# libdummy is to get the libtool wrapper for in-tree LD_LIBRARY_PATH setting
+lib_LTLIBRARIES += libdummy.la
+
+libdummy_la_SOURCES = libdummy.c
+
+nodist_varnishtest_SOURCES = varnishtest.c
+varnishtest_LDADD = libdummy.la
+varnishtest_CPPFLAGS = $(AM_CPPFLAGS) $(VTEST_CPPFLAGS)
+varnishtest_CFLAGS = $(AM_CFLAGS) -DLIBDIR=\"${libdir}\"
+
+endif !HAVE_VTEST
+
 ############################################################
 ## libvtest_ext_varnish
 
 libvtest_ext_varnish_la_SOURCES = \
 		vtest_ext_varnish.c \
+		vtest_ext_varnish.h \
 		$(varnishspecific_src)
 
 libvtest_ext_varnish_la_CPPFLAGS = $(AM_CPPFLAGS) $(VTEST_CPPFLAGS)
 
 libvtest_ext_varnish_la_LIBADD = $(addlibs)
+
+############################################################
+## automake
+##
+## automake (rightfully) includes all sources by default, but for the vtest
+## migration, we really only want it to include what it has
+
+EXTRA_DIST += $(nodist_varnishtest_SOURCES)
+
 
 ############################################################
 ## maintainer convenience

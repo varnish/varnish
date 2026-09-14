@@ -28,21 +28,11 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
+#define CMDS \
+	CMD_TOP(logexpect) \
+	CMD_TOP(varnish) \
+	CMD_TOP(vsm)
 
-#include <pthread.h>
-#include <signal.h>
-
-#include "vdef.h"
-#include "vtest_api.h"
-#include "vtest_ext_varnish.h"
-
-static __attribute__((constructor)) void
-register_varnish_top_cmds(void)
-{
-	#define CMD_TOP(x) \
-	add_cmd(#x, cmd_##x, CMDS_F_NONE);
-	CMDS
-	#undef CMD_TOP
-	add_cmd("vcache", cmd_varnish, CMDS_F_NONE);
-}
+#define CMD_TOP(x) cmd_f cmd_##x;
+CMDS
+#undef CMD_TOP

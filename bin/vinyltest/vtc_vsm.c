@@ -32,14 +32,23 @@
 
 #include "config.h"
 
+#include <signal.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 #include "vapi/vsm.h"
 
-#include "vtc.h"
+#include "vdef.h"
+
+#include "miniobj.h"
+#include "vas.h"
 #include "vav.h"
+#include "vqueue.h"
+#include "vsb.h"
+
+#include <vtest_api.h>
+#include "vtest_ext_varnish.h"
 
 struct vtc_vsm {
 	unsigned			magic;
