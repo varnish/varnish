@@ -1,6 +1,6 @@
 vtest "Test priv_task"
 
-feature !sanitizer
+vcache_builtwith !sanitizer
 
 server s1 {
 	rxreq

@@ -1,6 +1,6 @@
 vtest "Ban list sync across silos"
 
-feature persistent_storage
+vcache_builtwith persistent_storage
 
 shell "rm -f ${tmpdir}/_.per[12]"
 

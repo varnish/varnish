@@ -1,6 +1,6 @@
 vtest "Check expiry of non-instantiated object"
 
-feature persistent_storage
+vcache_builtwith persistent_storage
 
 shell "rm -f ${tmpdir}/_.per"
 

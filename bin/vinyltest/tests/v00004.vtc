@@ -1,8 +1,8 @@
 vtest "test if our default parameters make sense ..."
 
-feature 64bit
-feature !sanitizer
-feature !coverage
+vcache_builtwith 64bit
+vcache_builtwith !sanitizer
+vcache_builtwith !coverage
 
 # ... for our definition of a standard use case:
 # - 2019 header madness

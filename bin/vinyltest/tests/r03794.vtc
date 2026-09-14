@@ -1,8 +1,5 @@
 vtest "Append configurable Via header"
 
-# XXX TEMP broken, will be fixed in next commit
-feature cmd false
-
 server s1 {
 	rxreq
 	expect req.http.via == \

@@ -1,6 +1,6 @@
 vtest "Does anything get through Unix domain sockets at all ?"
 
-feature witness
+vcache_builtwith witness
 
 server s1 -listen "${tmpdir}/s1.sock" {
 	rxreq

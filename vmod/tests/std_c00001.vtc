@@ -1,7 +1,7 @@
 vtest "Test std.rollback"
 
 # ws_emu triggers #3550
-feature !workspace_emulator
+vcache_builtwith !workspace_emulator
 
 # bug regressions:
 # - #3009

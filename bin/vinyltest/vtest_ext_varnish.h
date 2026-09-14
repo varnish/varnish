@@ -31,7 +31,8 @@
 #define CMDS \
 	CMD_TOP(logexpect) \
 	CMD_TOP(varnish) \
-	CMD_TOP(vsm)
+	CMD_TOP(vsm) \
+	CMD_TOP(vcache_builtwith)
 
 #define CMD_TOP(x) cmd_f cmd_##x;
 CMDS

@@ -1,6 +1,6 @@
 vtest "Check timeout_linger"
 
-feature !workspace_emulator
+vcache_builtwith !workspace_emulator
 
 # XXX this test exploits the fact that the struct waited is
 # left near the free pointer of the session ws when a session

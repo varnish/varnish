@@ -1,6 +1,6 @@
 vtest "Test bans_req counter on persistent reload - #1225"
 
-feature persistent_storage
+vcache_builtwith persistent_storage
 
 shell "rm -f ${tmpdir}/_.per"
 

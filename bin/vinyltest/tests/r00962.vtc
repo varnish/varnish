@@ -1,6 +1,6 @@
 vtest "Test address remapping"
 
-feature persistent_storage
+vcache_builtwith persistent_storage
 
 # VM-remapping is too random on OSX
 feature cmd {test $(uname) != "Darwin"}
