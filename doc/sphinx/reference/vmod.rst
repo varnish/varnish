@@ -1067,3 +1067,336 @@ On MacOS::
           awk '/^[0-9a-f]/ {for(i=2;i<=NF;i++) printf "%s",$i}' |
           xxd -r -p | strings
         18e27f081788b5e5d44c480f6d9749c07d53ddb9
+
+.. _ref-vmod-vcache:
+
+Supporting multiple VCache based projects
+==========================================
+
+.. _`Vinyl Cache rename`: https://vinyl-cache.org/organization/on_vinyl_cache_and_varnish_cache.html
+.. _`#4537`: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/issues/4537
+.. _`vcacheize`: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/src/branch/main/contrib/vcacheize
+.. _`example-vmod`: https://github.com/varnish/varnish-modules
+.. _`autotools`: https://en.wikipedia.org/wiki/GNU_Autotools
+.. _`vtest`: https://code.vinyl-cache.org/vtest/VTest2
+
+Since the `Vinyl Cache rename`_, at least two projects exist which are (as
+of September 2026) largely compatible, and both provide the same VMOD API. So
+it should be possible for VMODs to support multiple VCache based projects
+(VCache flavors) with little effort. See `#4537`_ for details.
+
+If you adapted your VMOD to a specific VCache flavor using up to date macros,
+and want it to stay that way, you should not need to do anything. If, however,
+you want to make your VMOD compatible with multiple flavors, this guide is for
+you.
+
+Overview
+--------
+
+As of Vinyl Cache 9.1, an effort was made across VCache flavors to add such
+support for building VMODs against multiple VCache flavors, with the following
+goals:
+
+* VMOD authors remain in control over VCache flavors and versions they support
+
+* Parallel installations of VCache flavors remain possible
+
+The result is an overhaul of the build macros in ``varnish.m4`` (adopted from
+Vinyl Cache's own ``vinyl.m4``, which downstream projects are invited to adopt
+into their ``<flavor>.m4`` by simply replacing all instances of ``vinyl`` (in
+all case variations) with their project name; in fact, for this "unification
+effort" to be successful, it is important that downstream projects *do* adopt
+these changes, otherwise this effort becomes a one way street).
+
+In ``varnish.m4``, all public macros and variables previously beginning with
+``VARNISH`` now start with ``VCACHE``. Some variables remain unchanged, like
+``vcldir`` and ``pkgvcldir``.
+
+Great care has been taken to not break existing builds by providing aliases
+for the renamed macros.
+
+Quick start
+-----------
+
+The `vcacheize`_ script from this project's ``contrib`` directory should have
+been installed with Varnish. This is a very simple search/replace script to
+act on a git based VMOD's top level directory.
+
+If your VMOD is using reasonably up-to-date `autotools`_ tooling, this script
+should more or less do the right thing to adapt it to the ``VCACHE`` macros.
+However, in all its simplicity it is not infallible, and it is not meant to be.
+So use it under competent supervision.
+
+After a successful migration, the only thing left for the VMOD author to do is
+to appropriately adjust the ``VCACHE_REQUIRE()`` macro in ``configure.ac`` with
+the supported VCache flavors and their respective minimum and optionally maximum
+supported versions.
+
+An example
+----------
+
+So, as an example, let's try it out on a hypothetical `example-vmod`_ before it
+potentially got converted::
+
+        $ git describe
+        example-vmod-0.18.0-52-g9f784d4
+
+We have Acme Cache installed, from before it adopted the ``VCACHE`` macros, but
+no Varnish.
+
+If we try to build `example-vmod`_, it fails early, as expected::
+
+        $ ./bootstrap
+        Package varnishapi was not found in the pkg-config search path.
+        Perhaps you should add the directory containing `varnishapi.pc'
+        to the PKG_CONFIG_PATH environment variable
+
+So let's be hopeful and run `vcacheize`::
+
+	$ vcacheize
+	+ sed -i s:^ *\(VARNISH\|ACME\)_PREREQ(\(.*\)):VCACHE_REQUIRE([[varnish], \2], [[acme], \2]): configure.ac
+	+ sed -i s:\(VARNISH\|ACME\)_PREREQ:VCACHE_REQUIRE:g configure.ac
+	+ git grep -lE (VARNISH|ACME)(API)?_
+	+ sed -i s:\(VARNISH\|ACME\)\(API\)\?_:VCACHE\2_:g Makefile.am configure.ac src/Makefile.am src/foreign/hash/hash_slinger.h
+	+ find . -name *.vtc
+	+ sed -i s:^\(varnish\|acme\)test:vtest:;s:^\(varnish\|acme\):vcache:; ./src/tests/xkey/test01.vtc ./src/tests/vsthrottle/test01.vtc ./src/tests/saintmode/test01.vtc ./src/tests/bodyaccess/test01.vtc ./src/tests/str/test01.vtc ./src/tests/var/test01.vtc ./src/tests/accept/test01.vtc ./src/tests/header/import.vtc ./src/tests/tcp/01-dumpinfo.vtc
+	+ git grep -l VTC_LOG_COMPILER
+	+ sed -i /VTC_LOG_COMPILER/s:\(varnish\|acme\)test:vtest -E@VTESTEXT@:; src/Makefile.am
+	+ git grep -lE cache/cache_(varnish|acme)d.h
+	+ sed -i s:cache/cache_\(varnish\|acme\)d.h:cache/cache_int.h: configure.ac src/vmod_bodyaccess.c src/vmod_xkey.c
+	+ git grep -l pkg-config
+	+ sed -i s:\(pkg-config --.* \)\(varnish\|acme\)api\([^;)]*\):\1acmeapi\3 || \1varnishapi\3: bootstrap
+
+... and the usual build steps (output abbreviated)::
+
+	$ ./bootstrap && ./configure && make -j check && make install && echo OKOK
+	...
+	checking varnish... not found
+	checking acme... ok
+	checking for acmeapi... yes
+	...
+	checking for vsha256.h... yes
+	checking for cache/cache.h... yes
+	...
+	  VMODTOOL vcc_accept_if.c
+	  VMODTOOL vcc_bodyaccess_if.c
+	  VMODTOOL vcc_str_if.c
+	  VMODTOOL vcc_header_if.c
+	  VMODTOOL vcc_tcp_if.c
+	  VMODTOOL vcc_saintmode_if.c
+	  VMODTOOL vcc_var_if.c
+	  VMODTOOL vcc_vsthrottle_if.c
+	  VMODTOOL vcc_xkey_if.c
+	  VSCTOOL  VSC_xkey.c
+	  VSCTOOL  VSC_xkey.h
+	  VSCTOOL  VSC_xkey.rst
+	...
+	PASS: tests/header/import.vtc
+	PASS: tests/str/test01.vtc
+	PASS: tests/header/append_overflow.vtc
+	...
+	PASS: tests/vsthrottle/test06.vtc
+	============================================================================
+	Testsuite summary for example-vmod 0.28.0
+	============================================================================
+	# TOTAL: 59
+	# PASS:  59
+	# SKIP:  0
+	# XFAIL: 0
+	# FAIL:  0
+	# XPASS: 0
+	# ERROR: 0
+	...
+	OKOK
+
+So, great, the conversion just worked out of the box. All that's left to do now
+is review the changes, commit them if all is fine, and continue to maintain
+``VCACHE_REQUIRE`` in ``configure.ac``.
+
+If you want to or need to understand the details, or if something went wrong,
+please read the next paragraph.
+
+Details
+-------
+
+We will go through the required changes in the order of things happening for a
+common build. If you have trouble, we recommend you go through these steps one
+by one and check them.
+
+Make sure you are up-to-date before vcacheizing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before you attempt to convert, we recommend that your build mechanics are up to
+date and do not use the macros ``VARNISH_VMOD_INCLUDES``, ``VARNISH_VMOD_DIR``,
+``VARNISH_VMODTOOL`` or ``VARNISH_PKG_GET_VAR`` from an old ``varnish-legacy.m4``.
+
+We highly recommend looking at the build infrastructure created by the `Varnish
+Cache Development Kit`_. As of September 2026, it has not been adapted, but a
+VMOD compiling with the infrastructure from the kit on Varnish 9.0 or Vinyl
+Cache 9.0 (with renamed macros and variables) is a great starting point for the
+VCache conversion.
+
+Bootstrapping: Discover ``m4`` macros via ``pkg-config``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VMODs usually provide some form of ``bootstrap`` script (also sometimes called
+``autogen.sh`` or similar), which, confusingly, might also invoke ``configure``
+or not.
+
+At any rate, the main function of this script is to initially discover the
+directory where ``m4`` macros are installed for your VCache flavor, and it
+usually does this through ``pkg-config``, which itself might need to be hinted
+at the right place to find *its* ``.pc`` config file by setting ``PKG_CONFIG_PATH``.
+
+The important part of the script is a line like this::
+
+        aclocal -I m4 -I ${dataroot}/aclocal
+
+where ``dataroot`` is usually coming from a line like::
+
+        dataroot=$(pkg-config --variable=datarootdir varnishapi 2>/dev/null)
+
+So, for obvious reasons, because we reference ``varnishapi`` here, this is one
+of the places we need to change to support multiple VCache flavors, and,
+unfortunately, there seems to exist no practical way to discover them in a
+single line, so we need to name them. The `vcacheize`_ script should replace
+the above with (line break added)::
+
+        dataroot=$(pkg-config --variable=datarootdir varnishapi 2>/dev/null ||
+                   pkg-config --variable=datarootdir vinylapi 2>/dev/null)
+
+Now, a valid concern might be: *"But if it checks several projects, won't it
+find an arbitrary .m4?"*. Yes. This is exactly the reason why all downstream
+projects should converge on the same common macros in their variant of
+``varnish.m4``: ``autoconf`` discovers ``m4`` files by the macros they define, so
+it is not a problem for multiple files to provide the same macros, but it would
+be a problem for them to differ.
+
+Checking build requirements and create Makefiles: ``configure.ac``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``autoconf`` and ``automake`` create the ``configure`` script and Makefiles from
+``configure.ac``, basically by expanding ``m4`` macros, of which we provide
+those required for Varnish in ``varnish.m4`` (this is highly simplified).
+
+All of the macros and variables for use in ``configure.ac`` have simply been
+renamed from ``VARNISH*`` to ``VCACHE*``, except for ``VARNISH_PREREQ``, which
+is now obsolete and replaced by ``VCACHE_REQUIRE``. It has the following
+arguments (taken from ``varnish.m4``)::
+
+	# VCACHE_REQUIRE(DEF1, [DEF2, [DEF3, ...]])
+	# ------------------------------------------
+	# Since: Varnish 9.1
+	#
+	# DEFn: [PROJECT, MINIMUM-VERSION, [MAXIMUM-VERSION]]
+	#
+	# For example, if a VMOD prefers Varnish with a version of 9.0.0 or greater,
+	# but also supports Foo Cache with a version between 1.0.0 and 2.0.0 (inclusive),
+	# it can use this in configure.ac:
+	#
+	# VCACHE_REQUIRE(
+	#         [[varnish], [9.0.0]],
+	#         [[foo], [1.0.0], [2.0.0]],
+	# )
+
+To clarify, the order given is the order of precedence.
+
+So, to migrate, replace ``VARNISH_PREREQ`` with ``VCACHE_REQUIRE``, using the
+new syntax and rename macros and variables from ``VARNISH`` to ``VCACHE``.
+
+Invoking ``configure``
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. all em-dashes in this paragraph are human-made
+
+This does not directly relate to the migration, but ``configure`` now gained a
+``--with-vcache=<flavor>`` argument, as, for example ``--with-vcache=varnish``.
+This can be used to build a vacheized VMOD for a specific flavor if multiple are
+installed, or to build a VMOD for a flavor not supported by the
+``VCACHE_REQUIRE`` definition in ``configure.ac`` -- in which case, obviously,
+there is no promise by the VMOD author for the build to work.
+
+Makefiles
+~~~~~~~~~
+
+Makefiles should only need the variable rename to the ``VCACHE`` prefix.
+
+``cache/cache_int.h``
+~~~~~~~~~~~~~~~~~~~~~
+
+To avoid flavor names in file names, the file formally named ``cache_varnishd.h``
+or similar is now named ``cache_int.h``, so all occurrences should be adjusted.
+
+``vtest``
+~~~~~~~~~
+
+With the aforementioned changes, a build should succeed, but not necessarily the
+test cases. To also support VCache flavors for tests, we also changed
+substantially how we invoke and use ``vtest``.
+
+As of version 2.0, `vtest`_ itself no longer supports the commands ``vinyl``,
+``varnish``, ``logexpect`` or ``vsm``, and also no longer supports those
+``feature`` flags which apply to a build. All of this functionality has been
+moved into a VCache flavor extension, which, in the case of Varnish, is called
+``libvtest_ext_varnish.so``, to be loaded with the ``-E`` command line option.
+In the case of Varnish, this extension supports the commands ``varnish``,
+``vcache``, ``logexpect``, ``vsm`` and ``vcache_builtwith``. Downstream
+projects are invited to also implement an extension implementing ``vcache``,
+``logexpect``, ``vsm`` and ``vcache_builtwith`` to provide a unified vtest
+interface. They are expected to announce the path to their vtest extension via
+the ``pkg-config`` variable ``vtestext``.
+
+As of 9.1, Varnish can be built with either a bundled "legacy" ``varnishtest``,
+or using an externally installed ``vtest``, in which case it also provides a
+``varnishtest`` wrapper. So in both cases using ``varnishtest`` should continue
+to work.
+
+To transition to VCache builds, you should, however, migrate to use ``vtest``
+directly. This requires a change in how it is invoked and of which commands are
+used in test cases:
+
+* ``varnish.m4`` makes available to Makefiles the ``VTESTEXT`` variable,
+  discovered via ``pkg-config``. So the automake log compiler should be defined
+  like so::
+
+        src/Makefile.am:VTC_LOG_COMPILER = vtest -E@VTESTEXT@
+
+  (optionally followed by additional options)
+
+Test cases (``.vtc`` files) require the following changes:
+
+* The first line should start with ``vtest`` instead of ``varnishtest``
+
+* The ``varnish`` and ``vinyl`` commands should be replaced with ``vcache``
+
+And that's it for most (test)cases.
+
+``vtest``: What we did not vcacheify
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some test cases invoke ``varnishstat`` to check statistics. This should be
+avoided, not only to make VMODs portable, but also because this method can
+easily lead to the test case not doing what it is supposed to. Use ``vcache v<X>
+-expect`` instead to check certain counters appearing.
+
+Some test cases use ``varnishadm`` to issue CLI commands. ``vcache v<X> -cliok``
+should be used instead.
+
+For all remaining cases, where you *really* think that you need to invoke one of
+the tools, the failsafe option is to multiply the test case and guard each
+with::
+
+        feature vtest_cmd varnish
+
+or::
+
+        feature vtest_cmd vinyl
+
+Get help
+--------
+
+.. _`support options`: https://vinyl-cache.org/support/index.html
+
+If you need help, please use one of the `support options`_ or ask in `#4537`_.
+We want this effort to become a success, so please do not hesitate you got
+stuck. As always, we also welcome fixes and improvements.
