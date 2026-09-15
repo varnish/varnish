@@ -7,6 +7,7 @@ server s1 {
 	rxreq
 	expect req.http.content-length == 7
 	expect req.http.transfer-encoding == <undef>
+	expect req.body == request
 	txresp -noserver -hdr "Accept-ranges: bytes" -hdr "Content-Type: text/plain" -body response
 
 	rxreq
@@ -32,7 +33,7 @@ varnish v1 -cliok "param.set debug +syncvsl"
 
 logexpect l1 -v v1 -g raw {
 	expect	* 1001 ReqAcct	"160 7 167 78 16 94"
-	expect	* 1000 ReqAcct	"45 8 53 63 34 97"
+	expect	* 1000 ReqAcct	"45 8 53 72 38 110"
 } -start
 
 client c1 {
@@ -40,6 +41,9 @@ client c1 {
 		txping
 		rxping
 	} -run
+	stream 0 {
+		rxwinup
+	} -start
 	stream 1 {
 		txreq -req POST -hdr content-type text/plain -hdr content-length 7 -body request
 		# First, HTTP checks
@@ -56,6 +60,7 @@ client c2 {
 		barrier b2 sync
 		delay 1
 		barrier b3 sync
+		rxwinup
 	} -start
 	stream 1 {
 		txreq -url "/a" -req POST -nostrend
