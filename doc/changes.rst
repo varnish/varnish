@@ -41,6 +41,34 @@ Varnish-Cache 9.0.x (unreleased)
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
    (new to old)
 
+* A workspace buffer overflow vulnerability was fixed in the `.upper()` and
+  `.lower()` VCL string type methods. (VSV00020_)
+
+.. _VSV00020: https://vinyl-cache.org/security/VSV00020.html
+
+* HTTP/1 message framing checks have been tightened:
+
+  - Backend responses with invalid body framing now fail the fetch.
+
+  - Multiple ``Transfer-Encoding`` fields are now considered as a whole, such
+    that duplicate ``chunked`` codings are refused.
+
+  - Multiple ``Content-Length`` fields and values are now accepted if they all
+    agree (leading zeroes are tolerated) and consolidated into a single
+    canonical header, any disagreement is refused.
+
+  - ``Transfer-Encoding`` on an HTTP/1.0 request is now refused. For HTTP/1.0
+    backend responses, the new ``vcl_beresp_http10`` built-in subroutine
+    abandons the fetch, which VCL can override.
+
+  - The backend connection is now closed when the range check of a response
+    fails, to avoid reusing a connection with an unread body.
+
+* An existing, correct ``Connection`` response header is no longer overwritten
+  when closing: other tokens are preserved and ``close`` or ``keep-alive`` are
+  added as needed. If a ``Connection`` was not present, or was incorrect, we
+  create a new, correct one.
+
 ================================
 Varnish-Cache 9.0.3 (2026-05-18)
 ================================
