@@ -158,8 +158,8 @@ h2_init_sess(struct worker *wrk, struct sess *sp, struct h2_sess *h2s,
 	h2->expect_settings_next = 1;
 	VEFD_INIT(h2->efd);
 
-	h2->tx_window = h2->remote_settings.initial_window_size;
-	h2->rx_window = h2->local_settings.initial_window_size;
+	h2->tx_window = H2_proto_settings.initial_window_size;
+	h2->rx_window = H2_proto_settings.initial_window_size;
 
 	h2->t_win_low = 0.;
 
