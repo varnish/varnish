@@ -53,6 +53,9 @@ HTTP/1 message framing checks have been tightened:
   added as needed. If a ``Connection`` was not present, or was incorrect, we
   create a new, correct one.
 
+Changes to VCL
+==============
+
 Other changes to VCL
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -141,7 +144,7 @@ Changes for developers and VMOD authors
 =======================================
 
 VMOD builds
------------
+~~~~~~~~~~~
 
 We added infrastructure to easily build VMODs for multiple VCache based
 projects (Varnish, Vinyl Cache, and others). Besides changing how VMOD builds
