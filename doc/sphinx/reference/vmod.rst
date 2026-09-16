@@ -1130,7 +1130,7 @@ So use it under competent supervision.
 After a successful migration, the only thing left for the VMOD author to do is
 to appropriately adjust the ``VCACHE_REQUIRE()`` macro in ``configure.ac`` with
 the supported VCache flavors and their respective minimum and optionally maximum
-supported versions.
+(exlusive) supported versions.
 
 An example
 ----------
@@ -1288,11 +1288,11 @@ arguments (taken from ``varnish.m4``)::
 	# ------------------------------------------
 	# Since: Varnish 9.1
 	#
-	# DEFn: [PROJECT, MINIMUM-VERSION, [MAXIMUM-VERSION]]
+	# DEFn: [PROJECT, MINIMUM-VERSION, [BELOW-VERSION]]
 	#
 	# For example, if a VMOD prefers Varnish with a version of 9.0.0 or greater,
-	# but also supports Foo Cache with a version between 1.0.0 and 2.0.0 (inclusive),
-	# it can use this in configure.ac:
+	# but also supports Foo Cache with a version 1.x.y (so below 2.0.0), it can use
+	# this in configure.ac:
 	#
 	# VCACHE_REQUIRE(
 	#         [[varnish], [9.0.0]],
