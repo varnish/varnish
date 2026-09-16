@@ -66,6 +66,10 @@ The ``struct VCL_conf`` and ``struct VSC_main`` declarations have been removed
 from ``vrt.h``. ``struct vmod_data`` has moved to ``vmod_abi.h``. Neither of
 these should have been used by VMODs.
 
+The VDP API has been changed: After a non-zero return of ``.init()``,
+``.fini()`` is no longer called. This might require adjustments of ``.init()``
+to add cleanup for error returns.
+
 ``cache/cache_varnishd.h`` has been renamed to ``cache/cache_int.h``. You should
 avoid using it and try to stick to the API (``vrt.h`` and ``cache.h`` if
 needed).
