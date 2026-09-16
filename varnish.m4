@@ -725,7 +725,7 @@ AU_DEFUN([VARNISH_PREREQ], [
 
 	varnish_pkg_config
 	AC_MSG_CHECKING([Varnish])
-	varnish_version_required ${VCACHE_VERSION} m4_join([ ], $@) ||
+	varnish_version_required ${VCACHE_VERSION} m4_map_args_sep([m4_normalize(], [)], [ ], $@) ||
 		AC_MSG_ERROR([Varnish version not supported.])
 ], [Please migrate to VCACHE_REQUIRE])
 
