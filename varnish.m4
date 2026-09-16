@@ -102,11 +102,14 @@ varnish_version_required() {
 		return 1
 	])
 
-	test $[]# -gt 2 &&
-	AS_VERSION_COMPARE($[]3, $[]1, [
-		AC_MSG_RESULT([$[]1 higher than maximum version $[]3])
+	ok="x"
+	if test $[]# -gt 2 ; then
+		AS_VERSION_COMPARE($[]1, $[]3, [ok="yes"], [ok="no"], [ok="no"])
+	fi
+	if test "$ok" = "no" ; then
+		AC_MSG_RESULT([$[]1 is not lower than maximum version $[]3])
 		return 1
-	])
+	fi
 
 	AC_MSG_RESULT([ok])
 	return 0
@@ -715,7 +718,7 @@ AC_DEFUN([VCACHE_UTILITIES], [
 		[_VCACHE_UTILITY(_vut_name)])
 ])
 
-# VARNISH_PREREQ(MINIMUM-VERSION, [MAXIMUM-VERSION])
+# VARNISH_PREREQ(MINIMUM-VERSION, [BELOW-VERSION])
 # --------------------------------------------------
 #
 # Deprecated. Use VCACHE_REQUIRE
@@ -752,11 +755,11 @@ AC_DEFUN([VCACHE_REQUIRE1], [
 # ------------------------------------------
 # Since: Varnish 9.1
 #
-# DEFn: [PROJECT, MINIMUM-VERSION, [MAXIMUM-VERSION]]
+# DEFn: [PROJECT, MINIMUM-VERSION, [BELOW-VERSION]]
 #
 # For example, if a VMOD prefers Varnish with a version of 9.0.0 or greater,
-# but also supports Foo Cache with a version between 1.0.0 and 2.0.0 (inclusive),
-# it can use this in configure.ac:
+# but also supports Foo Cache with a version 1.x.y (so below 2.0.0), it can use
+# this in configure.ac:
 #
 # VCACHE_REQUIRE(
 #         [[varnish], [9.0.0]],
