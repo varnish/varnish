@@ -35,7 +35,7 @@ individual releases. These documents are updated as part of the
 release process.
 
 ================================
-Varnish-Cache 9.0.x (unreleased)
+Varnish-Cache 9.0.4 (2026-09-16)
 ================================
 
 .. PLEASE keep this roughly in commit order as shown by git-log / tig
