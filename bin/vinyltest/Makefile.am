@@ -133,6 +133,7 @@ vtest2/version.h:
 # this path is weird, but does seem to make sense to clean up until we remove
 # varnishtest from submodule
 EXTRA_DIST += $(srcdir)/vtest2/src/../tests/*.vtc \
+	vtest2/Makefile \
 	vtest2/src/gensequences \
 	vtest2/src/sequences \
 	vtest2/src/teken.3 \
