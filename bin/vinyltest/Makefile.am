@@ -101,7 +101,7 @@ nodist_varnishtest_SOURCES = \
 		vtest2/lib/vudp.c \
 		$(varnishspecific_src)
 
-VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src
+VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src -I$(srcdir)/vtest2
 
 varnishtest_CPPFLAGS = $(AM_CPPFLAGS) \
 	-I$(srcdir)/vtest2/lib \
@@ -127,6 +127,9 @@ vtc_h2_dectbl.h: $(srcdir)/vtest2/src/huffman_gen.py $(srcdir)/vtest2/src/tbl/vh
 	    $(srcdir)/vtest2/src/tbl/vhp_huffman.h > $@_
 	mv $@_ $@
 
+vtest2/version.h:
+	(cd $(srcdir)/vtest2 && $(MAKE) version.h)
+
 # this path is weird, but does seem to make sense to clean up until we remove
 # varnishtest from submodule
 EXTRA_DIST += $(srcdir)/vtest2/src/../tests/*.vtc \
@@ -141,7 +144,8 @@ EXTRA_DIST += $(srcdir)/vtest2/src/../tests/*.vtc \
 
 BUILT_SOURCES = \
 	teken_state.h \
-	vtc_h2_dectbl.h
+	vtc_h2_dectbl.h \
+	vtest2/version.h
 
 CLEANFILES = \
 	$(BUILT_SOURCES)		\
@@ -187,7 +191,7 @@ EXTRA_DIST += $(nodist_varnishtest_SOURCES)
 ############################################################
 ## maintainer convenience
 
-.PHONY: flint flint-local
+.PHONY: flint flint-local vtest2/version.h
 
 flint-local:
 	$(SHELL) flint.sh
