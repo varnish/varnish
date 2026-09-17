@@ -124,16 +124,16 @@ AM_MISSING_PROG([DOT], [dot])
 AC_CHECK_PROGS([DOT], [dot])
 
 # Define VMOD flags
-_VARNISH_VMOD_LDFLAGS
+_VCACHE_VMOD_LDFLAGS
 
 # Check for python.
-_VARNISH_CHECK_PYTHON
+_VCACHE_CHECK_PYTHON
 
 # Check for libraries.
-_VARNISH_SEARCH_LIBS(pthread, pthread_create, [thr pthread c_r])
-_VARNISH_CHECK_LIB(dl, dlopen)
-_VARNISH_CHECK_LIB(socket, socket)
-_VARNISH_CHECK_LIB(nsl, getaddrinfo)
+_VCACHE_SEARCH_LIBS(pthread, pthread_create, [thr pthread c_r])
+_VCACHE_CHECK_LIB(dl, dlopen)
+_VCACHE_CHECK_LIB(socket, socket)
+_VCACHE_CHECK_LIB(nsl, getaddrinfo)
 
 AC_SUBST(NET_LIBS, "${SOCKET_LIBS} ${NSL_LIBS}")
 
