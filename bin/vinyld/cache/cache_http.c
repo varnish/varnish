@@ -978,7 +978,7 @@ http_GetContentLength(struct http *hp)
 
 	if (cl >= 0 && need) {
 		// we have deleted all headers above
-		http_PrintfHeader(hp, "Content-Length: %jd", cl);
+		http_PrintfHeader(hp, "Content-Length: %zd", cl);
 	}
 
 	return (cl);
