@@ -740,7 +740,7 @@ vcc_number(struct vcc *tl, struct expr **e, vcc_type_t fmt, const char *sign)
 	if (fmt == BYTES) {
 		vcc_ByteVal(tl, &vi);
 		ERRCHK(tl);
-		e1 = vcc_mk_expr(BYTES, "%ju", (intmax_t)vi);
+		e1 = vcc_mk_expr(BYTES, "%jd", (intmax_t)vi);
 	} else {
 		t = tl->t;
 		vcc_NextToken(tl);
