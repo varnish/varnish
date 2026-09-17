@@ -455,6 +455,7 @@ vcc_ParseImport(struct vcc *tl)
 			return;
 		}
 		vcc_NextToken(tl);
+		ExpectErr(tl, CSTR);
 		if (!tl->unsafe_path && strchr(tl->t->dec, '/')) {
 			VSB_cat(tl->sb,
 			    "'import ... from path ...' is unsafe.\nAt:");
@@ -462,7 +463,6 @@ vcc_ParseImport(struct vcc *tl)
 			vcc_ErrWhere(tl, tl->t);
 			return;
 		}
-		ExpectErr(tl, CSTR);
 		p = strrchr(tl->t->dec, '/');
 		if (p != NULL && p[1] == '\0')
 			bprintf(fn, "%slibvmod_%.*s.so", tl->t->dec, PF(mod));

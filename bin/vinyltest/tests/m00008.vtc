@@ -36,6 +36,11 @@ varnish v1 -errvcl {'import ... from path ...' is unsafe.} {
 	import std from "${topbuild}/vmod/.libs/";
 }
 
+varnish v1 -errvcl {Expected CSTR got 'not_a_string'} {
+	backend default { .host = "${s1_sock}"; }
+	import std from not_a_string;
+}
+
 varnish v1 \
     -cliok "param.set vmod_path /nowhere:${topbuild}/vmod/.libs/"
 
