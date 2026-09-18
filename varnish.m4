@@ -733,25 +733,6 @@ AU_DEFUN([VARNISH_PREREQ], [
 		AC_MSG_ERROR([Varnish version not supported.])
 ], [Please migrate to VCACHE_REQUIRE])
 
-AC_DEFUN([VCACHE_REQUIRE1], [
-	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
-	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "$1[]api" ; then
-		AC_MSG_CHECKING([$1])
-		have=$($PKG_CONFIG --modversion "$1[]api" 2>/dev/null)
-		if test "x$have" = "x" ; then
-			AC_MSG_RESULT([not found])
-			if test "x$vcacheapi" != "x" ; then
-				vcacheapi="_"
-			fi
-		elif varnish_version_required ${have} m4_map_args_sep([m4_normalize(], [)], [ ], m4_shift($@)) ; then
-			vcacheapi="$1[]api"
-		elif test "x$vcacheapi" != "x" ; then
-			# varnish_version_required has output AC_MSG_RESULT
-			vcacheapi="_"
-		fi
-	fi
-])
-
 # VCACHE_REQUIRE(DEF1, [DEF2, [DEF3, ...]])
 # ------------------------------------------
 # Since: Varnish 9.1
