@@ -1,0 +1,43 @@
+varnishtest "Pipe WebSocket over a TLS backend"
+
+server s1 {
+	tls_handshake
+	rxreq
+	expect req.http.Upgrade == websocket
+	txresp -status 101 -nolen \
+	    -hdr "Connection: Upgrade" \
+	    -hdr "Upgrade: websocket"
+	send "pong"
+	recv 4
+} -start
+
+varnish v1 -vcl {
+	backend default {
+		.host = "${s1_addr}";
+		.port = "${s1_port}";
+		.ssl = 1;
+		.ssl_verify_peer = 0;
+	}
+
+	sub vcl_recv {
+		if (req.http.Upgrade ~ "(?i)websocket") {
+			return (pipe);
+		}
+	}
+
+	sub vcl_pipe {
+		set bereq.http.Upgrade = req.http.Upgrade;
+		set bereq.http.Connection = req.http.Connection;
+	}
+} -start
+
+client c1 {
+	txreq \
+	    -hdr "Connection: Upgrade" \
+	    -hdr "Upgrade: websocket"
+	rxresp
+	expect resp.status == 101
+	expect resp.http.Upgrade == websocket
+	recv 4
+	send "ping"
+} -run
