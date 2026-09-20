@@ -364,7 +364,7 @@ BAN_AddTest(struct ban_proto *bp,
 const char *
 BAN_Commit(struct ban_proto *bp)
 {
-	struct ban  *b, *bi;
+	struct ban  *b, *bi, *inited;
 	ssize_t ln;
 	vtim_real t0;
 	uint64_t u;
@@ -409,7 +409,7 @@ BAN_Commit(struct ban_proto *bp)
 		BAN_Free(b);
 		return (ban_error(bp, "Shutting down"));
 	}
-	bi = VTAILQ_FIRST(&ban_head);
+	inited = VTAILQ_FIRST(&ban_head);
 	VTAILQ_INSERT_HEAD(&ban_head, b, list);
 	ban_start = b;
 
@@ -438,7 +438,7 @@ BAN_Commit(struct ban_proto *bp)
 	if (!(b->flags & BANS_FLAG_REQ))
 		ban_kick_lurker();
 
-	if (bi != NULL)
+	if (inited != NULL)
 		ban_info_new(b->spec, ln);	/* Notify stevedores */
 	Lck_Unlock(&ban_mtx);
 
