@@ -4,7 +4,7 @@ Copyright (c) 2006-2026 Varnish Software
 Copyright 2010-2026 UPLEX - Nils Goroll Systemoptimierung
 Copyright 2026 The Varnish Cache Project])
 AC_REVISION([$Id$])
-AC_INIT([Varnish], [trunk], [opensource@varnish-software.com], [varnish])
+AC_INIT([Varnish], [9.1.0], [opensource@varnish-software.com], [varnish])
 AC_CONFIG_SRCDIR(include/miniobj.h)
 
 AC_CONFIG_HEADERS([config.h])
