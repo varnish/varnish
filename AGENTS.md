@@ -129,6 +129,72 @@ failures, check with `spatch --parse-c` first), `flint.lnt` (FlexeLint/PC-lint c
 
 ---
 
+## Porting fixes to/from upstream
+
+This codebase sits downstream of vinyl-cache, and vendors some code as git
+submodules (e.g. `bin/vinyltest/vtest2` from `github.com/varnish/VTest2`,
+itself downstream of vinyl-cache's own VTest2 fork). Porting a fix across
+either boundary follows the same rules:
+
+- **Verify against source, not against a description of the source.** A
+  pasted analysis (even one already "reviewed" by someone else) is a
+  hypothesis, not a fact — confirm it yourself: `grep` for the symbol,
+  `git show` the actual commit, read the actual file.
+- **Port the whole hunk, across every file the original commit touched.**
+  A cherry-pick that lands the header/prototype half of a change but drops
+  the implementation half (declared-but-never-defined) is a common,
+  easy-to-miss failure — it compiles cleanly and only breaks at
+  link/dlopen time. If a declaration looks unusually isolated, check
+  whether the source commit touched other files too.
+- **Don't "improve" a verbatim port without evidence the target file needs
+  it.** Before deviating from the upstream patch (e.g. dropping a line
+  that looks redundant), check whether the behavior you're trying to avoid
+  already exists in the target file today — the deviation may only cost a
+  clean diff against upstream for no functional gain. Default to porting
+  verbatim.
+- **Fix vendored/submodule code upstream first, then bump the pointer
+  here** as a separate commit — never hand-patch code inside a submodule
+  checkout in place.
+- **Verify by building and exercising the fix, not just reading the
+  diff.** For a missing/undefined-symbol bug: confirm the symbol is now
+  defined and exported (`nm -D` shows `T`, not `U`), and actually exercise
+  the failing path (e.g. `dlopen()` the extension that was failing)
+  before opening the PR.
+- **Don't trust a bulk commit-list diff alone** when checking whether a
+  divergent fork is missing functional commits — rebranding and
+  architectural divergence (e.g. vinyl/varnish renames) dominate the list
+  and drown out real gaps. Check specific suspicious hunks against the
+  actual build wiring (`Makefile.am` source lists, `#ifdef`s) before
+  concluding something is broken.
+- **`gh pr merge --auto` merges as soon as whatever checks branch
+  protection actually *requires* pass** — if the full CI matrix isn't
+  marked required, it can merge while slower jobs are still running.
+  "Merge once CI passes" means waiting for the full check matrix to
+  complete, not delegating that to `--auto`.
+- **Every commit ported from vinyl-cache into this repo gets a two-line
+  trailer**, `Upstream:` first, `Port:` second:
+  ```
+  Upstream: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/commit/<full-sha>
+  Port: exact
+  ```
+  or, if the content differs from upstream at all (including a purely
+  mechanical rename):
+  ```
+  Upstream: https://code.vinyl-cache.org/vinyl-cache/vinyl-cache/commit/<full-sha>
+  Port: adjusted -- <terse one-line reason>
+  ```
+  `Port: exact` means byte-identical to upstream's patch — no reason
+  follows it; any deviation, however small, is `Port: adjusted -- <why>`.
+  Don't add a separate `(cherry picked from commit ...)` line — the
+  `Upstream:` link already has the full sha, including for commits that
+  `git cherry-pick -x` applies with zero conflicts (its own trailer is
+  not a substitute). After assembling a branch, verify every commit has
+  the footer before building/pushing:
+  `for c in $(git log --format=%H origin/main..<branch>); do git show $c
+  --format=%B -s | grep -q '^Upstream:' || echo "MISSING: $c"; done`
+
+---
+
 ## Core concept: VCL
 
 VCL is a domain-specific language for expressing cache policy. It is **compiled to C, then
