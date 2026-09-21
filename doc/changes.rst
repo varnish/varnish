@@ -35,6 +35,10 @@ individual releases. These documents are updated as part of the
 release process.
 
 ================================
+Varnish-Cache trunk (unreleased)
+================================
+
+================================
 Varnish-Cache 9.1.0 (2026-09-18)
 ================================
 
