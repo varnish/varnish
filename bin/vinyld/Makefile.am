@@ -189,7 +189,7 @@ nobase_pkginclude_HEADERS = \
 	cache/cache_backend.h \
 	cache/cache_director.h \
 	cache/cache_filter.h \
-	cache/cache_varnishd.h \
+	cache/cache_int.h \
 	common/common_param.h \
 	waiter/waiter.h
 
@@ -287,16 +287,13 @@ vhp_hufdec.h: vhp_gen_hufdec
 
 DISTCLEANFILES = builtin_vcl.c
 
-BUILT_SOURCES	=	vhp_hufdec.h mgt/vtls_cfg/vtls_cfg_parser.h cache/cache_varnishd.h
+BUILT_SOURCES	=	vhp_hufdec.h mgt/vtls_cfg/vtls_cfg_parser.h cache/cache_int.h
 DISTCLEANFILES	+=	vhp_hufdec.h
 
 EXTRA_DIST += \
 	mgt/vtls_cfg/vtls_cfg_lexer.c \
 	mgt/vtls_cfg/vtls_cfg_parser.c \
 	mgt/vtls_cfg/vtls_cfg_parser.h
-
-cache/cache_varnishd.h: cache/cache_int.h
-	cp $^ $@
 
 ##
 # find holes, usual flow:
