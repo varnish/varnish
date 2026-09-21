@@ -128,7 +128,7 @@
  *	struct vrt_backend.backend_wait_timeout added
  *	struct vrt_backend.backend_wait_limit  added
  * 19.1 (2024-05-27)
- *	[cache_varnishd.h] ObjWaitExtend() gained statep argument
+ *	[cache_int.h] ObjWaitExtend() gained statep argument
  * 19.0 (2024-03-18)
  *	[cache.h] (struct req).filter_list renamed to vdp_filter_list
  *	order of vcl/vmod and director COLD events reversed to directors first
@@ -311,7 +311,7 @@
  *	VRT_AddVFP() added
  *	VRT_RemoveVFP() added
  * 7.0 (2018-03-15)
- *	lots of stuff moved from cache.h to cache_varnishd.h
+ *	lots of stuff moved from cache.h to cache_int.h
  *	   (ie: from "$Abi vrt" to "$Abi strict")
  *	VCL_INT and VCL_BYTES are always 64 bits.
  *	path field added to struct vrt_backend
