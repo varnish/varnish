@@ -132,9 +132,8 @@ jobs:
           - { dist: debian,      version: trixie,    check: true  }
           - { dist: ubuntu,      version: jammy,     check: false }
           - { dist: ubuntu,      version: noble,     check: false }
-          - { dist: ubuntu,      version: questing,  check: false }
           - { dist: ubuntu,      version: resolute,  check: false }
-        exclude:
+          - { dist: ubuntu,      version: stonking,  check: true }
           - os: { dist: archlinux, version: latest, check: true }
             arch: { name: "arm", suffix: "-arm" }
     steps:
