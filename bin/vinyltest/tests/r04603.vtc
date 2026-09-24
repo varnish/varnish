@@ -42,6 +42,15 @@ loop 5 {
 }
 
 varnish v1 -cliexpect "Child in state running" status
+varnish v1 -cliok "param.set thread_pools 1"
+delay 2
+varnish v1 -cliok "param.set thread_pools 1"
+delay 2
+varnish v1 -cliok "param.set thread_pools 1"
+delay 2
+varnish v1 -cliok "param.set thread_pools 1"
+delay 2
+varnish v1 -cliok "param.set thread_pools 1"
+delay 2
 
-delay 10
 varnish v1 -expect MAIN.pools == 1
