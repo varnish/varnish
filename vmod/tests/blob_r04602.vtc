@@ -1,0 +1,53 @@
+vtest "vmod_blob handling of inputs with embedded padding"
+
+varnish v1 -vcl {
+	import blob;
+	backend default none;
+	sub vcl_recv {
+		if (req.url == "/transcode") {
+			set req.http.X = blob.transcode(decoding=BASE64, encoding=BASE64,
+			    case=DEFAULT, length=-1,
+			    encoded="${string,repeat,800,QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=}");
+		}
+		return (synth(200));
+	}
+	sub vcl_synth {
+		# uses the built-in encoder for the result
+		set resp.http.decoded = blob.decode(decoding=BASE64,
+		    encoded=req.http.a + req.http.b);
+	}
+} -start
+
+client c1 {
+	# ok base cases: padding at the end, but split across strands
+	txreq -hdr "A: /w" -hdr "B: =="
+	rxresp
+	expect resp.http.decoded == ":/w==:"
+
+	txreq -hdr "A: ///" -hdr "B: ="
+	rxresp
+	expect resp.http.decoded == "://8=:"
+
+	# charactes after padding
+	txreq -hdr "A: ABC=" -hdr "B: D"
+	rxresp
+	expect resp.status == 500
+} -run
+
+client c1 {
+	txreq -hdr "A: AB==" -hdr "B: D"
+	rxresp
+	expect resp.status == 500
+} -run
+
+client c1 {
+	txreq -hdr "A: ABC" -hdr "B: =D"
+	rxresp
+	expect resp.status == 500
+} -run
+
+client c1 {
+	txreq -url "/transcode"
+	rxresp
+	expect resp.status == 503
+} -run
