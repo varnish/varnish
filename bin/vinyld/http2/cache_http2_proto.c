@@ -1131,7 +1131,7 @@ h2_stream_tmo(struct h2_sess *h2, const struct h2_req *r2, vtim_real now)
 	CHECK_OBJ_NOTNULL(r2, H2_REQ_MAGIC);
 
 	if (r2->t_win_low != 0 &&
-	    now - r2->t_win_low > cache_param->h2_window_timeout) {
+	    now > r2->t_win_low + cache_param->h2_window_timeout) {
 		VSLb(h2->vsl, SLT_Debug,
 		    "H2: stream %u: Hit h2_window_timeout", r2->stream);
 		if (h2->open_streams <= h2->win_low_streams) {
@@ -1144,7 +1144,7 @@ h2_stream_tmo(struct h2_sess *h2, const struct h2_req *r2, vtim_real now)
 	}
 
 	if (r2->t_send != 0 &&
-	    now - r2->t_send > SESS_TMO(h2->sess, send_timeout)) {
+	    now > r2->t_send + SESS_TMO(h2->sess, send_timeout)) {
 		VSLb(h2->vsl, SLT_Debug,
 		     "H2: stream %u: Hit send_timeout", r2->stream);
 		return (H2SE_SEND_TIMEOUT);
