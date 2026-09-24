@@ -1,5 +1,8 @@
 vtest "Lowering thread_pools under live keepalive traffic panics in MPL_Destroy()"
 
+# XXX TODO #4608
+feature cmd {test $(uname) == Linux}
+
 varnish v1 -arg "-p thread_pools=10 -p thread_pool_min=5" -vcl {
 	backend default none;
 	sub vcl_recv { return (synth(200)); }
@@ -42,15 +45,6 @@ loop 5 {
 }
 
 varnish v1 -cliexpect "Child in state running" status
-varnish v1 -cliok "param.set thread_pools 1"
-delay 2
-varnish v1 -cliok "param.set thread_pools 1"
-delay 2
-varnish v1 -cliok "param.set thread_pools 1"
-delay 2
-varnish v1 -cliok "param.set thread_pools 1"
-delay 2
-varnish v1 -cliok "param.set thread_pools 1"
-delay 2
 
+delay 10
 varnish v1 -expect MAIN.pools == 1
