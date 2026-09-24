@@ -212,7 +212,7 @@ pool_poolherder(void *priv)
 {
 	VTAILQ_HEAD(,pool) deadpools = VTAILQ_HEAD_INITIALIZER(deadpools);
 	unsigned nwq, poolno;
-	struct pool *pp;
+	struct pool *pp, *next;
 	uint64_t u;
 
 	THR_SetName("pool_poolherder");
@@ -254,7 +254,7 @@ pool_poolherder(void *priv)
 			continue;
 		}
 
-		while ((pp = VTAILQ_FIRST(&deadpools)) != NULL) {
+		VTAILQ_FOREACH_SAFE(pp, &deadpools, list, next) {
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 			int active;
 
@@ -267,7 +267,7 @@ pool_poolherder(void *priv)
 			Lck_Unlock(&pp->mtx);
 
 			if (active)
-				 continue;
+				continue;
 
 			VTAILQ_REMOVE(&deadpools, pp, list);
 			pool_destroy(pp);
