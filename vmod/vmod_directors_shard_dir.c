@@ -255,7 +255,7 @@ validate_alt(VRT_CTX, const struct sharddir *shardd, VCL_INT *alt)
 		*alt = 0;
 	} else if (*alt > alt_max) {
 		shard_err(ctx->vsl, shardd->name,
-		    "parameter alt=%ld limited to %jd", *alt,
+		    "parameter alt=%jd limited to %jd", (intmax_t)*alt,
 		    (intmax_t)alt_max);
 		*alt = alt_max;
 	}
