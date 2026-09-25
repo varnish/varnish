@@ -250,11 +250,13 @@ validate_alt(VRT_CTX, const struct sharddir *shardd, VCL_INT *alt)
 
 	if (*alt < 0) {
 		shard_err(ctx->vsl, shardd->name,
-		    "invalid negative parameter alt=%ld, set to 0", *alt);
+		    "invalid negative parameter alt=%jd, set to 0",
+		    (intmax_t)*alt);
 		*alt = 0;
 	} else if (*alt > alt_max) {
 		shard_err(ctx->vsl, shardd->name,
-		    "parameter alt=%ld limited to %ld", *alt, alt_max);
+		    "parameter alt=%ld limited to %jd", *alt,
+		    (intmax_t)alt_max);
 		*alt = alt_max;
 	}
 }
