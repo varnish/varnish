@@ -1,10 +1,19 @@
-vtest "H2 POST w/ 100 Continue"
+vtest "H2 POST w/ 100 Continue & Chunked streaming"
+
+barrier b1 cond 2
 
 server s1 {
-	rxreq
+	rxreqhdrs
 	expect req.http.content-length == <undef>
 	expect req.http.transfer-encoding == chunked
 	expect req.proto == HTTP/1.1
+	rxchunk
+	expect req.body == "request"
+	barrier b1 sync
+	rxchunk
+	rxchunk
+	expect req.body == "requestpart2"
+
 	txresp -hdr "Content-Type: text/plain" -body response
 } -start
 
@@ -26,7 +35,13 @@ client c1 {
 		expect resp.status == 100
 
 		txdata \
-			-data request
+			-data request \
+			-nostrend
+
+		barrier b1 sync
+
+		txdata \
+			-data part2 \
 
 		rxresp
 		expect resp.status == 200
