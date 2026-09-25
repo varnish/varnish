@@ -1,8 +1,5 @@
 vtest "Lowering thread_pools under live keepalive traffic panics in MPL_Destroy()"
 
-# XXX TODO #4608
-feature cmd {test $(uname) == Linux}
-
 varnish v1 -arg "-p thread_pools=10 -p thread_pool_min=5" -vcl {
 	backend default none;
 	sub vcl_recv { return (synth(200)); }

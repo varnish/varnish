@@ -476,6 +476,17 @@ t_vscarab(void)
 	free(heap);
 }
 
+static void
+sigusr1(void)
+{
+	struct sigaction sa = {0};
+
+	AZ(sigemptyset(&sa.sa_mask));
+	AZ(sigaddset(&sa.sa_mask, SIGUSR1));
+	sa.sa_handler = child_sig_nore;
+	AZ(sigaction(SIGUSR1, &sa, NULL));
+}
+
 void
 child_main(int sigmagic, size_t altstksz)
 {
@@ -486,7 +497,7 @@ child_main(int sigmagic, size_t altstksz)
 	(void)signal(SIGINT, SIG_DFL);
 	(void)signal(SIGTERM, SIG_DFL);
 	(void)signal(SIGQUIT, cli_quit);
-	(void)signal(SIGUSR1, child_sig_nore);
+	sigusr1();
 
 #if defined(__FreeBSD__) && __FreeBSD_version >= 1000000
 	malloc_message = child_malloc_fail;
