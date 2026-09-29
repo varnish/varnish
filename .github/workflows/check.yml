@@ -134,8 +134,11 @@ jobs:
           - { dist: ubuntu,      version: noble,     check: false }
           - { dist: ubuntu,      version: resolute,  check: false }
           - { dist: ubuntu,      version: stonking,  check: true }
-          - os: { dist: archlinux, version: latest, check: true }
-            arch: { name: "arm", suffix: "-arm" }
+        exclude:
+          - os:
+              dist: archlinux
+            arch:
+              name: arm
     steps:
       - *download_tarball
 
