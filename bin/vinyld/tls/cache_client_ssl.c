@@ -371,8 +371,8 @@ vtls_load_x509_names(struct cli *cli, struct vtls *vtls,
 
 	/* Extract CN for display purposes */
 	{
-		X509_NAME *x509_name;
-		X509_NAME_ENTRY *x509_entry;
+		const X509_NAME *x509_name;
+		const X509_NAME_ENTRY *x509_entry;
 
 		x509_name = X509_get_subject_name(x509);
 		if (x509_name != NULL) {
@@ -437,8 +437,8 @@ do {									\
 
 	/* Fall back to Common Name if no SANs */
 	if (nb == 0) {
-		X509_NAME *x509_name;
-		X509_NAME_ENTRY *x509_entry;
+		const X509_NAME *x509_name;
+		const X509_NAME_ENTRY *x509_entry;
 
 		x509_name = X509_get_subject_name(x509);
 		if (x509_name != NULL) {
