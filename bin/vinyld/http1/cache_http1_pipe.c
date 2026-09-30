@@ -123,8 +123,8 @@ V1P_Charge(struct req *req, const struct v1p_acct *a, struct VSC_vbe *b)
 }
 
 stream_close_t
-V1P_Process(const struct req *req, int fd, struct v1p_acct *v1a,
-    vtim_real deadline)
+V1P_Process(const struct req *req, int fd, const struct vco *oper,
+    void *oper_priv, struct v1p_acct *v1a, vtim_real deadline)
 {
 	struct pollfd fds[2];
 	struct rdf_vco rdf_c, rdf_b;
@@ -136,17 +136,17 @@ V1P_Process(const struct req *req, int fd, struct v1p_acct *v1a,
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 	CHECK_OBJ_NOTNULL(req->sp, SESS_MAGIC);
 	assert(fd > 0);
+	AN(oper);
 
 	/* Client side VCO */
 	rdf_c.fd = req->sp->fd;
 	rdf_c.oper = req->htc->oper;
 	rdf_c.oper_priv = req->htc->oper_priv;
 
-	/* Backend side - use VCO_default for now
-	 * TODO: When backend TLS is implemented, pass oper from pfd */
+	/* Backend side VCO */
 	rdf_b.fd = fd;
-	rdf_b.oper = VCO_default;
-	rdf_b.oper_priv = NULL;
+	rdf_b.oper = oper;
+	rdf_b.oper_priv = oper_priv;
 
 	if (req->htc->pipeline_b != NULL) {
 		j = rdf_b.oper->write(rdf_b.oper_priv, rdf_b.fd,
