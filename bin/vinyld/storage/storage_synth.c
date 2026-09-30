@@ -382,7 +382,7 @@ ssy_allocobj(struct worker *wrk, const struct stevedore *stv,
 }
 
 static void v_matchproto_(storage_close_f)
-ssy_close(const struct stevedore *st, int warn)
+ssy_close(struct stevedore *st, int warn)
 {
 
 	(void)st;

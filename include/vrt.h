@@ -48,7 +48,7 @@
 
 #define VRT_MAJOR_VERSION	22U
 
-#define VRT_MINOR_VERSION	2U
+#define VRT_MINOR_VERSION	3U
 
 /***********************************************************************
  * Major and minor VRT API versions.
@@ -57,7 +57,9 @@
  * Whenever something is deleted or changed in a way which is not
  * binary/load-time compatible, increment MAJOR version
  *
- * 22.2 (trunk)
+ * 22.3 (trunk)
+ *	un-const storage_close_f
+ * 22.2
  *	struct vrt_endpoint.ssl_ca_file added
  *	VRT_Rollback() no longer takes a VCL_HTTP argument
  *	struct vmod_data has moved to vmod_abi.h
