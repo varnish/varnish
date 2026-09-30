@@ -281,7 +281,8 @@ pool_poolherder(void *priv)
 			u += pp->lqueue;
 		}
 		VSC_C_main->thread_queue_len = u;
-		if (nwq > 0 || cache_param->wthread_pools > 0)
+		if (nwq > 0 || cache_param->wthread_pools > 0 ||
+		    VTAILQ_FIRST(&deadpools) != NULL)
 			(void)Lck_CondWaitTimeout(&cond, &pool_mtx, 1.0);
 		Lck_Unlock(&pool_mtx);
 	}
