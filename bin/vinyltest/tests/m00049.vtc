@@ -2,7 +2,7 @@ vtest "VMOD vfp & vdp - request bodies"
 
 # this test mirrors m00048.vtc with directions reversed
 
-server s1 -repeat 2 {
+server s1 -repeat 2 -keepalive {
 	rxreq
 	expect req.http.Content-Length == "28"
 	expect req.http.Transfer-Encoding == <undef>
