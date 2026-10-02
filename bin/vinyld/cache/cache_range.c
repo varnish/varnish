@@ -484,7 +484,7 @@ main(int argc, char *const *argv)
 int
 VRG_CheckBo(struct busyobj *bo)
 {
-	ssize_t rlo, rhi, crlo, crhi, crlen, clen;
+	ssize_t rlo, rhi, crlo = -1 , crhi = -1, crlen, clen;
 	const char *err;
 
 	CHECK_OBJ_NOTNULL(bo, BUSYOBJ_MAGIC);
@@ -511,7 +511,7 @@ VRG_CheckBo(struct busyobj *bo)
 		return (-1);
 	}
 
-	if (crlo < 0 && crhi < 0 && crlen < 0) {
+	if (crlen < 0 && crlo < 0 && crhi < 0) {
 		VSLb(bo->vsl, SLT_Debug,
 		    "Missing content-range header or unknown range unit");
 		return (0);
