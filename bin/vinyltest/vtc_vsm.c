@@ -28,8 +28,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef VTEST_WITH_VTC_VSM
-
 #include "config.h"
 
 #include <signal.h>
@@ -300,5 +298,3 @@ cmd_vsm(CMD_ARGS)
 		vtc_fatal(vl, "Unknown VSM argument: %s", *av);
 	}
 }
-
-#endif /* VTEST_WITH_VTC_VSM */

@@ -55,4 +55,5 @@ register_varnish_top_cmds(void)
 #endif
 
 	i_mode_add(top_builddir, "bin", "varnish", "");
+	i_mode_add(top_builddir, "bin", "vinyl", "");
 }

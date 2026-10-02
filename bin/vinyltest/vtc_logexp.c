@@ -28,8 +28,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef VTEST_WITH_VTC_LOGEXPECT
-
 /* SECTION: logexpect logexpect
  *
  * Reads the VSL and looks for records matching a given specification. It will
@@ -911,5 +909,3 @@ cmd_logexpect(CMD_ARGS)
 		logexp_spec(le, *av);
 	}
 }
-
-#endif /* VTEST_WITH_VTC_LOGEXPECT */
