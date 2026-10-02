@@ -479,8 +479,9 @@ t_vscarab(void)
 static void
 sigusr1(void)
 {
-	struct sigaction sa = {0};
+	struct sigaction sa;
 
+	memset(&sa, 0, sizeof sa);
 	AZ(sigemptyset(&sa.sa_mask));
 	AZ(sigaddset(&sa.sa_mask, SIGUSR1));
 	sa.sa_handler = child_sig_nore;
