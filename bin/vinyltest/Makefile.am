@@ -102,7 +102,7 @@ varnishtest_CFLAGS = $(AM_CFLAGS)
 varnishtest_LDADD = ${addlibs} libvtest_ext_varnish.la
 
 # --no-as-needed is to link against libvtest_ext_varnish.so despite no reference
-varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic -Wl,--no-as-needed
+varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic @LDFLAG_NO_AS_NEEDED@
 
 teken.c: teken_state.h
 
