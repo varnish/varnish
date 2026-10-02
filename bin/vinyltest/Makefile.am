@@ -13,9 +13,6 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/lib/libvgz
 
 AM_CFLAGS = \
-	-DVTEST_WITH_VTC_LOGEXPECT \
-	-DVTEST_WITH_VTC_VARNISH \
-	-DVTEST_WITH_VTC_VSM \
 	-DTOP_BUILDDIR='"${top_builddir}"' \
 	${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
 
@@ -26,12 +23,6 @@ addlibs = \
 	$(top_builddir)/lib/libvgz/libvgz.la \
 	${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
 	${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
-
-varnishspecific_src = \
-	vtc_logexp.c \
-	vtc_vsm.c \
-	vtc_varnish.c \
-	vtest_ext_varnish_builtwith.c
 
 EXTRA_DIST = \
 	$(top_srcdir)/bin/vinyltest/tests/*.vtc \
@@ -98,8 +89,7 @@ nodist_varnishtest_SOURCES = \
 		vtest2/src/vtc_tunnel.c \
 		vtest2/src/vtest_api.h \
 		vtest2/lib/vudp.h \
-		vtest2/lib/vudp.c \
-		$(varnishspecific_src)
+		vtest2/lib/vudp.c
 
 VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src -I$(srcdir)/vtest2
 
@@ -109,10 +99,10 @@ varnishtest_CPPFLAGS = $(AM_CPPFLAGS) \
 
 varnishtest_CFLAGS = $(AM_CFLAGS)
 
-varnishtest_LDADD = ${addlibs}
+varnishtest_LDADD = ${addlibs} libvtest_ext_varnish.la
 
-# would only be needed for vtest, but as both are the same atm...
-varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic
+# --no-as-needed is to link against libvtest_ext_varnish.so despite no reference
+varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic -Wl,--no-as-needed
 
 teken.c: teken_state.h
 
@@ -172,9 +162,12 @@ endif !HAVE_VTEST
 ## libvtest_ext_varnish
 
 libvtest_ext_varnish_la_SOURCES = \
-		vtest_ext_varnish.c \
-		vtest_ext_varnish.h \
-		$(varnishspecific_src)
+	vtc_logexp.c \
+	vtc_vsm.c \
+	vtc_varnish.c \
+	vtest_ext_varnish.c \
+	vtest_ext_varnish.h \
+	vtest_ext_varnish_builtwith.c
 
 libvtest_ext_varnish_la_CPPFLAGS = $(AM_CPPFLAGS) $(VTEST_CPPFLAGS)
 

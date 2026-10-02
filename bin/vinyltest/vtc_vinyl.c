@@ -28,8 +28,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef VTEST_WITH_VTC_VINYL
-
 #include "config.h"
 
 #include <sys/socket.h>
@@ -1438,5 +1436,3 @@ cmd_vinyl(CMD_ARGS)
 		vinyl_fatal(v, "Unknown %s argument: %s", me, *av);
 	}
 }
-
-#endif /* VTEST_WITH_VTC_VINYL */

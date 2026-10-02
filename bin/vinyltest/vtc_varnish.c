@@ -28,8 +28,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef VTEST_WITH_VTC_VARNISH
-
 #include "config.h"
 
 #include <sys/socket.h>
@@ -1459,5 +1457,3 @@ cmd_varnish(CMD_ARGS)
 		varnish_fatal(v, "Unknown %s argument: %s", me, *av);
 	}
 }
-
-#endif /* VTEST_WITH_VTC_VARNISH */
