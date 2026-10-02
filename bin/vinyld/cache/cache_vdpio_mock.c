@@ -48,6 +48,7 @@
 #include "vtim.h"
 
 #include "storage/storage.h"
+#include "storage/storage_vai.h"
 
 #include "vdpio_test.h"
 
@@ -216,7 +217,7 @@ notify(vai_hdl vhdl)
 	AZ(pthread_create(&thr, &attr, notify_thread, vhdl));
 }
 
-static const uintptr_t mocklease = (uintptr_t)&mocklease;
+static const viov_lease_t mocklease = (viov_lease_t)&mocklease;
 
 
 //lint -esym(818, cb_priv)
@@ -359,7 +360,7 @@ ObjVAIbuffer(struct worker *wrk, vai_hdl vhdl, struct vscarab *scarab)
 		b->sz = sz;
 		VTAILQ_INSERT_TAIL(&hdl->bufhead, b, list);
 
-		vio->lease = (uintptr_t)b;
+		vio->lease = ptr2lease(b);
 		vio->iov.iov_base = b->bytes;
 		vio->iov.iov_len = sz;
 		r++;
@@ -374,7 +375,7 @@ ObjVAIreturn(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 {
 	struct mockhdl *hdl;
 	struct mockbuf *b, *safe;
-	uintptr_t *p;
+	viov_lease_t *p;
 
 	(void) wrk;
 	CAST_OBJ_NOTNULL(hdl, vhdl, MOCKHDL_MAGIC);
@@ -388,7 +389,7 @@ ObjVAIreturn(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 		}
 		VTAILQ_FOREACH_SAFE(b, &hdl->bufhead, list, safe) {
 			CHECK_OBJ(b, MOCKBUF_MAGIC);
-			if (*p != (uintptr_t)b)
+			if (*p != ptr2lease(b))
 				continue;
 			VTAILQ_REMOVE(&hdl->bufhead, b, list);
 			break;
