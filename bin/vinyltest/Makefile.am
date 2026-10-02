@@ -16,14 +16,6 @@ AM_CFLAGS = \
 	-DTOP_BUILDDIR='"${top_builddir}"' \
 	${OPENSSL_CFLAGS} ${LIBCRYPTO_CFLAGS}
 
-# used in LDADD and LIBADD
-addlibs = \
-	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
-	$(top_builddir)/lib/libvinyl/libvarnish.la \
-	$(top_builddir)/lib/libvgz/libvgz.la \
-	${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
-	${OPENSSL_LIBS} ${LIBCRYPTO_LIBS}
-
 EXTRA_DIST = \
 	$(top_srcdir)/bin/vinyltest/tests/*.vtc \
 	$(top_srcdir)/bin/vinyltest/tests/common.pem \
@@ -95,11 +87,20 @@ VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src -I$(srcdir)/vtest2
 
 varnishtest_CPPFLAGS = $(AM_CPPFLAGS) \
 	-I$(srcdir)/vtest2/lib \
-	$(VTEST_CPPFLAGS)
+	$(VTEST_CPPFLAGS) \
+	@PCRE2_CFLAGS@
 
 varnishtest_CFLAGS = $(AM_CFLAGS)
 
-varnishtest_LDADD = ${addlibs} libvtest_ext_varnish.la
+# when building the in-tree vtest, use libvgz, but vtest upstream uses libz
+varnishtest_LDADD = \
+	$(top_builddir)/lib/libvgz/libvgz.la \
+	${PTHREAD_LIBS} ${NET_LIBS} ${LIBM} -ldl \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la \
+	$(top_builddir)/lib/libvinyl/libvarnish.la \
+	@PCRE2_LIBS@ \
+	${OPENSSL_LIBS} ${LIBCRYPTO_LIBS} \
+	libvtest_ext_varnish.la
 
 # --no-as-needed is to link against libvtest_ext_varnish.so despite no reference
 varnishtest_LDFLAGS = $(AM_LDFLAGS) -rdynamic @LDFLAG_NO_AS_NEEDED@
@@ -171,7 +172,9 @@ libvtest_ext_varnish_la_SOURCES = \
 
 libvtest_ext_varnish_la_CPPFLAGS = $(AM_CPPFLAGS) $(VTEST_CPPFLAGS)
 
-libvtest_ext_varnish_la_LIBADD = $(addlibs)
+libvtest_ext_varnish_la_LIBADD = \
+	$(top_builddir)/lib/libvinyl/libvarnish.la \
+	$(top_builddir)/lib/libvinylapi/libvarnishapi.la
 
 ############################################################
 ## automake
