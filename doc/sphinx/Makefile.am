@@ -173,9 +173,9 @@ BUILT_SOURCES += include/vsl-tags.rst
 vtest2_src = $(top_srcdir)/bin/vinyltest/vtest2/src
 
 nodist_VTCSYN_SRC = \
-	$(top_srcdir)/bin/vinyltest/vtc_logexp.c \
-	$(top_srcdir)/bin/vinyltest/vtc_varnish.c \
-	$(top_srcdir)/bin/vinyltest/vtc_vsm.c
+	$(top_srcdir)/bin/vinyltest/vtest_ext_varnish_logexp.c \
+	$(top_srcdir)/bin/vinyltest/vtest_ext_varnish_varnish.c \
+	$(top_srcdir)/bin/vinyltest/vtest_ext_varnish_vsm.c
 
 if HAVE_VTEST
 nodist_VTCSYN_SRC += \

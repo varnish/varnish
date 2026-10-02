@@ -162,9 +162,9 @@ endif !HAVE_VTEST
 ## libvtest_ext_varnish
 
 libvtest_ext_varnish_la_SOURCES = \
-	vtc_logexp.c \
-	vtc_vsm.c \
-	vtc_varnish.c \
+	vtest_ext_varnish_logexp.c \
+	vtest_ext_varnish_vsm.c \
+	vtest_ext_varnish_varnish.c \
 	vtest_ext_varnish.c \
 	vtest_ext_varnish.h \
 	vtest_ext_varnish_builtwith.c
