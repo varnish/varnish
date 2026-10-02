@@ -5,7 +5,7 @@ barrier b1 cond 2
 server s1 {
 	rxreq
 	barrier b1 sync
-	delay 0.2
+	delay 0.4
 	txresp
 
 	rxreq
