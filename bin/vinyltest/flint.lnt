@@ -56,3 +56,6 @@
 -esym(123, TDSAVE)	// Macro defined with args
 -esym(759, add_cmd)	// Could be moved from header to module
 -esym(765, add_cmd)	// Could be made static
+
+// constructor
+-esym(528, register_varnish_top_cmds)
