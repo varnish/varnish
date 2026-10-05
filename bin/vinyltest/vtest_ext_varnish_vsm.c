@@ -171,6 +171,8 @@ vsm_expect_status(struct vtc_vsm *m, const char *exp)
 	bstat = VSM_Status(m->vsm);
 	stat = VSB_new_auto();
 	AN(stat);
+
+	//lint -esym(438, sep) last value not used
 	sep = "";
 #define STATUS_BIT(b, s)				\
 	if (bstat & b) {				\
