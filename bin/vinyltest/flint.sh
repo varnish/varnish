@@ -10,5 +10,5 @@ FLOPS="
 	-Ivtest2
 	-Ivtest2/lib
 	$(ls vtest2/src/*.c| grep -v /teken.)
-	vtest_ext_varnish.c
+	vtest_ext_varnish*.c
 " ../../tools/flint_skel.sh
