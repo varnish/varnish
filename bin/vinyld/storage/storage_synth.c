@@ -178,6 +178,8 @@ ssy_ai_lease(struct worker *wrk, vai_hdl vhdl, struct vscarab *dst)
 			dviov->lease = VAI_LEASE_NORET;
 			r++;
 		}
+		if (dviov == NULL)
+			break;
 		if (hdl->viov == NULL) {
 			hdl->st = VSTAILQ_NEXT(hdl->st, list);
 			if (hdl->st == NULL)
