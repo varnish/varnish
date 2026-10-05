@@ -170,6 +170,7 @@ ssy_ai_lease(struct worker *wrk, vai_hdl vhdl, struct vscarab *dst)
 	AN(hdl->viov);
 
 	do {
+		dviov = NULL;
 		VSCARAB_FOREACH_RESUME(hdl->viov, &hdl->st->scarab) {
 			dviov = VSCARAB_GET(dst);
 			if (dviov == NULL)
