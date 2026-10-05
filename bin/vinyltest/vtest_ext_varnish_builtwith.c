@@ -155,7 +155,7 @@ cmd_vcache_builtwith(CMD_ARGS)
 	if (av == NULL)
 		return;
 
-#define FEATURE(nm, tst)				\
+#define BUILTWITH(nm, tst)				\
 	do {						\
 		if (!strcmp(feat, nm)) {		\
 			good = 1;			\
@@ -179,16 +179,16 @@ cmd_vcache_builtwith(CMD_ARGS)
 			feat++;
 		}
 
-		FEATURE("64bit", sizeof(void*) == 8);
-		FEATURE("persistent_storage", with_persistent_storage);
-		FEATURE("coverage", coverage);
-		FEATURE("asan", asan);
-		FEATURE("msan", msan);
-		FEATURE("tsan", tsan);
-		FEATURE("ubsan", ubsan);
-		FEATURE("sanitizer", sanitizer);
-		FEATURE("workspace_emulator", workspace_emulator);
-		FEATURE("witness", witness);
+		BUILTWITH("64bit", sizeof(void*) == 8);
+		BUILTWITH("persistent_storage", with_persistent_storage);
+		BUILTWITH("coverage", coverage);
+		BUILTWITH("asan", asan);
+		BUILTWITH("msan", msan);
+		BUILTWITH("tsan", tsan);
+		BUILTWITH("ubsan", ubsan);
+		BUILTWITH("sanitizer", sanitizer);
+		BUILTWITH("workspace_emulator", workspace_emulator);
+		BUILTWITH("witness", witness);
 
 		if (!good)
 			vtc_fatal(vl, "FAIL test, unknown feature: %s", feat);
