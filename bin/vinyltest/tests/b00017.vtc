@@ -47,7 +47,6 @@ client c1 {
 	rxresp
 	expect resp.status == 888
 	expect resp.http.connection != close
-	# on two-digit days, we have 8 chars more
 	expect resp.bodylen == 277
 	expect resp.body ~ "^Custom vcl_synth's .* body"
 	expect resp.http.storage == "storage.Transient"
