@@ -230,6 +230,7 @@ ssy_ai_return(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 		 if (*p != VAI_LEASE_NORET)
 			free (lease2ptr(*p));
 	}
+	VSCARET_INIT(scaret, scaret->capacity);
 }
 
 static void v_matchproto_(vai_fini_f)
