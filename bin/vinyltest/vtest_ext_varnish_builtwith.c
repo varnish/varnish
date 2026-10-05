@@ -32,30 +32,9 @@
 
 #include "config.h"
 
-#include <sys/wait.h>
-#include <sys/socket.h>
-
-#include <grp.h>
-#include <pwd.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/un.h>
-#include <unistd.h>
-
-#ifdef HAVE_SYS_PERSONALITY_H
-#  include <sys/personality.h>
-#endif
 
 #include "vdef.h"
-
-#include "vfil.h"
-#include "vnum.h"
-#include "vtcp.h"
-#include "vss.h"
-#include "vtim.h"
-#include "vus.h"
 
 #include <vtest_api.h>
 #include "vtest_ext_varnish.h"
@@ -157,7 +136,7 @@ cmd_vcache_builtwith(CMD_ARGS)
 
 #define BUILTWITH(nm, tst)				\
 	do {						\
-		if (!strcmp(feat, nm)) {		\
+		if (!vstrcmp(feat, nm)) {		\
 			good = 1;			\
 			if (tst) {			\
 				skip = neg;		\

@@ -37,6 +37,7 @@
  * This file should always be the first non <...> include in a .c file.
  */
 
+#include <string.h>	// string functions if no builtin
 #include <stddef.h>
 #include <stdint.h>
 
