@@ -618,7 +618,7 @@ vbf_stp_startfetch(struct worker *wrk, struct busyobj *bo)
 		bo->uncacheable = 1;
 		wrk->vpi->handling = VCL_RET_DELIVER;
 	}
-	if (!bo->uncacheable || !bo->do_stream)
+	if (!bo->uncacheable || !bo->do_stream || bo->is_bgfetch)
 		oc->boc->transit_buffer = 0;
 	if (bo->uncacheable)
 		oc->flags |= OC_F_HFM;
