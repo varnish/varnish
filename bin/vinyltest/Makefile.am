@@ -83,7 +83,7 @@ nodist_varnishtest_SOURCES = \
 		vtest2/lib/vudp.h \
 		vtest2/lib/vudp.c
 
-VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src -I$(srcdir)/vtest2
+VTEST_CPPFLAGS += -I$(srcdir)/vtest2/src -I$(srcdir)/vtest2 -I$(builddir)/vtest2
 
 varnishtest_CPPFLAGS = $(AM_CPPFLAGS) \
 	-I$(srcdir)/vtest2/lib \
@@ -119,7 +119,7 @@ vtc_h2_dectbl.h: $(srcdir)/vtest2/src/huffman_gen.py $(srcdir)/vtest2/src/tbl/vh
 	mv $@_ $@
 
 vtest2/version.h:
-	(cd $(srcdir)/vtest2 && $(MAKE) version.h)
+	(cd vtest2 && GIT_DIR=$(abs_srcdir)/vtest2/.git $(MAKE) -f $(abs_srcdir)/vtest2/Makefile version.h)
 
 # this path is weird, but does seem to make sense to clean up until we remove
 # varnishtest from submodule
