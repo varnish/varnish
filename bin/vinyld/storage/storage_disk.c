@@ -33,9 +33,9 @@
  *
  * The content survives an orderly restart of the cache process: on
  * close we write an index of all objects into free space in the file,
- * sync it, and mark the header clean.  On open we clear the clean mark
- * (synchronously) before anything else is written, and only load the
- * index if the mark was set.
+ * sync it, and mark the header clean.  On open we only load the index
+ * if the mark was set, and clear the mark (synchronously) before any
+ * space can be allocated.
  *
  * This stevedore is deliberately not crash-safe: if the cache process
  * dies for any other reason than an orderly shutdown, all content is
@@ -47,8 +47,12 @@
  *	[SDK_HDR_SIZE, mediasize)	extents, SDK_GRAN aligned
  *
  * The index is only valid while the header is marked clean, and is
- * written as a byte stream into a list of extents recorded in the
- * header:
+ * written as a byte stream into a list of extents.  Up to SDK_IDX_EXT
+ * extents are listed in the header.  If free space is too fragmented
+ * for that, the list goes into a map instead, an array of struct
+ * sdk_hdr_ext, and the header lists the extents of the map.
+ *
+ * The byte stream is:
  *
  *	uint32_t	ban list length
  *	uint8_t[]	ban list (as exported by cache_ban.c)
@@ -59,6 +63,8 @@
 #include "config.h"
 
 #include <sys/file.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -81,14 +87,19 @@
 #include "VSC_disk.h"
 
 #define SDK_HDR_SIZE		4096
-#define SDK_GRAN		512		/* allocation granularity */
+/*
+ * Allocation granularity.  With 4KB pages, extents never share a page,
+ * so a write to a new extent does not make the kernel read the rest of
+ * a page it has evicted, see sdk_zero().
+ */
+#define SDK_GRAN		4096
 #define SDK_EXT_MIN		(64 * 1024)	/* first extent */
 #define SDK_EXT_MAX		(16 * 1024 * 1024)
 #define SDK_EXT_ACCEPT		(4 * 1024)	/* smallest acceptable */
 #define SDK_WRBUF		(64 * 1024)	/* fetch staging buffer */
 #define SDK_RDBUF		(64 * 1024)	/* delivery buffer */
 #define SDK_IOBUF		(1024 * 1024)	/* index io buffer */
-#define SDK_IDX_EXT		128		/* index extents in header */
+#define SDK_IDX_EXT		128		/* extents in header */
 
 #define SDK_HDR_SIGNATURE	"Varnish Disk 1\n"
 #define SDK_BYTEORDER		0x01020304U
@@ -121,9 +132,12 @@ struct sdk_hdr {
 	uint64_t		gran;
 	uint64_t		idx_len;
 	uint8_t			idx_sha[VSHA256_LEN];
+	/* the index is in n_idx_ext extents ... */
 	uint32_t		n_idx_ext;
-	uint32_t		pad;
-	struct sdk_hdr_ext	idx_ext[SDK_IDX_EXT];
+	/* ... listed in ext[] if they fit, otherwise in the map */
+	uint32_t		n_ext;
+	uint8_t			map_sha[VSHA256_LEN];
+	struct sdk_hdr_ext	ext[SDK_IDX_EXT];
 	/* Must be last */
 	uint8_t			hdr_sha[VSHA256_LEN];
 };
@@ -188,6 +202,7 @@ struct sdk_sc {
 	uint64_t		data_end;
 
 	unsigned		closed;
+	unsigned		zero;
 
 	struct sdk_free_off	free_off;
 	struct sdk_free_len	free_len;
@@ -393,6 +408,78 @@ sdk_alloc_locked(struct sdk_sc *sc, uint64_t want, uint64_t min,
 	return (0);
 }
 
+/*
+ * Our writes rarely end on a page boundary.  If the rest of the page was
+ * written before, and has since been evicted from the page cache, the
+ * kernel must read it back before it can take the write, and the fetch
+ * waits for that read while holding the boc mtx.  Recycled space in a
+ * storage larger than RAM is mostly evicted, so we tell the filesystem
+ * that a new extent holds zeros, which needs no reading.
+ *
+ * Not on block devices, where this would write the zeros.
+ */
+static void
+sdk_zero_init(struct sdk_sc *sc)
+{
+#if defined(HAVE_FALLOCATE) && defined(FALLOC_FL_ZERO_RANGE)
+	struct stat st;
+
+	/* Probe on the header, which is rewritten right after */
+	sc->zero = !fstat(sc->fd, &st) && S_ISREG(st.st_mode) &&
+	    !fallocate(sc->fd, FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
+	    0, SDK_HDR_SIZE);
+#else
+	sc->zero = 0;
+#endif
+}
+
+#ifdef SYS_cachestat
+/* From <linux/mman.h>, which does not mix well with <sys/mman.h> */
+struct sdk_cachestat_range {
+	uint64_t		off;
+	uint64_t		len;
+};
+
+struct sdk_cachestat {
+	uint64_t		nr_cache;
+	uint64_t		nr_dirty;
+	uint64_t		nr_writeback;
+	uint64_t		nr_evicted;
+	uint64_t		nr_recently_evicted;
+};
+#endif
+
+static void
+sdk_zero(const struct sdk_sc *sc, const struct sdk_ext *e)
+{
+#if defined(HAVE_FALLOCATE) && defined(FALLOC_FL_ZERO_RANGE)
+#  ifdef SYS_cachestat
+	struct sdk_cachestat_range cr;
+	struct sdk_cachestat cs;
+#  endif
+
+	if (!sc->zero)
+		return;
+#  ifdef SYS_cachestat
+	/*
+	 * Recently freed space may still be in the page cache, where
+	 * writes need no reading, and zeroing would have to write back
+	 * whatever is dirty first.
+	 */
+	cr.off = e->off;
+	cr.len = e->space;
+	if (!syscall(SYS_cachestat, sc->fd, &cr, &cs, 0) &&
+	    cs.nr_cache * (uint64_t)getpagesize() >= e->space)
+		return;
+#  endif
+	(void)fallocate(sc->fd, FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
+	    (off_t)e->off, (off_t)e->space);
+#else
+	(void)sc;
+	(void)e;
+#endif
+}
+
 static int
 sdk_alloc(struct sdk_sc *sc, uint64_t want, uint64_t min, struct sdk_ext *e)
 {
@@ -409,6 +496,8 @@ sdk_alloc(struct sdk_sc *sc, uint64_t want, uint64_t min, struct sdk_ext *e)
 	} else
 		sc->stats->c_fail++;
 	Lck_Unlock(&sc->mtx);
+	if (r == 0)
+		sdk_zero(sc, e);
 	return (r);
 }
 
@@ -570,7 +659,7 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	uint64_t want, min;
 	unsigned n_ext;
 	size_t l;
-	int cancelled;
+	int cancelled, known;
 
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
@@ -581,6 +670,8 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);
 	o = sdk_getobj(oc);
 
+	/* A size hint is what remains of a known length */
+	known = *sz > 0;
 	if (*sz == 0)
 		*sz = cache_param->fetch_chunksize;
 	assert(*sz > 0);
@@ -604,7 +695,14 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	n_ext = o->n_ext;
 	e = n_ext > 0 ? &o->ext[n_ext - 1] : NULL;
 	if (e == NULL || e->len == e->space) {
-		if (e == NULL)
+		/*
+		 * Allocating more than we need for a small object leaves
+		 * a hole when it is trimmed, which concurrent fetches can
+		 * keep from coalescing.
+		 */
+		if (known)
+			want = *sz;
+		else if (e == NULL)
 			want = vmax_t(uint64_t, *sz, SDK_EXT_MIN);
 		else
 			want = vmax_t(uint64_t, *sz, e->space * 2);
@@ -1094,6 +1192,16 @@ sdk_hdr_write(const struct sdk_sc *sc, struct sdk_hdr *hdr)
 	return (fsync(sc->fd));
 }
 
+/* An index or map extent from disk */
+static int
+sdk_hdr_ext_ok(const struct sdk_sc *sc, const struct sdk_hdr_ext *e)
+{
+
+	return (e->off % SDK_GRAN == 0 && e->len % SDK_GRAN == 0 &&
+	    e->len > 0 && e->off >= sc->data_start &&
+	    e->len <= sc->data_end && e->off <= sc->data_end - e->len);
+}
+
 /* Returns a description of the problem, or NULL if the header is valid */
 static const char *
 sdk_hdr_check(const struct sdk_sc *sc, const struct sdk_hdr *hdr)
@@ -1114,23 +1222,28 @@ sdk_hdr_check(const struct sdk_sc *sc, const struct sdk_hdr *hdr)
 		return ("size changed");
 	if (!hdr->clean)
 		return ("not shut down cleanly");
-	if (hdr->n_idx_ext == 0 || hdr->n_idx_ext > SDK_IDX_EXT)
+	if (hdr->n_ext == 0 || hdr->n_ext > SDK_IDX_EXT ||
+	    hdr->n_idx_ext == 0 ||
+	    hdr->n_idx_ext > (sc->data_end - sc->data_start) / SDK_GRAN)
 		return ("bad index");
-	for (u = 0; u < hdr->n_idx_ext; u++) {
-		if (hdr->idx_ext[u].off < sc->data_start ||
-		    hdr->idx_ext[u].len > sc->data_end ||
-		    hdr->idx_ext[u].off > sc->data_end - hdr->idx_ext[u].len)
+	if (hdr->n_idx_ext <= SDK_IDX_EXT && hdr->n_ext != hdr->n_idx_ext)
+		return ("bad index");
+	for (u = 0; u < hdr->n_ext; u++) {
+		if (!sdk_hdr_ext_ok(sc, &hdr->ext[u]))
 			return ("bad index");
-		l += hdr->idx_ext[u].len;
+		l += hdr->ext[u].len;
 	}
-	if (l < hdr->idx_len)
+	if (hdr->n_idx_ext <= SDK_IDX_EXT && l < hdr->idx_len)
 		return ("bad index");
+	if (hdr->n_idx_ext > SDK_IDX_EXT &&
+	    l < (uint64_t)hdr->n_idx_ext * sizeof hdr->ext[0])
+		return ("bad index map");
 	return (NULL);
 }
 
 /*--------------------------------------------------------------------
- * Index byte stream, written to and read from the extents listed in
- * the header.  A writer with no extents only counts and hashes.
+ * Index byte stream, written to and read from a list of extents.  A
+ * writer with no extents only counts.
  */
 
 struct sdk_ios {
@@ -1206,9 +1319,9 @@ sdk_ios_put(struct sdk_ios *io, const void *ptr, size_t len)
 	size_t l;
 
 	io->total += len;
-	VSHA256_Update(&io->sha, ptr, len);
 	if (io->buf == NULL)
 		return;
+	VSHA256_Update(&io->sha, ptr, len);
 	while (len > 0) {
 		l = vmin_t(size_t, len, SDK_IOBUF - io->buf_pos);
 		memcpy(io->buf + io->buf_pos, p, l);
@@ -1403,32 +1516,78 @@ sdk_save_size(const struct sdk_sc *sc, const struct sdk_obj *o)
 }
 
 /*
- * Get space for the index, all or nothing.
+ * Get space for the index, all or nothing, largest free extents first.
+ * If it takes more extents than fit in the header, also get space for
+ * a map of them, which must fit in the header.
+ *
+ * Returns zero on success, otherwise how much more free space it takes
+ * (at least), or UINT64_MAX if we ran out of memory.
  */
-static int
-sdk_save_alloc(struct sdk_sc *sc, struct sdk_hdr *hdr, uint64_t len)
+static uint64_t
+sdk_save_alloc(struct sdk_sc *sc, struct sdk_hdr *hdr, uint64_t len,
+    struct sdk_hdr_ext **pext)
 {
+	struct sdk_hdr_ext *ext = NULL, *p;
 	struct sdk_ext e;
-	uint64_t rem;
-	unsigned u;
+	uint64_t rem, mrem = 0;
+	unsigned u, n = 0, l = 0;
+	int nomem = 0;
 
 	Lck_AssertHeld(&sc->mtx);
+	AN(pext);
+	AZ(*pext);
+	hdr->n_idx_ext = hdr->n_ext = 0;
+
 	rem = sdk_roundup(len);
-	hdr->n_idx_ext = 0;
-	while (rem > 0 && hdr->n_idx_ext < SDK_IDX_EXT) {
+	while (rem > 0) {
+		if (n == l) {
+			l = l ? l * 2 : SDK_IDX_EXT;
+			p = realloc(ext, l * sizeof *ext);
+			if (p == NULL) {
+				nomem = 1;
+				break;
+			}
+			ext = p;
+		}
 		if (sdk_alloc_locked(sc, rem, SDK_GRAN, &e))
 			break;
-		hdr->idx_ext[hdr->n_idx_ext].off = e.off;
-		hdr->idx_ext[hdr->n_idx_ext].len = e.space;
-		hdr->n_idx_ext++;
+		ext[n].off = e.off;
+		ext[n].len = e.space;
+		n++;
 		rem -= e.space;
 	}
-	if (rem == 0)
+
+	if (rem == 0 && n > SDK_IDX_EXT) {
+		mrem = sdk_roundup((uint64_t)n * sizeof *ext);
+		while (mrem > 0 && hdr->n_ext < SDK_IDX_EXT) {
+			if (sdk_alloc_locked(sc, mrem, SDK_GRAN, &e))
+				break;
+			hdr->ext[hdr->n_ext].off = e.off;
+			hdr->ext[hdr->n_ext].len = e.space;
+			hdr->n_ext++;
+			mrem -= e.space;
+		}
+	}
+
+	if (rem == 0 && mrem == 0) {
+		if (n <= SDK_IDX_EXT) {
+			memcpy(hdr->ext, ext, n * sizeof *ext);
+			hdr->n_ext = n;
+		}
+		hdr->n_idx_ext = n;
+		*pext = ext;
 		return (0);
-	for (u = 0; u < hdr->n_idx_ext; u++)
-		sdk_free_insert(sc, hdr->idx_ext[u].off, hdr->idx_ext[u].len);
-	hdr->n_idx_ext = 0;
-	return (-1);
+	}
+
+	for (u = 0; u < n; u++)
+		sdk_free_insert(sc, ext[u].off, ext[u].len);
+	for (u = 0; u < hdr->n_ext; u++)
+		sdk_free_insert(sc, hdr->ext[u].off, hdr->ext[u].len);
+	free(ext);
+	hdr->n_ext = 0;
+	if (nomem)
+		return (UINT64_MAX);
+	return (vmax_t(uint64_t, rem + mrem, SDK_GRAN));
 }
 
 /*
@@ -1478,15 +1637,18 @@ sdk_save_sacrifice(struct sdk_sc *sc, struct sdk_obj *o)
  * the process exits.
  *
  * A full cache may not have room for the index, in which case we give
- * up objects, oldest first, until it fits.
+ * up objects, oldest first, until it fits.  We only try to allocate
+ * once the free space adds up to what we know it takes, because each
+ * attempt can touch every free extent.
  */
 static void
 sdk_save(struct sdk_sc *sc)
 {
+	struct sdk_hdr_ext *ext = NULL;
 	struct sdk_hdr hdr;
 	struct sdk_ios io;
 	struct sdk_obj *o;
-	uint64_t len, sz;
+	uint64_t len, sz = 0, need = 0, s;
 	unsigned n, dropped = 0;
 	const char *err = NULL;
 	vtim_real t0;
@@ -1504,29 +1666,39 @@ sdk_save(struct sdk_sc *sc)
 	sdk_ios_fini(&io);
 
 	o = VTAILQ_FIRST(&sc->objs);
-	while (sdk_save_alloc(sc, &hdr, len)) {
+	while (1) {
+		if (sc->stats->g_space >= sdk_roundup(len) + need) {
+			s = sdk_save_alloc(sc, &hdr, len, &ext);
+			if (s == 0)
+				break;
+			if (s == UINT64_MAX) {
+				err = "out of memory for the index map";
+				break;
+			}
+			need += s;
+		}
 		for (; o != NULL; o = VTAILQ_NEXT(o, list)) {
 			if (!(o->flags & SDK_OF_SAVE))
 				continue;
 			sz = sdk_save_size(sc, o);
-			if (sdk_save_sacrifice(sc, o)) {
-				len -= sz;
-				n--;
-				dropped++;
+			if (sdk_save_sacrifice(sc, o))
 				break;
-			}
 		}
 		if (o == NULL) {
 			err = "not enough free space for the index";
 			break;
 		}
+		len -= sz;
+		n--;
+		dropped++;
 		o = VTAILQ_NEXT(o, list);
 	}
 	sc->closed = 1;
 
 	/* Second pass: write it */
 	if (err == NULL) {
-		sdk_ios_init(&io, sc, hdr.idx_ext, hdr.n_idx_ext, 0);
+		AN(ext);
+		sdk_ios_init(&io, sc, ext, hdr.n_idx_ext, 0);
 		sdk_save_stream(sc, &io);
 		if (sdk_ios_flush(&io))
 			err = io.nomem ? "out of memory for index buffer" :
@@ -1536,6 +1708,23 @@ sdk_save(struct sdk_sc *sc)
 		VSHA256_Final(hdr.idx_sha, &io.sha);
 		sdk_ios_fini(&io);
 	}
+
+	/*
+	 * We are done with the objects.  Nothing can be allocated or
+	 * freed any more, so other threads can have the lock back.
+	 */
+	Lck_Unlock(&sc->mtx);
+
+	if (err == NULL && hdr.n_idx_ext > SDK_IDX_EXT) {
+		sdk_ios_init(&io, sc, hdr.ext, hdr.n_ext, 0);
+		sdk_ios_put(&io, ext, hdr.n_idx_ext * sizeof *ext);
+		if (sdk_ios_flush(&io))
+			err = io.nomem ? "out of memory for index buffer" :
+			    "index map write error";
+		VSHA256_Final(hdr.map_sha, &io.sha);
+		sdk_ios_fini(&io);
+	}
+	free(ext);
 
 	/* Make sure bodies and index are on disk before we say so */
 	if (err == NULL && fsync(sc->fd))
@@ -1547,7 +1736,6 @@ sdk_save(struct sdk_sc *sc)
 		if (sdk_hdr_write(sc, &hdr))
 			err = "header write error";
 	}
-	Lck_Unlock(&sc->mtx);
 
 	if (err != NULL)
 		printf("DISK.%s: content not saved: %s\n",
@@ -1627,7 +1815,7 @@ sdk_load_attr(struct sdk_ios *io, uint8_t **pp, unsigned *plen)
 		return (-1);
 	if (l == 0)
 		return (0);
-	if (l > SDK_MAX_ATTR)
+	if (l > SDK_MAX_ATTR || l > io->limit - io->total)
 		return (-1);
 	*pp = malloc(l);
 	if (*pp == NULL) {
@@ -1648,7 +1836,8 @@ sdk_load_obj(const struct sdk_sc *sc, struct sdk_ios *io, struct sdk_load *lo)
 	if (sdk_ios_get(io, (uint8_t *)&lo->rec + sizeof lo->rec.magic,
 	    sizeof lo->rec - sizeof lo->rec.magic))
 		return (-1);
-	if (lo->rec.n_ext > SDK_MAX_EXT)
+	if (lo->rec.n_ext > SDK_MAX_EXT ||
+	    (uint64_t)lo->rec.n_ext * sizeof *e > io->limit - io->total)
 		return (-1);
 
 	ALLOC_OBJ(o, SDK_OBJ_MAGIC);
@@ -1695,10 +1884,53 @@ sdk_load_obj(const struct sdk_sc *sc, struct sdk_ios *io, struct sdk_load *lo)
 	return (0);
 }
 
+/* Read and verify the list of index extents from the map */
+static struct sdk_hdr_ext *
+sdk_load_map(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
+    struct sdk_loadctx *lc)
+{
+	struct sdk_hdr_ext *map;
+	struct sdk_ios io;
+	uint8_t sha[VSHA256_LEN];
+	uint64_t l;
+	unsigned u;
+	int r;
+
+	l = (uint64_t)hdr->n_idx_ext * sizeof *map;
+	map = malloc(l);
+	if (map == NULL) {
+		lc->nomem = 1;
+		return (NULL);
+	}
+	sdk_ios_init(&io, sc, hdr->ext, hdr->n_ext, l);
+	r = sdk_ios_get(&io, map, l);
+	lc->nomem = io.nomem;
+	VSHA256_Final(sha, &io.sha);
+	sdk_ios_fini(&io);
+	if (r == 0 && !memcmp(sha, hdr->map_sha, sizeof sha)) {
+		l = 0;
+		for (u = 0; u < hdr->n_idx_ext; u++) {
+			if (!sdk_hdr_ext_ok(sc, &map[u]))
+				break;
+			l += map[u].len;
+		}
+		if (u == hdr->n_idx_ext && l >= hdr->idx_len)
+			return (map);
+	}
+	free(map);
+	return (NULL);
+}
+
+/*
+ * Parse the index into lc in a single pass.  Nothing in lc is used
+ * unless the checksum of the whole index matches at the end.
+ */
 static int
 sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
     struct sdk_loadctx *lc)
 {
+	const struct sdk_hdr_ext *ext = hdr->ext;
+	struct sdk_hdr_ext *map = NULL;
 	struct sdk_ios io;
 	uint8_t sha[VSHA256_LEN];
 	struct sdk_load *lo, *p;
@@ -1706,38 +1938,19 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 	unsigned l;
 	int r = -1;
 
-	/* Verify the whole index before we trust any of it */
-	sdk_ios_init(&io, sc, hdr->idx_ext, hdr->n_idx_ext, hdr->idx_len);
-	if (io.nomem) {
-		lc->nomem = 1;
-		sdk_ios_fini(&io);
-		return (-1);
+	if (hdr->n_idx_ext > SDK_IDX_EXT) {
+		map = sdk_load_map(sc, hdr, lc);
+		if (map == NULL)
+			return (-1);
+		ext = map;
 	}
-	while (io.total < io.limit) {
-		if (io.buf_pos == io.buf_len) {
-			io.buf_len = vmin_t(uint64_t, SDK_IOBUF,
-			    io.limit - io.xfered);
-			io.buf_pos = 0;
-			sdk_ios_xfer(&io, io.buf_len, 0);
-			if (io.err)
-				break;
-			io.xfered += io.buf_len;
-		}
-		VSHA256_Update(&io.sha, io.buf, io.buf_len);
-		io.total += io.buf_len;
-		io.buf_pos = io.buf_len;
-	}
-	VSHA256_Final(sha, &io.sha);
-	sdk_ios_fini(&io);
-	if (io.err || memcmp(sha, hdr->idx_sha, sizeof sha))
-		return (-1);
 
-	sdk_ios_init(&io, sc, hdr->idx_ext, hdr->n_idx_ext, hdr->idx_len);
+	sdk_ios_init(&io, sc, ext, hdr->n_idx_ext, hdr->idx_len);
 	do {
 		if (sdk_ios_get(&io, &lc->bans_len, sizeof lc->bans_len))
 			break;
 		if (lc->bans_len > 0) {
-			if (lc->bans_len > hdr->idx_len)
+			if (lc->bans_len > io.limit - io.total)
 				break;
 			lc->bans = malloc(lc->bans_len);
 			if (lc->bans == NULL) {
@@ -1775,7 +1988,11 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 		}
 	} while (0);
 	lc->nomem = io.nomem;
+	VSHA256_Final(sha, &io.sha);
 	sdk_ios_fini(&io);
+	free(map);
+	if (r == 0 && memcmp(sha, hdr->idx_sha, sizeof sha))
+		r = -1;
 	if (r)
 		sdk_loadctx_fini(lc);
 	return (r);
@@ -1988,19 +2205,11 @@ sdk_open(struct stevedore *stv)
 	}
 
 	/*
-	 * Whatever happens from here on, the content on disk is only
-	 * valid again after an orderly sdk_close().  This must hit the
-	 * disk before we write anything else.
+	 * Loading only reads, and nothing can be allocated before we
+	 * return, so if we do not make it through, for instance because
+	 * loading takes longer than startup_timeout, the next attempt
+	 * finds the content intact.
 	 */
-	{
-		struct sdk_hdr nhdr;
-
-		sdk_hdr_init(sc, &nhdr);
-		if (sdk_hdr_write(sc, &nhdr))
-			ARGV_ERR("(-sdisk) %s: header write error: %s\n",
-			    sc->filename, VAS_errtxt(errno));
-	}
-
 	if (why == NULL)
 		sdk_open_load(sc, &hdr);
 	else
@@ -2014,6 +2223,18 @@ sdk_open(struct stevedore *stv)
 		sc->stats->g_space = sc->data_end - sc->data_start;
 		Lck_Unlock(&sc->mtx);
 	}
+
+	sdk_zero_init(sc);
+
+	/*
+	 * From here on, the content on disk is only valid again after
+	 * an orderly sdk_close().  This must hit the disk before any
+	 * extent is written.
+	 */
+	sdk_hdr_init(sc, &hdr);
+	if (sdk_hdr_write(sc, &hdr))
+		ARGV_ERR("(-sdisk) %s: header write error: %s\n",
+		    sc->filename, VAS_errtxt(errno));
 }
 
 /*--------------------------------------------------------------------

@@ -1,0 +1,62 @@
+varnishtest "-sdisk: an index in fragmented free space"
+
+# Header plus exactly 4096 pages of extents, filled with pairs of a
+# one page object which expires and a 15 page object which does not.
+# That leaves 256 single page holes, and the index needs more extents
+# than fit in the header.
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,16781312" \
+    -arg "-p default_grace=0" -arg "-p default_keep=0" -arg "-p shortlived=0" \
+    -arg "-p vsl_mask=none,+CLI" -vcl {
+	backend be none;
+
+	sub vcl_hash {
+		hash_data(req.xid);
+		return (lookup);
+	}
+	sub vcl_backend_fetch {
+		return (error(200));
+	}
+	sub vcl_backend_error {
+		if (bereq.url == "/short") {
+			set beresp.ttl = 1s;
+			set beresp.body = "${string,repeat,4096,s}";
+		} else {
+			set beresp.ttl = 1h;
+			set beresp.http.big = "${string,repeat,3000,x}";
+			set beresp.body = "${string,repeat,61440,l}";
+		}
+		return (deliver);
+	}
+	sub vcl_deliver {
+		unset resp.http.big;
+	}
+} -start
+
+client c1 {
+	loop 256 {
+		txreq -method HEAD -url "/short"
+		rxresp -no_obj
+		expect resp.status == 200
+		txreq -method HEAD -url "/long"
+		rxresp -no_obj
+		expect resp.status == 200
+	}
+} -run
+
+delay 1.5
+varnish v1 -expect MAIN.n_lru_nuked == 0
+varnish v1 -expect n_object == 256
+varnish v1 -expect DISK.disk.g_bytes == 15728640
+varnish v1 -expect DISK.disk.g_space == 1048576
+varnish v1 -expect DISK.disk.g_free_ext == 256
+
+varnish v1 -stop
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored == 256
+varnish v1 -expect DISK.disk.g_bytes == 15728640
+
+# Once more, from a restored index
+varnish v1 -stop
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored == 256
+varnish v1 -expect DISK.disk.g_bytes == 15728640

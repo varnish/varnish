@@ -478,7 +478,7 @@ storage *kind*\ s and options are built in:
 
   The disk backend stores object bodies in a file on disk, accessed
   with regular reads and writes. Object headers and other metadata are
-  kept in memory.
+  kept in memory, outside of the configured size.
 
   The content survives an orderly restart of the cache process, for
   instance ``varnishadm stop`` followed by ``varnishadm start``, or a

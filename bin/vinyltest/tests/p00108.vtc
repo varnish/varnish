@@ -59,7 +59,7 @@ varnish v1 -wait-stopped
 
 varnish v1 -start
 varnish v1 -expect DISK.disk.c_restored == 2
-varnish v1 -expect DISK.disk.g_bytes == 200704
+varnish v1 -expect DISK.disk.g_bytes == 204800
 
 client c3 {
 	txreq -url "/stream"

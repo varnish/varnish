@@ -226,8 +226,12 @@ syntax: disk,path[,size]
 The disk backend stores object bodies in a file, using regular reads
 and writes rather than `mmap`. Object headers and other metadata are
 kept in memory, so memory use grows with the number of objects, but
-not with their size. The page cache of the operating system acts as
-the memory tier for the bodies.
+not with their size. This memory is not part of the configured size;
+expect around a kilobyte per object, more with large headers. The page
+cache of the operating system acts as the memory tier for the bodies.
+
+Bodies are stored in multiples of 4KB, so small objects take up more
+space than their size.
 
 When configured as ``Transient`` storage, consumed body extents are
 recycled during streaming delivery. A response can therefore be larger
@@ -243,8 +247,8 @@ free space in the file, and the file is marked clean. On the next
 start, the index is loaded and the objects are available again,
 including the bans which applied to them.
 
-This storage is *not* crash safe: The file is marked unclean when the
-cache process starts, so if it stops for any other reason than an
+This storage is *not* crash safe: The file is marked unclean once the
+cache process has started, so if it stops for any other reason than an
 orderly shutdown, such as a panic, a crash or a power failure, the
 content is discarded on the next start. It is never partially
 reused.
@@ -254,7 +258,15 @@ A few things to keep in mind:
 * Writing the index happens while the cache process shuts down,
   which `varnishd` allows ``cli_timeout`` seconds for. This includes
   syncing all bodies to the disk. If it takes longer, the cache
-  process is killed, and the content is lost.
+  process is killed, and the content is lost. The time it took is
+  logged when the cache process stops; with millions of objects,
+  expect seconds.
+
+* Loading the index happens while the cache process starts, which
+  `varnishd` allows ``startup_timeout`` (or ``cli_timeout``, if that
+  is longer) for. If it takes longer, the cache process is killed, but
+  the content is kept, and the next attempt to start loads it again.
+  With millions of objects, consider raising ``startup_timeout``.
 
 * A body write error, such as an I/O error or running out of filesystem
   space, panics the cache process rather than exposing unwritten data.
@@ -270,9 +282,17 @@ A few things to keep in mind:
 * If allocating memory to parse the saved index fails, the cache
   starts empty and reports the allocation failure.
 
-* If the storage is full, the oldest objects are given up to make
-  room for the index. Objects without bodies can also be given up
-  to reduce the size of the index.
+* The index needs free space in the file, around half a kilobyte
+  per object, more with large headers. If the storage is full, the
+  oldest objects are given up to make room for the index. Objects
+  without bodies can also be given up to reduce the size of the
+  index.
+
+* On Linux, for a file on a filesystem which supports it, such as
+  ext4 or XFS, space is marked as zeroed with `fallocate(2)` when it
+  is allocated to an object. This saves the kernel from reading
+  evicted pages back from the disk before writing to them, which
+  matters when the storage is larger than the memory.
 
 * Changing the size of the file, or pointing `varnishd` at a
   directory (which creates an anonymous file), means starting empty.
