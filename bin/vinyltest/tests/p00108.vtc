@@ -1,0 +1,72 @@
+varnishtest "-sdisk: clean shutdown waits for a streaming fetch"
+
+barrier b1 cond 2
+barrier b2 cond 2
+barrier b3 cond 2
+
+server s1 {
+	rxreq
+	expect req.url == "/kept"
+	txresp -body "kept"
+
+	rxreq
+	expect req.url == "/stream"
+	txresp -nolen -hdr "Transfer-Encoding: chunked"
+	chunkedlen 100000
+	barrier b1 sync
+	barrier b2 sync
+	chunkedlen 100000
+	chunkedlen 0
+} -start
+
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,20m" -vcl+backend {
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+
+client c1 {
+	txreq -url "/kept"
+	rxresp
+	expect resp.body == "kept"
+} -run
+
+client c2 {
+	txreq -url "/stream"
+	rxresphdrs
+	expect resp.status == 200
+	barrier b3 sync
+	rxrespbody
+	expect resp.bodylen == 200000
+} -start
+barrier b1 sync
+barrier b3 sync
+varnish v1 -expect DISK.disk.g_bytes > 512
+
+logexpect l1 -v v1 -g raw {
+	expect * 0 CLI "EOF on CLI connection, worker stops"
+} -start
+
+process p1 "varnishadm -n ${v1_name} -t 20 stop" -start
+logexpect l1 -wait
+
+# Shutdown has started, but the backend and client have not finished.
+barrier b2 sync
+client c2 -wait
+server s1 -wait
+process p1 -wait
+varnish v1 -wait-stopped
+
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored == 2
+varnish v1 -expect DISK.disk.g_bytes == 200704
+
+client c3 {
+	txreq -url "/stream"
+	rxresp
+	expect resp.bodylen == 200000
+	txreq -url "/kept"
+	rxresp
+	expect resp.body == "kept"
+} -run
+varnish v1 -expect MAIN.backend_req == 0

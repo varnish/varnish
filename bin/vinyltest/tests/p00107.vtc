@@ -1,0 +1,62 @@
+varnishtest "-sdisk: gzip and compressed ESI survive clean restarts"
+
+server s1 {
+	rxreq
+	expect req.url == "/gzip"
+	txresp -gzipbody "stored gzip body"
+
+	rxreq
+	expect req.url == "/esi"
+	txresp -body {<a><esi:include src="/gzip"/><b>}
+} -start
+
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,20m" -vcl+backend {
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+		if (bereq.url == "/esi") {
+			set beresp.do_esi = true;
+			set beresp.do_gzip = true;
+		}
+	}
+} -start
+
+client c1 {
+	txreq -url "/gzip" -hdr "Accept-Encoding: gzip"
+	rxresp
+	expect resp.http.Content-Encoding == "gzip"
+	gunzip
+	expect resp.body == "stored gzip body"
+
+	txreq -url "/esi" -hdr "Accept-Encoding: gzip"
+	rxresp
+	expect resp.http.Content-Encoding == "gzip"
+	gunzip
+	expect resp.body == "<a>stored gzip body<b>"
+} -run
+server s1 -wait
+
+loop 2 {
+	varnish v1 -stop
+	varnish v1 -start
+	varnish v1 -expect DISK.disk.c_restored == 2
+
+	client c2 {
+		txreq -url "/gzip"
+		rxresp
+		expect resp.http.Content-Encoding == <undef>
+		expect resp.body == "stored gzip body"
+
+		txreq -url "/gzip" -hdr "Accept-Encoding: gzip"
+		rxresp
+		expect resp.http.Content-Encoding == "gzip"
+		gunzip
+		expect resp.body == "stored gzip body"
+
+		txreq -url "/esi" -hdr "Accept-Encoding: gzip"
+		rxresp
+		expect resp.http.Content-Encoding == "gzip"
+		gunzip
+		expect resp.body == "<a>stored gzip body<b>"
+	} -run
+	varnish v1 -expect MAIN.backend_req == 0
+}

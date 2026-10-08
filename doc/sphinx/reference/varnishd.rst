@@ -487,8 +487,12 @@ storage *kind*\ s and options are built in:
   next start.
 
   The path and size work as for the file backend. If path points to a
-  directory, the file is anonymous and the content only survives a
-  restart of the cache process, not of `varnishd`.
+  directory, the file is anonymous and the content does not survive
+  a restart.
+
+  The storage file is exclusively locked while the cache process is
+  running. Configuring another disk stevedore to use the same file
+  concurrently is an error.
 
 -s <persistent,path,size>
 

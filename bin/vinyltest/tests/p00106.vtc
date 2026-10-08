@@ -1,0 +1,81 @@
+varnishtest "-sdisk: reject concurrent use before resizing the storage file"
+
+server s1 {
+	rxreq
+	txresp -body "kept"
+} -start
+
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,20m" -vcl+backend {
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.body == "kept"
+} -run
+
+# A hard link also refers to the same locked file.
+shell {ln ${tmpdir}/_.disk ${tmpdir}/_.alias}
+shell -err -expect "cannot lock storage file" {
+	varnishd -jnone -F -n ${tmpdir}/v2 -b None -a 127.0.0.1:0 \
+	    -s disk,${tmpdir}/_.alias,17m
+}
+shell {test "$(wc -c < ${tmpdir}/_.disk)" -eq 20971520}
+
+client c2 {
+	txreq
+	rxresp
+	expect resp.body == "kept"
+} -run
+
+varnish v1 -stop
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored == 1
+
+client c3 {
+	txreq
+	rxresp
+	expect resp.body == "kept"
+} -run
+
+# Exiting the cache process releases the lock for another instance.
+varnish v1 -stop
+varnish v3 -arg "-sdisk=disk,${tmpdir}/_.alias,20m" -vcl+backend {
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+varnish v3 -expect DISK.disk.c_restored == 1
+
+client c4 -connect ${v3_sock} {
+	txreq
+	rxresp
+	expect resp.body == "kept"
+} -run
+
+# Directory storage gets a new anonymous file on each cache-process start.
+server s1 -wait
+server s1 {
+	rxreq
+	txresp -body "anonymous"
+} -start
+
+varnish v4 -arg "-sdisk=disk,${tmpdir},20m" -vcl+backend {
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+
+client c5 -connect ${v4_sock} {
+	txreq
+	rxresp
+	expect resp.body == "anonymous"
+} -run
+
+varnish v4 -stop
+varnish v4 -start
+varnish v4 -expect DISK.disk.c_restored == 0
+varnish v4 -expect DISK.disk.g_bytes == 0

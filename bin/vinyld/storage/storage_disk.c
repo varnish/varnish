@@ -58,6 +58,8 @@
 
 #include "config.h"
 
+#include <sys/file.h>
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -678,6 +680,9 @@ sdk_extend(struct worker *wrk, struct objcore *oc, ssize_t l)
 	 * XXX: This is called with the boc mtx held.  The write normally
 	 * only hits the page cache, but under writeback pressure this will
 	 * hold up streaming readers of this object.
+	 *
+	 * The void extend interface cannot report an I/O failure to the
+	 * fetch. Panic rather than publish unwritten bytes to readers.
 	 */
 	if (sdk_pwrite(o->sc, fs->buf + fs->pos, l, e->off + e->len))
 		WRONG("disk stevedore write error");
@@ -1142,6 +1147,7 @@ struct sdk_ios {
 	size_t			buf_len;
 	size_t			buf_pos;
 	int			err;
+	int			nomem;
 };
 
 static void
@@ -1157,7 +1163,10 @@ sdk_ios_init(struct sdk_ios *io, const struct sdk_sc *sc,
 	VSHA256_Init(&io->sha);
 	if (n_ext > 0) {
 		io->buf = malloc(SDK_IOBUF);
-		AN(io->buf);
+		if (io->buf == NULL) {
+			io->err = 1;
+			io->nomem = 1;
+		}
 	}
 }
 
@@ -1520,7 +1529,8 @@ sdk_save(struct sdk_sc *sc)
 		sdk_ios_init(&io, sc, hdr.idx_ext, hdr.n_idx_ext, 0);
 		sdk_save_stream(sc, &io);
 		if (sdk_ios_flush(&io))
-			err = "index write error";
+			err = io.nomem ? "out of memory for index buffer" :
+			    "index write error";
 		else
 			assert(io.total == len);
 		VSHA256_Final(hdr.idx_sha, &io.sha);
@@ -1580,6 +1590,7 @@ struct sdk_loadctx {
 	unsigned		l;
 	uint8_t			*bans;
 	uint32_t		bans_len;
+	int			nomem;
 };
 
 static void
@@ -1619,7 +1630,10 @@ sdk_load_attr(struct sdk_ios *io, uint8_t **pp, unsigned *plen)
 	if (l > SDK_MAX_ATTR)
 		return (-1);
 	*pp = malloc(l);
-	AN(*pp);
+	if (*pp == NULL) {
+		io->nomem = 1;
+		return (-1);
+	}
 	*plen = l;
 	return (sdk_ios_get(io, *pp, l));
 }
@@ -1638,7 +1652,10 @@ sdk_load_obj(const struct sdk_sc *sc, struct sdk_ios *io, struct sdk_load *lo)
 		return (-1);
 
 	ALLOC_OBJ(o, SDK_OBJ_MAGIC);
-	AN(o);
+	if (o == NULL) {
+		io->nomem = 1;
+		return (-1);
+	}
 	lo->o = o;
 
 #define OBJ_FIXATTR(U, n, s)					\
@@ -1658,7 +1675,10 @@ sdk_load_obj(const struct sdk_sc *sc, struct sdk_ios *io, struct sdk_load *lo)
 
 	if (lo->rec.n_ext > 0) {
 		o->ext = calloc(lo->rec.n_ext, sizeof *o->ext);
-		AN(o->ext);
+		if (o->ext == NULL) {
+			io->nomem = 1;
+			return (-1);
+		}
 		o->n_ext = o->l_ext = lo->rec.n_ext;
 		if (sdk_ios_get(io, o->ext, o->n_ext * sizeof *o->ext))
 			return (-1);
@@ -1681,12 +1701,18 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 {
 	struct sdk_ios io;
 	uint8_t sha[VSHA256_LEN];
-	struct sdk_load *lo;
+	struct sdk_load *lo, *p;
 	uint32_t magic;
+	unsigned l;
 	int r = -1;
 
 	/* Verify the whole index before we trust any of it */
 	sdk_ios_init(&io, sc, hdr->idx_ext, hdr->n_idx_ext, hdr->idx_len);
+	if (io.nomem) {
+		lc->nomem = 1;
+		sdk_ios_fini(&io);
+		return (-1);
+	}
 	while (io.total < io.limit) {
 		if (io.buf_pos == io.buf_len) {
 			io.buf_len = vmin_t(uint64_t, SDK_IOBUF,
@@ -1714,7 +1740,10 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 			if (lc->bans_len > hdr->idx_len)
 				break;
 			lc->bans = malloc(lc->bans_len);
-			AN(lc->bans);
+			if (lc->bans == NULL) {
+				io.nomem = 1;
+				break;
+			}
 			if (sdk_ios_get(&io, lc->bans, lc->bans_len))
 				break;
 		}
@@ -1729,9 +1758,14 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 			if (magic != SDK_REC_SIGNATURE)
 				break;
 			if (lc->n == lc->l) {
-				lc->l = lc->l ? lc->l * 2 : 1024;
-				lc->lo = realloc(lc->lo, lc->l * sizeof *lc->lo);
-				AN(lc->lo);
+				l = lc->l ? lc->l * 2 : 1024;
+				p = realloc(lc->lo, (size_t)l * sizeof *p);
+				if (p == NULL) {
+					io.nomem = 1;
+					break;
+				}
+				lc->lo = p;
+				lc->l = l;
 			}
 			lo = &lc->lo[lc->n++];
 			memset(lo, 0, sizeof *lo);
@@ -1740,6 +1774,7 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 				break;
 		}
 	} while (0);
+	lc->nomem = io.nomem;
 	sdk_ios_fini(&io);
 	if (r)
 		sdk_loadctx_fini(lc);
@@ -1796,11 +1831,15 @@ sdk_load_prepare(struct sdk_sc *sc, struct sdk_loadctx *lc, vtim_real now)
 
 	if (n_all > 0) {
 		all = malloc(n_all * sizeof *all);
-		AN(all);
+		if (all == NULL) {
+			lc->nomem = 1;
+			return (-1);
+		}
 	}
 	for (u = v = 0; u < lc->n; u++) {
-		memcpy(all + v, lc->lo[u].o->ext,
-		    lc->lo[u].o->n_ext * sizeof *all);
+		if (lc->lo[u].o->n_ext > 0)
+			memcpy(all + v, lc->lo[u].o->ext,
+			    lc->lo[u].o->n_ext * sizeof *all);
 		v += lc->lo[u].o->n_ext;
 	}
 	assert(v == n_all);
@@ -1895,8 +1934,9 @@ sdk_open_load(struct sdk_sc *sc, const struct sdk_hdr *hdr)
 	INIT_OBJ(lc, SDK_LOADCTX_MAGIC);
 	lc->sc = sc;
 	if (sdk_load_index(sc, hdr, lc)) {
-		printf("DISK.%s: starting empty: index corrupt\n",
-		    sc->stv->ident);
+		printf("DISK.%s: starting empty: %s\n",
+		    sc->stv->ident, lc->nomem ?
+		    "out of memory loading index" : "index corrupt");
 		return;
 	}
 
@@ -1904,8 +1944,9 @@ sdk_open_load(struct sdk_sc *sc, const struct sdk_hdr *hdr)
 		BAN_Reload(lc->bans, lc->bans_len);
 
 	if (sdk_load_prepare(sc, lc, VTIM_real())) {
-		printf("DISK.%s: starting empty: extents overlap\n",
-		    sc->stv->ident);
+		printf("DISK.%s: starting empty: %s\n",
+		    sc->stv->ident, lc->nomem ?
+		    "out of memory preparing free map" : "extents overlap");
 		sdk_loadctx_fini(lc);
 		return;
 	}
@@ -1976,7 +2017,7 @@ sdk_open(struct stevedore *stv)
 }
 
 /*--------------------------------------------------------------------
- * Configure the storage in the manager process
+ * Configure the storage before entering the worker jail
  */
 
 static void v_matchproto_(storage_init_f)
@@ -1985,6 +2026,7 @@ sdk_init(struct stevedore *parent, int ac, char * const *av)
 	const char *size = NULL;
 	struct sdk_sc *sc;
 	unsigned gran = SDK_HDR_SIZE;
+	int r;
 
 	AZ(av[ac]);
 	if (ac > 2)
@@ -1998,7 +2040,14 @@ sdk_init(struct stevedore *parent, int ac, char * const *av)
 	AN(sc);
 	sc->fd = -1;
 	(void)STV_GetFile(av[0], &sc->fd, &sc->filename, "-sdisk");
+	do {
+		r = flock(sc->fd, LOCK_EX | LOCK_NB);
+	} while (r && errno == EINTR);
+	if (r)
+		ARGV_ERR("(-sdisk) %s: cannot lock storage file: %s\n",
+		    sc->filename, VAS_errtxt(errno));
 	MCH_Fd_Inherit(sc->fd, "storage_disk");
+	/* FileSize rounds the media size; extents use SDK_GRAN separately. */
 	sc->mediasize = STV_FileSize(sc->fd, size, &gran, "-sdisk");
 	if (sc->mediasize < SDK_HDR_SIZE + SDK_EXT_MAX)
 		ARGV_ERR("(-sdisk) size too small\n");

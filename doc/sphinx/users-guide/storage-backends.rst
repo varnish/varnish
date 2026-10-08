@@ -234,7 +234,8 @@ recycled during streaming delivery. A response can therefore be larger
 than the storage when transit buffering is enabled.
 
 The 'path' and 'size' parameters work as for the file backend. The
-size must be at least 16MB.
+size must allow for a 4KB header in addition to at least 16MB of body
+storage, after rounding down to the filesystem block size.
 
 The content survives an orderly restart of the cache process. When
 the cache process shuts down, an index of all objects is written to
@@ -254,6 +255,20 @@ A few things to keep in mind:
   which `varnishd` allows ``cli_timeout`` seconds for. This includes
   syncing all bodies to the disk. If it takes longer, the cache
   process is killed, and the content is lost.
+
+* A body write error, such as an I/O error or running out of filesystem
+  space, panics the cache process rather than exposing unwritten data.
+  This discards the stored content on the next start. Read errors fail
+  the affected delivery instead.
+
+* The storage file is exclusively locked while the cache process is
+  running. Another disk stevedore cannot open the same file at that
+  time, even under a different name or with a different configured
+  size. The lock is released when the cache process exits.
+  This is an advisory lock; other programs must not modify the file.
+
+* If allocating memory to parse the saved index fails, the cache
+  starts empty and reports the allocation failure.
 
 * If the storage is full, the oldest objects are given up to make
   room for the index. Objects without bodies can also be given up
