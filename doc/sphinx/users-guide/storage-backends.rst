@@ -256,7 +256,8 @@ A few things to keep in mind:
   process is killed, and the content is lost.
 
 * If the storage is full, the oldest objects are given up to make
-  room for the index.
+  room for the index. Objects without bodies can also be given up
+  to reduce the size of the index.
 
 * Changing the size of the file, or pointing `varnishd` at a
   directory (which creates an anonymous file), means starting empty.

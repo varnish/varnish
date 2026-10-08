@@ -1,0 +1,67 @@
+varnishtest "-sdisk: dropping metadata-only objects can make the index fit"
+
+server s1 -repeat 10 -keepalive {
+	rxreq
+	txresp -status 204 -hdr "Big: ${string,repeat,1024,x}"
+} -start
+
+server s2 -repeat 15 -keepalive {
+	rxreq
+	txresp -bodylen 1048576
+} -start
+
+server s3 {
+	rxreq
+	txresp -bodylen 1040384
+} -start
+
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,16781312" -vcl+backend {
+	import std;
+
+	sub vcl_hash {
+		hash_data(std.random(0, 1000000000));
+	}
+	sub vcl_backend_fetch {
+		if (bereq.url == "/body") {
+			set bereq.backend = s2;
+		} else if (bereq.url == "/tail") {
+			set bereq.backend = s3;
+		}
+	}
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+
+client c1 {
+	loop 10 {
+		txreq -url "/headers"
+		rxresp
+		expect resp.status == 204
+	}
+	loop 15 {
+		txreq -url "/body"
+		rxresp
+		expect resp.bodylen == 1048576
+	}
+	txreq -url "/tail"
+	rxresp
+	expect resp.bodylen == 1040384
+} -run
+
+varnish v1 -expect DISK.disk.g_bytes == 16769024
+varnish v1 -expect DISK.disk.g_space == 8192
+varnish v1 -expect MAIN.n_lru_nuked == 0
+
+varnish v1 -stop
+varnish v1 -start
+
+# Removing some headers shrinks the index enough to retain every body.
+varnish v1 -expect DISK.disk.c_restored > 16
+varnish v1 -expect DISK.disk.c_restored < 26
+varnish v1 -expect DISK.disk.g_bytes == 16769024
+
+varnish v1 -stop
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored > 16
+varnish v1 -expect DISK.disk.g_bytes == 16769024

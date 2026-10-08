@@ -1428,7 +1428,7 @@ sdk_save_alloc(struct sdk_sc *sc, struct sdk_hdr *hdr, uint64_t len)
  * one, because its extents are about to be overwritten.
  */
 static int
-sdk_save_sacrifice(struct sdk_sc *sc, struct sdk_obj *o, uint64_t *freed)
+sdk_save_sacrifice(struct sdk_sc *sc, struct sdk_obj *o)
 {
 	struct objcore *oc;
 	struct objhead *oh;
@@ -1454,7 +1454,8 @@ sdk_save_sacrifice(struct sdk_sc *sc, struct sdk_obj *o, uint64_t *freed)
 	o->flags &= ~SDK_OF_SAVE;
 	for (u = 0; u < o->n_ext; u++) {
 		sdk_free_ext_locked(sc, o->ext[u].off, o->ext[u].space);
-		*freed += o->ext[u].space;
+		if (o->ext[u].space > 0)
+			sc->stats->g_alloc--;
 	}
 	o->n_ext = 0;
 	o->len = 0;
@@ -1476,7 +1477,7 @@ sdk_save(struct sdk_sc *sc)
 	struct sdk_hdr hdr;
 	struct sdk_ios io;
 	struct sdk_obj *o;
-	uint64_t len, need, freed;
+	uint64_t len, sz;
 	unsigned n, dropped = 0;
 	const char *err = NULL;
 	vtim_real t0;
@@ -1495,27 +1496,22 @@ sdk_save(struct sdk_sc *sc)
 
 	o = VTAILQ_FIRST(&sc->objs);
 	while (sdk_save_alloc(sc, &hdr, len)) {
-		/* Short on space, or too fragmented */
-		need = sdk_roundup(len);
-		if (need > sc->stats->g_space)
-			need -= sc->stats->g_space;
-		else
-			need = SDK_EXT_MAX;
-		freed = 0;
-		for (; o != NULL && freed < need; o = VTAILQ_NEXT(o, list)) {
+		for (; o != NULL; o = VTAILQ_NEXT(o, list)) {
 			if (!(o->flags & SDK_OF_SAVE))
 				continue;
-			len -= sdk_save_size(sc, o);
-			if (sdk_save_sacrifice(sc, o, &freed)) {
+			sz = sdk_save_size(sc, o);
+			if (sdk_save_sacrifice(sc, o)) {
+				len -= sz;
 				n--;
 				dropped++;
-			} else
-				len += sdk_save_size(sc, o);
+				break;
+			}
 		}
-		if (o == NULL && freed < need) {
+		if (o == NULL) {
 			err = "not enough free space for the index";
 			break;
 		}
+		o = VTAILQ_NEXT(o, list);
 	}
 	sc->closed = 1;
 
