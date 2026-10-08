@@ -229,6 +229,10 @@ kept in memory, so memory use grows with the number of objects, but
 not with their size. The page cache of the operating system acts as
 the memory tier for the bodies.
 
+When configured as ``Transient`` storage, consumed body extents are
+recycled during streaming delivery. A response can therefore be larger
+than the storage when transit buffering is enabled.
+
 The 'path' and 'size' parameters work as for the file backend. The
 size must be at least 16MB.
 

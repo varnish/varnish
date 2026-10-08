@@ -566,7 +566,9 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	struct sdk_obj *o;
 	struct sdk_ext *e, ne;
 	uint64_t want, min;
+	unsigned n_ext;
 	size_t l;
+	int cancelled;
 
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
@@ -596,16 +598,36 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	}
 	CAST_OBJ_NOTNULL(fs, oc->boc->stevedore_priv, SDK_FETCH_MAGIC);
 
-	e = o->n_ext > 0 ? &o->ext[o->n_ext - 1] : NULL;
+	Lck_Lock(&oc->boc->mtx);
+	n_ext = o->n_ext;
+	e = n_ext > 0 ? &o->ext[n_ext - 1] : NULL;
 	if (e == NULL || e->len == e->space) {
 		if (e == NULL)
 			want = vmax_t(uint64_t, *sz, SDK_EXT_MIN);
 		else
 			want = vmax_t(uint64_t, *sz, e->space * 2);
 		want = vmin_t(uint64_t, want, SDK_EXT_MAX);
+		if (oc->boc->transit_buffer > 0)
+			want = vmin_t(uint64_t, want,
+			    oc->boc->transit_buffer);
 		min = vmin_t(uint64_t, want, SDK_EXT_ACCEPT);
+		Lck_Unlock(&oc->boc->mtx);
 
 		while (sdk_alloc(o->sc, want, min, &ne)) {
+			if (oc->boc->transit_buffer > 0 && n_ext > 0) {
+				/* The consumer can return extents while we wait. */
+				Lck_Lock(&oc->boc->mtx);
+				while (o->n_ext == n_ext &&
+				    !(oc->flags & OC_F_CANCEL))
+					(void)Lck_CondWait(&oc->boc->cond,
+					    &oc->boc->mtx);
+				n_ext = o->n_ext;
+				cancelled = oc->flags & OC_F_CANCEL;
+				Lck_Unlock(&oc->boc->mtx);
+				if (cancelled)
+					return (0);
+				continue;
+			}
 			if (stv->lru == NULL || !LRU_NukeOne(wrk, stv->lru))
 				return (0);
 		}
@@ -617,7 +639,6 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 			AN(o->ext);
 		}
 		o->ext[o->n_ext++] = ne;
-		Lck_Unlock(&oc->boc->mtx);
 		e = &o->ext[o->n_ext - 1];
 	}
 	assert(e->len < e->space);
@@ -625,6 +646,9 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	if (fs->pos == SDK_WRBUF)
 		fs->pos = 0;
 	l = vmin_t(size_t, SDK_WRBUF - fs->pos, e->space - e->len);
+	if (oc->boc->transit_buffer > 0)
+		l = vmin_t(size_t, l, *sz);
+	Lck_Unlock(&oc->boc->mtx);
 	assert(l > 0);
 	*sz = (ssize_t)l;
 	*ptr = fs->buf + fs->pos;
@@ -676,12 +700,17 @@ sdk_trimstore(struct worker *wrk, struct objcore *oc)
 
 	sdk_fetch_fini(oc->boc);
 
-	if (o->n_ext == 0)
+	Lck_Lock(&oc->boc->mtx);
+	if (o->n_ext == 0) {
+		Lck_Unlock(&oc->boc->mtx);
 		return;
+	}
 	e = &o->ext[o->n_ext - 1];
 	space = sdk_roundup(e->len);
-	if (space == e->space)
+	if (space == e->space) {
+		Lck_Unlock(&oc->boc->mtx);
 		return;
+	}
 
 	Lck_Lock(&o->sc->mtx);
 	sdk_free_ext_locked(o->sc, e->off + space, e->space - space);
@@ -689,7 +718,6 @@ sdk_trimstore(struct worker *wrk, struct objcore *oc)
 		o->sc->stats->g_alloc--;
 	Lck_Unlock(&o->sc->mtx);
 
-	Lck_Lock(&oc->boc->mtx);
 	e->space = space;
 	if (space == 0)
 		o->n_ext--;
@@ -740,6 +768,27 @@ sdk_bocdone(struct worker *wrk, struct objcore *oc, struct boc *boc)
  * iterator function must be flushed.
  */
 
+static void
+sdk_iterator_free_ext(struct sdk_obj *o, struct boc *boc, unsigned ei)
+{
+	struct sdk_ext *e;
+
+	if (boc != NULL)
+		Lck_Lock(&boc->mtx);
+	assert(ei < o->n_ext);
+	e = &o->ext[ei];
+	Lck_Lock(&o->sc->mtx);
+	sdk_free_ext_locked(o->sc, e->off, e->space);
+	o->sc->stats->g_alloc--;
+	Lck_Unlock(&o->sc->mtx);
+	memmove(e, e + 1, (o->n_ext - ei - 1) * sizeof *e);
+	o->n_ext--;
+	if (boc != NULL) {
+		PTOK(pthread_cond_signal(&boc->cond));
+		Lck_Unlock(&boc->mtx);
+	}
+}
+
 static int v_matchproto_(objiterator_f)
 sdk_iterator(struct worker *wrk, struct objcore *oc,
     void *priv, objiterate_f *func, int final)
@@ -756,7 +805,6 @@ sdk_iterator(struct worker *wrk, struct objcore *oc,
 
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	AN(func);
-	(void)final;
 	o = sdk_getobj(oc);
 
 	boc = HSH_RefBoc(oc);
@@ -812,6 +860,11 @@ sdk_iterator(struct worker *wrk, struct objcore *oc,
 			if (done == avail && state == BOS_FINISHED)
 				u |= OBJ_ITER_END;
 			r = func(priv, u, buf, l);
+			if (final && r == 0 && (epos == e.space ||
+			    (state == BOS_FINISHED && epos == e.len))) {
+				sdk_iterator_free_ext(o, boc, ei);
+				epos = 0;
+			}
 		}
 		if (state == BOS_FINISHED && done == avail)
 			break;
