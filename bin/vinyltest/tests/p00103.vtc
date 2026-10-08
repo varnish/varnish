@@ -1,0 +1,33 @@
+varnishtest "-sdisk: a full storage gives up objects to fit the index"
+
+server s1 -repeat 16 -keepalive {
+	rxreq
+	txresp -bodylen 1048576
+} -start
+
+# Header plus exactly 16MB of extents
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,16781312" -vcl+backend {
+	import std;
+
+	sub vcl_hash {
+		hash_data(std.random(0, 1000000000));
+	}
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+
+client c1 {
+	loop 16 {
+		txreq
+		rxresp
+		expect resp.bodylen == 1048576
+	}
+} -run
+
+varnish v1 -expect DISK.disk.g_space == 0
+varnish v1 -expect MAIN.n_lru_nuked == 0
+
+varnish v1 -stop
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored == 15

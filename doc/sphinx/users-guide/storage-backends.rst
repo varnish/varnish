@@ -218,6 +218,49 @@ and MADV_SEQUENTIAL madvise() advice argument, respectively.  Defaults to
 On Linux, large objects and rotational disk should benefit from
 "sequential".
 
+disk
+~~~~
+
+syntax: disk,path[,size]
+
+The disk backend stores object bodies in a file, using regular reads
+and writes rather than `mmap`. Object headers and other metadata are
+kept in memory, so memory use grows with the number of objects, but
+not with their size. The page cache of the operating system acts as
+the memory tier for the bodies.
+
+The 'path' and 'size' parameters work as for the file backend. The
+size must be at least 16MB.
+
+The content survives an orderly restart of the cache process. When
+the cache process shuts down, an index of all objects is written to
+free space in the file, and the file is marked clean. On the next
+start, the index is loaded and the objects are available again,
+including the bans which applied to them.
+
+This storage is *not* crash safe: The file is marked unclean when the
+cache process starts, so if it stops for any other reason than an
+orderly shutdown, such as a panic, a crash or a power failure, the
+content is discarded on the next start. It is never partially
+reused.
+
+A few things to keep in mind:
+
+* Writing the index happens while the cache process shuts down,
+  which `varnishd` allows ``cli_timeout`` seconds for. This includes
+  syncing all bodies to the disk. If it takes longer, the cache
+  process is killed, and the content is lost.
+
+* If the storage is full, the oldest objects are given up to make
+  room for the index.
+
+* Changing the size of the file, or pointing `varnishd` at a
+  directory (which creates an anonymous file), means starting empty.
+
+* Objects are found again by their hash, so a change of ``vcl_hash``
+  across a restart makes the old objects unreachable, until they are
+  evicted or expire.
+
 deprecated_persistent
 ---------------------
 
