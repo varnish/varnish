@@ -282,7 +282,6 @@ ved_vdp_esi_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 
 	ALLOC_OBJ(ecx, ECX_MAGIC);
 	AN(ecx);
-	assert(sizeof gzip_hdr == 10);
 	ecx->preq = ctx->req;
 	*priv = ecx;
 	RFC2616_Weaken_Etag(vdc->hp);
@@ -343,7 +342,7 @@ ved_vdp_esi_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 			if (*ecx->p == VEC_GZ) {
 				if (ecx->pecx == NULL)
 					retval = VDP_bytes(vdc, VDP_NULL,
-					    gzip_hdr, 10);
+					    gzip_hdr, sizeof gzip_hdr);
 				ecx->l_crc = 0;
 				ecx->crc = crc32(0L, Z_NULL, 0);
 				ecx->isgzip = 1;
