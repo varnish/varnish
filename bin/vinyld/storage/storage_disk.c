@@ -88,10 +88,10 @@
 #define SDK_IOBUF		(1024 * 1024)	/* index io buffer */
 #define SDK_IDX_EXT		128		/* index extents in header */
 
-#define SDK_HDR_MAGIC		"Varnish Disk 1\n"
+#define SDK_HDR_SIGNATURE	"Varnish Disk 1\n"
 #define SDK_BYTEORDER		0x01020304U
 #define SDK_VERSION		1U
-#define SDK_REC_MAGIC		0x5344524bU	/* "SDRK" */
+#define SDK_REC_SIGNATURE	0x5344524bU	/* "SDRK" */
 #define SDK_REC_END		0x53444e44U	/* "SDND" */
 
 /* sanity limits when parsing the index */
@@ -1068,7 +1068,7 @@ sdk_hdr_init(const struct sdk_sc *sc, struct sdk_hdr *hdr)
 {
 
 	memset(hdr, 0, sizeof *hdr);
-	bprintf(hdr->magic, "%s", SDK_HDR_MAGIC);
+	bprintf(hdr->magic, "%s", SDK_HDR_SIGNATURE);
 	hdr->byteorder = SDK_BYTEORDER;
 	hdr->version = SDK_VERSION;
 	hdr->hdrsize = sizeof *hdr;
@@ -1097,7 +1097,7 @@ sdk_hdr_check(const struct sdk_sc *sc, const struct sdk_hdr *hdr)
 	unsigned u;
 	uint64_t l = 0;
 
-	if (memcmp(hdr->magic, SDK_HDR_MAGIC, sizeof SDK_HDR_MAGIC))
+	if (memcmp(hdr->magic, SDK_HDR_SIGNATURE, sizeof SDK_HDR_SIGNATURE))
 		return ("no header");
 	sdk_hdr_sha(hdr, sha);
 	if (memcmp(sha, hdr->hdr_sha, sizeof sha))
@@ -1302,7 +1302,7 @@ sdk_save_obj(struct sdk_ios *io, const struct sdk_obj *o)
 	CHECK_OBJ_NOTNULL(oc->objhead, OBJHEAD_MAGIC);
 
 	memset(&rec, 0, sizeof rec);
-	rec.magic = SDK_REC_MAGIC;
+	rec.magic = SDK_REC_SIGNATURE;
 	rec.n_ext = o->n_ext;
 	memcpy(rec.digest, oc->objhead->digest, sizeof rec.digest);
 	rec.t_origin = oc->t_origin;
@@ -1726,7 +1726,7 @@ sdk_load_index(const struct sdk_sc *sc, const struct sdk_hdr *hdr,
 					r = 0;
 				break;
 			}
-			if (magic != SDK_REC_MAGIC)
+			if (magic != SDK_REC_SIGNATURE)
 				break;
 			if (lc->n == lc->l) {
 				lc->l = lc->l ? lc->l * 2 : 1024;
