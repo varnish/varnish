@@ -1,0 +1,78 @@
+varnishtest "-sdisk: LRU nuking, streaming and a damaged header"
+
+barrier b1 cond 2
+
+server s1 -repeat 16 -keepalive {
+	rxreq
+	txresp -bodylen 1500000
+} -start
+
+server s2 {
+	rxreq
+	txresp -nolen -hdr "Transfer-Encoding: chunked"
+	chunkedlen 100000
+	barrier b1 sync
+	delay 0.5
+	chunkedlen 100000
+	chunkedlen 0
+} -start
+
+varnish v1 -arg "-sdisk=disk,${tmpdir}/_.disk,20m" -vcl+backend {
+	import std;
+
+	sub vcl_hash {
+		if (req.url == "/obj") {
+			hash_data(std.random(0, 1000000000));
+		}
+	}
+	sub vcl_backend_fetch {
+		if (bereq.url == "/stream") {
+			set bereq.backend = s2;
+		}
+	}
+	sub vcl_backend_response {
+		set beresp.ttl = 1h;
+	}
+} -start
+
+# 16 x 1.5MB does not fit in 20MB, the oldest must be nuked
+client c1 {
+	loop 16 {
+		txreq -url "/obj"
+		rxresp
+		expect resp.bodylen == 1500000
+	}
+} -run
+varnish v1 -expect MAIN.n_lru_nuked > 0
+varnish v1 -expect n_object > 0
+
+# Two clients streaming the same object while it is being fetched
+client c2 {
+	txreq -url "/stream"
+	rxresp
+	expect resp.bodylen == 200000
+} -start
+barrier b1 sync
+client c3 {
+	txreq -url "/stream"
+	rxresp
+	expect resp.bodylen == 200000
+} -run
+client c2 -wait
+
+varnish v1 -stop
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored > 0
+
+client c4 {
+	txreq -url "/stream"
+	rxresp
+	expect resp.bodylen == 200000
+} -run
+
+# A damaged header means starting empty
+varnish v1 -stop
+shell {printf XXXX | dd of=${tmpdir}/_.disk bs=1 seek=64 conv=notrunc 2>/dev/null}
+varnish v1 -start
+varnish v1 -expect DISK.disk.c_restored == 0
+varnish v1 -expect DISK.disk.g_bytes == 0

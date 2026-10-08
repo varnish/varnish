@@ -1,0 +1,83 @@
+..
+	Copyright (c) 2026 Varnish Software AS
+	SPDX-License-Identifier: BSD-2-Clause
+	See LICENSE file for full text of license
+
+..
+	This is *NOT* a RST file but the syntax has been chosen so
+	that it may become an RST file at some later date.
+
+.. vinyl_vsc_begin::	disk
+	:oneliner:	Disk Stevedore Counters
+	:order:		50
+
+.. vinyl_vsc:: c_req
+	:type:	counter
+	:level:	info
+	:oneliner:	Allocator requests
+
+	Number of times the storage has been asked to provide a disk extent.
+
+.. vinyl_vsc:: c_fail
+	:type:	counter
+	:level:	info
+	:oneliner:	Allocator failures
+
+	Number of times the storage has failed to provide a disk extent.
+
+.. vinyl_vsc:: c_bytes
+	:type:	counter
+	:level:	info
+	:format: bytes
+	:oneliner:	Bytes allocated
+
+	Number of total bytes allocated by this storage.
+
+.. vinyl_vsc:: c_freed
+	:type:	counter
+	:level:	info
+	:format: bytes
+	:oneliner:	Bytes freed
+
+	Number of total bytes returned to this storage.
+
+.. vinyl_vsc:: g_alloc
+	:type:	gauge
+	:level:	info
+	:oneliner:	Allocations outstanding
+
+	Number of disk extents outstanding.
+
+.. vinyl_vsc:: g_bytes
+	:type:	gauge
+	:level:	info
+	:format: bytes
+	:oneliner:	Bytes outstanding
+
+	Number of bytes allocated from the storage.
+
+.. vinyl_vsc:: g_space
+	:type:	gauge
+	:level:	info
+	:format: bytes
+	:oneliner:	Bytes available
+
+	Number of bytes left in the storage.
+
+.. vinyl_vsc:: g_free_ext
+	:type:	gauge
+	:level:	diag
+	:oneliner:	Free extents
+
+	Number of free extents. A high number relative to g_space
+	indicates fragmentation.
+
+.. vinyl_vsc:: c_restored
+	:type:	counter
+	:level:	info
+	:oneliner:	Objects restored
+
+	Number of objects restored from the storage when the cache
+	process started after a clean shutdown.
+
+.. vinyl_vsc_end::	disk
