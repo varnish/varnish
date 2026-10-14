@@ -109,8 +109,8 @@ ved_reembark(struct worker *wrk, struct req *req)
 
 static void ved_run(struct worker *wrk, struct req *req);
 
-static void
-ved_include(struct req *preq, const char *src, const char *host,
+static struct req *
+ved_prep(struct req *preq, const char *src, const char *host,
     struct ecx *ecx)
 {
 	struct worker *wrk;
@@ -127,7 +127,7 @@ ved_include(struct req *preq, const char *src, const char *host,
 		    cache_param->max_esi_depth);
 		if (ecx->abrt)
 			preq->top->topreq->vdc->retval = -1;
-		return;
+		return (NULL);
 	}
 
 	req = Req_New(preq->sp, preq);
@@ -188,8 +188,19 @@ ved_include(struct req *preq, const char *src, const char *host,
 
 	req->transport = &VED_transport;
 	req->transport_priv = ecx;
+	return (req);
+}
 
-	ved_run(wrk, req);
+static void
+ved_include(struct req *preq, const char *src, const char *host,
+    struct ecx *ecx)
+{
+	struct req *req;
+
+	req = ved_prep(preq, src, host, ecx);
+	if (req == NULL)
+		return;
+	ved_run(preq->wrk, req);
 }
 
 static void
