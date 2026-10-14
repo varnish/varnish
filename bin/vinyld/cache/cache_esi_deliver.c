@@ -391,16 +391,16 @@ ved_vdp_esi_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 				    ecx->preq->esi_include_onerror;
 				/* FALLTHROUGH */
 			case VEC_IC:
+				if (VDP_bytes(vdc, VDP_FLUSH, NULL, 0)) {
+					ecx->p = ecx->e;
+					break;
+				}
 				ecx->p++;
 				q = (const void*)strchr((const char*)ecx->p, '\0');
 				AN(q);
 				q++;
 				r = (const void*)strchr((const char*)q, '\0');
 				AN(r);
-				if (VDP_bytes(vdc, VDP_FLUSH, NULL, 0)) {
-					ecx->p = ecx->e;
-					break;
-				}
 				Debug("INCL [%s][%s] BEGIN\n", q, ecx->p);
 				ved_include(ecx->preq,
 				    (const char*)q, (const char*)ecx->p, ecx);
