@@ -107,19 +107,17 @@ ved_reembark(struct worker *wrk, struct req *req)
 
 /*--------------------------------------------------------------------*/
 
+static void ved_run(struct worker *wrk, struct req *req);
+
 static void
 ved_include(struct req *preq, const char *src, const char *host,
     struct ecx *ecx)
 {
 	struct worker *wrk;
-	struct sess *sp;
 	struct req *req;
-	enum req_fsm_nxt s;
 
 	CHECK_OBJ_NOTNULL(preq, REQ_MAGIC);
 	CHECK_OBJ_NOTNULL(preq->top, REQTOP_MAGIC);
-	sp = preq->sp;
-	CHECK_OBJ_NOTNULL(sp, SESS_MAGIC);
 	CHECK_OBJ_NOTNULL(ecx, ECX_MAGIC);
 	wrk = preq->wrk;
 
@@ -132,9 +130,8 @@ ved_include(struct req *preq, const char *src, const char *host,
 		return;
 	}
 
-	req = Req_New(sp, preq);
+	req = Req_New(preq->sp, preq);
 	AN(req);
-	THR_SetRequest(req);
 	assert(IS_NO_VXID(req->vsl->wid));
 	req->vsl->wid = VXID_Get(wrk, VSL_CLIENTMARKER);
 
@@ -192,6 +189,23 @@ ved_include(struct req *preq, const char *src, const char *host,
 	req->transport = &VED_transport;
 	req->transport_priv = ecx;
 
+	ved_run(wrk, req);
+}
+
+static void
+ved_run(struct worker *wrk, struct req *req)
+{
+	struct req *preq = THR_GetRequest();
+	struct ecx *ecx;
+	struct sess *sp;
+	enum req_fsm_nxt s;
+
+	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
+	CAST_OBJ_NOTNULL(ecx, req->transport_priv, ECX_MAGIC);
+	sp = req->sp;
+	CHECK_OBJ_NOTNULL(sp, SESS_MAGIC);
+
+	THR_SetRequest(req);
 	VCL_TaskEnter(req->privs);
 
 	while (1) {
