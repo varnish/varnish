@@ -111,22 +111,19 @@ static void ved_run(struct worker *wrk, struct req *req);
 
 static struct req *
 ved_prep(struct req *preq, const char *src, const char *host,
-    struct ecx *ecx)
+    int isgzip)
 {
 	struct worker *wrk;
 	struct req *req;
 
 	CHECK_OBJ_NOTNULL(preq, REQ_MAGIC);
 	CHECK_OBJ_NOTNULL(preq->top, REQTOP_MAGIC);
-	CHECK_OBJ_NOTNULL(ecx, ECX_MAGIC);
 	wrk = preq->wrk;
 
 	if (preq->esi_level >= cache_param->max_esi_depth) {
 		VSLb(preq->vsl, SLT_VCL_Error,
 		    "ESI depth limit reached (param max_esi_depth = %u)",
 		    cache_param->max_esi_depth);
-		if (ecx->abrt)
-			preq->top->topreq->vdc->retval = -1;
 		return (NULL);
 	}
 
@@ -165,7 +162,7 @@ ved_prep(struct req *preq, const char *src, const char *host,
 	http_Unset(req->http, H_Range);
 
 	/* Set Accept-Encoding according to what we want */
-	if (ecx->isgzip)
+	if (isgzip)
 		http_ForceHeader(req->http, H_Accept_Encoding, "gzip");
 	else
 		http_Unset(req->http, H_Accept_Encoding);
@@ -186,8 +183,6 @@ ved_prep(struct req *preq, const char *src, const char *host,
 	assert(req->req_step == R_STP_TRANSPORT);
 	req->t_req = preq->t_req;
 
-	req->transport = &VED_transport;
-	req->transport_priv = ecx;
 	return (req);
 }
 
@@ -197,9 +192,14 @@ ved_include(struct req *preq, const char *src, const char *host,
 {
 	struct req *req;
 
-	req = ved_prep(preq, src, host, ecx);
+	CHECK_OBJ_NOTNULL(ecx, ECX_MAGIC);
+	req = ved_prep(preq, src, host, ecx->isgzip);
+	if (req == NULL && ecx->abrt)
+		preq->top->topreq->vdc->retval = -1;
 	if (req == NULL)
 		return;
+	req->transport = &VED_transport;
+	req->transport_priv = ecx;
 	ved_run(preq->wrk, req);
 }
 
