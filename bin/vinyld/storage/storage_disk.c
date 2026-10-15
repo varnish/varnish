@@ -27,18 +27,20 @@
  *
  * Disk stevedore
  *
- * Object bodies live in a file (or block device) and are accessed with
+ * Object bodies live in a regular file and are accessed with
  * pread(2)/pwrite(2).  Object metadata (the objcore and all object
  * attributes) live in RAM.
  *
  * Nothing is persistent: the file is just backing store for bodies,
  * and whatever it contains when we open it is ignored and overwritten.
+ *
+ * The file is fully allocated at startup, so writes do not run out of
+ * filesystem space, see sdk_extend().
  */
 
 #include "config.h"
 
 #include <sys/file.h>
-#include <sys/stat.h>
 #include <sys/syscall.h>
 
 #include <fcntl.h>
@@ -175,6 +177,7 @@ struct sdk_fetch {
 #define SDK_FETCH_MAGIC		0x0f3a91c4
 	uint8_t			*buf;
 	size_t			pos;
+	uint64_t		want;	/* last extent size requested */
 };
 
 /*--------------------------------------------------------------------
@@ -191,6 +194,8 @@ sdk_pwrite(const struct sdk_sc *sc, const void *ptr, size_t len, uint64_t off)
 		i = pwrite(sc->fd, p, len, (off_t)off);
 		if (i < 0 && errno == EINTR)
 			continue;
+		if (i == 0)
+			errno = EIO;
 		if (i <= 0)
 			return (-1);
 		p += i;
@@ -210,6 +215,8 @@ sdk_pread(const struct sdk_sc *sc, void *ptr, size_t len, uint64_t off)
 		i = pread(sc->fd, p, len, (off_t)off);
 		if (i < 0 && errno == EINTR)
 			continue;
+		if (i == 0)
+			errno = EIO;
 		if (i <= 0)
 			return (-1);
 		p += i;
@@ -327,19 +334,15 @@ sdk_alloc_locked(struct sdk_sc *sc, uint64_t want, uint64_t min,
  * waits for that read while holding the boc mtx.  Recycled space in a
  * storage larger than RAM is mostly evicted, so we tell the filesystem
  * that a new extent holds zeros, which needs no reading.
- *
- * Not on block devices, where this would write the zeros.
  */
 static void
 sdk_zero_init(struct sdk_sc *sc)
 {
 #if defined(HAVE_FALLOCATE) && defined(FALLOC_FL_ZERO_RANGE)
-	struct stat st;
 
 	/* Probe on the start of the file, which holds nothing yet */
-	sc->zero = !fstat(sc->fd, &st) && S_ISREG(st.st_mode) &&
-	    !fallocate(sc->fd, FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
-	    0, SDK_GRAN);
+	sc->zero = !fallocate(sc->fd,
+	    FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE, 0, SDK_GRAN);
 #else
 	sc->zero = 0;
 #endif
@@ -607,36 +610,39 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 		 * Allocating more than we need for a small object leaves
 		 * a hole when it is trimmed, which concurrent fetches can
 		 * keep from coalescing.
+		 *
+		 * Grow from what we last asked for, not from what we got,
+		 * so a fragment does not restart the growth.
 		 */
 		if (known)
 			want = *sz;
-		else if (e == NULL)
+		else if (fs->want == 0)
 			want = vmax_t(uint64_t, *sz, SDK_EXT_MIN);
 		else
-			want = vmax_t(uint64_t, *sz, e->space * 2);
+			want = vmax_t(uint64_t, *sz, fs->want * 2);
 		want = vmin_t(uint64_t, want, SDK_EXT_MAX);
 		if (oc->boc->transit_buffer > 0)
 			want = vmin_t(uint64_t, want,
 			    oc->boc->transit_buffer);
+		fs->want = want;
 		min = vmin_t(uint64_t, want, SDK_EXT_ACCEPT);
 		Lck_Unlock(&oc->boc->mtx);
 
 		while (sdk_alloc(o->sc, want, min, &ne)) {
-			if (oc->boc->transit_buffer > 0 && n_ext > 0) {
-				/* The consumer can return extents while we wait. */
-				Lck_Lock(&oc->boc->mtx);
-				while (o->n_ext == n_ext &&
-				    !(oc->flags & OC_F_CANCEL))
-					(void)Lck_CondWait(&oc->boc->cond,
-					    &oc->boc->mtx);
-				n_ext = o->n_ext;
-				cancelled = oc->flags & OC_F_CANCEL;
-				Lck_Unlock(&oc->boc->mtx);
-				if (cancelled)
-					return (0);
+			if (stv->lru != NULL && LRU_NukeOne(wrk, stv->lru))
 				continue;
-			}
-			if (stv->lru == NULL || !LRU_NukeOne(wrk, stv->lru))
+			if (oc->boc->transit_buffer == 0 || n_ext == 0)
+				return (0);
+			/* The consumer can return extents while we wait. */
+			Lck_Lock(&oc->boc->mtx);
+			while (o->n_ext == n_ext &&
+			    !(oc->flags & OC_F_CANCEL))
+				(void)Lck_CondWait(&oc->boc->cond,
+				    &oc->boc->mtx);
+			n_ext = o->n_ext;
+			cancelled = oc->flags & OC_F_CANCEL;
+			Lck_Unlock(&oc->boc->mtx);
+			if (cancelled)
 				return (0);
 		}
 
@@ -651,7 +657,8 @@ sdk_getspace(struct worker *wrk, struct objcore *oc, ssize_t *sz,
 	}
 	assert(e->len < e->space);
 
-	if (fs->pos == SDK_WRBUF)
+	/* A tiny remainder is not worth a VFP round trip and a write */
+	if (SDK_WRBUF - fs->pos < SDK_GRAN)
 		fs->pos = 0;
 	l = vmin_t(size_t, SDK_WRBUF - fs->pos, e->space - e->len);
 	if (oc->boc->transit_buffer > 0)
@@ -780,7 +787,8 @@ sdk_iterator_free_ext(struct sdk_obj *o, struct boc *boc, unsigned ei)
 	memmove(e, e + 1, (o->n_ext - ei - 1) * sizeof *e);
 	o->n_ext--;
 	if (boc != NULL) {
-		PTOK(pthread_cond_signal(&boc->cond));
+		/* The fetch may share the condvar with other waiters */
+		PTOK(pthread_cond_broadcast(&boc->cond));
 		Lck_Unlock(&boc->mtx);
 	}
 }
@@ -1011,6 +1019,37 @@ sdk_panic(struct vsb *vsb, const struct objcore *oc)
 }
 
 /*--------------------------------------------------------------------
+ * Buffers, for gzip and h2 request bodies when we are the Transient
+ * storage.  They are short lived and never reach the file.
+ */
+
+static void * v_matchproto_(storage_allocbuf_f)
+sdk_allocbuf(struct worker *wrk, const struct stevedore *stv, size_t size,
+    uintptr_t *ppriv)
+{
+	void *p;
+
+	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
+	CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);
+	AN(ppriv);
+
+	p = malloc(size);
+	if (p == NULL)
+		return (NULL);
+	*ppriv = (uintptr_t)p;
+	return (p);
+}
+
+static void v_matchproto_(storage_freebuf_f)
+sdk_freebuf(struct worker *wrk, const struct stevedore *stv, uintptr_t priv)
+{
+
+	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
+	CHECK_OBJ_NOTNULL(stv, STEVEDORE_MAGIC);
+	free((void *)priv);
+}
+
+/*--------------------------------------------------------------------
  * Open the storage in the cache process
  */
 
@@ -1029,7 +1068,9 @@ sdk_open(struct stevedore *stv)
 	Lck_New(&sc->mtx, lck_sdk);
 	VRBT_INIT(&sc->free_off);
 	VRBT_INIT(&sc->free_len);
+	Lck_Lock(&sc->mtx);
 	sdk_free_insert(sc, 0, sc->data_end);
+	Lck_Unlock(&sc->mtx);
 	sc->stats->g_space = sc->data_end;
 	sdk_zero_init(sc);
 }
@@ -1068,7 +1109,11 @@ sdk_init(struct stevedore *parent, int ac, char * const *av)
 	sc->mediasize = STV_FileSize(sc->fd, size, &gran, "-sdisk");
 	if (sc->mediasize < SDK_EXT_MAX)
 		ARGV_ERR("(-sdisk) size too small\n");
-	if (VFIL_allocate(sc->fd, (off_t)sc->mediasize, 0))
+	/*
+	 * Insist on allocating the whole file now: a sparse file would
+	 * turn a full filesystem into a write error in sdk_extend().
+	 */
+	if (VFIL_allocate(sc->fd, (off_t)sc->mediasize, 1))
 		ARGV_ERR("(-sdisk) allocation error: %s\n",
 		    VAS_errtxt(errno));
 	sc->data_end = sc->mediasize & ~((uint64_t)SDK_GRAN - 1);
@@ -1081,6 +1126,8 @@ const struct stevedore sdk_stevedore = {
 	.init		=	sdk_init,
 	.open		=	sdk_open,
 	.allocobj	=	sdk_allocobj,
+	.allocbuf	=	sdk_allocbuf,
+	.freebuf	=	sdk_freebuf,
 	.panic		=	sdk_panic,
 	.methods	=	&sdk_methods,
 };

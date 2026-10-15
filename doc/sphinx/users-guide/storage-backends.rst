@@ -239,7 +239,10 @@ than the storage when transit buffering is enabled.
 
 The 'path' and 'size' parameters work as for the file backend. The
 size must be at least 16MB, after rounding down to the filesystem block
-size.
+size. Unlike the file backend, the whole file is allocated at startup,
+so that a full filesystem cannot cause write errors later. On
+filesystems where this cannot be done with `fallocate(2)`, the file is
+written through once, which takes a while for a large storage.
 
 The content does not survive a restart of the cache process. The file
 is only backing store for bodies, and whatever it contains at startup is
