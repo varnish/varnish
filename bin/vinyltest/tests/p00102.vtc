@@ -1,4 +1,4 @@
-varnishtest "-sdisk: LRU nuking, streaming and a damaged header"
+varnishtest "-sdisk: LRU nuking and streaming"
 
 barrier b1 cond 2
 
@@ -60,19 +60,8 @@ client c3 {
 } -run
 client c2 -wait
 
-varnish v1 -stop
-varnish v1 -start
-varnish v1 -expect DISK.disk.c_restored > 0
-
 client c4 {
 	txreq -url "/stream"
 	rxresp
 	expect resp.bodylen == 200000
 } -run
-
-# A damaged header means starting empty
-varnish v1 -stop
-shell {printf XXXX | dd of=${tmpdir}/_.disk bs=1 seek=64 conv=notrunc 2>/dev/null}
-varnish v1 -start
-varnish v1 -expect DISK.disk.c_restored == 0
-varnish v1 -expect DISK.disk.g_bytes == 0

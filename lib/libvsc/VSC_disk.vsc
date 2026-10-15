@@ -72,12 +72,4 @@
 	Number of free extents. A high number relative to g_space
 	indicates fragmentation.
 
-.. vinyl_vsc:: c_restored
-	:type:	counter
-	:level:	info
-	:oneliner:	Objects restored
-
-	Number of objects restored from the storage when the cache
-	process started after a clean shutdown.
-
 .. vinyl_vsc_end::	disk

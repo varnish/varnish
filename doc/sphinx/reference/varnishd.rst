@@ -480,15 +480,11 @@ storage *kind*\ s and options are built in:
   with regular reads and writes. Object headers and other metadata are
   kept in memory, outside of the configured size.
 
-  The content survives an orderly restart of the cache process, for
-  instance ``varnishadm stop`` followed by ``varnishadm start``, or a
-  restart of `varnishd`. If the cache process stops for any other
-  reason, such as a panic or a crash, the content is discarded on the
-  next start.
+  The content does not survive a restart: the file is only backing
+  store, and whatever it contains at startup is overwritten.
 
   The path and size work as for the file backend. If path points to a
-  directory, the file is anonymous and the content does not survive
-  a restart.
+  directory, the file is anonymous.
 
   The storage file is exclusively locked while the cache process is
   running. Configuring another disk stevedore to use the same file

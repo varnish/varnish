@@ -31,16 +31,6 @@ client c2 {
 	expect resp.body == "kept"
 } -run
 
-varnish v1 -stop
-varnish v1 -start
-varnish v1 -expect DISK.disk.c_restored == 1
-
-client c3 {
-	txreq
-	rxresp
-	expect resp.body == "kept"
-} -run
-
 # Exiting the cache process releases the lock for another instance.
 varnish v1 -stop
 varnish v3 -arg "-sdisk=disk,${tmpdir}/_.alias,20m" -vcl+backend {
@@ -48,15 +38,9 @@ varnish v3 -arg "-sdisk=disk,${tmpdir}/_.alias,20m" -vcl+backend {
 		set beresp.ttl = 1h;
 	}
 } -start
-varnish v3 -expect DISK.disk.c_restored == 1
+varnish v3 -expect DISK.disk.g_bytes == 0
 
-client c4 -connect ${v3_sock} {
-	txreq
-	rxresp
-	expect resp.body == "kept"
-} -run
-
-# Directory storage gets a new anonymous file on each cache-process start.
+# Directory storage gets an anonymous file.
 server s1 -wait
 server s1 {
 	rxreq
@@ -74,8 +58,3 @@ client c5 -connect ${v4_sock} {
 	rxresp
 	expect resp.body == "anonymous"
 } -run
-
-varnish v4 -stop
-varnish v4 -start
-varnish v4 -expect DISK.disk.c_restored == 0
-varnish v4 -expect DISK.disk.g_bytes == 0
