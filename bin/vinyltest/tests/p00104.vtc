@@ -1,0 +1,66 @@
+varnishtest "-sdisk: recycle extents during transient streaming"
+
+feature cmd "command -v curl"
+
+barrier b1 cond 2
+barrier b2 cond 2
+
+server s1 -repeat 2 -keepalive {
+	rxreq
+	txresp -bodylen 25000000
+} -start
+
+varnish v1 -arg "-sdefault=malloc,1m" \
+    -arg "-sTransient=disk,${tmpdir}/_.disk,20m" \
+    -arg "-p transit_buffer=64k" -vcl+backend {
+	sub vcl_recv {
+		return (pass);
+	}
+} -start
+
+# The response is larger than the storage, but delivered extents are reused.
+shell {
+	test "$(curl -fsS --max-time 20 -o /dev/null -w '%{size_download}' http://${v1_addr}:${v1_port}/)" = 25000000
+}
+varnish v1 -expect DISK.Transient.g_bytes == 0
+varnish v1 -expect DISK.Transient.g_alloc == 0
+
+# Allocation must wait for delivery when the transit window exceeds capacity.
+varnish v1 -cliok "param.set transit_buffer 32m"
+shell {
+	test "$(curl -fsS --max-time 20 -o /dev/null -w '%{size_download}' http://${v1_addr}:${v1_port}/)" = 25000000
+}
+varnish v1 -expect DISK.Transient.g_bytes == 0
+varnish v1 -expect DISK.Transient.g_alloc == 0
+varnish v1 -expect MAIN.fetch_failed == 0
+
+server s2 {
+	non_fatal
+	rxreq
+	txresp -bodylen 25000000
+} -start
+
+varnish v1 -vcl+backend {
+	sub vcl_recv {
+		set req.backend_hint = s2;
+		return (pass);
+	}
+}
+
+client c1 {
+	txreq
+	rxresphdrs
+	expect resp.status == 200
+	recv 100
+	barrier b1 sync
+	barrier b2 sync
+} -start
+
+barrier b1 sync
+varnish v1 -expect DISK.Transient.g_space == 0
+barrier b2 sync
+client c1 -wait
+
+varnish v1 -expect VBE.vcl2.s2.busy == 0
+varnish v1 -expect DISK.Transient.g_bytes == 0
+varnish v1 -expect DISK.Transient.g_alloc == 0
