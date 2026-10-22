@@ -120,8 +120,8 @@ vsub_vlu(void *priv, const char *str)
 }
 
 /*
- * Read the child's output until EOF or until the deadline.  Returns non-zero
- * on timeout.  Note that EOF only happens once all holders of the write side
+ * Read the child's output until EOF or until the deadline.  Returns 1 on
+ * timeout, -1 on poll() failure (errno is preserved), 0 otherwise.  Note that EOF only happens once all holders of the write side
  * of the pipe are gone, so a descendant of the child can trigger a timeout
  * even after the child itself has exited.
  */
@@ -131,7 +131,8 @@ vsub_read_tmo(int fd, struct vsub_priv *sp, vtim_dur tmo)
 	struct vlu *vlu;
 	struct pollfd pfd;
 	vtim_mono end;
-	int i, t, timed_out = 0;
+	int i, t, rv = 0;
+	double d;
 
 	vlu = VLU_New(vsub_vlu, sp, 0);
 	AN(vlu);
@@ -139,24 +140,29 @@ vsub_read_tmo(int fd, struct vsub_priv *sp, vtim_dur tmo)
 	pfd.fd = fd;
 	pfd.events = POLLIN;
 	while (1) {
-		t = (int)((end - VTIM_mono()) * 1000.0);
-		if (t <= 0) {
-			timed_out = 1;
+		d = (end - VTIM_mono()) * 1000.0;
+		if (d < 1.0) {
+			rv = 1;
 			break;
 		}
+		t = d > 1e9 ? 1000000000 : (int)d;
 		pfd.revents = 0;
 		i = poll(&pfd, 1, t);
 		if (i < 0 && errno == EINTR)
 			continue;
-		if (i < 0)
+		if (i < 0) {
+			rv = -1;
 			break;
+		}
 		if (i == 0)
 			continue;
 		if (VLU_Fd(vlu, fd) != 0)
 			break;
 	}
+	i = errno;
 	VLU_Destroy(&vlu);
-	return (timed_out);
+	errno = i;
+	return (rv);
 }
 
 /* returns an exit code */
@@ -218,10 +224,15 @@ VSUB_run_tmo(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 		if (setpgid(pid, pid) < 0)
 			assert(errno == EACCES || errno == ESRCH);
 		timed_out = vsub_read_tmo(p[0], &sp, tmo);
-		if (timed_out) {
+		if (timed_out != 0) {
 			(void)kill(-pid, SIGKILL);
-			VSB_printf(sb, "Running %s timed out after %.1fs\n",
-			    name, tmo);
+			if (timed_out > 0)
+				VSB_printf(sb,
+				    "Running %s timed out after %.1fs\n",
+				    name, tmo);
+			else
+				VSB_printf(sb, "Running %s: poll() failed: "
+				    "%s\n", name, strerror(errno));
 		}
 	} else
 		(void)VLU_File(p[0], vsub_vlu, &sp, 0);
@@ -254,12 +265,10 @@ VSUB_run_tmo(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 		assert(rv != -1);
 		return (rv);
 	}
-	return (timed_out ? 1 : 0);
+	return (timed_out != 0 ? 1 : 0);
 }
 
 #ifdef TEST_DRIVER
-
-#include "vtim.h"
 
 static void
 run_sh(void *priv)
@@ -269,7 +278,7 @@ run_sh(void *priv)
 }
 
 static int
-check(const char *script, vtim_dur tmo, int expect_zero, const char *needle,
+check(const char *script, vtim_dur tmo, int expect, const char *needle,
     int limit)
 {
 	struct vsb *sb;
@@ -283,7 +292,7 @@ check(const char *script, vtim_dur tmo, int expect_zero, const char *needle,
 	r = VSUB_run_tmo(sb, run_sh, TRUST_ME(script), "test", -1, tmo);
 	t0 = VTIM_mono() - t0;
 	AZ(VSB_finish(sb));
-	if ((r == 0) != expect_zero) {
+	if (expect >= 0 ? (int)r != expect : r == 0) {
 		fprintf(stderr, "'%s': bad return %u\n", script, r);
 		fail = 1;
 	}
@@ -308,10 +317,10 @@ main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	fail |= check("echo hello", 5, 1, "hello", 0);
-	fail |= check("exit 3", 0, 0, "exited with 3", 0);
-	fail |= check("exec sleep 30", 0.5, 0, "timed out", 5);
-	fail |= check("sleep 30 & exit 0", 0.5, 0, "timed out", 5);
+	fail |= check("echo hello", 5, 0, "hello", 0);
+	fail |= check("exit 3", 0, 3, "exited with 3", 0);
+	fail |= check("exec sleep 30", 0.5, -1, "timed out", 5);
+	fail |= check("sleep 30 & exit 0", 0.5, -1, "timed out", 5);
 	return (fail);
 }
 #endif /* TEST_DRIVER */
