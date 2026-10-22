@@ -1,0 +1,136 @@
+varnishtest "vcl.ext_load: happy path, options and timeout"
+
+feature topbuild
+
+server s1 {
+	rxreq
+	txresp
+} -repeat 2 -start
+
+varnish v1 -arg "-p debug=+vcl_keep" -vcl+backend {
+	import std;
+} -start
+
+shell {
+	mkdir -p ${tmpdir}/fixture &&
+	cp ${v1_name}/vcl_vcl1.*/vgc.so ${v1_name}/vcl_vcl1.*/vgc.sym \
+	    ${tmpdir}/fixture/
+}
+
+varnish v1 -cliok "param.set debug -vcl_keep"
+
+shell {
+	cat > ${tmpdir}/cc.sh <<'EOS'
+#!/bin/sh
+echo "$1" >> ${tmpdir}/runs
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/env.sh <<'EOS'
+#!/bin/sh
+env > ${tmpdir}/ext_env
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/argv.sh <<'EOS'
+#!/bin/sh
+printf '%s\n' "$1" "$2" "$(pwd -P)" > ${tmpdir}/ext_argv
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/sleep.sh <<'EOS'
+#!/bin/sh
+exec sleep 30
+EOS
+	cat > ${tmpdir}/bg.sh <<'EOS'
+#!/bin/sh
+sleep 30 &
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+exit 0
+EOS
+	chmod +x ${tmpdir}/*.sh
+}
+
+# Happy path
+
+varnish v1 -cliok "vcl.ext_load ext1 /dev/null ${tmpdir}/cc.sh"
+varnish v1 -cliexpect "ext1" "vcl.list"
+varnish v1 -cliok "vcl.use ext1"
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
+
+# -t cold
+
+varnish v1 -cliok "vcl.ext_load ext2 /dev/null ${tmpdir}/cc.sh -t cold"
+varnish v1 -cliexpect "available *cold *cold *[0-9]+ *ext2" "vcl.list"
+
+# -E
+
+varnish v1 -cliok "vcl.ext_load ext3 /dev/null ${tmpdir}/env.sh -E FOO=1 -E BAR=baz -E EMPTY="
+shell "grep -x 'FOO=1' ${tmpdir}/ext_env"
+shell "grep -x 'BAR=baz' ${tmpdir}/ext_env"
+shell "grep -x 'EMPTY=' ${tmpdir}/ext_env"
+
+# argv and cwd
+
+varnish v1 -cliok {vcl.ext_load ext4 "a b;c" ${tmpdir}/argv.sh}
+shell {
+	test "$(sed -n 1p ${tmpdir}/ext_argv)" = "a b;c" &&
+	test "$(sed -n 2p ${tmpdir}/ext_argv)" = \
+	    "$(sed -n 3p ${tmpdir}/ext_argv)" &&
+	sed -n 2p ${tmpdir}/ext_argv | grep -E '^/.*/vcl_ext4\.[0-9]+\.[0-9]+$'
+}
+
+# Restart does not rerun the program
+
+shell "wc -l < ${tmpdir}/runs > ${tmpdir}/runs.n"
+
+varnish v1 -stop
+varnish v1 -start
+
+varnish v1 -cliexpect "ext1" "vcl.list"
+shell {test "$(wc -l < ${tmpdir}/runs)" = "$(cat ${tmpdir}/runs.n)"}
+
+client c1 -run
+
+# VMOD copy on behalf of the external VCL
+
+varnish v1 -cliok "vcl.use ext1"
+varnish v1 -cliok "vcl.discard vcl1"
+shell "test -f ${v1_name}/vmod_cache/_vmod_std.*"
+
+varnish v1 -cliok {vcl.inline libv "vcl 4.1; backend b { .host = \"${s1_addr}\"; }"}
+varnish v1 -cliok "vcl.use libv"
+varnish v1 -cliok "vcl.discard ext*"
+shell -err "test -f ${v1_name}/vmod_cache/_vmod_std.*"
+
+varnish v1 -cliok "vcl.ext_load ext5 /dev/null ${tmpdir}/cc.sh"
+shell "test -f ${v1_name}/vmod_cache/_vmod_std.*"
+
+# Option errors
+
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -T 0"
+varnish v1 -cliexpect "Invalid -T value" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -T 0"
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -T abc"
+varnish v1 -cliexpect "Invalid -T value" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -T abc"
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -E novalue"
+varnish v1 -cliexpect "Invalid -E value" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -E novalue"
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -E =x"
+varnish v1 -cliexpect "Invalid -E value" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -E =x"
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -t bogus"
+varnish v1 -cliexpect "State must be one of auto, cold or warm" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -t bogus"
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -X"
+varnish v1 -cliexpect "Unknown option" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -X"
+varnish v1 -clierr 106 "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -T"
+varnish v1 -cliexpect "Missing argument for -T" "vcl.ext_load e /dev/null ${tmpdir}/cc.sh -T"
+
+varnish v1 -clierr 104 "vcl.ext_load a b"
+
+# Timeout
+
+varnish v1 -clierr 106 "vcl.ext_load slow /dev/null ${tmpdir}/sleep.sh -T 1"
+varnish v1 -cliexpect "timed out" "vcl.ext_load slow /dev/null ${tmpdir}/sleep.sh -T 1"
+varnish v1 -clierr 106 "vcl.ext_load bg /dev/null ${tmpdir}/bg.sh -T 1"
+varnish v1 -cliexpect "timed out" "vcl.ext_load bg /dev/null ${tmpdir}/bg.sh -T 1"
+varnish v1 -cliok "vcl.list"
