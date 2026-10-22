@@ -33,6 +33,9 @@
 
 #include "config.h"
 
+#include <errno.h>
+#include <poll.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>		// Solaris closefrom(3c)
@@ -51,6 +54,7 @@
 #include "vlu.h"
 #include "vsb.h"
 #include "vsub.h"
+#include "vtim.h"
 
 struct vsub_priv {
 	const char	*name;
@@ -115,12 +119,61 @@ vsub_vlu(void *priv, const char *str)
 	return (0);
 }
 
+/*
+ * Read the child's output until EOF or until the deadline.  Returns non-zero
+ * on timeout.  Note that EOF only happens once all holders of the write side
+ * of the pipe are gone, so a descendant of the child can trigger a timeout
+ * even after the child itself has exited.
+ */
+static int
+vsub_read_tmo(int fd, struct vsub_priv *sp, vtim_dur tmo)
+{
+	struct vlu *vlu;
+	struct pollfd pfd;
+	vtim_mono end;
+	int i, t, timed_out = 0;
+
+	vlu = VLU_New(vsub_vlu, sp, 0);
+	AN(vlu);
+	end = VTIM_mono() + tmo;
+	pfd.fd = fd;
+	pfd.events = POLLIN;
+	while (1) {
+		t = (int)((end - VTIM_mono()) * 1000.0);
+		if (t <= 0) {
+			timed_out = 1;
+			break;
+		}
+		pfd.revents = 0;
+		i = poll(&pfd, 1, t);
+		if (i < 0 && errno == EINTR)
+			continue;
+		if (i < 0)
+			break;
+		if (i == 0)
+			continue;
+		if (VLU_Fd(vlu, fd) != 0)
+			break;
+	}
+	VLU_Destroy(&vlu);
+	return (timed_out);
+}
+
 /* returns an exit code */
 unsigned
 VSUB_run(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
     int maxlines)
 {
-	int rv, p[2], status;
+
+	return (VSUB_run_tmo(sb, func, priv, name, maxlines, 0));
+}
+
+/* returns an exit code, tmo <= 0 means no deadline */
+unsigned
+VSUB_run_tmo(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
+    int maxlines, vtim_dur tmo)
+{
+	int rv, p[2], status, timed_out = 0;
 	pid_t pid;
 	struct vsub_priv sp;
 
@@ -144,6 +197,8 @@ VSUB_run(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 		return (1);
 	}
 	if (pid == 0) {
+		if (tmo > 0)
+			(void)setpgid(0, 0);
 		VFIL_null_fd(STDIN_FILENO);
 		assert(dup2(p[1], STDOUT_FILENO) == STDOUT_FILENO);
 		assert(dup2(p[1], STDERR_FILENO) == STDERR_FILENO);
@@ -158,7 +213,18 @@ VSUB_run(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 		_exit(4);
 	}
 	closefd(&p[1]);
-	(void)VLU_File(p[0], vsub_vlu, &sp, 0);
+	if (tmo > 0) {
+		/* Also done by the child, whichever gets there first wins */
+		if (setpgid(pid, pid) < 0)
+			assert(errno == EACCES || errno == ESRCH);
+		timed_out = vsub_read_tmo(p[0], &sp, tmo);
+		if (timed_out) {
+			(void)kill(-pid, SIGKILL);
+			VSB_printf(sb, "Running %s timed out after %.1fs\n",
+			    name, tmo);
+		}
+	} else
+		(void)VLU_File(p[0], vsub_vlu, &sp, 0);
 	closefd(&p[0]);
 	if (sp.maxlines >= 0 && sp.lines > sp.maxlines)
 		VSB_printf(sb, "[%d lines truncated]\n",
@@ -188,5 +254,64 @@ VSUB_run(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 		assert(rv != -1);
 		return (rv);
 	}
-	return (0);
+	return (timed_out ? 1 : 0);
 }
+
+#ifdef TEST_DRIVER
+
+#include "vtim.h"
+
+static void
+run_sh(void *priv)
+{
+
+	(void)execl("/bin/sh", "sh", "-c", (const char *)priv, (char *)NULL);
+}
+
+static int
+check(const char *script, vtim_dur tmo, int expect_zero, const char *needle,
+    int limit)
+{
+	struct vsb *sb;
+	vtim_mono t0;
+	unsigned r;
+	int fail = 0;
+
+	sb = VSB_new_auto();
+	AN(sb);
+	t0 = VTIM_mono();
+	r = VSUB_run_tmo(sb, run_sh, TRUST_ME(script), "test", -1, tmo);
+	t0 = VTIM_mono() - t0;
+	AZ(VSB_finish(sb));
+	if ((r == 0) != expect_zero) {
+		fprintf(stderr, "'%s': bad return %u\n", script, r);
+		fail = 1;
+	}
+	if (strstr(VSB_data(sb), needle) == NULL) {
+		fprintf(stderr, "'%s': missing '%s' in '%s'\n", script,
+		    needle, VSB_data(sb));
+		fail = 1;
+	}
+	if (limit > 0 && t0 >= limit) {
+		fprintf(stderr, "'%s': took %.1fs\n", script, t0);
+		fail = 1;
+	}
+	VSB_destroy(&sb);
+	return (fail);
+}
+
+int
+main(int argc, char **argv)
+{
+	int fail = 0;
+
+	(void)argc;
+	(void)argv;
+
+	fail |= check("echo hello", 5, 1, "hello", 0);
+	fail |= check("exit 3", 0, 0, "exited with 3", 0);
+	fail |= check("exec sleep 30", 0.5, 0, "timed out", 5);
+	fail |= check("sleep 30 & exit 0", 0.5, 0, "timed out", 5);
+	return (fail);
+}
+#endif /* TEST_DRIVER */
