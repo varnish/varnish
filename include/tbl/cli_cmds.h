@@ -99,12 +99,14 @@ CLI_CMD(VCL_EXT_LOAD,
 	"Compile with an external program and load the result under the"
 	" name provided.",
 
-	"  The program is executed as ``<program> <input> <dir>``, with"
-	" ``<dir>`` (an absolute path) as its working directory, and must"
-	" leave ``vgc.so`` and ``vgc.sym`` there and exit with status 0."
-	" ``-t`` sets the initial state, ``-T`` bounds the run time of the"
-	" program (default 60 seconds) and each ``-E`` adds a variable to"
-	" its environment.\n\n"
+	"  ``<program>`` must be an absolute path.  It is executed as"
+	" ``<program> <input> <dir>``, with ``<dir>`` (an absolute path) as"
+	" its working directory, and must leave ``vgc.so`` and ``vgc.sym``"
+	" there and exit with status 0.  ``-t`` sets the initial state,"
+	" ``-T`` bounds the run time of the program, and separately of the"
+	" test load of ``vgc.so`` (default 60 seconds), and each ``-E`` adds"
+	" a variable to its environment.  At most 1 MiB of its output is"
+	" relayed.\n\n"
 	"  The program is executed with the privileges of the VCL compiler,"
 	" regardless of whether cc_command is read-only.",
 	CLI_F_AUTH,

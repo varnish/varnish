@@ -16,6 +16,9 @@ its symbol table itself::
 
     vcl.ext_load <configname> <input> <program> [-t auto|cold|warm] [-T <seconds>] [-E NAME=VALUE]...
 
+``<program>`` must be an absolute path, otherwise the command is
+rejected.
+
 ``<input>`` is handed to the program verbatim and is not interpreted by
 Varnish.  It will typically be a file name, and since the program does
 not necessarily run in the same directory as the CLI client, it should
@@ -23,6 +26,8 @@ be an absolute path.
 
 ``-t`` sets the initial temperature of the VCL, as for ``vcl.load``.
 ``-T`` sets the time limit for the program, in seconds (default 60).
+The test load of the resulting shared object (see below) gets its own,
+separate time limit of the same length.
 ``-E`` adds ``NAME=VALUE`` to the environment of the program, on top of
 the environment inherited from the management process, and can be
 repeated.
@@ -48,9 +53,15 @@ That directory is also the current working directory of the program.
 The program runs with the same privileges as ``cc_command`` (including
 the ``cc_group`` group, where applicable), with a umask of 027.
 
-The output of the program is relayed to the CLI client.  If the
-program has not finished after the ``-T`` timeout, its whole process
-group is killed and the load fails.
+The output of the program is relayed to the CLI client, up to 1 MiB;
+anything beyond that is discarded and an ``[output truncated]`` note
+is added.  (The ``cli_limit`` parameter may truncate the response
+further.)  The program runs in a process group of its own.  If it has
+not exited after the ``-T`` timeout, the process group and the program
+itself are killed with ``SIGKILL`` and the load fails.  This also
+applies when the program closed its output early or left its process
+group.  Descendants that left the process group are not killed, but
+Varnish does not wait for them either.
 
 On success the program must exit with status 0, having left two files
 in ``<dir>``:
@@ -69,16 +80,24 @@ When ``vext`` is false, it also needs ``file``, the VMOD to use, and
 ``dst``, where it is expected at run time.  ``dst`` must have the form
 ``./vmod_cache/<name>`` with a single path component, relative to the
 working directory of Varnish.  The management process copies the VMOD
-from ``file`` to ``dst``.  A ``$VCL`` import may only refer to labels
-of existing VCLs.  A symbol table that does not meet these rules is
-rejected with an ``Invalid symbol table: ...`` message and the load
-fails.
+from ``file`` to ``dst``, unless ``dst`` already exists as a regular
+file.  ``file`` may be a symbolic link, but must lead to a regular
+file.  A ``$VCL`` import may only refer to labels of existing VCLs.
+``vgc.sym`` must be a regular file (not a symbolic link) of at most
+64 MiB, with arrays and objects nested at most 64 levels deep.  A
+symbol table that does not meet these rules is rejected with an
+``Invalid symbol table: ...`` message and the load fails.
 
-Varnish then performs the usual test load of the shared object.  If it
-succeeds, only ``vgc.so`` is kept and everything else in ``<dir>`` is
-removed (recursively, without following symbolic links).  If anything
-fails, the whole directory is removed.  With the ``vcl_keep`` debug flag
-nothing is removed.
+Once the program has exited successfully, Varnish first checks that
+``vgc.so`` is a regular file (not a symbolic link) and performs the
+usual test load of it, in a separate process bounded by the ``-T``
+timeout.  Only then is ``vgc.sym`` read and validated, and the VMODs it
+lists copied.
+
+If everything succeeds, only ``vgc.so`` is kept and everything else in
+``<dir>`` is removed (recursively, without following symbolic links).
+If anything fails, the whole directory is removed.  With the
+``vcl_keep`` debug flag nothing is removed.
 
 The result is an ordinary VCL: it shows up in ``vcl.list`` and can be
 used, labelled, and discarded like any other.  It survives restarts of

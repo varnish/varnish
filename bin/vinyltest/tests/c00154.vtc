@@ -7,7 +7,7 @@ server s1 {
 	txresp
 } -start
 
-varnish v1 -arg "-p debug=+vcl_keep" -vcl+backend {
+varnish v1 -arg "-p debug=+vcl_keep 2>${tmpdir}/mgt.err" -vcl+backend {
 	import std;
 } -start
 
@@ -91,3 +91,4 @@ EOS
 }
 varnish v1 -clierr 106 "vcl.ext_load deep /dev/null ${tmpdir}/deep.sh"
 varnish v1 -cliok "vcl.list"
+shell "grep -q 'Directory tree too deep' ${tmpdir}/mgt.err"

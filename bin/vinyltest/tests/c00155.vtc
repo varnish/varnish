@@ -185,5 +185,10 @@ shell {
 varnish v1 -cliok "param.set cli_limit 64k"
 varnish v1 -cliok "vcl.list"
 
+# Relative program path
+varnish v1 -clierr 106 "vcl.ext_load rel /dev/null cc.sh"
+varnish v1 -cliexpect "Program path must be absolute" "vcl.ext_load rel /dev/null cc.sh"
+varnish v1 -clierr 106 "vcl.ext_load rel /dev/null ./cc.sh"
+
 varnish v1 -cliok "vcl.ext_load ok /dev/null ${tmpdir}/cc.sh"
 varnish v1 -cliok "vcl.list"

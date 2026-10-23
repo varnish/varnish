@@ -144,4 +144,5 @@ varnish v1 -cliok "vcl.list"
 
 # A successful build must not complain about the missing vgc.c
 
+shell "test -f ${tmpdir}/mgt.err"
 shell -err "grep -q 'Could not delete' ${tmpdir}/mgt.err"

@@ -630,6 +630,13 @@ mcf_vcl_ext_load(struct cli *cli, const char * const *av, void *priv)
 
 	(void)priv;
 
+	/* It runs in the build directory, relative paths make no sense */
+	if (*av[4] != '/') {
+		VCLI_Out(cli, "Program path must be absolute");
+		VCLI_SetResult(cli, CLIS_PARAM);
+		return;
+	}
+
 	INIT_OBJ(ext, MGT_VCL_EXT_MAGIC);
 	ext->input = av[3];
 	ext->program = av[4];

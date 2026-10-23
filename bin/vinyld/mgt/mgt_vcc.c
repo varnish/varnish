@@ -278,7 +278,7 @@ run_ext(void *priv)
 	av[2] = vp->absdir;
 	av[3] = NULL;
 	/* execv() wants a non-const vector, but does not modify it */
-	(void)execv(ext->program, (char * const *)(uintptr_t)av);
+	(void)execv(ext->program, TRUST_ME(av));
 	fprintf(stderr, "Cannot exec %s: %s\n", ext->program,
 	    VAS_errtxt(errno));
 	exit(1);
