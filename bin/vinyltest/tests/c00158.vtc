@@ -1,0 +1,292 @@
+varnishtest "tools/vcl_pack.py: package compiled VCL, load it with vcl.ext_load"
+
+feature topbuild
+feature cmd "python3 -c 'import json'"
+
+server s1 {
+	rxreq
+	txresp
+} -repeat 4 -start
+
+varnish v1 -vcl+backend {
+	import std;
+
+	sub vcl_deliver {
+		set resp.http.from = "vcl1";
+	}
+} -start
+
+varnish v1 -cliok "vcl.label lbl vcl1"
+
+shell {
+	cat > ${tmpdir}/c.vcl <<-EOF
+	vcl 4.1;
+	import std;
+	backend b { .host = "${s1_addr}"; .port = "${s1_port}"; }
+	sub vcl_deliver {
+		set resp.http.from = "compiled";
+		set resp.http.upper = std.toupper("x");
+	}
+	EOF
+}
+
+# Export from the running varnishd
+
+shell {
+	set -e
+	python3 ${topsrc}/tools/vcl_pack.py export -n ${v1_name} \
+	    -o ${tmpdir}/vcl1.json vcl1
+	python3 - ${tmpdir}/vcl1.json <<-'EOF'
+	import json, sys
+	p = json.load(open(sys.argv[1]))
+	assert p["format"] == "vcl-pack" and p["version"] == 1, p
+	assert p["name"] == "vcl1" and p["origin"] == "export", p
+	assert p["symtab"][0] == {"version": 0}, p["symtab"]
+	assert [e["name"] for e in p["symtab"][1:]
+	    if e.get("type") == "$VMOD"] == ["std"], p["symtab"]
+	EOF
+}
+
+shell -err -expect "is a label" {
+	python3 ${topsrc}/tools/vcl_pack.py export -n ${v1_name} \
+	    -o ${tmpdir}/lbl.json lbl
+}
+shell -err -expect "No VCL named nope" {
+	python3 ${topsrc}/tools/vcl_pack.py export -n ${v1_name} \
+	    -o ${tmpdir}/nope.json nope
+}
+shell -err -expect "No vgc.so" {
+	python3 ${topsrc}/tools/vcl_pack.py export -n ${v1_name} \
+	    --workdir ${tmpdir} -o ${tmpdir}/nope.json vcl1
+}
+
+# Compile without a running varnishd
+
+shell {
+	set -e
+	mkdir ${tmpdir}/t
+	TMPDIR=${tmpdir}/t python3 ${topsrc}/tools/vcl_pack.py compile \
+	    -f ${tmpdir}/c.vcl -p vmod_path=${topbuild}/vmod/.libs \
+	    -o ${tmpdir}/c.json
+	# the throwaway working directory is gone
+	test -z "$(ls -A ${tmpdir}/t)"
+	python3 - ${tmpdir}/c.json <<-'EOF'
+	import json, sys
+	p = json.load(open(sys.argv[1]))
+	assert p["name"] == "c" and p["origin"] == "compile", p
+	assert [e["name"] for e in p["symtab"][1:]
+	    if e.get("type") == "$VMOD"] == ["std"], p["symtab"]
+	EOF
+}
+
+shell -err -expect "varnishd -C failed" {
+	echo "vcl 4.1; this is not vcl" > ${tmpdir}/bad.vcl
+	python3 ${topsrc}/tools/vcl_pack.py compile -f ${tmpdir}/bad.vcl \
+	    -o ${tmpdir}/bad.json
+}
+shell -err -expect "varnishd -C failed" {
+	TMPDIR=${tmpdir}/t python3 ${topsrc}/tools/vcl_pack.py compile \
+	    -f ${tmpdir}/c.vcl -p vmod_path=${topbuild}/vmod/.libs \
+	    -p cc_command=false -o ${tmpdir}/bad.json
+}
+shell {test -z "$(ls -A ${tmpdir}/t)"}
+
+# Load both packages
+
+shell {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    exported ${tmpdir}/vcl1.json
+}
+shell {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} -t warm \
+	    compiled ${tmpdir}/c.json
+}
+varnish v1 -cliexpect "exported" "vcl.list"
+varnish v1 -cliexpect "warm *[0-9]+ *compiled" "vcl.list"
+
+varnish v1 -cliok "vcl.use exported"
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+	expect resp.http.from == "vcl1"
+} -run
+
+varnish v1 -cliok "vcl.use compiled"
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+	expect resp.http.from == "compiled"
+	expect resp.http.upper == "X"
+} -run
+
+# A package survives the discard of the VCL it was exported from
+
+varnish v1 -cliok "vcl.discard lbl"
+varnish v1 -cliok "vcl.discard vcl1"
+shell {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    again ${tmpdir}/vcl1.json
+}
+varnish v1 -cliok "vcl.use again"
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+	expect resp.http.from == "vcl1"
+} -run
+
+# Damaged packages are refused before and during vcl.ext_load
+
+shell {
+	python3 - ${tmpdir}/vcl1.json ${tmpdir}/corrupt.json <<-'EOF'
+	import base64, json, sys
+	p = json.load(open(sys.argv[1]))
+	so = bytearray(base64.b64decode(p["so"]))
+	so[100] ^= 0xff
+	p["so"] = base64.b64encode(so).decode()
+	json.dump(p, open(sys.argv[2], "w"))
+	EOF
+}
+shell -err -expect "checksum mismatch" {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    corrupt ${tmpdir}/corrupt.json
+}
+varnish v1 -cliexpect "checksum mismatch" \
+	"vcl.ext_load corrupt ${tmpdir}/corrupt.json ${topsrc}/tools/vcl_pack.py"
+varnish v1 -clierr 106 \
+	"vcl.ext_load corrupt ${tmpdir}/c.vcl ${topsrc}/tools/vcl_pack.py"
+shell -err -expect "not a VCL package" {
+	python3 ${topsrc}/tools/vcl_pack.py ${tmpdir}/c.vcl ${tmpdir}
+}
+varnish v1 -cliexpect "active .* again" "vcl.list"
+shell -err {
+	varnishadm -n ${v1_name} vcl.list | grep corrupt
+}
+
+# VMODs: tamper.py <in> <out> <mode> [<vmod>]
+
+shell {
+	cat > ${tmpdir}/tamper.py <<'EOF'
+import base64, json, sys
+p = json.load(open(sys.argv[1]))
+mode = sys.argv[3]
+vmod = [e for e in p["symtab"][1:] if e.get("name") == sys.argv[4]]
+if mode == "move":
+    vmod[0]["file"] = "/nonexistent/libvmod_%s.so" % sys.argv[4]
+elif mode == "fileid":
+    vmod[0]["dst"] = vmod[0]["dst"][:-64] + "0" * 64
+elif mode == "embedded":
+    vm = p["vmods"][sys.argv[4]]
+    data = bytearray(base64.b64decode(vm["data"]))
+    data[100] ^= 0xff
+    vm["data"] = base64.b64encode(data).decode()
+json.dump(p, open(sys.argv[2], "w"))
+EOF
+	cat > ${tmpdir}/blob.vcl <<-EOF
+	vcl 4.1;
+	import blob;
+	backend b none;
+	sub vcl_recv {
+		return (synth(200));
+	}
+	sub vcl_synth {
+		set resp.http.vmod = blob.encode(HEX, blob=blob.decode(encoded="x"));
+	}
+	EOF
+	cat > ${tmpdir}/cookie.vcl <<-EOF
+	vcl 4.1;
+	import cookie;
+	backend b none;
+	sub vcl_recv {
+		return (synth(200));
+	}
+	sub vcl_synth {
+		cookie.parse("a=78");
+		set resp.http.vmod = cookie.get("a");
+	}
+	EOF
+}
+
+shell {
+	! ls ${v1_name}/vmod_cache/_vmod_blob.* 2>/dev/null &&
+	! ls ${v1_name}/vmod_cache/_vmod_cookie.* 2>/dev/null
+}
+
+shell {
+	set -e
+	python3 ${topsrc}/tools/vcl_pack.py compile -f ${tmpdir}/blob.vcl \
+	    -p vmod_path=${topbuild}/vmod/.libs -o ${tmpdir}/blob.json
+	python3 ${topsrc}/tools/vcl_pack.py compile -f ${tmpdir}/cookie.vcl \
+	    -p vmod_path=${topbuild}/vmod/.libs -o ${tmpdir}/cookie.json
+	python3 ${topsrc}/tools/vcl_pack.py compile -f ${tmpdir}/cookie.vcl \
+	    -p vmod_path=${topbuild}/vmod/.libs --vmods embed \
+	    -o ${tmpdir}/cookie-emb.json
+	python3 ${topsrc}/tools/vcl_pack.py export -n ${v1_name} \
+	    --vmods embed -o ${tmpdir}/again-emb.json again
+	python3 - ${tmpdir}/cookie.json ${tmpdir}/cookie-emb.json \
+	    ${tmpdir}/again-emb.json <<-'EOF'
+	import json, sys
+	local, embed, again = [json.load(open(f)) for f in sys.argv[1:]]
+	assert "vmods" not in local, local.keys()
+	assert list(embed["vmods"]) == ["cookie"], embed["vmods"]
+	assert list(again["vmods"]) == ["std"], again["vmods"]
+	assert all(e["dst"].endswith("." + p["vmods"][e["name"]]["file_id"])
+	    for p in (embed, again) for e in p["symtab"][1:])
+	EOF
+
+	python3 ${tmpdir}/tamper.py ${tmpdir}/blob.json \
+	    ${tmpdir}/blob-moved.json move blob
+	python3 ${tmpdir}/tamper.py ${tmpdir}/cookie.json \
+	    ${tmpdir}/cookie-fileid.json fileid cookie
+	python3 ${tmpdir}/tamper.py ${tmpdir}/cookie-emb.json \
+	    ${tmpdir}/cookie-emb-moved.json move cookie
+	python3 ${tmpdir}/tamper.py ${tmpdir}/cookie-emb-moved.json \
+	    ${tmpdir}/cookie-emb-corrupt.json embedded cookie
+}
+
+# The local VMOD must match the file_id the VCL was compiled against
+shell -err -expect "no VMOD cookie with file_id 0000" {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    fileid ${tmpdir}/cookie-fileid.json
+}
+shell -err -expect "VMOD cookie checksum mismatch" {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    corrupt ${tmpdir}/cookie-emb-corrupt.json
+}
+shell -err -expect "no VMOD blob with file_id" {
+	python3 ${topsrc}/tools/vcl_pack.py ${tmpdir}/blob-moved.json \
+	    ${tmpdir}
+}
+shell {
+	! ls ${v1_name}/vmod_cache/_vmod_blob.* 2>/dev/null &&
+	! ls ${v1_name}/vmod_cache/_vmod_cookie.* 2>/dev/null
+}
+
+# Local VMOD found in vmod_path rather than where it was compiled
+shell {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    blob ${tmpdir}/blob-moved.json
+}
+shell "ls ${v1_name}/vmod_cache/_vmod_blob.*"
+varnish v1 -cliok "vcl.use blob"
+client c2 {
+	txreq
+	rxresp
+	expect resp.status == 200
+	expect resp.http.vmod == "78"
+} -run
+
+# Embedded VMOD, the original file is gone
+shell {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} \
+	    cookie ${tmpdir}/cookie-emb-moved.json
+}
+shell {
+	set -e
+	ls ${v1_name}/vmod_cache/_vmod_cookie.*
+	! ls ${v1_name}/vcl_cookie.*/vmod_* 2>/dev/null
+}
+varnish v1 -cliok "vcl.use cookie"
+client c2 -run

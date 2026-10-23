@@ -121,3 +121,30 @@ Used as::
 
 A real compiler would replace the ``cp`` with the translation of
 ``<input>`` to a shared object, writing ``vgc.sym`` along the way.
+
+Packaging compiled VCL
+~~~~~~~~~~~~~~~~~~~~~~
+
+``tools/vcl_pack.py`` in the source tree packs a compiled VCL into a
+single JSON file holding ``vgc.so`` and its symbol table, and acts as a
+``vcl.ext_load`` program that unpacks such a file.  A package is made
+either from a VCL loaded in a running ``varnishd``, or from a VCL file
+with ``varnishd -C``, run in a throwaway working directory with the
+``vcl_keep`` debug flag::
+
+    vcl_pack.py export -n /var/lib/varnish/varnishd -o boot.json boot
+    vcl_pack.py compile -f /etc/varnish/default.vcl -o default.json
+
+and loaded with::
+
+    vcl_pack.py load -n /var/lib/varnish/varnishd mycfg default.json
+
+which runs ``vcl.ext_load mycfg <default.json> <vcl_pack.py>``, both
+paths made absolute.
+
+By default (``--vmods local``) the package does not contain the VMODs.
+When it is loaded, each VMOD import is looked up at its ``file`` in the
+symbol table, then in ``vmod_path``, and the first one with the
+``file_id`` the VCL was compiled against is used.  A VMOD already
+present in ``vmod_cache`` is not looked up.  With ``--vmods embed`` the
+VMODs are stored in the package and used from there.
