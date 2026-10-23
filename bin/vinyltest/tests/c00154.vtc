@@ -73,3 +73,21 @@ shell {
 	test -d ${v1_name}/vcl_kept.* &&
 	test -f ${v1_name}/vcl_kept.*/junk
 }
+
+# deep tree must not hurt mgt
+varnish v1 -cliok "param.set debug -vcl_keep"
+shell {
+	cat > ${tmpdir}/deep.sh <<'EOS'
+#!/bin/sh
+cd "$2" || exit 1
+i=0
+while [ $i -lt 100 ]; do
+	mkdir d && cd d || exit 1
+	i=$((i + 1))
+done
+exit 1
+EOS
+	chmod +x ${tmpdir}/deep.sh
+}
+varnish v1 -clierr 106 "vcl.ext_load deep /dev/null ${tmpdir}/deep.sh"
+varnish v1 -cliok "vcl.list"

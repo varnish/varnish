@@ -412,54 +412,59 @@ mgt_vcc_init_vp(struct vcc_priv *vp)
 	AN(vp->dir);
 }
 
+#define RMTREE_MAXDEPTH 64
+
 static void
-mgt_vcc_rmtree_fd(const char *path, int dfd, const char *keep)
+mgt_vcc_rmtree_fd(const char *path, int fd, const char *keep, int depth)
 {
 	DIR *d;
 	struct dirent *de;
 	struct stat st;
-	char *sub;
-	int fd;
+	char sub[PATH_MAX];
+	int dfd, sfd;
 
-	d = fdopendir(dfd);
+	d = fdopendir(fd);
 	if (d == NULL) {
 		fprintf(stderr, "Could not read '%s': %s\n",
 		    path, strerror(errno));
-		(void)close(dfd);
+		(void)close(fd);
 		return;
 	}
+	dfd = dirfd(d);
 	while ((de = readdir(d)) != NULL) {
 		if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, ".."))
 			continue;
 		if (keep != NULL && !strcmp(de->d_name, keep))
 			continue;
+		(void)snprintf(sub, sizeof sub, "%s/%s", path, de->d_name);
 		if (fstatat(dfd, de->d_name, &st, AT_SYMLINK_NOFOLLOW)) {
-			fprintf(stderr, "Could not stat '%s/%s': %s\n",
-			    path, de->d_name, strerror(errno));
+			fprintf(stderr, "Could not stat '%s': %s\n",
+			    sub, strerror(errno));
 			continue;
 		}
 		if (!S_ISDIR(st.st_mode)) {
 			if (unlinkat(dfd, de->d_name, 0))
-				fprintf(stderr,
-				    "Could not delete '%s/%s': %s\n",
-				    path, de->d_name, strerror(errno));
+				fprintf(stderr, "Could not delete '%s': %s\n",
+				    sub, strerror(errno));
 			continue;
 		}
-		fd = openat(dfd, de->d_name,
+		if (depth >= RMTREE_MAXDEPTH) {
+			fprintf(stderr,
+			    "Directory tree too deep, not descending '%s'\n",
+			    sub);
+			continue;
+		}
+		sfd = openat(dfd, de->d_name,
 		    O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
-		if (fd < 0) {
-			fprintf(stderr, "Could not open '%s/%s': %s\n",
-			    path, de->d_name, strerror(errno));
+		if (sfd < 0) {
+			fprintf(stderr, "Could not open '%s': %s\n",
+			    sub, strerror(errno));
 			continue;
 		}
-		sub = NULL;
-		if (asprintf(&sub, "%s/%s", path, de->d_name) < 0)
-			sub = NULL;
-		mgt_vcc_rmtree_fd(sub != NULL ? sub : de->d_name, fd, NULL);
-		free(sub);
+		mgt_vcc_rmtree_fd(sub, sfd, NULL, depth + 1);
 		if (unlinkat(dfd, de->d_name, AT_REMOVEDIR))
-			fprintf(stderr, "Could not rmdir '%s/%s': %s\n",
-			    path, de->d_name, strerror(errno));
+			fprintf(stderr, "Could not rmdir '%s': %s\n",
+			    sub, strerror(errno));
 	}
 	AZ(closedir(d));
 }
@@ -481,7 +486,7 @@ mgt_vcc_rmtree(const char *dir, const char *keep)
 			fprintf(stderr, "Could not open '%s': %s\n",
 			    dir, strerror(errno));
 	} else {
-		mgt_vcc_rmtree_fd(dir, fd, keep);
+		mgt_vcc_rmtree_fd(dir, fd, keep, 0);
 		if (keep == NULL && rmdir(dir))
 			fprintf(stderr, "Could not rmdir '%s': %s\n",
 			    dir, strerror(errno));
