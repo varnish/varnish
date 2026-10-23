@@ -37,6 +37,6 @@ unsigned VSUB_run(struct vsb *, vsub_func_f *, void *priv, const char *name,
     int maxlines);
 
 unsigned VSUB_run_tmo(struct vsb *, vsub_func_f *, void *priv, const char *name,
-    int maxlines, vtim_dur tmo);
+    int maxlines, vtim_dur tmo, size_t maxbytes);
 
 void VSUB_closefrom(int fd);

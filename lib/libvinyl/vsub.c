@@ -59,14 +59,16 @@
 struct vsub_priv {
 	const char	*name;
 	struct vsb	*sb;
-	int		lines;
+	unsigned long	lines;
 	int		maxlines;
+	size_t		bytes;
+	size_t		maxbytes;
+	int		truncated;
 };
 
 void
 VSUB_closefrom(int fd)
 {
-
 	assert(fd >= 0);
 
 #ifdef HAVE_CLOSEFROM
@@ -110,33 +112,45 @@ static int
 vsub_vlu(void *priv, const char *str)
 {
 	struct vsub_priv *sp;
+	size_t l;
 
 	sp = priv;
 	if (!sp->lines++)
 		VSB_printf(sp->sb, "Message from %s:\n", sp->name);
-	if (sp->maxlines < 0 || sp->lines <= sp->maxlines)
-		VSB_printf(sp->sb, "%s\n", str);
+	if (sp->maxlines >= 0 && sp->lines > (unsigned)sp->maxlines)
+		return (0);
+	if (sp->maxbytes > 0) {
+		/* Only ever keep a prefix of the output */
+		if (sp->truncated)
+			return (0);
+		l = strlen(str) + 1;
+		if (l > sp->maxbytes - sp->bytes) {
+			sp->truncated = 1;
+			return (0);
+		}
+		sp->bytes += l;
+	}
+	VSB_printf(sp->sb, "%s\n", str);
 	return (0);
 }
 
 /*
  * Read the child's output until EOF or until the deadline.  Returns 1 on
- * timeout, -1 on poll() failure (errno is preserved), 0 otherwise.  Note that EOF only happens once all holders of the write side
- * of the pipe are gone, so a descendant of the child can trigger a timeout
- * even after the child itself has exited.
+ * timeout, -1 on poll() failure (errno is preserved), 0 otherwise.
+ * Note that EOF only happens once all holders of the write side of the
+ * pipe are gone, so a descendant of the child can trigger a timeout even
+ * after the child itself has exited.
  */
 static int
-vsub_read_tmo(int fd, struct vsub_priv *sp, vtim_dur tmo)
+vsub_read_tmo(int fd, struct vsub_priv *sp, vtim_mono end)
 {
 	struct vlu *vlu;
 	struct pollfd pfd;
-	vtim_mono end;
 	int i, t, rv = 0;
 	double d;
 
 	vlu = VLU_New(vsub_vlu, sp, 0);
 	AN(vlu);
-	end = VTIM_mono() + tmo;
 	pfd.fd = fd;
 	pfd.events = POLLIN;
 	while (1) {
@@ -165,28 +179,62 @@ vsub_read_tmo(int fd, struct vsub_priv *sp, vtim_dur tmo)
 	return (rv);
 }
 
+/*
+ * Reap the child, but give up at the deadline: closing (or redirecting)
+ * its output does not mean it is done.  Returns 1 on timeout, 0 if the
+ * child was reaped or waitpid() failed (*reaped tells which).
+ */
+static int
+vsub_wait_tmo(pid_t pid, int *status, int *reaped, vtim_mono end)
+{
+	vtim_dur d, nap = 0.001;
+	pid_t rv;
+
+	*reaped = 0;
+	while (1) {
+		rv = waitpid(pid, status, WNOHANG);
+		if (rv == pid) {
+			*reaped = 1;
+			return (0);
+		}
+		if (rv < 0 && errno != EINTR)
+			return (0);
+		d = end - VTIM_mono();
+		if (d <= 0)
+			return (1);
+		VTIM_sleep(nap < d ? nap : d);
+		if (nap < 0.05)
+			nap *= 2;
+	}
+}
+
 /* returns an exit code */
 unsigned
 VSUB_run(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
     int maxlines)
 {
 
-	return (VSUB_run_tmo(sb, func, priv, name, maxlines, 0));
+	return (VSUB_run_tmo(sb, func, priv, name, maxlines, 0, 0));
 }
 
-/* returns an exit code, tmo <= 0 means no deadline */
+/*
+ * returns an exit code, tmo <= 0 means no deadline, maxbytes == 0 means
+ * no limit on the amount of output kept in sb.
+ */
 unsigned
 VSUB_run_tmo(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
-    int maxlines, vtim_dur tmo)
+    int maxlines, vtim_dur tmo, size_t maxbytes)
 {
-	int rv, p[2], status, timed_out = 0;
+	int rv, p[2], status, timed_out = 0, reaped = 0, e;
 	pid_t pid;
+	vtim_mono end;
 	struct vsub_priv sp;
 
+	memset(&sp, 0, sizeof sp);
 	sp.sb = sb;
 	sp.name = name;
-	sp.lines = 0;
 	sp.maxlines = maxlines;
+	sp.maxbytes = maxbytes;
 
 	if (pipe(p) < 0) {
 		VSB_printf(sb, "Starting %s: pipe() failed: %s",
@@ -220,34 +268,50 @@ VSUB_run_tmo(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 	}
 	closefd(&p[1]);
 	if (tmo > 0) {
-		/* Also done by the child, whichever gets there first wins */
-		if (setpgid(pid, pid) < 0)
-			assert(errno == EACCES || errno == ESRCH);
-		timed_out = vsub_read_tmo(p[0], &sp, tmo);
+		/*
+		 * Also done by the child, whichever gets there first wins.
+		 * This fails if the child already moved on (exec'ed and
+		 * changed its process group or session), which is fine.
+		 */
+		(void)setpgid(pid, pid);
+		end = VTIM_mono() + tmo;
+		timed_out = vsub_read_tmo(p[0], &sp, end);
+		if (timed_out == 0)
+			timed_out = vsub_wait_tmo(pid, &status, &reaped, end);
 		if (timed_out != 0) {
+			e = errno;
+			/*
+			 * The child may have left its process group, so
+			 * kill it directly too.  It has not been reaped, so
+			 * its pid cannot have been reused.
+			 */
 			(void)kill(-pid, SIGKILL);
+			(void)kill(pid, SIGKILL);
 			if (timed_out > 0)
 				VSB_printf(sb,
 				    "Running %s timed out after %.1fs\n",
 				    name, tmo);
 			else
 				VSB_printf(sb, "Running %s: poll() failed: "
-				    "%s\n", name, strerror(errno));
+				    "%s\n", name, strerror(e));
 		}
 	} else
 		(void)VLU_File(p[0], vsub_vlu, &sp, 0);
 	closefd(&p[0]);
-	if (sp.maxlines >= 0 && sp.lines > sp.maxlines)
-		VSB_printf(sb, "[%d lines truncated]\n",
+	if (sp.maxlines >= 0 && sp.lines > (unsigned)sp.maxlines)
+		VSB_printf(sb, "[%lu lines truncated]\n",
 		    sp.lines - sp.maxlines);
-	do {
+	if (sp.truncated)
+		VSB_cat(sb, "[output truncated]\n");
+	while (!reaped) {
 		rv = waitpid(pid, &status, 0);
 		if (rv < 0 && errno != EINTR) {
 			VSB_printf(sb, "Running %s: waitpid() failed: %s\n",
 			    name, strerror(errno));
 			return (1);
 		}
-	} while (rv < 0);
+		reaped = (rv == pid);
+	}
 	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
 		rv = -1;
 		VSB_printf(sb, "Running %s failed", name);
@@ -270,6 +334,14 @@ VSUB_run_tmo(struct vsb *sb, vsub_func_f *func, void *priv, const char *name,
 
 #ifdef TEST_DRIVER
 
+#define ESCAPE_PGRP \
+	"perl -e '" \
+	"my $c = fork(); defined $c or exit 1;" \
+	"if (!$c) { setpgrp(0, 0); exec \"sleep\", \"30\" }" \
+	"for (1..1000) { last if getpgrp($c) == $c; select(undef, undef, undef, 0.001) }" \
+	"setpgrp(0, $c) or exit 1;" \
+	"exec \"sleep\", \"30\"'"
+
 static void
 run_sh(void *priv)
 {
@@ -278,8 +350,8 @@ run_sh(void *priv)
 }
 
 static int
-check(const char *script, vtim_dur tmo, int expect, const char *needle,
-    int limit)
+check_cap(const char *script, vtim_dur tmo, int expect, const char *needle,
+    int limit, size_t maxbytes)
 {
 	struct vsb *sb;
 	vtim_mono t0;
@@ -289,7 +361,8 @@ check(const char *script, vtim_dur tmo, int expect, const char *needle,
 	sb = VSB_new_auto();
 	AN(sb);
 	t0 = VTIM_mono();
-	r = VSUB_run_tmo(sb, run_sh, TRUST_ME(script), "test", -1, tmo);
+	r = VSUB_run_tmo(sb, run_sh, TRUST_ME(script), "test", -1, tmo,
+	    maxbytes);
 	t0 = VTIM_mono() - t0;
 	AZ(VSB_finish(sb));
 	if (expect >= 0 ? (int)r != expect : r == 0) {
@@ -305,8 +378,21 @@ check(const char *script, vtim_dur tmo, int expect, const char *needle,
 		fprintf(stderr, "'%s': took %.1fs\n", script, t0);
 		fail = 1;
 	}
+	if (maxbytes > 0 && VSB_len(sb) > maxbytes + 1024) {
+		fprintf(stderr, "'%s': %zd bytes of output\n", script,
+		    VSB_len(sb));
+		fail = 1;
+	}
 	VSB_destroy(&sb);
 	return (fail);
+}
+
+static int
+check(const char *script, vtim_dur tmo, int expect, const char *needle,
+    int limit)
+{
+
+	return (check_cap(script, tmo, expect, needle, limit, 0));
 }
 
 int
@@ -321,6 +407,18 @@ main(int argc, char **argv)
 	fail |= check("exit 3", 0, 3, "exited with 3", 0);
 	fail |= check("exec sleep 30", 0.5, -1, "timed out", 5);
 	fail |= check("sleep 30 & exit 0", 0.5, -1, "timed out", 5);
+	/* No output to wait for, the deadline must cover the reaping too */
+	fail |= check("exec >/dev/null 2>&1; sleep 30", 0.5, -1,
+	    "timed out", 5);
+	/* Leave the process group, falls back to a plain sleep without perl */
+	fail |= check("exec >/dev/null 2>&1; "
+	    "command -v perl >/dev/null && exec " ESCAPE_PGRP "; "
+	    "exec sleep 30", 0.5, -1, "timed out", 5);
+	fail |= check_cap("yes | head -c 5000000; exit 1", 5, 1,
+	    "[output truncated]", 0, 1024 * 1024);
+	fail |= check_cap("echo hello", 5, 0, "hello", 0, 1024 * 1024);
+	fail |= check_cap("yes | head -c 50000", 5, 0, "[output truncated]",
+	    0, 1000);
 	return (fail);
 }
 #endif /* TEST_DRIVER */

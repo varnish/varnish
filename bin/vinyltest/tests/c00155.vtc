@@ -1,0 +1,145 @@
+varnishtest "vcl.ext_load: a misbehaving program cannot wedge mgt"
+
+feature topbuild
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-p debug=+vcl_keep" -vcl+backend {
+	import std;
+} -start
+
+shell {
+	mkdir -p ${tmpdir}/fixture &&
+	cp ${v1_name}/vcl_vcl1.*/vgc.so ${v1_name}/vcl_vcl1.*/vgc.sym \
+	    ${tmpdir}/fixture/
+}
+
+varnish v1 -cliok "param.set debug -vcl_keep"
+
+shell {
+	# timed.sh <max seconds> <expected output> <cli command>...
+	cat > ${tmpdir}/timed.sh <<'EOS'
+#!/bin/sh
+max=$1
+pat=$2
+shift 2
+t0=$(date +%s)
+out=$(varnishadm -n ${v1_name} -t 120 "$@" 2>&1)
+rc=$?
+t1=$(date +%s)
+printf '%s\n' "$out" | head -c 2000
+echo
+test $rc -ne 0 || { echo "unexpected success"; exit 1; }
+printf '%s\n' "$out" | grep -q -- "$pat" || { echo "missing '$pat'"; exit 1; }
+test $((t1 - t0)) -lt $max || { echo "took $((t1 - t0))s"; exit 1; }
+EOS
+	cat > ${tmpdir}/quiet.sh <<'EOS'
+#!/bin/sh
+exec >/dev/null 2>&1
+sleep 30
+EOS
+	cat > ${tmpdir}/escape1.sh <<'EOS'
+#!/bin/sh
+setsid sleep 30 &
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+exit 0
+EOS
+	cat > ${tmpdir}/escape2.sh <<'EOS'
+#!/bin/sh
+# Leave the process group we were started in, keep running
+exec >/dev/null 2>&1
+command -v perl >/dev/null || exec sleep 30
+exec perl -e '
+	my $c = fork();
+	defined $c or exit 1;
+	if (!$c) { setpgrp(0, 0); exec "sleep", "30" }
+	for (1..1000) {
+		last if getpgrp($c) == $c;
+		select(undef, undef, undef, 0.001);
+	}
+	setpgrp(0, $c) or exit 1;
+	exec "sleep", "30"'
+EOS
+	cat > ${tmpdir}/sparse.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+truncate -s 64T "$2/vgc.sym" 2>/dev/null || truncate -s 1T "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/fifosym.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+rm -f "$2/vgc.sym"
+mkfifo "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/deep.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+head -c 2000000 /dev/zero | tr '\0' '[' > "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/fifoso.sh <<'EOS'
+#!/bin/sh
+rm -f "$2/vgc.so"
+mkfifo "$2/vgc.so"
+cp ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/planted.sh <<'EOS'
+#!/bin/sh
+mkdir -p ../vmod_cache/_vmod_d
+cp ${tmpdir}/fixture/vgc.so "$2"
+echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"d","file":"${tmpdir}/fixture/vgc.so","dst":"./vmod_cache/_vmod_d"}]' > "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/vmodfifo.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"f","file":"${tmpdir}/vmod.fifo","dst":"./vmod_cache/_vmod_f"}]' > "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/vmodok.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"e","file":"${tmpdir}/fixture/vgc.so","dst":"./vmod_cache/_vmod_e"}]' > "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/flood.sh <<'EOS'
+#!/bin/sh
+yes | head -c 50000000
+exit 1
+EOS
+	cat > ${tmpdir}/cc.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	mkfifo ${tmpdir}/vmod.fifo
+	chmod +x ${tmpdir}/*.sh
+}
+
+# Deadline covers reaping, not just reading the output
+shell "${tmpdir}/timed.sh 10 'timed out' vcl.ext_load quiet /dev/null ${tmpdir}/quiet.sh -T 1"
+varnish v1 -cliok "vcl.list"
+
+# Escape to a new session, keeping the output pipe open
+shell "${tmpdir}/timed.sh 10 'timed out' vcl.ext_load esc1 /dev/null ${tmpdir}/escape1.sh -T 1"
+varnish v1 -cliok "vcl.list"
+
+# Leave the process group
+shell "${tmpdir}/timed.sh 10 'timed out' vcl.ext_load esc2 /dev/null ${tmpdir}/escape2.sh -T 1"
+varnish v1 -cliok "vcl.list"
+
+# Output flood
+varnish v1 -cliok "param.set cli_limit 4m"
+shell {
+	if out=$(varnishadm -n ${v1_name} vcl.ext_load flood /dev/null \
+	    ${tmpdir}/flood.sh); then
+		exit 1
+	fi
+	printf '%s\n' "$out" | grep -q 'output truncated' || exit 1
+	n=$(printf '%s\n' "$out" | wc -c)
+	echo "$n bytes"
+	test $n -lt 1100000
+}
+varnish v1 -cliok "param.set cli_limit 64k"
+varnish v1 -cliok "vcl.list"
+
+varnish v1 -cliok "vcl.ext_load ok /dev/null ${tmpdir}/cc.sh"
+varnish v1 -cliok "vcl.list"

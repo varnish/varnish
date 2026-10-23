@@ -83,6 +83,9 @@ const char *mgt_vmod_path;
 #define VGC_LIB		"vgc.so"
 #define VGC_SYM		"vgc.sym"
 
+#define VGC_SYM_MAX	(64 * 1024 * 1024)
+#define EXT_OUTPUT_MAX	(1024 * 1024)
+
 /*--------------------------------------------------------------------*/
 
 void
@@ -388,7 +391,8 @@ mgt_vcc_ext_run(struct vcc_priv *vp, struct vsb *sb)
 		return (2);
 
 	VJ_master(JAIL_MASTER_SYSTEM);
-	subs = VSUB_run_tmo(sb, run_ext, vp, "Ext-compiler", -1, ext->timeout);
+	subs = VSUB_run_tmo(sb, run_ext, vp, "Ext-compiler", -1, ext->timeout,
+	    EXT_OUTPUT_MAX);
 	VJ_master(JAIL_MASTER_LOW);
 	if (subs)
 		return (subs);
