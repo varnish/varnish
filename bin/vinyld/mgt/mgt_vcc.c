@@ -320,12 +320,13 @@ mgt_vcc_touchfile(const char *fn, struct vsb *sb)
 }
 
 static unsigned
-mgt_vcc_dlopen(struct vcc_priv *vp, struct vsb *sb)
+mgt_vcc_dlopen(struct vcc_priv *vp, struct vsb *sb, vtim_dur tmo)
 {
 	unsigned subs;
 
 	VJ_master(JAIL_MASTER_SYSTEM);
-	subs = VSUB_run(sb, run_dlopen, vp, "dlopen", 10);
+	subs = VSUB_run_tmo(sb, run_dlopen, vp, "dlopen", 10, tmo,
+	    tmo > 0 ? EXT_OUTPUT_MAX : 0);
 	VJ_master(JAIL_MASTER_LOW);
 	return (subs);
 }
@@ -373,13 +374,14 @@ mgt_vcc_compile(struct vcc_priv *vp, struct vsb *sb, int C_flag)
 	if (subs)
 		return (subs);
 
-	return (mgt_vcc_dlopen(vp, sb));
+	return (mgt_vcc_dlopen(vp, sb, 0));
 }
 
 static unsigned
 mgt_vcc_ext_run(struct vcc_priv *vp, struct vsb *sb)
 {
 	const struct mgt_vcl_ext *ext;
+	struct stat st;
 	unsigned subs;
 
 	CAST_OBJ_NOTNULL(ext, vp->ext, MGT_VCL_EXT_MAGIC);
@@ -397,7 +399,14 @@ mgt_vcc_ext_run(struct vcc_priv *vp, struct vsb *sb)
 	if (subs)
 		return (subs);
 
-	return (mgt_vcc_dlopen(vp, sb));
+	/* dlopen(3) would happily block on a FIFO */
+	if (lstat(VSB_data(vp->libfile), &st) || !S_ISREG(st.st_mode)) {
+		VSB_printf(sb, "%s is not a regular file\n", VGC_LIB);
+		return (2);
+	}
+
+	/* Constructors in vgc.so run during the test load: fresh budget */
+	return (mgt_vcc_dlopen(vp, sb, ext->timeout));
 }
 
 /*--------------------------------------------------------------------*/

@@ -140,6 +140,10 @@ shell "! ls -d ${v1_name}/vcl_fifosym.*"
 shell "${tmpdir}/timed.sh 10 'nesting too deep' vcl.ext_load deep /dev/null ${tmpdir}/deep.sh"
 varnish v1 -cliok "vcl.list"
 
+# vgc.so is a FIFO
+shell "${tmpdir}/timed.sh 10 'not a regular file' vcl.ext_load fifoso /dev/null ${tmpdir}/fifoso.sh"
+varnish v1 -cliok "vcl.list"
+
 # Output flood
 varnish v1 -cliok "param.set cli_limit 4m"
 shell {
