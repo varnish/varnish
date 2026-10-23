@@ -61,7 +61,7 @@ mgt_vcl_symtab_val(const struct vjsn_val *vv, const char *val)
 
 	jv = vjsn_child(vv, val);
 	AN(jv);
-	AN(vjsn_is_string(jv));
+	assert(vjsn_is_string(jv));
 	AN(jv->value);
 	return (jv->value);
 }
@@ -110,8 +110,7 @@ mgt_vcl_check_vmod(const struct vjsn_val *vv, struct vsb *err)
 }
 
 static int
-mgt_vcl_check_vcl(const struct vclprog *vp, const struct vjsn_val *vv,
-    struct vsb *err)
+mgt_vcl_check_vcl(const struct vjsn_val *vv, struct vsb *err)
 {
 	const struct vclprog *vp2;
 
@@ -121,9 +120,9 @@ mgt_vcl_check_vcl(const struct vclprog *vp, const struct vjsn_val *vv,
 		return (-1);
 	}
 	vp2 = mcf_vcl_byname(mgt_vcl_symtab_val(vv, "name"));
-	if (vp2 == NULL || vp2 == vp) {
+	if (vp2 == NULL || !mcf_is_label(vp2)) {
 		VSB_printf(err, "Invalid symbol table: "
-		    "import of unknown VCL '%s'\n",
+		    "$VCL import of '%s' which is not a label\n",
 		    mgt_vcl_symtab_val(vv, "name"));
 		return (-1);
 	}
@@ -131,8 +130,7 @@ mgt_vcl_check_vcl(const struct vclprog *vp, const struct vjsn_val *vv,
 }
 
 static int
-mgt_vcl_symtab_check(const struct vclprog *vp, const struct vjsn *vj,
-    struct vsb *err)
+mgt_vcl_symtab_check(const struct vjsn *vj, struct vsb *err)
 {
 	const struct vjsn_val *v1, *v2;
 	const char *typ;
@@ -178,7 +176,7 @@ mgt_vcl_symtab_check(const struct vclprog *vp, const struct vjsn *vj,
 			if (mgt_vcl_check_vmod(v1, err))
 				return (-1);
 		} else if (!vstrcmp(typ, "$VCL")) {
-			if (mgt_vcl_check_vcl(vp, v1, err))
+			if (mgt_vcl_check_vcl(v1, err))
 				return (-1);
 		} else {
 			VSB_printf(err, "Invalid symbol table: "
@@ -311,7 +309,7 @@ mgt_vcl_symtab(struct vclprog *vp, const char *input, struct vsb *err)
 	}
 	AN(vj);
 	vp->symtab = vj;
-	if (mgt_vcl_symtab_check(vp, vj, err))
+	if (mgt_vcl_symtab_check(vj, err))
 		return (-1);
 
 	VTAILQ_FOREACH(v1, &vj->value->children, list) {

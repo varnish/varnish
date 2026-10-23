@@ -54,6 +54,14 @@ exit 1
 EOS
 	chmod +x ${tmpdir}/*.sh
 	echo 'not json' > ${tmpdir}/syms/notjson
+	echo '[{"dir":"import","type":"$VCL","name":"x"}]' > ${tmpdir}/syms/noversion
+	echo '[{"version":1}]' > ${tmpdir}/syms/badversion
+	echo '[{"version":0},"str"]' > ${tmpdir}/syms/nonobj
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","name":"x","file":"/f","dst":"./vmod_cache/_vmod_y"}]' > ${tmpdir}/syms/novext
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":"no","name":"x","file":"/f","dst":"./vmod_cache/_vmod_y"}]' > ${tmpdir}/syms/strvext
+	echo '[{"version":0},{"dir":"import","type":"$BOGUS"}]' > ${tmpdir}/syms/badtype
+	echo '[{"version":0},{"dir":"import","type":"$VCL","name":"cold1"}]' > ${tmpdir}/syms/cold
+	echo '[{"version":0},{"dir":"import","type":"$VCL","name":"vcl1"}]' > ${tmpdir}/syms/warm
 	echo '[{"version":0},{"dir":"import","type":"$VCL","name":"nope"}]' > ${tmpdir}/syms/nope
 	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","file":"/nonexistent","dst":"../../x"}]' > ${tmpdir}/syms/dst1
 	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","file":"/nonexistent","dst":"./vmod_cache/../x"}]' > ${tmpdir}/syms/dst2
@@ -134,6 +142,56 @@ varnish v1 -cliexpect "Cannot copy vmod" "vcl.ext_load s_nofilecopy /dev/null ${
 varnish v1 -cliok "vcl.list"
 shell "! ls -d ${v1_name}/vcl_s_nofilecopy.*"
 shell "! test -e ${v1_name}/vmod_cache/_vmod_x"
+
+varnish v1 -cliok {vcl.inline cold1 "vcl 4.1; backend b { .host = \"${s1_addr}\"; }" cold}
+
+# s_noversion
+varnish v1 -clierr 106 "vcl.ext_load s_noversion /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/noversion"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_noversion /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/noversion"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_noversion.*"
+
+# s_badversion
+varnish v1 -clierr 106 "vcl.ext_load s_badversion /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/badversion"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_badversion /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/badversion"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_badversion.*"
+
+# s_nonobj
+varnish v1 -clierr 106 "vcl.ext_load s_nonobj /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nonobj"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_nonobj /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nonobj"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_nonobj.*"
+
+# s_novext
+varnish v1 -clierr 106 "vcl.ext_load s_novext /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/novext"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_novext /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/novext"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_novext.*"
+
+# s_strvext
+varnish v1 -clierr 106 "vcl.ext_load s_strvext /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/strvext"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_strvext /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/strvext"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_strvext.*"
+
+# s_badtype
+varnish v1 -clierr 106 "vcl.ext_load s_badtype /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/badtype"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_badtype /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/badtype"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_badtype.*"
+
+# s_cold
+varnish v1 -clierr 106 "vcl.ext_load s_cold /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/cold"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_cold /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/cold"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_cold.*"
+
+# s_warm
+varnish v1 -clierr 106 "vcl.ext_load s_warm /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/warm"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_warm /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/warm"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_warm.*"
 
 # A failed name can be reused
 
