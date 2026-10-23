@@ -39,6 +39,10 @@ Naming scheme
 	id ~ ^w		--> b tests with witness enabled
 	id ~ ^x		--> VEXT tests
 
+	Tests that only exist downstream (not in vinyl-cache) carry an
+	additional "vc-" prefix, e.g. vc-T00000.vtc, vc-tls_b00000.vtc, so
+	their numbers never collide with tests ported from upstream.
+
 	Coverage for individual VMODs is in "${top_srcdir}vmod/tests".
 
 Tests suffixed with .disabled are not executed automatically on 'make check'.
