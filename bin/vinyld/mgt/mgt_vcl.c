@@ -253,7 +253,7 @@ mgt_vcl_del(struct vclprog *vp)
 		vcl_count--;
 	if (vp->fname != NULL) {
 		if (!MGT_DO_DEBUG(DBG_VCL_KEEP))
-			AZ(unlink(vp->fname));
+			assert(unlink(vp->fname) == 0 || errno == ENOENT);
 		p = strrchr(vp->fname, '/');
 		AN(p);
 		*p = '\0';

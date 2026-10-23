@@ -33,6 +33,8 @@
 
 #include "config.h"
 
+#include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdint.h>
@@ -411,18 +413,100 @@ mgt_vcc_init_vp(struct vcc_priv *vp)
 }
 
 static void
+mgt_vcc_rmtree_fd(const char *path, int dfd, const char *keep)
+{
+	DIR *d;
+	struct dirent *de;
+	struct stat st;
+	char *sub;
+	int fd;
+
+	d = fdopendir(dfd);
+	if (d == NULL) {
+		fprintf(stderr, "Could not read '%s': %s\n",
+		    path, strerror(errno));
+		(void)close(dfd);
+		return;
+	}
+	while ((de = readdir(d)) != NULL) {
+		if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, ".."))
+			continue;
+		if (keep != NULL && !strcmp(de->d_name, keep))
+			continue;
+		if (fstatat(dfd, de->d_name, &st, AT_SYMLINK_NOFOLLOW)) {
+			fprintf(stderr, "Could not stat '%s/%s': %s\n",
+			    path, de->d_name, strerror(errno));
+			continue;
+		}
+		if (!S_ISDIR(st.st_mode)) {
+			if (unlinkat(dfd, de->d_name, 0))
+				fprintf(stderr,
+				    "Could not delete '%s/%s': %s\n",
+				    path, de->d_name, strerror(errno));
+			continue;
+		}
+		fd = openat(dfd, de->d_name,
+		    O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+		if (fd < 0) {
+			fprintf(stderr, "Could not open '%s/%s': %s\n",
+			    path, de->d_name, strerror(errno));
+			continue;
+		}
+		sub = NULL;
+		if (asprintf(&sub, "%s/%s", path, de->d_name) < 0)
+			sub = NULL;
+		mgt_vcc_rmtree_fd(sub != NULL ? sub : de->d_name, fd, NULL);
+		free(sub);
+		if (unlinkat(dfd, de->d_name, AT_REMOVEDIR))
+			fprintf(stderr, "Could not rmdir '%s/%s': %s\n",
+			    path, de->d_name, strerror(errno));
+	}
+	AZ(closedir(d));
+}
+
+/*
+ * Remove everything in dir except the entry named keep, recursively and
+ * without ever following symlinks.  If keep is NULL, remove dir too.
+ */
+
+static void
+mgt_vcc_rmtree(const char *dir, const char *keep)
+{
+	int fd;
+
+	VJ_master(JAIL_MASTER_FILE);
+	fd = open(dir, O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+	if (fd < 0) {
+		if (errno != ENOENT)
+			fprintf(stderr, "Could not open '%s': %s\n",
+			    dir, strerror(errno));
+	} else {
+		mgt_vcc_rmtree_fd(dir, fd, keep);
+		if (keep == NULL && rmdir(dir))
+			fprintf(stderr, "Could not rmdir '%s': %s\n",
+			    dir, strerror(errno));
+	}
+	VJ_master(JAIL_MASTER_LOW);
+}
+
+static void
 mgt_vcc_fini_vp(struct vcc_priv *vp, enum vcc_fini_e vcc_status)
 {
 	int ignore_enoent = (vcc_status == VCC_FAILED);
 
 	if (!MGT_DO_DEBUG(DBG_VCL_KEEP)) {
-		/* The external compiler path has no C source file */
-		if (vp->ext == NULL)
+		if (vp->ext != NULL) {
+			/* Untrusted program: remove whatever it left behind */
+			mgt_vcc_rmtree(VSB_data(vp->dir),
+			    vcc_status == VCC_SUCCESS ? "vgc.so" : NULL);
+		} else {
 			VJ_unlink(VSB_data(vp->csrcfile), ignore_enoent);
-		VJ_unlink(VSB_data(vp->symfile), ignore_enoent);
-		if (vcc_status != VCC_SUCCESS) {
-			VJ_unlink(VSB_data(vp->libfile), ignore_enoent);
-			VJ_rmdir(VSB_data(vp->dir));
+			VJ_unlink(VSB_data(vp->symfile), ignore_enoent);
+			if (vcc_status != VCC_SUCCESS) {
+				VJ_unlink(VSB_data(vp->libfile),
+				    ignore_enoent);
+				VJ_rmdir(VSB_data(vp->dir));
+			}
 		}
 	}
 	free(vp->absdir);
