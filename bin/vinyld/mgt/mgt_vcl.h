@@ -90,4 +90,6 @@ int mcf_is_label(const struct vclprog *vp);
 void mgt_vcl_symtab_clean(struct vclprog *vp);
 int mgt_vcl_symtab(struct vclprog *vp, const char *input, struct vsb *err);
 void mcf_vcl_symtab(struct cli *cli, const char * const *av, void *priv);
+void mcf_vcl_symtab_json(struct cli *cli, const char * const *av,
+    void *priv);
 

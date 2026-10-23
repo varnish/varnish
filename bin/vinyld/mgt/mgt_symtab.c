@@ -460,3 +460,119 @@ mcf_vcl_symtab(struct cli *cli, const char * const *av, void *priv)
 		}
 	}
 }
+
+/*--------------------------------------------------------------------*/
+
+static void
+mcf_vcl_vjsn_json(struct cli *cli, const struct vjsn_val *vj)
+{
+	struct vjsn_val *vj1;
+	const char *sep = "";
+
+	AN(cli);
+	CHECK_OBJ_NOTNULL(vj, VJSN_VAL_MAGIC);
+
+	if (vjsn_is_string(vj)) {
+		VCLI_JSON_str(cli, vj->value);
+		return;
+	}
+	if (vjsn_is_number(vj)) {
+		VCLI_Out(cli, "%s", vj->value);
+		return;
+	}
+	if (!vjsn_is_object(vj) && !vjsn_is_array(vj)) {
+		/* true, false, null */
+		VCLI_Out(cli, "%s", vj->type);
+		return;
+	}
+	VCLI_Out(cli, "%c", vjsn_is_object(vj) ? '{' : '[');
+	VSB_indent(cli->sb, 2);
+	VTAILQ_FOREACH(vj1, &vj->children, list) {
+		VCLI_Out(cli, "%s\n", sep);
+		if (vj1->name != NULL) {
+			VCLI_JSON_str(cli, vj1->name);
+			VCLI_Out(cli, ": ");
+		}
+		mcf_vcl_vjsn_json(cli, vj1);
+		sep = ",";
+	}
+	VSB_indent(cli->sb, -2);
+	if (*sep != '\0')
+		VCLI_Out(cli, "\n");
+	VCLI_Out(cli, "%c", vjsn_is_object(vj) ? '}' : ']');
+}
+
+static void
+mcf_vcl_symtab_dep_json(struct cli *cli, const struct vclprog *vp,
+    const struct vjsn_val *vj, const char *sep)
+{
+
+	CHECK_OBJ_NOTNULL(vp, VCLPROG_MAGIC);
+	VCLI_Out(cli, "%s\n", sep);
+	VCLI_Out(cli, "{\n");
+	VSB_indent(cli->sb, 2);
+	VCLI_Out(cli, "\"name\": ");
+	VCLI_JSON_str(cli, vp->name);
+	VCLI_Out(cli, ",\n");
+	VCLI_Out(cli, "\"entry\": ");
+	if (vj != NULL)
+		mcf_vcl_vjsn_json(cli, vj);
+	else
+		VCLI_Out(cli, "null");
+	VCLI_Out(cli, "\n");
+	VSB_indent(cli->sb, -2);
+	VCLI_Out(cli, "}");
+}
+
+void v_matchproto_(cli_func_t)
+mcf_vcl_symtab_json(struct cli *cli, const char * const *av, void *priv)
+{
+	struct vclprog *vp;
+	struct vcldep *vd;
+	const char *sep;
+
+	(void)priv;
+	VCLI_JSON_begin(cli, 1, av);
+	VTAILQ_FOREACH(vp, &vclhead, list) {
+		VCLI_Out(cli, ",\n");
+		VCLI_Out(cli, "{\n");
+		VSB_indent(cli->sb, 2);
+		VCLI_Out(cli, "\"name\": ");
+		VCLI_JSON_str(cli, vp->name);
+		VCLI_Out(cli, ",\n");
+		VCLI_Out(cli, "\"label\": %s,\n",
+		    mcf_is_label(vp) ? "true" : "false");
+
+		VCLI_Out(cli, "\"imports\": [");
+		VSB_indent(cli->sb, 2);
+		sep = "";
+		VTAILQ_FOREACH(vd, &vp->dfrom, lfrom) {
+			mcf_vcl_symtab_dep_json(cli, vd->to, vd->vj, sep);
+			sep = ",";
+		}
+		VSB_indent(cli->sb, -2);
+		VCLI_Out(cli, "%s", *sep ? "\n" : "");
+		VCLI_Out(cli, "],\n");
+
+		VCLI_Out(cli, "\"exports\": [");
+		VSB_indent(cli->sb, 2);
+		sep = "";
+		VTAILQ_FOREACH(vd, &vp->dto, lto) {
+			mcf_vcl_symtab_dep_json(cli, vd->from, vd->vj, sep);
+			sep = ",";
+		}
+		VSB_indent(cli->sb, -2);
+		VCLI_Out(cli, "%s", *sep ? "\n" : "");
+		VCLI_Out(cli, "],\n");
+
+		VCLI_Out(cli, "\"symtab\": ");
+		if (vp->symtab != NULL)
+			mcf_vcl_vjsn_json(cli, vp->symtab->value);
+		else
+			VCLI_Out(cli, "null");
+		VCLI_Out(cli, "\n");
+		VSB_indent(cli->sb, -2);
+		VCLI_Out(cli, "}");
+	}
+	VCLI_JSON_end(cli);
+}

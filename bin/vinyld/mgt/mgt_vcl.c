@@ -1202,7 +1202,8 @@ static struct cli_proto cli_vcl[] = {
 	{ CLICMD_VCL_LIST,		mcf_vcl_list, mcf_vcl_list_json },
 	{ CLICMD_VCL_DEPS,		mcf_vcl_deps, mcf_vcl_deps_json },
 	{ CLICMD_VCL_LABEL,		mcf_vcl_label },
-	{ CLICMD_DEBUG_VCL_SYMTAB,	mcf_vcl_symtab },
+	{ CLICMD_DEBUG_VCL_SYMTAB,	mcf_vcl_symtab,
+					    mcf_vcl_symtab_json },
 	{ NULL }
 };
 

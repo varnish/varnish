@@ -454,9 +454,9 @@ CLI_CMD(DEBUG_PANIC_MASTER,
 
 CLI_CMD(DEBUG_VCL_SYMTAB,
 	"vcl.symtab",
-	"vcl.symtab",
+	"vcl.symtab [-j]",
 	"Dump the VCL symbol-tables.",
-	"",
+	"  ``-j`` specifies JSON output.",
 	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )
