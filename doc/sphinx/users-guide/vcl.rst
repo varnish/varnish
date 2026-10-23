@@ -47,6 +47,7 @@ code commented out in the file `builtin.vcl` that ships with Varnish Cache.
    vcl-grace
    vcl-separate
    vcl-inline-c
+   vcl-ext-load
    vcl-examples
    devicedetection
 

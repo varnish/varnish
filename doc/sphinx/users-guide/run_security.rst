@@ -155,6 +155,11 @@ HTTP service, but a few can do more damage than others:
 :ref:`ref_param_cc_command`
 	Execute arbitrary programs
 
+``vcl.ext_load`` (CLI command)
+	Runs any program with the privileges of the VCL compiler, see
+	:ref:`vcl-ext-load`.  This is not prevented by making
+	``cc_command`` read-only with ``-r cc_command``.
+
 :ref:`ref_param_vcc_feature`
 	The ``allow_inline_c`` flag would allow any C code from VCL to be
 	executed by Varnish.
