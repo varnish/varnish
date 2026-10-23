@@ -20,7 +20,7 @@ EXTRA_DIST = \
 	$(top_srcdir)/bin/vinyltest/tests/*.vtc \
 	$(top_srcdir)/bin/vinyltest/tests/common.pem \
 	$(top_srcdir)/bin/vinyltest/tests/README \
-	test_assets/*.bin
+	$(top_srcdir)/bin/vinyltest/test_assets/*.bin
 
 lib_LTLIBRARIES = libvtest_ext_varnish.la
 
