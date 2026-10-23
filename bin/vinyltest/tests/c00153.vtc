@@ -1,0 +1,147 @@
+varnishtest "vcl.ext_load: untrusted compiler output cannot crash mgt"
+
+feature topbuild
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-p debug=+vcl_keep" -vcl+backend {
+	import std;
+} -start
+
+shell {
+	mkdir -p ${tmpdir}/fixture &&
+	cp ${v1_name}/vcl_vcl1.*/vgc.so ${v1_name}/vcl_vcl1.*/vgc.sym \
+	    ${tmpdir}/fixture/
+}
+
+varnish v1 -cliok "param.set debug -vcl_keep"
+
+shell {
+	mkdir -p ${tmpdir}/syms
+	cat > ${tmpdir}/cc.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/exit3.sh <<'EOS'
+#!/bin/sh
+exit 3
+EOS
+	cat > ${tmpdir}/nothing.sh <<'EOS'
+#!/bin/sh
+exit 0
+EOS
+	cat > ${tmpdir}/garbage.sh <<'EOS'
+#!/bin/sh
+echo "this is not an ELF object" > "$2/vgc.so"
+cp ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/nosym.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+rm "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/sym.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+cp "$SYMFILE" "$2/vgc.sym"
+EOS
+	cat > ${tmpdir}/fail1.sh <<'EOS'
+#!/bin/sh
+exit 1
+EOS
+	chmod +x ${tmpdir}/*.sh
+	echo 'not json' > ${tmpdir}/syms/notjson
+	echo '[{"version":0},{"dir":"import","type":"$VCL","name":"nope"}]' > ${tmpdir}/syms/nope
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","file":"/nonexistent","dst":"../../x"}]' > ${tmpdir}/syms/dst1
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","file":"/nonexistent","dst":"./vmod_cache/../x"}]' > ${tmpdir}/syms/dst2
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","file":"/nonexistent","dst":"./vmod_cache/"}]' > ${tmpdir}/syms/dst3
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","dst":"./vmod_cache/_vmod_x"}]' > ${tmpdir}/syms/nofile
+	echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"x","file":"/nonexistent","dst":"./vmod_cache/_vmod_x"}]' > ${tmpdir}/syms/nofilecopy
+}
+
+# exit3
+varnish v1 -clierr 106 "vcl.ext_load exit3 /dev/null ${tmpdir}/exit3.sh"
+varnish v1 -cliexpect "exited with 3" "vcl.ext_load exit3 /dev/null ${tmpdir}/exit3.sh"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_exit3.*"
+
+# noprog
+varnish v1 -clierr 106 "vcl.ext_load noprog /dev/null ${tmpdir}/nonexistent"
+varnish v1 -cliexpect "Cannot exec" "vcl.ext_load noprog /dev/null ${tmpdir}/nonexistent"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_noprog.*"
+
+# nothing
+varnish v1 -clierr 106 "vcl.ext_load nothing /dev/null ${tmpdir}/nothing.sh"
+varnish v1 -cliexpect "dlopen" "vcl.ext_load nothing /dev/null ${tmpdir}/nothing.sh"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_nothing.*"
+
+# garbage
+varnish v1 -clierr 106 "vcl.ext_load garbage /dev/null ${tmpdir}/garbage.sh"
+varnish v1 -cliexpect "dlopen" "vcl.ext_load garbage /dev/null ${tmpdir}/garbage.sh"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_garbage.*"
+
+# nosym
+varnish v1 -clierr 106 "vcl.ext_load nosym /dev/null ${tmpdir}/nosym.sh"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load nosym /dev/null ${tmpdir}/nosym.sh"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_nosym.*"
+
+# s_notjson
+varnish v1 -clierr 106 "vcl.ext_load s_notjson /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/notjson"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_notjson /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/notjson"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_notjson.*"
+
+# s_nope
+varnish v1 -clierr 106 "vcl.ext_load s_nope /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nope"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_nope /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nope"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_nope.*"
+
+# s_dst1
+varnish v1 -clierr 106 "vcl.ext_load s_dst1 /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/dst1"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_dst1 /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/dst1"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_dst1.*"
+
+# s_dst2
+varnish v1 -clierr 106 "vcl.ext_load s_dst2 /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/dst2"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_dst2 /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/dst2"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_dst2.*"
+
+# s_dst3
+varnish v1 -clierr 106 "vcl.ext_load s_dst3 /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/dst3"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_dst3 /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/dst3"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_dst3.*"
+
+# s_nofile
+varnish v1 -clierr 106 "vcl.ext_load s_nofile /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nofile"
+varnish v1 -cliexpect "Invalid symbol table" "vcl.ext_load s_nofile /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nofile"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_nofile.*"
+
+# s_nofilecopy
+varnish v1 -clierr 106 "vcl.ext_load s_nofilecopy /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nofilecopy"
+varnish v1 -cliexpect "Cannot copy vmod" "vcl.ext_load s_nofilecopy /dev/null ${tmpdir}/sym.sh -E SYMFILE=${tmpdir}/syms/nofilecopy"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_s_nofilecopy.*"
+shell "! test -e ${v1_name}/vmod_cache/_vmod_x"
+
+# A failed name can be reused
+
+varnish v1 -clierr 106 "vcl.ext_load again /dev/null ${tmpdir}/fail1.sh"
+varnish v1 -cliok "vcl.ext_load again /dev/null ${tmpdir}/cc.sh"
+
+# Duplicate name
+
+varnish v1 -clierr 106 "vcl.ext_load vcl1 /dev/null ${tmpdir}/cc.sh"
+varnish v1 -cliexpect "Already a VCL named vcl1" "vcl.ext_load vcl1 /dev/null ${tmpdir}/cc.sh"
+varnish v1 -cliok "vcl.list"

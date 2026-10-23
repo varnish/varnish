@@ -508,15 +508,34 @@ mgt_vcc_mkdir(struct cli *cli, struct vcc_priv *vp, const char *vclname)
  */
 
 static char *
-mgt_vcc_success(struct vcc_priv *vp, struct vclprog *vcl)
+mgt_vcc_success(struct cli *cli, struct vcc_priv *vp, struct vclprog *vcl)
 {
 	char *p;
+	struct vsb *sb;
+	int i;
 
 	p = VFIL_readfile(NULL, VSB_data(vp->symfile), NULL);
-	AN(p);
-	mgt_vcl_symtab(vcl, p);
+	if (p == NULL) {
+		VCLI_Out(cli, "Invalid symbol table: cannot read %s: %s\n",
+		    VSB_data(vp->symfile), VAS_errtxt(errno));
+		mgt_vcc_failed(cli, vp);
+		return (NULL);
+	}
+	sb = VSB_new_auto();
+	AN(sb);
+	i = mgt_vcl_symtab(vcl, p, sb);
+	free(p);
+	AZ(VSB_finish(sb));
+	if (i) {
+		VCLI_Out(cli, "%s", VSB_data(sb));
+		VSB_destroy(&sb);
+		mgt_vcc_failed(cli, vp);
+		return (NULL);
+	}
+	VSB_destroy(&sb);
 
-	REPLACE(p, VSB_data(vp->libfile));
+	p = strdup(VSB_data(vp->libfile));
+	AN(p);
 	mgt_vcc_fini_vp(vp, VCC_SUCCESS);
 	return (p);
 }
@@ -558,7 +577,7 @@ mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 		return (NULL);
 	}
 
-	return (mgt_vcc_success(vp, vcl));
+	return (mgt_vcc_success(cli, vp, vcl));
 }
 
 char *
@@ -600,5 +619,5 @@ mgt_VccExtCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 		return (NULL);
 	}
 
-	return (mgt_vcc_success(vp, vcl));
+	return (mgt_vcc_success(cli, vp, vcl));
 }
