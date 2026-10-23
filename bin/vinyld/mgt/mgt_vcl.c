@@ -279,7 +279,7 @@ mgt_vcl_del(struct vclprog *vp)
 
 		if (VTAILQ_EMPTY(&vf->vcls)) {
 			if (!MGT_DO_DEBUG(DBG_VMOD_SO_KEEP))
-				AZ(unlink(vf->fname));
+				VJ_unlink(vf->fname, 1);
 			VTAILQ_REMOVE(&vmodhead, vf, list);
 			free(vf->fname);
 			FREE_OBJ(vf);

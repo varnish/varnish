@@ -144,6 +144,32 @@ varnish v1 -cliok "vcl.list"
 shell "${tmpdir}/timed.sh 10 'not a regular file' vcl.ext_load fifoso /dev/null ${tmpdir}/fifoso.sh"
 varnish v1 -cliok "vcl.list"
 
+# Pre-planted VMOD destination
+shell "${tmpdir}/timed.sh 10 'Cannot copy vmod' vcl.ext_load planted /dev/null ${tmpdir}/planted.sh"
+varnish v1 -cliok "vcl.list"
+shell "test -d ${v1_name}/vmod_cache/_vmod_d"
+
+# VMOD file is a FIFO
+shell "${tmpdir}/timed.sh 10 'Cannot copy vmod' vcl.ext_load vmodfifo /dev/null ${tmpdir}/vmodfifo.sh"
+varnish v1 -cliok "vcl.list"
+shell "! test -e ${v1_name}/vmod_cache/_vmod_f"
+
+# VMOD copy replaced behind our back
+varnish v1 -cliok "vcl.ext_load vmodok /dev/null ${tmpdir}/vmodok.sh"
+shell {
+	rm -f ${v1_name}/vmod_cache/_vmod_e &&
+	mkdir ${v1_name}/vmod_cache/_vmod_e
+}
+varnish v1 -cliok "vcl.discard vmodok"
+shell {
+	for i in $(seq 50); do
+		varnishadm -n ${v1_name} vcl.list | grep -q vmodok || exit 0
+		sleep 0.1
+	done
+	exit 1
+}
+varnish v1 -cliok "vcl.list"
+
 # Output flood
 varnish v1 -cliok "param.set cli_limit 4m"
 shell {

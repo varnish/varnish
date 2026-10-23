@@ -207,27 +207,51 @@ mgt_vcl_import_vcl(struct vclprog *vp1, const struct vjsn_val *vv)
 static int
 mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 {
-	int fi, fo;
+	int fi, fo, fl;
 	int ret = 0;
 	ssize_t sz;
+	struct stat st;
 	char buf[BUFSIZ];
 
 	fo = open(to, O_WRONLY | O_CREAT | O_EXCL, 0744);
-	if (fo < 0 && errno == EEXIST)
-		return (0);
+	if (fo < 0 && errno == EEXIST) {
+		/* The program may have planted something there */
+		if (fstatat(AT_FDCWD, to, &st, AT_SYMLINK_NOFOLLOW) == 0 &&
+		    S_ISREG(st.st_mode))
+			return (0);
+		fprintf(stderr, "While creating copy of vmod %s:\n\t"
+		    "%s exists and is not a regular file\n", nm, to);
+		return (1);
+	}
 	if (fo < 0) {
 		fprintf(stderr, "While creating copy of vmod %s:\n\t%s: %s\n",
 		    nm, to, VAS_errtxt(errno));
 		return (1);
 	}
-	fi = open(fm, O_RDONLY);
+	/*
+	 * Symlinks are fine (libvcc emits them, for instance through the
+	 * vmod_path), but opening must not block and we only copy regular
+	 * files.
+	 */
+	fi = open(fm, O_RDONLY | O_NONBLOCK);
 	if (fi < 0) {
 		fprintf(stderr, "Opening vmod %s from %s: %s\n",
 		    nm, fm, VAS_errtxt(errno));
-		AZ(unlink(to));
+		(void)unlink(to);
 		closefd(&fo);
 		return (1);
 	}
+	if (fstat(fi, &st) || !S_ISREG(st.st_mode)) {
+		fprintf(stderr, "Opening vmod %s from %s: not a regular file\n",
+		    nm, fm);
+		(void)unlink(to);
+		closefd(&fi);
+		closefd(&fo);
+		return (1);
+	}
+	fl = fcntl(fi, F_GETFL);
+	assert(fl != -1);
+	AZ(fcntl(fi, F_SETFL, fl & ~O_NONBLOCK));
 	while (1) {
 		sz = read(fi, buf, sizeof buf);
 		if (sz == 0)
@@ -235,7 +259,7 @@ mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 		if (sz < 0 || sz != write(fo, buf, sz)) {
 			fprintf(stderr, "Copying vmod %s: %s\n",
 			    nm, VAS_errtxt(errno));
-			AZ(unlink(to));
+			(void)unlink(to);
 			ret = 1;
 			break;
 		}
