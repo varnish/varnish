@@ -33,9 +33,9 @@
 
 #include "config.h"
 
+#include <fcntl.h>
 #include <limits.h>
 #include <stdint.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -314,10 +314,6 @@ mgt_vcc_touchfile(const char *fn, struct vsb *sb)
 	return (0);
 }
 
-/*--------------------------------------------------------------------
- * Compile a VCL program, return shared object, errors in sb.
- */
-
 static unsigned
 mgt_vcc_dlopen(struct vcc_priv *vp, struct vsb *sb)
 {
@@ -328,6 +324,10 @@ mgt_vcc_dlopen(struct vcc_priv *vp, struct vsb *sb)
 	VJ_master(JAIL_MASTER_LOW);
 	return (subs);
 }
+
+/*--------------------------------------------------------------------
+ * Compile a VCL program, return shared object, errors in sb.
+ */
 
 static unsigned
 mgt_vcc_compile(struct vcc_priv *vp, struct vsb *sb, int C_flag)
@@ -416,7 +416,9 @@ mgt_vcc_fini_vp(struct vcc_priv *vp, enum vcc_fini_e vcc_status)
 	int ignore_enoent = (vcc_status == VCC_FAILED);
 
 	if (!MGT_DO_DEBUG(DBG_VCL_KEEP)) {
-		VJ_unlink(VSB_data(vp->csrcfile), ignore_enoent);
+		/* The external compiler path has no C source file */
+		if (vp->ext == NULL)
+			VJ_unlink(VSB_data(vp->csrcfile), ignore_enoent);
 		VJ_unlink(VSB_data(vp->symfile), ignore_enoent);
 		if (vcc_status != VCC_SUCCESS) {
 			VJ_unlink(VSB_data(vp->libfile), ignore_enoent);
@@ -428,6 +430,19 @@ mgt_vcc_fini_vp(struct vcc_priv *vp, enum vcc_fini_e vcc_status)
 	VSB_destroy(&vp->libfile);
 	VSB_destroy(&vp->symfile);
 	VSB_destroy(&vp->dir);
+}
+
+/*--------------------------------------------------------------------
+ * Clean up after a failed compilation and report it to the CLI.
+ */
+
+static void
+mgt_vcc_failed(struct cli *cli, struct vcc_priv *vp)
+{
+
+	mgt_vcc_fini_vp(vp, VCC_FAILED);
+	VCLI_Out(cli, "VCL compilation failed");
+	VCLI_SetResult(cli, CLIS_PARAM);
 }
 
 /*--------------------------------------------------------------------
@@ -524,10 +539,8 @@ mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 	vp->vclsrcfile = vclsrcfile;
 
 	if (mgt_vcc_mkdir(cli, vp, vclname)) {
-		mgt_vcc_fini_vp(vp, VCC_FAILED);
 		VSB_destroy(&sb);
-		VCLI_Out(cli, "VCL compilation failed");
-		VCLI_SetResult(cli, CLIS_PARAM);
+		mgt_vcc_failed(cli, vp);
 		return (NULL);
 	}
 
@@ -538,11 +551,10 @@ mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 	VSB_destroy(&sb);
 
 	if (status || C_flag) {
-		mgt_vcc_fini_vp(vp, VCC_FAILED);
-		if (status) {
-			VCLI_Out(cli, "VCL compilation failed");
-			VCLI_SetResult(cli, CLIS_PARAM);
-		}
+		if (status)
+			mgt_vcc_failed(cli, vp);
+		else
+			mgt_vcc_fini_vp(vp, VCC_FAILED);
 		return (NULL);
 	}
 
@@ -568,10 +580,8 @@ mgt_VccExtCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 	vp->ext = ext;
 
 	if (mgt_vcc_mkdir(cli, vp, vclname)) {
-		mgt_vcc_fini_vp(vp, VCC_FAILED);
 		VSB_destroy(&sb);
-		VCLI_Out(cli, "VCL compilation failed");
-		VCLI_SetResult(cli, CLIS_PARAM);
+		mgt_vcc_failed(cli, vp);
 		return (NULL);
 	}
 
@@ -586,9 +596,7 @@ mgt_VccExtCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 	VSB_destroy(&sb);
 
 	if (status) {
-		mgt_vcc_fini_vp(vp, VCC_FAILED);
-		VCLI_Out(cli, "VCL compilation failed");
-		VCLI_SetResult(cli, CLIS_PARAM);
+		mgt_vcc_failed(cli, vp);
 		return (NULL);
 	}
 
