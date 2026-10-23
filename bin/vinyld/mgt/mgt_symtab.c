@@ -291,6 +291,47 @@ mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv,
 	return (0);
 }
 
+/*
+ * vjsn_parse() recurses for every nested array or object, so reject deep
+ * nesting before handing it untrusted input.
+ */
+
+#define SYMTAB_MAXDEPTH 64
+
+static int
+mgt_vcl_symtab_depth(const char *p)
+{
+	int depth = 0, instr = 0;
+
+	for (; *p != '\0'; p++) {
+		if (instr) {
+			if (*p == '\\' && p[1] != '\0')
+				p++;
+			else if (*p == '"')
+				instr = 0;
+			continue;
+		}
+		switch (*p) {
+		case '"':
+			instr = 1;
+			break;
+		case '[':
+		case '{':
+			if (++depth > SYMTAB_MAXDEPTH)
+				return (-1);
+			break;
+		case ']':
+		case '}':
+			if (depth > 0)
+				depth--;
+			break;
+		default:
+			break;
+		}
+	}
+	return (0);
+}
+
 int
 mgt_vcl_symtab(struct vclprog *vp, const char *input, struct vsb *err)
 {
@@ -301,6 +342,10 @@ mgt_vcl_symtab(struct vclprog *vp, const char *input, struct vsb *err)
 	CHECK_OBJ_NOTNULL(vp, VCLPROG_MAGIC);
 	AN(input);
 	AN(err);
+	if (mgt_vcl_symtab_depth(input)) {
+		VSB_cat(err, "Invalid symbol table: nesting too deep\n");
+		return (-1);
+	}
 	vj = vjsn_parse(input, &perr);
 	if (perr != NULL) {
 		VSB_printf(err, "Invalid symbol table: parse error: %s\n",

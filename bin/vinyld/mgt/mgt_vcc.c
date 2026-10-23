@@ -596,6 +596,63 @@ mgt_vcc_mkdir(struct cli *cli, struct vcc_priv *vp, const char *vclname)
 }
 
 /*--------------------------------------------------------------------
+ * Read a file which may have been left by an untrusted program: it must
+ * be a regular file of reasonable size, and opening it must not block.
+ * Returns NULL with the reason in sb on failure.
+ */
+
+static char *
+mgt_vcc_read_untrusted(const char *fn, size_t maxsize, struct vsb *sb)
+{
+	struct stat st;
+	char *p;
+	size_t len = 0;
+	ssize_t i;
+	int fd;
+
+	fd = open(fn, O_RDONLY | O_NONBLOCK | O_NOFOLLOW);
+	if (fd < 0) {
+		VSB_printf(sb, "cannot open %s: %s", fn, VAS_errtxt(errno));
+		return (NULL);
+	}
+	if (fstat(fd, &st)) {
+		VSB_printf(sb, "cannot stat %s: %s", fn, VAS_errtxt(errno));
+		closefd(&fd);
+		return (NULL);
+	}
+	if (!S_ISREG(st.st_mode)) {
+		VSB_printf(sb, "%s is not a regular file", fn);
+		closefd(&fd);
+		return (NULL);
+	}
+	if (st.st_size < 0 || (uintmax_t)st.st_size > maxsize) {
+		VSB_printf(sb, "%s is larger than %zu bytes", fn, maxsize);
+		closefd(&fd);
+		return (NULL);
+	}
+	p = malloc(st.st_size + 1L);
+	AN(p);
+	while (len < (size_t)st.st_size) {
+		i = read(fd, p + len, st.st_size - len);
+		if (i < 0 && errno == EINTR)
+			continue;
+		if (i < 0) {
+			VSB_printf(sb, "cannot read %s: %s", fn,
+			    VAS_errtxt(errno));
+			closefd(&fd);
+			free(p);
+			return (NULL);
+		}
+		if (i == 0)
+			break;
+		len += i;
+	}
+	closefd(&fd);
+	p[len] = '\0';
+	return (p);
+}
+
+/*--------------------------------------------------------------------
  * Read the symbol table of a successful compilation and hand over the
  * shared object.
  */
@@ -607,15 +664,16 @@ mgt_vcc_success(struct cli *cli, struct vcc_priv *vp, struct vclprog *vcl)
 	struct vsb *sb;
 	int i;
 
-	p = VFIL_readfile(NULL, VSB_data(vp->symfile), NULL);
+	sb = VSB_new_auto();
+	AN(sb);
+	p = mgt_vcc_read_untrusted(VSB_data(vp->symfile), VGC_SYM_MAX, sb);
 	if (p == NULL) {
-		VCLI_Out(cli, "Invalid symbol table: cannot read %s: %s\n",
-		    VSB_data(vp->symfile), VAS_errtxt(errno));
+		AZ(VSB_finish(sb));
+		VCLI_Out(cli, "Invalid symbol table: %s\n", VSB_data(sb));
+		VSB_destroy(&sb);
 		mgt_vcc_failed(cli, vp);
 		return (NULL);
 	}
-	sb = VSB_new_auto();
-	AN(sb);
 	i = mgt_vcl_symtab(vcl, p, sb);
 	free(p);
 	AZ(VSB_finish(sb));

@@ -126,6 +126,20 @@ varnish v1 -cliok "vcl.list"
 shell "${tmpdir}/timed.sh 10 'timed out' vcl.ext_load esc2 /dev/null ${tmpdir}/escape2.sh -T 1"
 varnish v1 -cliok "vcl.list"
 
+# Huge sparse vgc.sym
+shell "${tmpdir}/timed.sh 10 'Invalid symbol table' vcl.ext_load sparse /dev/null ${tmpdir}/sparse.sh"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_sparse.*"
+
+# vgc.sym is a FIFO
+shell "${tmpdir}/timed.sh 10 'Invalid symbol table' vcl.ext_load fifosym /dev/null ${tmpdir}/fifosym.sh"
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_fifosym.*"
+
+# Deeply nested vgc.sym
+shell "${tmpdir}/timed.sh 10 'nesting too deep' vcl.ext_load deep /dev/null ${tmpdir}/deep.sh"
+varnish v1 -cliok "vcl.list"
+
 # Output flood
 varnish v1 -cliok "param.set cli_limit 4m"
 shell {
