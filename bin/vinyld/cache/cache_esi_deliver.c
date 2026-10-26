@@ -107,34 +107,28 @@ ved_reembark(struct worker *wrk, struct req *req)
 
 /*--------------------------------------------------------------------*/
 
-static void
-ved_include(struct req *preq, const char *src, const char *host,
-    struct ecx *ecx)
+static void ved_run(struct worker *wrk, struct req *req);
+
+static struct req *
+ved_prep(struct req *preq, const char *src, const char *host,
+    int isgzip)
 {
 	struct worker *wrk;
-	struct sess *sp;
 	struct req *req;
-	enum req_fsm_nxt s;
 
 	CHECK_OBJ_NOTNULL(preq, REQ_MAGIC);
 	CHECK_OBJ_NOTNULL(preq->top, REQTOP_MAGIC);
-	sp = preq->sp;
-	CHECK_OBJ_NOTNULL(sp, SESS_MAGIC);
-	CHECK_OBJ_NOTNULL(ecx, ECX_MAGIC);
 	wrk = preq->wrk;
 
 	if (preq->esi_level >= cache_param->max_esi_depth) {
 		VSLb(preq->vsl, SLT_VCL_Error,
 		    "ESI depth limit reached (param max_esi_depth = %u)",
 		    cache_param->max_esi_depth);
-		if (ecx->abrt)
-			preq->top->topreq->vdc->retval = -1;
-		return;
+		return (NULL);
 	}
 
-	req = Req_New(sp, preq);
+	req = Req_New(preq->sp, preq);
 	AN(req);
-	THR_SetRequest(req);
 	assert(IS_NO_VXID(req->vsl->wid));
 	req->vsl->wid = VXID_Get(wrk, VSL_CLIENTMARKER);
 
@@ -168,7 +162,7 @@ ved_include(struct req *preq, const char *src, const char *host,
 	http_Unset(req->http, H_Range);
 
 	/* Set Accept-Encoding according to what we want */
-	if (ecx->isgzip)
+	if (isgzip)
 		http_ForceHeader(req->http, H_Accept_Encoding, "gzip");
 	else
 		http_Unset(req->http, H_Accept_Encoding);
@@ -189,9 +183,40 @@ ved_include(struct req *preq, const char *src, const char *host,
 	assert(req->req_step == R_STP_TRANSPORT);
 	req->t_req = preq->t_req;
 
+	return (req);
+}
+
+static void
+ved_include(struct req *preq, const char *src, const char *host,
+    struct ecx *ecx)
+{
+	struct req *req;
+
+	CHECK_OBJ_NOTNULL(ecx, ECX_MAGIC);
+	req = ved_prep(preq, src, host, ecx->isgzip);
+	if (req == NULL && ecx->abrt)
+		preq->top->topreq->vdc->retval = -1;
+	if (req == NULL)
+		return;
 	req->transport = &VED_transport;
 	req->transport_priv = ecx;
+	ved_run(preq->wrk, req);
+}
 
+static void
+ved_run(struct worker *wrk, struct req *req)
+{
+	struct req *preq = THR_GetRequest();
+	struct ecx *ecx;
+	struct sess *sp;
+	enum req_fsm_nxt s;
+
+	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
+	CAST_OBJ_NOTNULL(ecx, req->transport_priv, ECX_MAGIC);
+	sp = req->sp;
+	CHECK_OBJ_NOTNULL(sp, SESS_MAGIC);
+
+	THR_SetRequest(req);
 	VCL_TaskEnter(req->privs);
 
 	while (1) {
@@ -282,7 +307,6 @@ ved_vdp_esi_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 
 	ALLOC_OBJ(ecx, ECX_MAGIC);
 	AN(ecx);
-	assert(sizeof gzip_hdr == 10);
 	ecx->preq = ctx->req;
 	*priv = ecx;
 	RFC2616_Weaken_Etag(vdc->hp);
@@ -343,7 +367,7 @@ ved_vdp_esi_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 			if (*ecx->p == VEC_GZ) {
 				if (ecx->pecx == NULL)
 					retval = VDP_bytes(vdc, VDP_NULL,
-					    gzip_hdr, 10);
+					    gzip_hdr, sizeof gzip_hdr);
 				ecx->l_crc = 0;
 				ecx->crc = crc32(0L, Z_NULL, 0);
 				ecx->isgzip = 1;
@@ -392,16 +416,16 @@ ved_vdp_esi_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 				    ecx->preq->esi_include_onerror;
 				/* FALLTHROUGH */
 			case VEC_IC:
+				if (VDP_bytes(vdc, VDP_FLUSH, NULL, 0)) {
+					ecx->p = ecx->e;
+					break;
+				}
 				ecx->p++;
 				q = (const void*)strchr((const char*)ecx->p, '\0');
 				AN(q);
 				q++;
 				r = (const void*)strchr((const char*)q, '\0');
 				AN(r);
-				if (VDP_bytes(vdc, VDP_FLUSH, NULL, 0)) {
-					ecx->p = ecx->e;
-					break;
-				}
 				Debug("INCL [%s][%s] BEGIN\n", q, ecx->p);
 				ved_include(ecx->preq,
 				    (const char*)q, (const char*)ecx->p, ecx);

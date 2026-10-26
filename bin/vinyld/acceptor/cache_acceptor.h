@@ -39,6 +39,8 @@ struct lock;
 void VCA_Init(void);
 void VCA_Start(struct cli *cli);
 void VCA_Shutdown(void);
+void VCA_USR1_Unblock(void);
+void VCA_USR1_Block(void);
 
 enum vca_event {
 	VCA_EVENT_LADDR,

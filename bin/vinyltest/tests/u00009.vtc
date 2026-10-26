@@ -2,6 +2,7 @@ vtest	"trivial run of varnishhist in curses mode"
 
 server s1 {
 	rxreq
+	delay 1
 	txresp -bodylen 32
 } -start
 

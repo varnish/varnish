@@ -86,7 +86,8 @@ nobase_pkginclude_HEADERS += \
 	vte.h \
 	vtim.h \
 	vtree.h \
-	vrnd.h
+	vrnd.h \
+	vdpio_test.h
 
 # Private headers
 nobase_noinst_HEADERS = \

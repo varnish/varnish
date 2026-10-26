@@ -170,6 +170,7 @@ ssy_ai_lease(struct worker *wrk, vai_hdl vhdl, struct vscarab *dst)
 	AN(hdl->viov);
 
 	do {
+		dviov = NULL;
 		VSCARAB_FOREACH_RESUME(hdl->viov, &hdl->st->scarab) {
 			dviov = VSCARAB_GET(dst);
 			if (dviov == NULL)
@@ -178,6 +179,8 @@ ssy_ai_lease(struct worker *wrk, vai_hdl vhdl, struct vscarab *dst)
 			dviov->lease = VAI_LEASE_NORET;
 			r++;
 		}
+		if (dviov == NULL)
+			break;
 		if (hdl->viov == NULL) {
 			hdl->st = VSTAILQ_NEXT(hdl->st, list);
 			if (hdl->st == NULL)
@@ -230,6 +233,7 @@ ssy_ai_return(struct worker *wrk, vai_hdl vhdl, struct vscaret *scaret)
 		 if (*p != VAI_LEASE_NORET)
 			free (lease2ptr(*p));
 	}
+	VSCARET_INIT(scaret, scaret->capacity);
 }
 
 static void v_matchproto_(vai_fini_f)
@@ -382,7 +386,7 @@ ssy_allocobj(struct worker *wrk, const struct stevedore *stv,
 }
 
 static void v_matchproto_(storage_close_f)
-ssy_close(const struct stevedore *st, int warn)
+ssy_close(struct stevedore *st, int warn)
 {
 
 	(void)st;
