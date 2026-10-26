@@ -204,12 +204,15 @@ mgt_vcl_import_vcl(struct vclprog *vp1, const struct vjsn_val *vv)
 	mgt_vcl_dep_add(vp1, vp2)->vj = vv;
 }
 
+#define VMOD_COPY_MAX	(32 * 1024 * 1024)
+
 static int
 mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 {
 	int fi, fo, fl;
 	int ret = 0;
 	ssize_t sz;
+	off_t total = 0;
 	struct stat st;
 	char buf[BUFSIZ];
 
@@ -249,6 +252,14 @@ mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 		closefd(&fo);
 		return (1);
 	}
+	if (st.st_size > VMOD_COPY_MAX) {
+		fprintf(stderr, "Opening vmod %s from %s: "
+		    "larger than %d bytes\n", nm, fm, VMOD_COPY_MAX);
+		(void)unlink(to);
+		closefd(&fi);
+		closefd(&fo);
+		return (1);
+	}
 	fl = fcntl(fi, F_GETFL);
 	assert(fl != -1);
 	AZ(fcntl(fi, F_SETFL, fl & ~O_NONBLOCK));
@@ -259,6 +270,15 @@ mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 		if (sz < 0 || sz != write(fo, buf, sz)) {
 			fprintf(stderr, "Copying vmod %s: %s\n",
 			    nm, VAS_errtxt(errno));
+			(void)unlink(to);
+			ret = 1;
+			break;
+		}
+		/* The file may grow while we copy it */
+		total += sz;
+		if (total > VMOD_COPY_MAX) {
+			fprintf(stderr, "Copying vmod %s: "
+			    "larger than %d bytes\n", nm, VMOD_COPY_MAX);
 			(void)unlink(to);
 			ret = 1;
 			break;

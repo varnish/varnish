@@ -96,6 +96,11 @@ EOS
 cp ${tmpdir}/fixture/vgc.so "$2"
 echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"f","file":"${tmpdir}/vmod.fifo","dst":"./vmod_cache/_vmod_f"}]' > "$2/vgc.sym"
 EOS
+	cat > ${tmpdir}/vmodbig.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so "$2"
+echo '[{"version":0},{"dir":"import","type":"$VMOD","vext":false,"name":"b","file":"${tmpdir}/vmod.big","dst":"./vmod_cache/_vmod_b"}]' > "$2/vgc.sym"
+EOS
 	cat > ${tmpdir}/vmodok.sh <<'EOS'
 #!/bin/sh
 cp ${tmpdir}/fixture/vgc.so "$2"
@@ -111,6 +116,7 @@ EOS
 cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
 EOS
 	mkfifo ${tmpdir}/vmod.fifo
+	truncate -s 64M ${tmpdir}/vmod.big
 	chmod +x ${tmpdir}/*.sh
 }
 
@@ -153,6 +159,11 @@ shell "test -d ${v1_name}/vmod_cache/_vmod_d"
 shell "${tmpdir}/timed.sh 10 'Cannot copy vmod' vcl.ext_load vmodfifo /dev/null ${tmpdir}/vmodfifo.sh"
 varnish v1 -cliok "vcl.list"
 shell "! test -e ${v1_name}/vmod_cache/_vmod_f"
+
+# VMOD file larger than the copy limit
+shell "${tmpdir}/timed.sh 10 'Cannot copy vmod' vcl.ext_load vmodbig /dev/null ${tmpdir}/vmodbig.sh"
+varnish v1 -cliok "vcl.list"
+shell "! test -e ${v1_name}/vmod_cache/_vmod_b"
 
 # VMOD copy replaced behind our back
 varnish v1 -cliok "vcl.ext_load vmodok /dev/null ${tmpdir}/vmodok.sh"

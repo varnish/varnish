@@ -82,7 +82,7 @@ When ``vext`` is false, it also needs ``file``, the VMOD to use, and
 working directory of Varnish.  The management process copies the VMOD
 from ``file`` to ``dst``, unless ``dst`` already exists as a regular
 file.  ``file`` may be a symbolic link, but must lead to a regular
-file.  A ``$VCL`` import may only refer to labels of existing VCLs.
+file of at most 32 MiB.  A ``$VCL`` import may only refer to labels of existing VCLs.
 ``vgc.sym`` must be a regular file (not a symbolic link) of at most
 64 MiB, with arrays and objects nested at most 64 levels deep.  A
 symbol table that does not meet these rules is rejected with an
