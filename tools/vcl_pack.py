@@ -39,7 +39,8 @@ vcl.ext_load.
         in a throwaway working directory, with the vcl_keep debug flag so
         vgc.so and vgc.sym survive until they are packaged.
 
-    vcl_pack.py load -n <workdir> [-t state] [-T s] <configname> <in.json>
+    vcl_pack.py load -n <workdir> [-t state] [-T s] [--check-cache]
+                     <configname> <in.json>
         Have a running varnishd load a package, using this script as the
         vcl.ext_load program.
 
@@ -50,8 +51,9 @@ vcl.ext_load.
 VMODs are not part of a package by default ("--vmods local"): when the
 package is loaded, each imported VMOD is looked up at the path recorded
 in the symbol table, then in vmod_path, and must have the same file_id
-as the one the VCL was compiled against.  With "--vmods embed" the VMODs
-are stored in the package and used from there.
+as the one the VCL was compiled against.  A VMOD already in vmod_cache is
+used as is, its file_id is only checked with "load --check-cache".  With
+"--vmods embed" the VMODs are stored in the package and used from there.
 """
 
 import argparse
@@ -69,6 +71,7 @@ VERSION = 1
 VMOD_CACHE = "./vmod_cache/"
 VMOD_SPEC_MAGIC = b"VMOD_JSON_SPEC\x02"
 VMOD_PATH_ENV = "VCL_PACK_VMOD_PATH"
+CHECK_CACHE_ENV = "VCL_PACK_CHECK_CACHE"
 
 
 class PackError(Exception):
@@ -352,6 +355,8 @@ def cmd_load(args):
     argv = adm_argv(args) + ["vcl.ext_load", args.configname, pack,
                              os.path.abspath(__file__),
                              "-E", "%s=%s" % (VMOD_PATH_ENV, vmod_path)]
+    if args.check_cache:
+        argv += ["-E", "%s=1" % CHECK_CACHE_ENV]
     if args.t:
         argv += ["-t", args.t]
     if args.T:
@@ -372,10 +377,14 @@ def unpack(pack_path, dst):
     workdir = os.path.dirname(os.path.abspath(dst))
     vmod_path = [d for d in os.environ.get(VMOD_PATH_ENV, "").split(":")
                  if d]
+    check_cache = os.environ.get(CHECK_CACHE_ENV) == "1"
 
     for e in vmod_imports(symtab):
-        if os.path.isfile(os.path.join(workdir, e["dst"])):
+        cached = os.path.join(workdir, e["dst"])
+        if os.path.isfile(cached):
             # Already in vmod_cache, the file is not copied
+            if check_cache:
+                find_vmod(e, [cached])
             continue
         vm = pack.get("vmods", {}).get(e["name"])
         if vm is not None:
@@ -441,6 +450,9 @@ def main(argv):
     p.add_argument("-t", choices=("auto", "cold", "warm"),
                    help="initial temperature")
     p.add_argument("-T", type=int, help="vcl.ext_load time limit")
+    p.add_argument("--check-cache", action="store_true",
+                   help="also check the file_id of VMODs already in "
+                   "vmod_cache")
     p.add_argument("configname", help="name of the new VCL")
     p.add_argument("pack", help="package file")
     p.set_defaults(func=cmd_load)

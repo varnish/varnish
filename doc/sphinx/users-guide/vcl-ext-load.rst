@@ -146,5 +146,6 @@ By default (``--vmods local``) the package does not contain the VMODs.
 When it is loaded, each VMOD import is looked up at its ``file`` in the
 symbol table, then in ``vmod_path``, and the first one with the
 ``file_id`` the VCL was compiled against is used.  A VMOD already
-present in ``vmod_cache`` is not looked up.  With ``--vmods embed`` the
-VMODs are stored in the package and used from there.
+present in ``vmod_cache`` is used as is, and its ``file_id`` is only
+checked when ``load`` is given ``--check-cache``.  With ``--vmods
+embed`` the VMODs are stored in the package and used from there.

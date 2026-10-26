@@ -290,3 +290,28 @@ shell {
 }
 varnish v1 -cliok "vcl.use cookie"
 client c2 -run
+
+# VMODs already in vmod_cache are only checked with --check-cache
+shell {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} --check-cache \
+	    blob2 ${tmpdir}/blob.json
+}
+shell {
+	set -e
+	f=$(ls ${v1_name}/vmod_cache/_vmod_blob.*)
+	# new inode, the child keeps its mapping of the real one
+	cp ${topbuild}/vmod/.libs/libvmod_cookie.so ${tmpdir}/planted.so
+	mv ${tmpdir}/planted.so $f
+	mkdir ${v1_name}/scratch
+	touch ${v1_name}/scratch/vgc.so ${v1_name}/scratch/vgc.sym
+	python3 ${topsrc}/tools/vcl_pack.py ${tmpdir}/blob.json \
+	    ${v1_name}/scratch
+	rm -r ${v1_name}/scratch
+}
+shell -err -expect "VMOD name is 'cookie'" {
+	python3 ${topsrc}/tools/vcl_pack.py load -n ${v1_name} --check-cache \
+	    blob3 ${tmpdir}/blob.json
+}
+shell -err {
+	varnishadm -n ${v1_name} vcl.list | grep blob3
+}
