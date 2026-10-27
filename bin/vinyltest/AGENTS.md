@@ -5,6 +5,7 @@ Test files use the `.vtc` extension and a custom DSL parsed by this tool. The `b
 Test locations:
 - `bin/vinyltest/tests/` — core daemon tests, prefixed by category: `b*` (basic functionality), `r*` (regression tests, one per bug fix), plus many other single-letter category prefixes (`c*`, `d*`, `e*`, `f*`, `g*`, `h*`, `i*`, `j*`, `l*`, `m*`, `o*`, `p*`, `s*`, `t*`, `u*`, `v*`, `x*`, `T*`)
 - `vmod/tests/` — per-vmod tests (`<name>_*.vtc`)
+- Downstream-only tests (no vinyl-cache counterpart) in either directory get an extra `vc-` prefix (`vc-T00000.vtc`, `vc-tls_b00000.vtc`) so their numbers never collide with ported upstream tests. Tests ported from vinyl-cache keep upstream's exact name.
 
 ## Running tests
 
