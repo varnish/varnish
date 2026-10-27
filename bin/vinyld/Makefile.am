@@ -116,6 +116,7 @@ varnishd_SOURCES = \
 	storage/storage_lru.c \
 	storage/storage_malloc.c \
 	storage/storage_debug.c \
+	storage/storage_disk.c \
 	storage/storage_simple.c \
 	storage/storage_synth.c \
 	storage/storage_umem.c \

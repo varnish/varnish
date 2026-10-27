@@ -1,0 +1,46 @@
+varnishtest "-sdisk as Transient: gzip buffers and h2 request bodies"
+
+server s1 {
+	rxreq
+	expect req.url == "/gzip"
+	expect req.http.accept-encoding == "gzip"
+	txresp -bodylen 4000
+
+	rxreq
+	expect req.url == "/post"
+	expect req.body == request
+	txresp -body response
+} -start
+
+varnish v1 -arg "-sdefault=malloc,1m" \
+    -arg "-sTransient=disk,${tmpdir}/_.disk,20m" \
+    -vcl+backend {
+	sub vcl_backend_response {
+		if (bereq.url == "/gzip") {
+			set beresp.do_gzip = true;
+		}
+	}
+} -cliok "param.set http_gzip_support true" \
+  -cliok "param.set feature +http2" -start
+
+# The gzip VFP takes its work buffer from the Transient stevedore.
+client c1 {
+	txreq -url /gzip -hdr "Accept-Encoding: gzip"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.content-encoding == "gzip"
+	gunzip
+	expect resp.bodylen == 4000
+} -run
+
+# So does the HTTP/2 request body receive buffer.
+client c2 {
+	stream 1 {
+		txreq -req POST -url /post -hdr content-length 7 -body request
+		rxresp
+		expect resp.status == 200
+		expect resp.body == response
+	} -run
+} -run
+
+varnish v1 -expect MAIN.fetch_failed == 0

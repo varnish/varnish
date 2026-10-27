@@ -218,6 +218,54 @@ and MADV_SEQUENTIAL madvise() advice argument, respectively.  Defaults to
 On Linux, large objects and rotational disk should benefit from
 "sequential".
 
+disk
+~~~~
+
+syntax: disk,path[,size]
+
+The disk backend stores object bodies in a file, using regular reads
+and writes rather than `mmap`. Object headers and other metadata are
+kept in memory, so memory use grows with the number of objects, but
+not with their size. This memory is not part of the configured size;
+expect around a kilobyte per object, more with large headers. The page
+cache of the operating system acts as the memory tier for the bodies.
+
+Bodies are stored in multiples of 4KB, so small objects take up more
+space than their size.
+
+When configured as ``Transient`` storage, consumed body extents are
+recycled during streaming delivery. A response can therefore be larger
+than the storage when transit buffering is enabled.
+
+The 'path' and 'size' parameters work as for the file backend. The
+size must be at least 16MB, after rounding down to the filesystem block
+size. Unlike the file backend, the whole file is allocated at startup,
+so that a full filesystem cannot cause write errors later. On
+filesystems where this cannot be done with `fallocate(2)`, the file is
+written through once, which takes a while for a large storage.
+
+The content does not survive a restart of the cache process. The file
+is only backing store for bodies, and whatever it contains at startup is
+ignored and overwritten.
+
+A few things to keep in mind:
+
+* A body write error, such as an I/O error or running out of filesystem
+  space, panics the cache process rather than exposing unwritten data.
+  Read errors fail the affected delivery instead.
+
+* The storage file is exclusively locked while the cache process is
+  running. Another disk stevedore cannot open the same file at that
+  time, even under a different name or with a different configured
+  size. The lock is released when the cache process exits.
+  This is an advisory lock; other programs must not modify the file.
+
+* On Linux, for a file on a filesystem which supports it, such as
+  ext4 or XFS, space is marked as zeroed with `fallocate(2)` when it
+  is allocated to an object. This saves the kernel from reading
+  evicted pages back from the disk before writing to them, which
+  matters when the storage is larger than the memory.
+
 deprecated_persistent
 ---------------------
 
