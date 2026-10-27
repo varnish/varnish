@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <fnmatch.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +50,7 @@
 #include "vcli_serve.h"
 #include "vct.h"
 #include "vev.h"
+#include "vnum.h"
 #include "vte.h"
 #include "vtim.h"
 
@@ -61,6 +63,8 @@ struct vclstate {
 #include "tbl/vcl_states.h"
 
 static const struct vclstate VCL_STATE_LABEL[1] = {{ "label" }};
+
+#define VCL_EXT_TIMEOUT	60.
 
 static unsigned vcl_count;
 
@@ -249,7 +253,7 @@ mgt_vcl_del(struct vclprog *vp)
 		vcl_count--;
 	if (vp->fname != NULL) {
 		if (!MGT_DO_DEBUG(DBG_VCL_KEEP))
-			AZ(unlink(vp->fname));
+			VJ_unlink(vp->fname, 1);
 		p = strrchr(vp->fname, '/');
 		AN(p);
 		*p = '\0';
@@ -275,7 +279,7 @@ mgt_vcl_del(struct vclprog *vp)
 
 		if (VTAILQ_EMPTY(&vf->vcls)) {
 			if (!MGT_DO_DEBUG(DBG_VMOD_SO_KEEP))
-				AZ(unlink(vf->fname));
+				VJ_unlink(vf->fname, 1);
 			VTAILQ_REMOVE(&vmodhead, vf, list);
 			free(vf->fname);
 			FREE_OBJ(vf);
@@ -432,7 +436,8 @@ mgt_vcl_setstate(struct cli *cli, struct vclprog *vp, const struct vclstate *vs)
 
 static struct vclprog *
 mgt_new_vcl(struct cli *cli, const char *vclname, const char *vclsrc,
-    const char *vclsrcfile, const char *state, int C_flag)
+    const char *vclsrcfile, const char *state, int C_flag,
+    const struct mgt_vcl_ext *ext)
 {
 	unsigned status;
 	char *lib, *p;
@@ -458,7 +463,11 @@ mgt_new_vcl(struct cli *cli, const char *vclname, const char *vclsrc,
 		return (NULL);
 
 	vp = mgt_vcl_add(vclname, vs);
-	lib = mgt_VccCompile(cli, vp, vclname, vclsrc, vclsrcfile, C_flag);
+	if (ext != NULL)
+		lib = mgt_VccExtCompile(cli, vp, vclname, ext);
+	else
+		lib = mgt_VccCompile(cli, vp, vclname, vclsrc, vclsrcfile,
+		    C_flag);
 	if (lib == NULL) {
 		mgt_vcl_del(vp);
 		return (NULL);
@@ -510,7 +519,7 @@ mgt_vcl_startup(struct cli *cli, const char *vclsrc, const char *vclname,
 		bprintf(buf, "boot%d", n++);
 		vclname = buf;
 	}
-	vp = mgt_new_vcl(cli, vclname, vclsrc, origin, NULL, C_flag);
+	vp = mgt_new_vcl(cli, vclname, vclsrc, origin, NULL, C_flag, NULL);
 	if (vp != NULL) {
 		/* Last startup VCL becomes the automatically selected
 		 * active VCL. */
@@ -589,7 +598,7 @@ mcf_vcl_inline(struct cli *cli, const char * const *av, void *priv)
 	if (!mcf_find_no_vcl(cli, av[2]))
 		return;
 
-	vp = mgt_new_vcl(cli, av[2], av[3], "<vcl.inline>", av[4], 0);
+	vp = mgt_new_vcl(cli, av[2], av[3], "<vcl.inline>", av[4], 0, NULL);
 	if (vp != NULL && !MCH_Running())
 		VCLI_Out(cli, "VCL compiled.\n");
 }
@@ -603,9 +612,81 @@ mcf_vcl_load(struct cli *cli, const char * const *av, void *priv)
 	if (!mcf_find_no_vcl(cli, av[2]))
 		return;
 
-	vp = mgt_new_vcl(cli, av[2], NULL, av[3], av[4], 0);
+	vp = mgt_new_vcl(cli, av[2], NULL, av[3], av[4], 0, NULL);
 	if (vp != NULL && !MCH_Running())
 		VCLI_Out(cli, "VCL compiled.\n");
+}
+
+static void v_matchproto_(cli_func_t)
+mcf_vcl_ext_load(struct cli *cli, const char * const *av, void *priv)
+{
+	struct mgt_vcl_ext ext[1];
+	const char *state = NULL;
+	const char **env;
+	struct vclprog *vp;
+	const char *arg, *eq;
+	double d;
+	int i, nenv = 0;
+
+	(void)priv;
+
+	/* It runs in the build directory, relative paths make no sense */
+	if (*av[4] != '/') {
+		VCLI_Out(cli, "Program path must be absolute");
+		VCLI_SetResult(cli, CLIS_PARAM);
+		return;
+	}
+
+	INIT_OBJ(ext, MGT_VCL_EXT_MAGIC);
+	ext->input = av[3];
+	ext->program = av[4];
+	ext->timeout = VCL_EXT_TIMEOUT;
+
+	env = calloc(1, sizeof *env);
+	AN(env);
+	for (i = 5; av[i] != NULL; i += 2) {
+		if (av[i + 1] == NULL && (!vstrcmp(av[i], "-t") ||
+		    !vstrcmp(av[i], "-T") || !vstrcmp(av[i], "-E"))) {
+			VCLI_Out(cli, "Missing argument for %s", av[i]);
+			VCLI_SetResult(cli, CLIS_PARAM);
+			break;
+		}
+		arg = av[i + 1];
+		if (!vstrcmp(av[i], "-t")) {
+			state = arg;
+		} else if (!vstrcmp(av[i], "-T")) {
+			d = VNUM(arg);
+			if (!isfinite(d) || d <= 0.) {
+				VCLI_Out(cli, "Invalid -T value: %s", arg);
+				VCLI_SetResult(cli, CLIS_PARAM);
+				break;
+			}
+			ext->timeout = d;
+		} else if (!vstrcmp(av[i], "-E")) {
+			eq = strchr(arg, '=');
+			if (eq == NULL || eq == arg) {
+				VCLI_Out(cli, "Invalid -E value: %s", arg);
+				VCLI_SetResult(cli, CLIS_PARAM);
+				break;
+			}
+			env = realloc(env, (nenv + 2) * sizeof *env);
+			AN(env);
+			env[nenv++] = arg;
+			env[nenv] = NULL;
+		} else {
+			VCLI_Out(cli, "Unknown option: %s", av[i]);
+			VCLI_SetResult(cli, CLIS_PARAM);
+			break;
+		}
+	}
+	ext->env = env;
+
+	if (cli->result == CLIS_OK && mcf_find_no_vcl(cli, av[2])) {
+		vp = mgt_new_vcl(cli, av[2], NULL, NULL, state, 0, ext);
+		if (vp != NULL && !MCH_Running())
+			VCLI_Out(cli, "VCL compiled.\n");
+	}
+	free(env);
 }
 
 
@@ -1114,13 +1195,15 @@ mgt_vcl_poker(const struct vev *e, int what)
 static struct cli_proto cli_vcl[] = {
 	{ CLICMD_VCL_LOAD,		mcf_vcl_load },
 	{ CLICMD_VCL_INLINE,		mcf_vcl_inline },
+	{ CLICMD_VCL_EXT_LOAD,		mcf_vcl_ext_load },
 	{ CLICMD_VCL_USE,		mcf_vcl_use },
 	{ CLICMD_VCL_STATE,		mcf_vcl_state },
 	{ CLICMD_VCL_DISCARD,		mcf_vcl_discard },
 	{ CLICMD_VCL_LIST,		mcf_vcl_list, mcf_vcl_list_json },
 	{ CLICMD_VCL_DEPS,		mcf_vcl_deps, mcf_vcl_deps_json },
 	{ CLICMD_VCL_LABEL,		mcf_vcl_label },
-	{ CLICMD_DEBUG_VCL_SYMTAB,	mcf_vcl_symtab },
+	{ CLICMD_DEBUG_VCL_SYMTAB,	mcf_vcl_symtab,
+					    mcf_vcl_symtab_json },
 	{ NULL }
 };
 

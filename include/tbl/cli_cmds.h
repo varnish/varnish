@@ -92,6 +92,27 @@ CLI_CMD(VCL_INLINE,
 	2, 3
 )
 
+CLI_CMD(VCL_EXT_LOAD,
+	"vcl.ext_load",
+	"vcl.ext_load <configname> <input> <program>"
+	" [-t auto|cold|warm] [-T <seconds>] [-E NAME=VALUE]...",
+	"Compile with an external program and load the result under the"
+	" name provided.",
+
+	"  ``<program>`` must be an absolute path.  It is executed as"
+	" ``<program> <input> <dir>``, with ``<dir>`` (an absolute path) as"
+	" its working directory, and must leave ``vgc.so`` and ``vgc.sym``"
+	" there and exit with status 0.  ``-t`` sets the initial state,"
+	" ``-T`` bounds the run time of the program, and separately of the"
+	" test load of ``vgc.so`` (default 60 seconds), and each ``-E`` adds"
+	" a variable to its environment.  At most 1 MiB of its output is"
+	" relayed.\n\n"
+	"  The program is executed with the privileges of the VCL compiler,"
+	" regardless of whether cc_command is read-only.",
+	CLI_F_AUTH,
+	3, -1
+)
+
 CLI_CMD(VCL_STATE,
 	"vcl.state",
 	"vcl.state <configname> auto|cold|warm",
@@ -433,9 +454,9 @@ CLI_CMD(DEBUG_PANIC_MASTER,
 
 CLI_CMD(DEBUG_VCL_SYMTAB,
 	"vcl.symtab",
-	"vcl.symtab",
+	"vcl.symtab [-j]",
 	"Dump the VCL symbol-tables.",
-	"",
+	"  ``-j`` specifies JSON output.",
 	CLI_F_AUTH|CLI_F_DEBUG,
 	0, 0
 )

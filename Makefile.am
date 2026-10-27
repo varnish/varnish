@@ -26,7 +26,8 @@ EXTRA_DIST = \
 	varnish.m4 \
 	vsc.am \
 	vtc.am \
-	wflags.py
+	wflags.py \
+	tools/vcl_pack.py
 
 CONFIGURE_DEPENDENCIES = wflags.py
 

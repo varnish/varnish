@@ -1,0 +1,87 @@
+vtest "vcl.symtab -j"
+
+feature cmd "jq -V"
+
+server s1 {
+} -start
+
+# Simple VCL, no vmods
+varnish v1 -vcl+backend { } -start
+
+# With vmods
+varnish v1 -vcl+backend {
+	import std;
+	import debug;
+}
+
+# With vmods and labels
+varnish v1 -cliok "vcl.label lbl vcl2"
+
+varnish v1 -vcl+backend {
+	import std;
+
+	sub vcl_recv {
+		return (vcl(lbl));
+	}
+}
+
+shell {
+	set -ex
+
+	varnishadm -n ${v1_name} vcl.symtab -j > result.json
+	jq '.[3:][] | select(.name == "vcl1")' result.json > vcl1.json
+	jq '.[3:][] | select(.name == "vcl2")' result.json > vcl2.json
+	jq '.[3:][] | select(.name == "vcl3")' result.json > vcl3.json
+	jq '.[3:][] | select(.name == "lbl")' result.json > lbl.json
+	echo '{"dir": "import", "type": "$VCL", "name": "lbl"}' > lblimp.json
+
+	# global
+	jq -e '.[1] == ["vcl.symtab", "-j"]' result.json
+	jq -e '.[3:] | length == 4' result.json
+
+	# vcl1
+	jq -e '.label == false' vcl1.json
+	jq -e '.imports == []' vcl1.json
+	jq -e '.exports == []' vcl1.json
+	jq -e '.symtab[0] == {"version": 0}' vcl1.json
+	jq -e '[.symtab[] | select(.dir == "import")] == []' vcl1.json
+
+	# vcl2
+	jq '.symtab[] | select(.type == "$VMOD" and .name == "std")' \
+	    vcl2.json > std.json
+	jq '.symtab[] | select(.type == "$VMOD" and .name == "debug")' \
+	    vcl2.json > debug.json
+
+	jq -e '.label == false' vcl2.json
+	jq -e '.imports == []' vcl2.json
+	jq -e '.exports == [{"name": "lbl", "entry": null}]' vcl2.json
+	jq -e '.symtab[0] == {"version": 0}' vcl2.json
+	jq -e '[.symtab[] | select(.type == "$VMOD")] | length == 2' vcl2.json
+
+	jq -e '.dir == "import"' std.json
+	jq -e '.vext == false' std.json
+	jq -e '.file | test("libvmod_std")' std.json
+	jq -e '.dst | startswith("./vmod_cache/_vmod_std.")' std.json
+
+	jq -e '.dir == "import"' debug.json
+	jq -e '.vext == false' debug.json
+	jq -e '.file | test("libvmod_debug")' debug.json
+	jq -e '.dst | startswith("./vmod_cache/_vmod_debug.")' debug.json
+
+	# lbl
+	jq -e '.label == true' lbl.json
+	jq -e '.symtab == null' lbl.json
+	jq -e '.imports == [{"name": "vcl2", "entry": null}]' lbl.json
+	jq -e --slurpfile e lblimp.json \
+	    '.exports == [{"name": "vcl3", "entry": $e[0]}]' lbl.json
+
+	# vcl3
+	jq -e '.label == false' vcl3.json
+	jq -e --slurpfile e lblimp.json \
+	    '.imports == [{"name": "lbl", "entry": $e[0]}]' vcl3.json
+	jq -e '.exports == []' vcl3.json
+	jq -e --slurpfile e lblimp.json \
+	    '[.symtab[] | select(.type == "$VCL")] == $e' vcl3.json
+	jq -e '[.symtab[] | select(.type == "$VMOD") | .name] == ["std"]' \
+	    vcl3.json
+}

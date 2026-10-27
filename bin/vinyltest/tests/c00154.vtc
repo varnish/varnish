@@ -1,0 +1,94 @@
+varnishtest "vcl.ext_load: build directory cleanup and vanished objects"
+
+feature topbuild
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -arg "-p debug=+vcl_keep 2>${tmpdir}/mgt.err" -vcl+backend {
+	import std;
+} -start
+
+shell {
+	mkdir -p ${tmpdir}/fixture ${tmpdir}/precious
+	cp ${v1_name}/vcl_vcl1.*/vgc.so ${v1_name}/vcl_vcl1.*/vgc.sym \
+	    ${tmpdir}/fixture/
+	touch ${tmpdir}/precious/keepme
+}
+
+varnish v1 -cliok "param.set debug -vcl_keep"
+
+shell {
+	cat > ${tmpdir}/bad.sh <<'EOS'
+#!/bin/sh
+mkdir "$2/sub"
+echo x > "$2/sub/x"
+echo x > "$2/vgc.c"
+ln -s ${tmpdir}/precious "$2/link"
+exit 1
+EOS
+	cat > ${tmpdir}/ok.sh <<'EOS'
+#!/bin/sh
+mkdir "$2/sub"
+echo x > "$2/sub/x"
+echo x > "$2/vgc.c"
+ln -s ${tmpdir}/precious "$2/link"
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+exit 0
+EOS
+	cat > ${tmpdir}/cc.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/fixture/vgc.so ${tmpdir}/fixture/vgc.sym "$2"
+EOS
+	cat > ${tmpdir}/junk.sh <<'EOS'
+#!/bin/sh
+echo x > "$2/junk"
+exit 1
+EOS
+	chmod +x ${tmpdir}/*.sh
+}
+
+varnish v1 -clierr 106 "vcl.ext_load bad1 /dev/null ${tmpdir}/bad.sh"
+shell {
+	! ls -d ${v1_name}/vcl_bad1.* &&
+	test -f ${tmpdir}/precious/keepme
+}
+
+varnish v1 -cliok "vcl.ext_load ok1 /dev/null ${tmpdir}/ok.sh"
+shell {
+	test "$(ls ${v1_name}/vcl_ok1.*/)" = "vgc.so" &&
+	test -f ${tmpdir}/precious/keepme
+}
+
+varnish v1 -cliok "vcl.ext_load gone1 /dev/null ${tmpdir}/cc.sh"
+shell "rm ${v1_name}/vcl_gone1.*/vgc.so"
+varnish v1 -cliok "vcl.discard gone1"
+varnish v1 -cliok "vcl.list"
+
+varnish v1 -cliok "param.set debug +vcl_keep"
+varnish v1 -clierr 106 "vcl.ext_load kept /dev/null ${tmpdir}/junk.sh"
+shell {
+	test -d ${v1_name}/vcl_kept.* &&
+	test -f ${v1_name}/vcl_kept.*/junk
+}
+
+# deep tree must not hurt mgt
+varnish v1 -cliok "param.set debug -vcl_keep"
+shell {
+	cat > ${tmpdir}/deep.sh <<'EOS'
+#!/bin/sh
+cd "$2" || exit 1
+i=0
+while [ $i -lt 100 ]; do
+	mkdir d && cd d || exit 1
+	i=$((i + 1))
+done
+exit 1
+EOS
+	chmod +x ${tmpdir}/deep.sh
+}
+varnish v1 -clierr 106 "vcl.ext_load deep /dev/null ${tmpdir}/deep.sh"
+varnish v1 -cliok "vcl.list"
+shell "grep -q 'Directory tree too deep' ${tmpdir}/mgt.err"
