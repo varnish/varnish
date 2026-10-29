@@ -38,6 +38,10 @@ release process.
 Varnish-Cache trunk (unreleased)
 ================================
 
+* ACL entries with non-zero bits in the masked part now cause a warning
+  instead of an error, unless the ACL has the ``+pedantic`` flag set
+  explicitly. ``-pedantic`` still silences the warning.
+
 ================================
 Varnish-Cache 9.1.0 (2026-09-18)
 ================================

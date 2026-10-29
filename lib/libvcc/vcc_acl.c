@@ -55,7 +55,7 @@ struct acl {
 	int			flag_log;
 	int			flag_fold;
 	int			flag_fold_report;
-	int			flag_pedantic;
+	int			flag_pedantic;	/* -1 warn, 0 off, 1 error */
 	int			flag_table;
 
 	struct acl_tree		acl_tree;
@@ -237,6 +237,14 @@ vcc_acl_chk(struct vcc *tl, const struct acl_e *ae, const int l,
 		VSB_cat(tl->sb, "Non-zero bits in masked part, ");
 		VSB_printf(tl->sb, "(maybe use %s ?)\n", t);
 		vcc_ErrWhere(tl, ae->t_addr);
+	}
+	if (tl->acl->flag_pedantic < 0) {
+		VSB_printf(tl->sb, "This is probably wrong: the entry "
+		    "matches all of %s.\n", t);
+		VSB_printf(tl->sb, "Use %s for the network, \"/%d\" for "
+		    "the single address, or -pedantic to silence this.\n",
+		    t, fam == PF_INET ? 32 : 128);
+		vcc_Warn(tl);
 	}
 	REPLACE(r, t);
 	return (r);
@@ -863,7 +871,7 @@ vcc_ParseAcl(struct vcc *tl)
 
 	INIT_OBJ(acl, VCC_ACL_MAGIC);
 	tl->acl = acl;
-	acl->flag_pedantic = 1;
+	acl->flag_pedantic = -1;	/* warn, unless set explicitly */
 	acl->flag_fold = 1;
 	acl->flag_fold_report = 1;
 	vcc_NextToken(tl);

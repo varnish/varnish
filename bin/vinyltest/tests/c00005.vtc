@@ -210,13 +210,59 @@ varnish v1 -errvcl {Non-zero bits in masked part} {
 	}
 }
 
+# without +pedantic, non-zero bits in the masked part only warn
+varnish v1 -cliexpect "This is probably wrong: the entry matches all of 2a01:cb08:707:200::/64" {vcl.inline pedantic_warn << EOF
+	vcl 4.1;
+
+	backend dummy None;
+
+	acl acl1 {
+		"2a01:cb08:707:200:4965:6567:d27b:145b"/64;
+	}
+
+	sub vcl_recv {
+		if (client.ip ~ acl1) {}
+	}
+	EOF
+}
+
+varnish v1 -cliexpect "That was just a warning" {vcl.inline pedantic_warn4 << EOF
+	vcl 4.1;
+
+	backend dummy None;
+
+	acl acl1 {
+		"1.2.3.4"/24;
+	}
+
+	sub vcl_recv {
+		if (client.ip ~ acl1) {}
+	}
+	EOF
+}
+
+varnish v1 -cliexpect ! "Non-zero bits" {vcl.inline pedantic_off << EOF
+	vcl 4.1;
+
+	backend dummy None;
+
+	acl acl1 -pedantic {
+		"1.2.3.4"/24;
+	}
+
+	sub vcl_recv {
+		if (client.ip ~ acl1) {}
+	}
+	EOF
+}
+
 # this is both an OK test for pedantic and fold
 varnish v1 -vcl {
 	import std;
 
 	backend dummy None;
 
-	// +fold and +pedantic are default
+	// +fold is default
 	acl acl1 +log {
 		# bad notation (confusing)
 		"1.2.3.0"/24;

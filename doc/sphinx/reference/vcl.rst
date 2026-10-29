@@ -335,7 +335,12 @@ individually:
 * `+table` - Implement the ACL with a table instead of compiled code.
   This runs a little bit slower, but compiles large ACLs much faster.
 
-* `-pedantic` - Allow masks to cover non-zero host-bits.
+* `+pedantic` - Fail compilation if a mask covers non-zero host-bits.
+
+  By default such entries only cause a warning, and the host-bits are
+  cleared, so ``"192.0.2.1"/24`` matches all of ``192.0.2.0/24``.
+
+* `-pedantic` - Silently allow masks to cover non-zero host-bits.
   This allows the following to work::
 
     acl foo -pedantic +log {
