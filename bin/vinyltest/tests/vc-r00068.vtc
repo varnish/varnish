@@ -1,0 +1,5 @@
+vtest "tls.cert.list -j returns empty body when child is stopped"
+
+varnish v1 -arg "-a :0,https"
+
+varnish v1 -clijson "tls.cert.list -j"
