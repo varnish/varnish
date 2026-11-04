@@ -112,7 +112,7 @@ http1_garbage(struct http *hp, struct http_conn *htc, const char *p, uint16_t st
 	if (p == NULL || htc->rxbuf_b == NULL)
 		return (status);
 	VSLb(hp->vsl, SLT_HttpGarbage, "%.*s",
-	    (int)pdiff(htc->rxbuf_b, p), p);
+	    (int)pdiff(p, htc->rxbuf_e), p);
 	return (status);
 }
 

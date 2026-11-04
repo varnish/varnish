@@ -449,6 +449,7 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 		VTIM_sleep(.1);
 
 	ps->thread = pthread_self();
+	VCA_USR1_Unblock();
 	while (ls->sock != -2 && !ps->pool->die) {
 		INIT_OBJ(&wa, WRK_ACCEPT_MAGIC);
 		wa.acceptlsock = ls;
@@ -518,6 +519,7 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 			if (!ps->pool->die) {
 				AZ(Pool_Task(wrk->pool, ps->task,
 				    TASK_QUEUE_VCA));
+				VCA_USR1_Block();
 				return;
 			}
 		}
@@ -526,6 +528,7 @@ vca_tcp_accept_task(struct worker *wrk, void *arg)
 
 	}
 	ps->thread = cli_thread;
+	VCA_USR1_Block();
 
 	VSL(SLT_Debug, NO_VXID, "XXX Accept thread dies %p", ps);
 	Lck_Lock(&ps->pool->mtx);

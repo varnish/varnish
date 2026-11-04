@@ -653,7 +653,8 @@ shardcfg_reconfigure(VRT_CTX, struct sharddir *shardd, VCL_INT replicas)
 	CHECK_OBJ_NOTNULL(shardd, SHARDDIR_MAGIC);
 	if (replicas <= 0) {
 		shard_err(ctx->vsl, shardd->name,
-		    ".reconfigure() invalid replicas argument %ld", replicas);
+		    ".reconfigure() invalid replicas argument %jd",
+		    (intmax_t)replicas);
 		return (0);
 	}
 

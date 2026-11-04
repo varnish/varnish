@@ -102,15 +102,12 @@ varnish_version_required() {
 		return 1
 	])
 
-	dnl XXX TODO: should probably use AS_IF()
 	ok="x"
-	if test $[]# -gt 2 ; then
-		AS_VERSION_COMPARE($[]1, $[]3, [ok="yes"], [ok="no"], [ok="no"])
-	fi
-	if test "$ok" = "no" ; then
-		AC_MSG_RESULT([$[]1 is not lower than maximum version $[]3])
-		return 1
-	fi
+	AS_IF([test $[]# -gt 2],
+		[AS_VERSION_COMPARE($[]1, $[]3, [ok="yes"], [ok="no"], [ok="no"])])
+	AS_IF([test "$ok" = "no"],
+		[AC_MSG_RESULT([$[]1 is not lower than maximum version $[]3])
+		 return 1])
 
 	AC_MSG_RESULT([ok])
 	return 0
@@ -156,12 +153,12 @@ AC_DEFUN([_VCACHE_PKG_CONFIG], [
 
 varnish_pkg_config() {
 	# run only once
-	if test "x$vcldir" != "x" ; then
+	AS_IF([test "x$vcldir" != "x"], [
 		return
-	fi
-	if test "x$vcacheapi" = "x" ; then
+	])
+	AS_IF([test "x$vcacheapi" = "x"], [
 		vcacheapi="varnishapi"
-	fi
+	])
 	PKG_CHECK_MODULES([VCACHEAPI], [${vcacheapi}])
 	AC_SUBST([VCACHE_VERSION], [$($PKG_CONFIG --modversion ${vcacheapi})])
 
@@ -187,11 +184,10 @@ varnish_pkg_config() {
 
 	dnl Inherit Varnish's prefix if undefined
 	dnl Also the libdir for multi-lib systems
-	if test "$prefix" = NONE
-	then
+	AS_IF([test "$prefix" = NONE], [
 		ac_default_prefix=$VCACHEAPI_PREFIX
 		libdir=$VCACHEAPI_LIBDIR
-	fi
+	])
 
 	dnl Define the VCL directory for automake
 	vcldir=$($PKG_CONFIG --define-variable=datadir=$datadir \
@@ -795,30 +791,32 @@ AU_DEFUN([VARNISH_PREREQ], [
 
 AC_DEFUN([VCACHE_REQUIRE1], [
 	AC_REQUIRE([_VCACHE_VERSION_REQUIRED])
-	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "$1[]api" ; then
+	AS_IF([test "x$vcacheapi" = "x" || test "$vcacheapi" = "$1[]api"], [
 		AC_MSG_CHECKING([$1])
 		have=$($PKG_CONFIG --modversion "$1[]api" 2>/dev/null)
-		if test "x$have" = "x" ; then
+		AS_IF([test "x$have" = "x"], [
 			AC_MSG_RESULT([not found])
-			if test "x$vcacheapi" != "x" ; then
+			AS_IF([test "x$vcacheapi" != "x"], [
 				vcacheapi="_"
-			fi
-		elif varnish_version_required ${have} m4_map_args_sep([m4_normalize(], [)], [ ], m4_shift($@)) ; then
+			])],
+		      [varnish_version_required ${have} m4_map_args_sep([m4_normalize(], [)], [ ], m4_shift($@))], [
 			vcacheapi="$1[]api"
-		elif test "x$vcacheapi" != "x" ; then
+		      ],
+		      [test "x$vcacheapi" != "x"], [
 			# varnish_version_required has output AC_MSG_RESULT
 			vcacheapi="_"
-		fi
-	fi
+		      ]
+		)
+	])
 ])
 
 AC_DEFUN([VCACHE_REQUIRE], [
 	AC_REQUIRE([_VCACHE_PKG_CONFIG])
 
 	m4_map([VCACHE_REQUIRE1], [$@])
-	if test "x$vcacheapi" = "x" || test "$vcacheapi" = "_" ; then
+	AS_IF([test "x$vcacheapi" = "x" || test "$vcacheapi" = "_"], [
 		AC_MSG_ERROR([no supported vcache project found])
-	fi
+	])
 
 	# note: it is possible for varnish_pkg_config to have run before the
 	# above, in which case the VCACHE_REQUIRE1 only checked that the api has

@@ -222,7 +222,8 @@ cnt_deliver(struct worker *wrk, struct req *req)
 	ObjTouch(req->wrk, req->objcore, req->t_prev);
 
 	if (Resp_Setup_Deliver(req)) {
-		(void)HSH_DerefObjCore(wrk, &req->objcore);
+		HSH_Cancel(wrk, req->objcore, NULL);
+		Req_StashObjcore(req, &req->objcore);
 		req->err_code = 500;
 		req->req_step = R_STP_SYNTH;
 		return (REQ_FSM_MORE);

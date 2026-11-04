@@ -48,7 +48,7 @@
 
 #define VRT_MAJOR_VERSION	22U
 
-#define VRT_MINOR_VERSION	2U
+#define VRT_MINOR_VERSION	3U
 
 /***********************************************************************
  * Major and minor VRT API versions.
@@ -57,8 +57,32 @@
  * Whenever something is deleted or changed in a way which is not
  * binary/load-time compatible, increment MAJOR version
  *
- * 22.2 (trunk)
+ * 22.3 (trunk)
+ *	un-const storage_close_f
+ * 22.2
  *	struct vrt_endpoint.ssl_ca_file added
+ *	VRT_Rollback() no longer takes a VCL_HTTP argument
+ *	struct vmod_data has moved to vmod_abi.h
+ *	enum gethdr_e gained a new HDR_REQ0 value
+ *	http_req0 added to struct vrt_ctx
+ *	struct vmod_data moved to vmod_abi.h
+ *	stuct VCL_conf declaration removed from vrt.h
+ *	struct VSC_main declaration removed from vrt.h
+ *	VRT_r_req0_method() added
+ *	VRT_r_req0_proto() added
+ *	VRT_r_req0_url() added
+ *	VRT_r_beresp_esi_disable_xml_check() added
+ *	VRT_l_beresp_esi_disable_xml_check() added
+ *	VRT_r_beresp_esi_ignore_https() added
+ *	VRT_l_beresp_esi_ignore_https() added
+ *	VRT_r_beresp_esi_ignore_other_elements() added
+ *	VRT_l_beresp_esi_ignore_other_elements() added
+ *	VRT_r_beresp_esi_remove_bom() added
+ *	VRT_l_beresp_esi_remove_bom() added
+ *	VRT_r_resp_esi_include_onerror() added
+ *	VRT_l_resp_esi_include_onerror() added
+ *	VRT_r_resp_storage() added
+ *	VRT_l_resp_storage() added
  *	VRT_synth_strands() removed
  *	VRT_synth_blob() removed
  *	VRT_synth_page() removed

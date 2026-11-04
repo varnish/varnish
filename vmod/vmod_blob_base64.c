@@ -323,11 +323,6 @@ base64_decode(const enum encoding dec, blob_dest_t buf,
 
 		if (s == NULL)
 			continue;
-		if (*s && term) {
-			errno = EINVAL;
-			r = -1;
-			goto out;
-		}
 		while (*s && len) {
 			b = alpha->i64[(uint8_t)*s];
 			s++;
@@ -339,13 +334,18 @@ base64_decode(const enum encoding dec, blob_dest_t buf,
 				goto out;
 			}
 			n++;
-			if (b == PAD) {
+			if (b == PAD && term < 2) {
 				term++;
 				continue;
 			}
+			if (term) {
+				errno = EINVAL;
+				r = -1;
+				goto out;
+			}
 			u |= (uint8_t)b;
 			if (n == 4) {
-				if (decode(&dest, buf, buflen, u, n-term) < 0) {
+				if (decode(&dest, buf, buflen, u, n) < 0) {
 					r = -1;
 					goto out;
 				}

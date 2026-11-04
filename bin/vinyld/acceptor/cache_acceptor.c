@@ -244,6 +244,8 @@ static struct cli_proto vca_cmds[] = {
 	{ NULL }
 };
 
+static sigset_t set_sigusr1;
+
 void
 VCA_Init(void)
 {
@@ -257,6 +259,9 @@ VCA_Init(void)
 		CHECK_OBJ_NOTNULL(vca, ACCEPTOR_MAGIC);
 		vca->init();
 	}
+
+	AZ(sigemptyset(&set_sigusr1));
+	AZ(sigaddset(&set_sigusr1, SIGUSR1));
 }
 
 void
@@ -272,6 +277,18 @@ VCA_Shutdown(void)
 	}
 
 	Lck_Unlock(&shut_mtx);
+}
+
+void
+VCA_USR1_Unblock(void)
+{
+	AZ(pthread_sigmask(SIG_UNBLOCK, &set_sigusr1, NULL));
+}
+
+void
+VCA_USR1_Block(void)
+{
+	AZ(pthread_sigmask(SIG_BLOCK, &set_sigusr1, NULL));
 }
 
 /*--------------------------------------------------------------------

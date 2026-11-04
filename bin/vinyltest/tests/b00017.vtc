@@ -22,7 +22,14 @@ varnish v1 -vcl {
 		if (! req.http.synth) {
 			set resp.storage = storage.Transient;
 		}
-		set resp.body = "Custom vcl_synth's " + now + " body";
+		set resp.body = "Custom vcl_synth's " + now + " body" +
+			" 1 " + now +
+			" 2 " + now +
+			" 3 " + now +
+			" 4 " + now +
+			" 5 " + now +
+			" 6 " + now +
+			" 7 " + now;
 		set resp.http.storage = resp.storage;
 		return (deliver);
 	}
@@ -40,18 +47,16 @@ client c1 {
 	rxresp
 	expect resp.status == 888
 	expect resp.http.connection != close
-	expect resp.bodylen >= 52
-	expect resp.bodylen <= 53
-	expect resp.body ~ "^Custom vcl_synth's .* body$"
+	expect resp.bodylen == 277
+	expect resp.body ~ "^Custom vcl_synth's .* body"
 	expect resp.http.storage == "storage.Transient"
 
 	txreq -url "/" -hdr "synth: true"
 	rxresp
 	expect resp.status == 888
 	expect resp.http.connection != close
-	expect resp.bodylen >= 52
-	expect resp.bodylen <= 53
-	expect resp.body ~ "^Custom vcl_synth's .* body$"
+	expect resp.bodylen == 277
+	expect resp.body ~ "^Custom vcl_synth's .* body"
 	expect resp.http.storage == "storage.Synth"
 
 	txreq -url "/cov-backend"
@@ -65,4 +70,4 @@ client c1 {
 
 varnish v1 -expect s_synth == 2
 varnish v1 -expect SSY.synth.c_allocobj_success == 1
-varnish v1 -expect SSY.synth.c_getspace_success == 1
+varnish v1 -expect SSY.synth.c_getspace_success == 3

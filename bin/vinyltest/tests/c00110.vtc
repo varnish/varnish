@@ -1,8 +1,7 @@
 vtest "Transit buffering with early close"
 
 # flaky on BSD
-
-feature cmd {test $(uname) == Linux}
+feature cmd {test $(uname) = Linux}
 
 server s1 {
 	non_fatal

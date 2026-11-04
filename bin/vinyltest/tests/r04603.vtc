@@ -1,0 +1,47 @@
+vtest "Lowering thread_pools under live keepalive traffic panics in MPL_Destroy()"
+
+varnish v1 -arg "-p thread_pools=10 -p thread_pool_min=5" -vcl {
+	backend default none;
+	sub vcl_recv { return (synth(200)); }
+	sub vcl_synth { return (deliver); }
+} -start
+
+varnish v1 -expect MAIN.pools == 10
+
+# loop and repeat count are a bit sensitive but this was the minimum i found to still panic
+loop 5 {
+	client cf${n} -keepalive -repeat 10 {
+		non_fatal
+		timeout 1
+		txreq
+		rxresp
+		delay 0.15
+	} -start
+	delay 0.025
+}
+loop 5 {
+	client cs${n} -keepalive -repeat 6 {
+		non_fatal
+		timeout 1
+		txreq
+		rxresp
+		delay 0.25
+	} -start
+	delay 0.025
+}
+
+delay 0.5
+# Doesn't have to be 1 pool but it increases the reproduction changes.
+varnish v1 -cliok "param.set thread_pools 1"
+
+loop 5 {
+	client cf${n} -wait
+}
+loop 5 {
+	client cs${n} -wait
+}
+
+varnish v1 -cliexpect "Child in state running" status
+
+delay 10
+varnish v1 -expect MAIN.pools == 1

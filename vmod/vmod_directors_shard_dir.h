@@ -107,7 +107,8 @@ sharddir_backend(const struct sharddir *shardd, unsigned id)
 	shard_log(vsl, SLT_Notice, name, fmt, __VA_ARGS__)
 
 void sharddir_debug(struct sharddir *shardd, const uint32_t flags);
-void sharddir_log(struct vsl_log *, enum VSL_tag_e tag,  const char *fmt, ...);
+void sharddir_log(struct vsl_log *, enum VSL_tag_e tag,  const char *fmt, ...)
+    v_printflike_(3, 4);
 void sharddir_new(struct sharddir **sharddp, const char *vcl_name,
     const struct vmod_directors_shard_param *param);
 void sharddir_set_param(struct sharddir *shardd,

@@ -51,12 +51,24 @@ static unsigned count = 0;
 	(! vstrncmp((a), (s), vstrlen(s))			\
 	 && (d = VNUM_duration(a + vstrlen(s))) != nan(""))
 
-static void smd_open(struct stevedore *stv)
+static void
+smd_close(struct stevedore *stv, int warn)
 {
+
+	if (warn)
+		return;
+	LRU_Free(&stv->lru);
+}
+
+static void
+smd_open(struct stevedore *stv)
+{
+
 	sma_stevedore.open(stv);
 	fprintf(stderr, "-sdebug open delay %fs\n", dopen);
 	AN(dopen);
 	VTIM_sleep(dopen);
+	stv->lru = LRU_Alloc();
 }
 
 static void v_matchproto_(storage_init_f)
@@ -109,9 +121,11 @@ smd_init(struct stevedore *parent, int aac, char * const *aav)
 	}
 	if (dopen > 0.0) {
 		parent->open = smd_open;
+		parent->close = smd_close;
 		fprintf(stderr, "-sdebug open delay in init %fs\n", dopen);
 	}
 }
+
 
 const struct stevedore smd_stevedore = {
 	.magic		=	STEVEDORE_MAGIC,

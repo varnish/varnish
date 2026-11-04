@@ -305,7 +305,7 @@ Access Control List (ACL)
 -------------------------
 
 An Access Control List (ACL) declaration creates and initialises a named access
-control list which can later be used to match client addresses::
+control list which can later be used to match ip addresses::
 
     acl localnetwork {
         "localhost";    # myself
@@ -325,6 +325,13 @@ To match an IP address against an ACL, simply use the match operator::
     if (client.ip ~ localnetwork) {
         return (pipe);
     }
+
+To convert a string into an IP address, use ``std.ip()``.
+
+ACLs get compiled into an efficient "most specific first" matcher through
+sorting the entries by mask length, which is why the example behaves as
+described: ``! "192.0.2.23"`` (with an implicit ``/32`` mask) has precedence
+over ``"192.0.2.0"/24``, no matter its position in the ACL.
 
 ACLs have feature flags which can be set or cleared for each ACL
 individually:

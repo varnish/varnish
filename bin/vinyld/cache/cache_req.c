@@ -352,6 +352,7 @@ Req_Cleanup(struct sess *sp, struct worker *wrk, struct req *req)
 	assert(sp == req->sp);
 	if (IS_TOPREQ(req))
 		AZ(req->top->vcl0);
+	assert(VRBT_EMPTY(req->privs));
 
 	AZ(req->director_hint);
 	req->restarts = 0;
