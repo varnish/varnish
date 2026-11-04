@@ -595,9 +595,8 @@ VSB_quote_pfx(struct vsb *s, const char *pfx, const void *v, int len, int how)
 			VSB_putc(s, '"');
 		if (how & VSB_QUOTE_ABBREVIATE)
 			VSB_cat(s, "[...]");
-		if ((how & VSB_QUOTE_NONL) &&
-		    p[len-1] != '\n')
-			(void)VSB_putc(s, '\n');
+		if (how & VSB_QUOTE_NONL)
+			VSB_putc(s, '\n');
 		return;
 	}
 
