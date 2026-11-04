@@ -474,6 +474,22 @@ storage *kind*\ s and options are built in:
   MADV_SEQUENTIAL madvise() advice argument, respectively. Defaults to
   ``random``.
 
+-s <disk,path[,size]>
+
+  The disk backend stores object bodies in a file on disk, accessed
+  with regular reads and writes. Object headers and other metadata are
+  kept in memory, outside of the configured size.
+
+  The content does not survive a restart: the file is only backing
+  store, and whatever it contains at startup is overwritten.
+
+  The path and size work as for the file backend. If path points to a
+  directory, the file is anonymous.
+
+  The storage file is exclusively locked while the cache process is
+  running. Configuring another disk stevedore to use the same file
+  concurrently is an error.
+
 -s <persistent,path,size>
 
   Persistent storage. Varnish will store objects in a file in a manner
