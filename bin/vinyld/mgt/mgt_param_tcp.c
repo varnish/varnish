@@ -59,7 +59,7 @@ tcp_probe(int sock, int nam, const char *param, unsigned def)
 	unsigned u;
 
 	l = sizeof u;
-	i = getsockopt(sock, IPPROTO_TCP, nam, &u, &l);
+	i = sock < 0 ? -1 : getsockopt(sock, IPPROTO_TCP, nam, &u, &l);
 	if (i < 0 || u == 0)
 		u = def;
 	MCF_ParamConf(MCF_DEFAULT, param, "%u", u);
@@ -69,12 +69,15 @@ static void
 tcp_keep_probes(void)
 {
 	const char *err;
-	int s;
+	int s = -1;
 
-	s = VTCP_listen_on(":0", NULL, 10, &err);
-	if (err != NULL)
-		ARGV_ERR("Could not probe TCP keepalives: %s", err);
-	assert(s > 0);
+	/* -x documents these defaults as platform dependent. */
+	if (heritage.argc < 2 || vstrncmp(heritage.argv[1], "-x", 2)) {
+		s = VTCP_listen_on(":0", NULL, 10, &err);
+		if (err != NULL)
+			ARGV_ERR("Could not probe TCP keepalives: %s", err);
+		assert(s > 0);
+	}
 #ifdef HAVE_TCP_KEEP
 	tcp_probe(s, TCP_KEEPIDLE, "tcp_keepalive_time",	600);
 	tcp_probe(s, TCP_KEEPCNT, "tcp_keepalive_probes",	5);
@@ -82,7 +85,8 @@ tcp_keep_probes(void)
 #else
 	tcp_probe(s, TCP_KEEPALIVE, "tcp_keepalive_time",	600);
 #endif
-	closefd(&s);
+	if (s >= 0)
+		closefd(&s);
 }
 #endif
 
