@@ -1,0 +1,43 @@
+varnishtest "vcl.ext_load: the test load of vgc.so is bounded by -T"
+
+feature topbuild
+feature cmd "command -v cc"
+
+shell {
+	cat > ${tmpdir}/slow.c <<'EOS'
+#include <unistd.h>
+
+static void __attribute__((constructor))
+slow(void)
+{
+	sleep(30);
+}
+EOS
+	cc -shared -fPIC -o ${tmpdir}/slow.so ${tmpdir}/slow.c
+}
+
+varnish v1 -vcl {
+	backend be none;
+} -start
+
+shell {
+	cat > ${tmpdir}/slow.sh <<'EOS'
+#!/bin/sh
+cp ${tmpdir}/slow.so "$2/vgc.so"
+echo '[{"version":0}]' > "$2/vgc.sym"
+EOS
+	chmod +x ${tmpdir}/slow.sh
+}
+
+shell -expect "dlopen timed out" {
+	t0=$(date +%s)
+	if varnishadm -n ${v1_name} -t 120 \
+	    vcl.ext_load slow /dev/null ${tmpdir}/slow.sh -T 1; then
+		exit 1
+	fi
+	t1=$(date +%s)
+	test $((t1 - t0)) -lt 10
+}
+
+varnish v1 -cliok "vcl.list"
+shell "! ls -d ${v1_name}/vcl_slow.*"

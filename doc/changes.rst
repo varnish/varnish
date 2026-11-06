@@ -38,6 +38,11 @@ release process.
 Varnish-Cache trunk (unreleased)
 ================================
 
+* New CLI command ``vcl.ext_load`` to load a VCL built by an external
+  program instead of the VCL compiler. The program runs with the privileges
+  of the VCL compiler, which ``-r cc_command`` does not prevent. See the
+  users guide for details.
+
 ================================
 Varnish-Cache 9.1.0 (2026-09-18)
 ================================

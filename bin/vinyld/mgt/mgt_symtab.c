@@ -47,6 +47,13 @@
 
 /*--------------------------------------------------------------------*/
 
+/*
+ * The symbol table may come from an external program, so nothing in it
+ * can be trusted: validate everything before acting on any of it.
+ */
+
+#define VMOD_CACHE_DIR "./vmod_cache/"
+
 static const char *
 mgt_vcl_symtab_val(const struct vjsn_val *vv, const char *val)
 {
@@ -57,6 +64,131 @@ mgt_vcl_symtab_val(const struct vjsn_val *vv, const char *val)
 	assert(vjsn_is_string(jv));
 	AN(jv->value);
 	return (jv->value);
+}
+
+static int
+mgt_vcl_symtab_isstr(const struct vjsn_val *vv, const char *key)
+{
+	const struct vjsn_val *jv;
+
+	jv = vjsn_child(vv, key);
+	return (jv != NULL && vjsn_is_string(jv) && jv->value != NULL);
+}
+
+static int
+mgt_vcl_check_vmod(const struct vjsn_val *vv, struct vsb *err)
+{
+	const struct vjsn_val *jv;
+	const char *dst;
+
+	jv = vjsn_child(vv, "vext");
+	if (jv == NULL || !(vjsn_is_true(jv) || vjsn_is_false(jv))) {
+		VSB_cat(err, "Invalid symbol table: "
+		    "$VMOD entry without boolean 'vext'\n");
+		return (-1);
+	}
+	if (vjsn_is_true(jv))
+		return (0);
+	if (!mgt_vcl_symtab_isstr(vv, "name") ||
+	    !mgt_vcl_symtab_isstr(vv, "file") ||
+	    !mgt_vcl_symtab_isstr(vv, "dst")) {
+		VSB_cat(err, "Invalid symbol table: "
+		    "$VMOD entry without string 'name', 'file' or 'dst'\n");
+		return (-1);
+	}
+	dst = mgt_vcl_symtab_val(vv, "dst");
+	if (strncmp(dst, VMOD_CACHE_DIR, strlen(VMOD_CACHE_DIR)) ||
+	    dst[strlen(VMOD_CACHE_DIR)] == '\0' ||
+	    strchr(dst + strlen(VMOD_CACHE_DIR), '/') != NULL ||
+	    !strcmp(dst + strlen(VMOD_CACHE_DIR), ".") ||
+	    !strcmp(dst + strlen(VMOD_CACHE_DIR), "..")) {
+		VSB_printf(err, "Invalid symbol table: "
+		    "bad VMOD destination '%s'\n", dst);
+		return (-1);
+	}
+	return (0);
+}
+
+static int
+mgt_vcl_check_vcl(const struct vjsn_val *vv, struct vsb *err)
+{
+	const struct vclprog *vp2;
+
+	if (!mgt_vcl_symtab_isstr(vv, "name")) {
+		VSB_cat(err, "Invalid symbol table: "
+		    "$VCL entry without string 'name'\n");
+		return (-1);
+	}
+	vp2 = mcf_vcl_byname(mgt_vcl_symtab_val(vv, "name"));
+	if (vp2 == NULL || !mcf_is_label(vp2)) {
+		VSB_printf(err, "Invalid symbol table: "
+		    "$VCL import of '%s' which is not a label\n",
+		    mgt_vcl_symtab_val(vv, "name"));
+		return (-1);
+	}
+	return (0);
+}
+
+static int
+mgt_vcl_symtab_check(const struct vjsn *vj, struct vsb *err)
+{
+	const struct vjsn_val *v1, *v2;
+	const char *typ;
+	int first = 1;
+
+	if (!vjsn_is_array(vj->value)) {
+		VSB_cat(err, "Invalid symbol table: not an array\n");
+		return (-1);
+	}
+	VTAILQ_FOREACH(v1, &vj->value->children, list) {
+		if (!vjsn_is_object(v1)) {
+			VSB_cat(err, "Invalid symbol table: "
+			    "element is not an object\n");
+			return (-1);
+		}
+		if (first) {
+			first = 0;
+			v2 = vjsn_child(v1, "version");
+			if (v2 == NULL || !vjsn_is_number(v2) ||
+			    v2->value == NULL || strcmp(v2->value, "0")) {
+				VSB_cat(err, "Invalid symbol table: "
+				    "unsupported or missing version\n");
+				return (-1);
+			}
+		}
+		v2 = vjsn_child(v1, "dir");
+		if (v2 == NULL)
+			continue;
+		if (!vjsn_is_string(v2) || v2->value == NULL) {
+			VSB_cat(err, "Invalid symbol table: "
+			    "'dir' is not a string\n");
+			return (-1);
+		}
+		if (vstrcmp(v2->value, "import"))
+			continue;
+		if (!mgt_vcl_symtab_isstr(v1, "type")) {
+			VSB_cat(err, "Invalid symbol table: "
+			    "import entry without string 'type'\n");
+			return (-1);
+		}
+		typ = mgt_vcl_symtab_val(v1, "type");
+		if (!vstrcmp(typ, "$VMOD")) {
+			if (mgt_vcl_check_vmod(v1, err))
+				return (-1);
+		} else if (!vstrcmp(typ, "$VCL")) {
+			if (mgt_vcl_check_vcl(v1, err))
+				return (-1);
+		} else {
+			VSB_printf(err, "Invalid symbol table: "
+			    "unknown import type '%s'\n", typ);
+			return (-1);
+		}
+	}
+	if (first) {
+		VSB_cat(err, "Invalid symbol table: empty array\n");
+		return (-1);
+	}
+	return (0);
 }
 
 static void
@@ -72,30 +204,65 @@ mgt_vcl_import_vcl(struct vclprog *vp1, const struct vjsn_val *vv)
 	mgt_vcl_dep_add(vp1, vp2)->vj = vv;
 }
 
+#define VMOD_COPY_MAX	(32 * 1024 * 1024)
+
 static int
 mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 {
-	int fi, fo;
+	int fi, fo, fl;
 	int ret = 0;
 	ssize_t sz;
+	off_t total = 0;
+	struct stat st;
 	char buf[BUFSIZ];
 
 	fo = open(to, O_WRONLY | O_CREAT | O_EXCL, 0744);
-	if (fo < 0 && errno == EEXIST)
-		return (0);
+	if (fo < 0 && errno == EEXIST) {
+		/* The program may have planted something there */
+		if (fstatat(AT_FDCWD, to, &st, AT_SYMLINK_NOFOLLOW) == 0 &&
+		    S_ISREG(st.st_mode))
+			return (0);
+		fprintf(stderr, "While creating copy of vmod %s:\n\t"
+		    "%s exists and is not a regular file\n", nm, to);
+		return (1);
+	}
 	if (fo < 0) {
 		fprintf(stderr, "While creating copy of vmod %s:\n\t%s: %s\n",
 		    nm, to, VAS_errtxt(errno));
 		return (1);
 	}
-	fi = open(fm, O_RDONLY);
+	/*
+	 * Symlinks are fine (libvcc emits them, for instance through the
+	 * vmod_path), but opening must not block and we only copy regular
+	 * files.
+	 */
+	fi = open(fm, O_RDONLY | O_NONBLOCK);
 	if (fi < 0) {
 		fprintf(stderr, "Opening vmod %s from %s: %s\n",
 		    nm, fm, VAS_errtxt(errno));
-		AZ(unlink(to));
+		(void)unlink(to);
 		closefd(&fo);
 		return (1);
 	}
+	if (fstat(fi, &st) || !S_ISREG(st.st_mode)) {
+		fprintf(stderr, "Opening vmod %s from %s: not a regular file\n",
+		    nm, fm);
+		(void)unlink(to);
+		closefd(&fi);
+		closefd(&fo);
+		return (1);
+	}
+	if (st.st_size > VMOD_COPY_MAX) {
+		fprintf(stderr, "Opening vmod %s from %s: "
+		    "larger than %d bytes\n", nm, fm, VMOD_COPY_MAX);
+		(void)unlink(to);
+		closefd(&fi);
+		closefd(&fo);
+		return (1);
+	}
+	fl = fcntl(fi, F_GETFL);
+	assert(fl != -1);
+	AZ(fcntl(fi, F_SETFL, fl & ~O_NONBLOCK));
 	while (1) {
 		sz = read(fi, buf, sizeof buf);
 		if (sz == 0)
@@ -103,7 +270,16 @@ mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 		if (sz < 0 || sz != write(fo, buf, sz)) {
 			fprintf(stderr, "Copying vmod %s: %s\n",
 			    nm, VAS_errtxt(errno));
-			AZ(unlink(to));
+			(void)unlink(to);
+			ret = 1;
+			break;
+		}
+		/* The file may grow while we copy it */
+		total += sz;
+		if (total > VMOD_COPY_MAX) {
+			fprintf(stderr, "Copying vmod %s: "
+			    "larger than %d bytes\n", nm, VMOD_COPY_MAX);
+			(void)unlink(to);
 			ret = 1;
 			break;
 		}
@@ -114,8 +290,9 @@ mgt_vcl_cache_vmod(const char *nm, const char *fm, const char *to)
 	return (ret);
 }
 
-static void
-mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv)
+static int
+mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv,
+    struct vsb *err)
 {
 	struct vmodfile *vf;
 	struct vmoddep *vd;
@@ -128,9 +305,9 @@ mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv)
 	AN(vv);
 
 	jv = vjsn_child(vv, "vext");
-	if (vjsn_is_true(jv))
-		return;
 	AN(jv);
+	if (vjsn_is_true(jv))
+		return (0);
 	v_name = mgt_vcl_symtab_val(vv, "name");
 	v_file = mgt_vcl_symtab_val(vv, "file");
 	v_dst = mgt_vcl_symtab_val(vv, "dst");
@@ -139,11 +316,15 @@ mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv)
 		if (!vstrcmp(vf->fname, v_dst))
 			break;
 	if (vf == NULL) {
+		if (mgt_vcl_cache_vmod(v_name, v_file, v_dst)) {
+			VSB_printf(err, "Cannot copy vmod %s from %s to %s\n",
+			    v_name, v_file, v_dst);
+			return (-1);
+		}
 		ALLOC_OBJ(vf, VMODFILE_MAGIC);
 		AN(vf);
 		REPLACE(vf->fname, v_dst);
 		VTAILQ_INIT(&vf->vcls);
-		AZ(mgt_vcl_cache_vmod(v_name, v_file, v_dst));
 		VTAILQ_INSERT_TAIL(&vmodhead, vf, list);
 	}
 	ALLOC_OBJ(vd, VMODDEP_MAGIC);
@@ -151,42 +332,89 @@ mgt_vcl_import_vmod(struct vclprog *vp, const struct vjsn_val *vv)
 	vd->to = vf;
 	VTAILQ_INSERT_TAIL(&vp->vmods, vd, lfrom);
 	VTAILQ_INSERT_TAIL(&vf->vcls, vd, lto);
+	return (0);
 }
 
-void
-mgt_vcl_symtab(struct vclprog *vp, const char *input)
+/*
+ * vjsn_parse() recurses for every nested array or object, so reject deep
+ * nesting before handing it untrusted input.
+ */
+
+#define SYMTAB_MAXDEPTH 64
+
+static int
+mgt_vcl_symtab_depth(const char *p)
+{
+	int depth = 0, instr = 0;
+
+	for (; *p != '\0'; p++) {
+		if (instr) {
+			if (*p == '\\' && p[1] != '\0')
+				p++;
+			else if (*p == '"')
+				instr = 0;
+			continue;
+		}
+		switch (*p) {
+		case '"':
+			instr = 1;
+			break;
+		case '[':
+		case '{':
+			if (++depth > SYMTAB_MAXDEPTH)
+				return (-1);
+			break;
+		case ']':
+		case '}':
+			if (depth > 0)
+				depth--;
+			break;
+		default:
+			break;
+		}
+	}
+	return (0);
+}
+
+int
+mgt_vcl_symtab(struct vclprog *vp, const char *input, struct vsb *err)
 {
 	struct vjsn *vj;
 	struct vjsn_val *v1, *v2;
-	const char *typ, *err;
+	const char *typ, *perr;
 
 	CHECK_OBJ_NOTNULL(vp, VCLPROG_MAGIC);
 	AN(input);
-	vj = vjsn_parse(input, &err);
-	if (err != NULL) {
-		fprintf(stderr, "FATAL: Symtab parse error: %s\n%s\n",
-		    err, input);
+	AN(err);
+	if (mgt_vcl_symtab_depth(input)) {
+		VSB_cat(err, "Invalid symbol table: nesting too deep\n");
+		return (-1);
 	}
-	AZ(err);
+	vj = vjsn_parse(input, &perr);
+	if (perr != NULL) {
+		VSB_printf(err, "Invalid symbol table: parse error: %s\n",
+		    perr);
+		return (-1);
+	}
 	AN(vj);
 	vp->symtab = vj;
-	assert(vjsn_is_array(vj->value));
+	if (mgt_vcl_symtab_check(vj, err))
+		return (-1);
+
 	VTAILQ_FOREACH(v1, &vj->value->children, list) {
-		assert(vjsn_is_object(v1));
 		v2 = vjsn_child(v1, "dir");
-		if (v2 == NULL)
-			continue;
-		assert(vjsn_is_string(v2));
-		if (vstrcmp(v2->value, "import"))
+		if (v2 == NULL || vstrcmp(v2->value, "import"))
 			continue;
 		typ = mgt_vcl_symtab_val(v1, "type");
-		if (!vstrcmp(typ, "$VMOD"))
-			mgt_vcl_import_vmod(vp, v1);
-		else if (!vstrcmp(typ, "$VCL"))
+		if (!vstrcmp(typ, "$VMOD")) {
+			if (mgt_vcl_import_vmod(vp, v1, err))
+				return (-1);
+		} else {
+			assert(!vstrcmp(typ, "$VCL"));
 			mgt_vcl_import_vcl(vp, v1);
-		else
-			WRONG("Bad symtab import entry");
+		}
 	}
+	return (0);
 }
 
 void
@@ -251,4 +479,120 @@ mcf_vcl_symtab(struct cli *cli, const char * const *av, void *priv)
 			mcf_vcl_vjsn_dump(cli, vp->symtab->value, 4);
 		}
 	}
+}
+
+/*--------------------------------------------------------------------*/
+
+static void
+mcf_vcl_vjsn_json(struct cli *cli, const struct vjsn_val *vj)
+{
+	struct vjsn_val *vj1;
+	const char *sep = "";
+
+	AN(cli);
+	CHECK_OBJ_NOTNULL(vj, VJSN_VAL_MAGIC);
+
+	if (vjsn_is_string(vj)) {
+		VCLI_JSON_str(cli, vj->value);
+		return;
+	}
+	if (vjsn_is_number(vj)) {
+		VCLI_Out(cli, "%s", vj->value);
+		return;
+	}
+	if (!vjsn_is_object(vj) && !vjsn_is_array(vj)) {
+		/* true, false, null */
+		VCLI_Out(cli, "%s", vj->type);
+		return;
+	}
+	VCLI_Out(cli, "%c", vjsn_is_object(vj) ? '{' : '[');
+	VSB_indent(cli->sb, 2);
+	VTAILQ_FOREACH(vj1, &vj->children, list) {
+		VCLI_Out(cli, "%s\n", sep);
+		if (vj1->name != NULL) {
+			VCLI_JSON_str(cli, vj1->name);
+			VCLI_Out(cli, ": ");
+		}
+		mcf_vcl_vjsn_json(cli, vj1);
+		sep = ",";
+	}
+	VSB_indent(cli->sb, -2);
+	if (*sep != '\0')
+		VCLI_Out(cli, "\n");
+	VCLI_Out(cli, "%c", vjsn_is_object(vj) ? '}' : ']');
+}
+
+static void
+mcf_vcl_symtab_dep_json(struct cli *cli, const struct vclprog *vp,
+    const struct vjsn_val *vj, const char *sep)
+{
+
+	CHECK_OBJ_NOTNULL(vp, VCLPROG_MAGIC);
+	VCLI_Out(cli, "%s\n", sep);
+	VCLI_Out(cli, "{\n");
+	VSB_indent(cli->sb, 2);
+	VCLI_Out(cli, "\"name\": ");
+	VCLI_JSON_str(cli, vp->name);
+	VCLI_Out(cli, ",\n");
+	VCLI_Out(cli, "\"entry\": ");
+	if (vj != NULL)
+		mcf_vcl_vjsn_json(cli, vj);
+	else
+		VCLI_Out(cli, "null");
+	VCLI_Out(cli, "\n");
+	VSB_indent(cli->sb, -2);
+	VCLI_Out(cli, "}");
+}
+
+void v_matchproto_(cli_func_t)
+mcf_vcl_symtab_json(struct cli *cli, const char * const *av, void *priv)
+{
+	struct vclprog *vp;
+	struct vcldep *vd;
+	const char *sep;
+
+	(void)priv;
+	VCLI_JSON_begin(cli, 1, av);
+	VTAILQ_FOREACH(vp, &vclhead, list) {
+		VCLI_Out(cli, ",\n");
+		VCLI_Out(cli, "{\n");
+		VSB_indent(cli->sb, 2);
+		VCLI_Out(cli, "\"name\": ");
+		VCLI_JSON_str(cli, vp->name);
+		VCLI_Out(cli, ",\n");
+		VCLI_Out(cli, "\"label\": %s,\n",
+		    mcf_is_label(vp) ? "true" : "false");
+
+		VCLI_Out(cli, "\"imports\": [");
+		VSB_indent(cli->sb, 2);
+		sep = "";
+		VTAILQ_FOREACH(vd, &vp->dfrom, lfrom) {
+			mcf_vcl_symtab_dep_json(cli, vd->to, vd->vj, sep);
+			sep = ",";
+		}
+		VSB_indent(cli->sb, -2);
+		VCLI_Out(cli, "%s", *sep ? "\n" : "");
+		VCLI_Out(cli, "],\n");
+
+		VCLI_Out(cli, "\"exports\": [");
+		VSB_indent(cli->sb, 2);
+		sep = "";
+		VTAILQ_FOREACH(vd, &vp->dto, lto) {
+			mcf_vcl_symtab_dep_json(cli, vd->from, vd->vj, sep);
+			sep = ",";
+		}
+		VSB_indent(cli->sb, -2);
+		VCLI_Out(cli, "%s", *sep ? "\n" : "");
+		VCLI_Out(cli, "],\n");
+
+		VCLI_Out(cli, "\"symtab\": ");
+		if (vp->symtab != NULL)
+			mcf_vcl_vjsn_json(cli, vp->symtab->value);
+		else
+			VCLI_Out(cli, "null");
+		VCLI_Out(cli, "\n");
+		VSB_indent(cli->sb, -2);
+		VCLI_Out(cli, "}");
+	}
+	VCLI_JSON_end(cli);
 }

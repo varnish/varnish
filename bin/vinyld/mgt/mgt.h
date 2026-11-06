@@ -235,6 +235,18 @@ void mgt_DumpBuiltin(void);
 char *mgt_VccCompile(struct cli *, struct vclprog *, const char *vclname,
     const char *vclsrc, const char *vclsrcfile, int C_flag);
 
+struct mgt_vcl_ext {
+	unsigned		magic;
+#define MGT_VCL_EXT_MAGIC	0x6c8e2f1d
+	const char		*input;
+	const char		*program;
+	vtim_dur		timeout;
+	const char		**env;	/* NULL-terminated "NAME=VALUE" */
+};
+
+char *mgt_VccExtCompile(struct cli *, struct vclprog *, const char *vclname,
+    const struct mgt_vcl_ext *);
+
 void mgt_vcl_init(void);
 void mgt_vcl_startup(struct cli *, const char *vclsrc, const char *origin,
     const char *vclname, int Cflag);

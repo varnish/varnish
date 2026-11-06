@@ -33,8 +33,11 @@
 
 #include "config.h"
 
-#include <limits.h>
+#include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,6 +60,8 @@ struct vcc_priv {
 #define VCC_PRIV_MAGIC	0x70080cb8
 	const char	*vclsrc;
 	const char	*vclsrcfile;
+	const struct mgt_vcl_ext	*ext;
+	char		*absdir;
 	struct vsb	*dir;
 	struct vsb	*csrcfile;
 	struct vsb	*libfile;
@@ -77,6 +82,9 @@ const char *mgt_vmod_path;
 #define VGC_SRC		"vgc.c"
 #define VGC_LIB		"vgc.so"
 #define VGC_SYM		"vgc.sym"
+
+#define VGC_SYM_MAX	(64 * 1024 * 1024)
+#define EXT_OUTPUT_MAX	(1024 * 1024)
 
 /*--------------------------------------------------------------------*/
 
@@ -235,6 +243,48 @@ run_cc(void *priv)
 }
 
 /*--------------------------------------------------------------------
+ * Run the external compiler program in a sub-process
+ */
+
+static void v_noreturn_ v_matchproto_(vsub_func_f)
+run_ext(void *priv)
+{
+	struct vcc_priv *vp;
+	const struct mgt_vcl_ext *ext;
+	const char *e, *eq;
+	char *name;
+	const char *av[4];
+	int i;
+
+	VJ_subproc(JAIL_SUBPROC_CC);
+	CAST_OBJ_NOTNULL(vp, priv, VCC_PRIV_MAGIC);
+	CAST_OBJ_NOTNULL(ext, vp->ext, MGT_VCL_EXT_MAGIC);
+
+	AZ(chdir(vp->absdir));
+	(void)umask(027);
+
+	for (i = 0; ext->env != NULL && ext->env[i] != NULL; i++) {
+		e = ext->env[i];
+		eq = strchr(e, '=');
+		AN(eq);
+		name = strndup(e, eq - e);
+		AN(name);
+		AZ(setenv(name, eq + 1, 1));
+		free(name);
+	}
+
+	av[0] = ext->program;
+	av[1] = ext->input;
+	av[2] = vp->absdir;
+	av[3] = NULL;
+	/* execv() wants a non-const vector, but does not modify it */
+	(void)execv(ext->program, TRUST_ME(av));
+	fprintf(stderr, "Cannot exec %s: %s\n", ext->program,
+	    VAS_errtxt(errno));
+	exit(1);
+}
+
+/*--------------------------------------------------------------------
  * Attempt to open compiled VCL in a sub-process
  */
 
@@ -267,6 +317,18 @@ mgt_vcc_touchfile(const char *fn, struct vsb *sb)
 	}
 	closefd(&i);
 	return (0);
+}
+
+static unsigned
+mgt_vcc_dlopen(struct vcc_priv *vp, struct vsb *sb, vtim_dur tmo)
+{
+	unsigned subs;
+
+	VJ_master(JAIL_MASTER_SYSTEM);
+	subs = VSUB_run_tmo(sb, run_dlopen, vp, "dlopen", 10, tmo,
+	    tmo > 0 ? EXT_OUTPUT_MAX : 0);
+	VJ_master(JAIL_MASTER_LOW);
+	return (subs);
 }
 
 /*--------------------------------------------------------------------
@@ -312,10 +374,39 @@ mgt_vcc_compile(struct vcc_priv *vp, struct vsb *sb, int C_flag)
 	if (subs)
 		return (subs);
 
+	return (mgt_vcc_dlopen(vp, sb, 0));
+}
+
+static unsigned
+mgt_vcc_ext_run(struct vcc_priv *vp, struct vsb *sb)
+{
+	const struct mgt_vcl_ext *ext;
+	struct stat st;
+	unsigned subs;
+
+	CAST_OBJ_NOTNULL(ext, vp->ext, MGT_VCL_EXT_MAGIC);
+	AN(sb);
+	VSB_clear(sb);
+	if (mgt_vcc_touchfile(VSB_data(vp->libfile), sb))
+		return (2);
+	if (mgt_vcc_touchfile(VSB_data(vp->symfile), sb))
+		return (2);
+
 	VJ_master(JAIL_MASTER_SYSTEM);
-	subs = VSUB_run(sb, run_dlopen, vp, "dlopen", 10);
+	subs = VSUB_run_tmo(sb, run_ext, vp, "Ext-compiler", -1, ext->timeout,
+	    EXT_OUTPUT_MAX);
 	VJ_master(JAIL_MASTER_LOW);
-	return (subs);
+	if (subs)
+		return (subs);
+
+	/* dlopen(3) would happily block on a FIFO */
+	if (lstat(VSB_data(vp->libfile), &st) || !S_ISREG(st.st_mode)) {
+		VSB_printf(sb, "%s is not a regular file\n", VGC_LIB);
+		return (2);
+	}
+
+	/* Constructors in vgc.so run during the test load: fresh budget */
+	return (mgt_vcc_dlopen(vp, sb, ext->timeout));
 }
 
 /*--------------------------------------------------------------------*/
@@ -334,42 +425,136 @@ mgt_vcc_init_vp(struct vcc_priv *vp)
 	AN(vp->dir);
 }
 
+#define RMTREE_MAXDEPTH 64
+
+static void
+mgt_vcc_rmtree_fd(const char *path, int fd, const char *keep, int depth)
+{
+	DIR *d;
+	struct dirent *de;
+	struct stat st;
+	char sub[PATH_MAX];
+	int dfd, sfd;
+
+	d = fdopendir(fd);
+	if (d == NULL) {
+		fprintf(stderr, "Could not read '%s': %s\n",
+		    path, strerror(errno));
+		(void)close(fd);
+		return;
+	}
+	dfd = dirfd(d);
+	while ((de = readdir(d)) != NULL) {
+		if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, ".."))
+			continue;
+		if (keep != NULL && !strcmp(de->d_name, keep))
+			continue;
+		(void)snprintf(sub, sizeof sub, "%s/%s", path, de->d_name);
+		if (fstatat(dfd, de->d_name, &st, AT_SYMLINK_NOFOLLOW)) {
+			fprintf(stderr, "Could not stat '%s': %s\n",
+			    sub, strerror(errno));
+			continue;
+		}
+		if (!S_ISDIR(st.st_mode)) {
+			if (unlinkat(dfd, de->d_name, 0))
+				fprintf(stderr, "Could not delete '%s': %s\n",
+				    sub, strerror(errno));
+			continue;
+		}
+		if (depth >= RMTREE_MAXDEPTH) {
+			fprintf(stderr,
+			    "Directory tree too deep, not descending '%s'\n",
+			    sub);
+			continue;
+		}
+		sfd = openat(dfd, de->d_name,
+		    O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+		if (sfd < 0) {
+			fprintf(stderr, "Could not open '%s': %s\n",
+			    sub, strerror(errno));
+			continue;
+		}
+		mgt_vcc_rmtree_fd(sub, sfd, NULL, depth + 1);
+		if (unlinkat(dfd, de->d_name, AT_REMOVEDIR))
+			fprintf(stderr, "Could not rmdir '%s': %s\n",
+			    sub, strerror(errno));
+	}
+	AZ(closedir(d));
+}
+
+/*
+ * Remove everything in dir except the entry named keep, recursively and
+ * without ever following symlinks.  If keep is NULL, remove dir too.
+ */
+
+static void
+mgt_vcc_rmtree(const char *dir, const char *keep)
+{
+	int fd;
+
+	VJ_master(JAIL_MASTER_FILE);
+	fd = open(dir, O_RDONLY | O_DIRECTORY | O_NOFOLLOW);
+	if (fd < 0) {
+		if (errno != ENOENT)
+			fprintf(stderr, "Could not open '%s': %s\n",
+			    dir, strerror(errno));
+	} else {
+		mgt_vcc_rmtree_fd(dir, fd, keep, 0);
+		if (keep == NULL && rmdir(dir))
+			fprintf(stderr, "Could not rmdir '%s': %s\n",
+			    dir, strerror(errno));
+	}
+	VJ_master(JAIL_MASTER_LOW);
+}
+
 static void
 mgt_vcc_fini_vp(struct vcc_priv *vp, enum vcc_fini_e vcc_status)
 {
 	int ignore_enoent = (vcc_status == VCC_FAILED);
 
 	if (!MGT_DO_DEBUG(DBG_VCL_KEEP)) {
-		VJ_unlink(VSB_data(vp->csrcfile), ignore_enoent);
-		VJ_unlink(VSB_data(vp->symfile), ignore_enoent);
-		if (vcc_status != VCC_SUCCESS) {
-			VJ_unlink(VSB_data(vp->libfile), ignore_enoent);
-			VJ_rmdir(VSB_data(vp->dir));
+		if (vp->ext != NULL) {
+			/* Untrusted program: remove whatever it left behind */
+			mgt_vcc_rmtree(VSB_data(vp->dir),
+			    vcc_status == VCC_SUCCESS ? "vgc.so" : NULL);
+		} else {
+			VJ_unlink(VSB_data(vp->csrcfile), ignore_enoent);
+			VJ_unlink(VSB_data(vp->symfile), ignore_enoent);
+			if (vcc_status != VCC_SUCCESS) {
+				VJ_unlink(VSB_data(vp->libfile),
+				    ignore_enoent);
+				VJ_rmdir(VSB_data(vp->dir));
+			}
 		}
 	}
+	free(vp->absdir);
 	VSB_destroy(&vp->csrcfile);
 	VSB_destroy(&vp->libfile);
 	VSB_destroy(&vp->symfile);
 	VSB_destroy(&vp->dir);
 }
 
-char *
-mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
-    const char *vclsrc, const char *vclsrcfile, int C_flag)
+/*--------------------------------------------------------------------
+ * Clean up after a failed compilation and report it to the CLI.
+ */
+
+static void
+mgt_vcc_failed(struct cli *cli, struct vcc_priv *vp)
 {
-	struct vcc_priv vp[1];
-	struct vsb *sb;
-	unsigned status;
-	char *p;
 
-	AN(cli);
+	mgt_vcc_fini_vp(vp, VCC_FAILED);
+	VCLI_Out(cli, "VCL compilation failed");
+	VCLI_SetResult(cli, CLIS_PARAM);
+}
 
-	sb = VSB_new_auto();
-	AN(sb);
+/*--------------------------------------------------------------------
+ * Set up the per-VCL subdirectory and the names of the files in it.
+ * Returns non-zero (and the reason in cli) on failure.
+ */
 
-	mgt_vcc_init_vp(vp);
-	vp->vclsrc = vclsrc;
-	vp->vclsrcfile = vclsrcfile;
+static int
+mgt_vcc_mkdir(struct cli *cli, struct vcc_priv *vp, const char *vclname)
+{
 
 	/*
 	 * The subdirectory must have a unique name to 100% certain evade
@@ -416,11 +601,125 @@ mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 	VSB_printf(vp->symfile, "%s/%s", VSB_data(vp->dir), VGC_SYM);
 	AZ(VSB_finish(vp->symfile));
 
-	if (VJ_make_subdir(VSB_data(vp->dir), "VCL", cli->sb)) {
-		mgt_vcc_fini_vp(vp, VCC_FAILED);
+	return (VJ_make_subdir(VSB_data(vp->dir), "VCL", cli->sb));
+}
+
+/*--------------------------------------------------------------------
+ * Read a file which may have been left by an untrusted program: it must
+ * be a regular file of reasonable size, and opening it must not block.
+ * Returns NULL with the reason in sb on failure.
+ */
+
+static char *
+mgt_vcc_read_untrusted(const char *fn, size_t maxsize, struct vsb *sb)
+{
+	struct stat st;
+	char *p;
+	size_t len = 0;
+	ssize_t i;
+	int fd;
+
+	fd = open(fn, O_RDONLY | O_NONBLOCK | O_NOFOLLOW);
+	if (fd < 0) {
+		VSB_printf(sb, "cannot open %s: %s", fn, VAS_errtxt(errno));
+		return (NULL);
+	}
+	if (fstat(fd, &st)) {
+		VSB_printf(sb, "cannot stat %s: %s", fn, VAS_errtxt(errno));
+		closefd(&fd);
+		return (NULL);
+	}
+	if (!S_ISREG(st.st_mode)) {
+		VSB_printf(sb, "%s is not a regular file", fn);
+		closefd(&fd);
+		return (NULL);
+	}
+	if (st.st_size < 0 || (uintmax_t)st.st_size > maxsize) {
+		VSB_printf(sb, "%s is larger than %zu bytes", fn, maxsize);
+		closefd(&fd);
+		return (NULL);
+	}
+	p = malloc(st.st_size + 1L);
+	AN(p);
+	while (len < (size_t)st.st_size) {
+		i = read(fd, p + len, st.st_size - len);
+		if (i < 0 && errno == EINTR)
+			continue;
+		if (i < 0) {
+			VSB_printf(sb, "cannot read %s: %s", fn,
+			    VAS_errtxt(errno));
+			closefd(&fd);
+			free(p);
+			return (NULL);
+		}
+		if (i == 0)
+			break;
+		len += i;
+	}
+	closefd(&fd);
+	p[len] = '\0';
+	return (p);
+}
+
+/*--------------------------------------------------------------------
+ * Read the symbol table of a successful compilation and hand over the
+ * shared object.
+ */
+
+static char *
+mgt_vcc_success(struct cli *cli, struct vcc_priv *vp, struct vclprog *vcl)
+{
+	char *p;
+	struct vsb *sb;
+	int i;
+
+	sb = VSB_new_auto();
+	AN(sb);
+	p = mgt_vcc_read_untrusted(VSB_data(vp->symfile), VGC_SYM_MAX, sb);
+	if (p == NULL) {
+		AZ(VSB_finish(sb));
+		VCLI_Out(cli, "Invalid symbol table: %s\n", VSB_data(sb));
 		VSB_destroy(&sb);
-		VCLI_Out(cli, "VCL compilation failed");
-		VCLI_SetResult(cli, CLIS_PARAM);
+		mgt_vcc_failed(cli, vp);
+		return (NULL);
+	}
+	i = mgt_vcl_symtab(vcl, p, sb);
+	free(p);
+	AZ(VSB_finish(sb));
+	if (i) {
+		VCLI_Out(cli, "%s", VSB_data(sb));
+		VSB_destroy(&sb);
+		mgt_vcc_failed(cli, vp);
+		return (NULL);
+	}
+	VSB_destroy(&sb);
+
+	p = strdup(VSB_data(vp->libfile));
+	AN(p);
+	mgt_vcc_fini_vp(vp, VCC_SUCCESS);
+	return (p);
+}
+
+char *
+mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
+    const char *vclsrc, const char *vclsrcfile, int C_flag)
+{
+	struct vcc_priv vp[1];
+	struct vsb *sb;
+	unsigned status;
+
+	AN(cli);
+
+	sb = VSB_new_auto();
+	AN(sb);
+
+	mgt_vcc_init_vp(vp);
+	vp->vclsrc = vclsrc;
+	vp->vclsrcfile = vclsrcfile;
+
+	if (mgt_vcc_mkdir(cli, vp, vclname)) {
+		VSB_destroy(&sb);
+		mgt_vcc_failed(cli, vp);
 		return (NULL);
 	}
 
@@ -431,19 +730,54 @@ mgt_VccCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
 	VSB_destroy(&sb);
 
 	if (status || C_flag) {
-		mgt_vcc_fini_vp(vp, VCC_FAILED);
-		if (status) {
-			VCLI_Out(cli, "VCL compilation failed");
-			VCLI_SetResult(cli, CLIS_PARAM);
-		}
+		if (status)
+			mgt_vcc_failed(cli, vp);
+		else
+			mgt_vcc_fini_vp(vp, VCC_FAILED);
 		return (NULL);
 	}
 
-	p = VFIL_readfile(NULL, VSB_data(vp->symfile), NULL);
-	AN(p);
-	mgt_vcl_symtab(vcl, p);
+	return (mgt_vcc_success(cli, vp, vcl));
+}
 
-	REPLACE(p, VSB_data(vp->libfile));
-	mgt_vcc_fini_vp(vp, VCC_SUCCESS);
-	return (p);
+char *
+mgt_VccExtCompile(struct cli *cli, struct vclprog *vcl, const char *vclname,
+    const struct mgt_vcl_ext *ext)
+{
+	struct vcc_priv vp[1];
+	struct vsb *sb;
+	char buf[PATH_MAX];
+	unsigned status;
+
+	AN(cli);
+	CHECK_OBJ_NOTNULL(ext, MGT_VCL_EXT_MAGIC);
+
+	sb = VSB_new_auto();
+	AN(sb);
+
+	mgt_vcc_init_vp(vp);
+	vp->ext = ext;
+
+	if (mgt_vcc_mkdir(cli, vp, vclname)) {
+		VSB_destroy(&sb);
+		mgt_vcc_failed(cli, vp);
+		return (NULL);
+	}
+
+	/* mgt's working directory is the workdir */
+	AN(getcwd(buf, sizeof buf));
+	assert(asprintf(&vp->absdir, "%s/%s", buf, VSB_data(vp->dir)) > 0);
+
+	status = mgt_vcc_ext_run(vp, sb);
+	AZ(VSB_finish(sb));
+	if (VSB_len(sb) > 0)
+		VCLI_Out(cli, "%s", VSB_data(sb));
+	VSB_destroy(&sb);
+
+	if (status) {
+		mgt_vcc_failed(cli, vp);
+		return (NULL);
+	}
+
+	return (mgt_vcc_success(cli, vp, vcl));
 }
