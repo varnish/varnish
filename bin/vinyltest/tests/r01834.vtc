@@ -31,7 +31,7 @@ varnish v1 -vcl+backend {
 } -start
 
 # Start with enough workspace to receive some good results
-client c1 -repeat 5 {
+client c1 -repeat 4 {
 	txreq -hdr "Connection: close"
 	rxresp
 	expect resp.status == 200

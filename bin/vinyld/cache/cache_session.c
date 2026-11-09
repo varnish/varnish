@@ -371,6 +371,15 @@ HTC_RxStuff(struct http_conn *htc, htc_complete_f *func,
 		else
 			WRONG("htc_status_e");
 
+		// htc_complete_f can not return EOF, TIMEOUT or IDLE
+		//
+		// all but MORE and EMPTY have been handled
+		//
+		// when returning, we map:
+		//
+		// HTC_S_EMPTY -> HTC_S_IDLE
+		// HTC_S_MORE -> HTC_S_TIMEOUT
+
 		if (hs == HTC_S_EMPTY && !isnan(ti) && (isnan(tn) || ti < tn))
 			tmo = ti - now;
 		else if (isnan(tn))
@@ -400,10 +409,14 @@ HTC_RxStuff(struct http_conn *htc, htc_complete_f *func,
 			htc->rxbuf_e += z;
 		else if (z == -2) {
 			WS_ReleaseP(htc->ws, htc->rxbuf_b);
-			if (hs == HTC_S_EMPTY)
+			switch (hs) {
+			case HTC_S_EMPTY:
 				return (HTC_S_IDLE);
-			else
+			case HTC_S_MORE:
 				return (HTC_S_TIMEOUT);
+			default:
+				WRONG("htc_status_e (read timeout)");
+			}
 		}
 	}
 }

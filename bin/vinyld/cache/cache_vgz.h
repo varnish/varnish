@@ -37,6 +37,7 @@
 struct vgz;
 
 enum vgzret_e {
+	VGZ_WRONG = -2,	// flint/assert
 	VGZ_ERROR = -1,
 	VGZ_OK = 0,
 	VGZ_END = 1,

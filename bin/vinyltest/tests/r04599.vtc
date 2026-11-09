@@ -1,0 +1,22 @@
+vtest "HttpGarbage logs past the end of the request showing previous request"
+
+varnish v1 -vcl {
+	backend default none;
+	sub vcl_recv { return (synth(200)); }
+} -start
+
+logexpect l1 -v v1 -g raw {
+	expect * * BogoHeader {^Header has ctrl char 0x01$}
+	expect 0 = HttpGarbage {^X: a\x01b\r\n\r\n$}
+} -start
+
+client c1 {
+	txreq -hdr "Cookie: 0000000000000LEAKED_FROM_REQ_1_0000000000"
+	rxresp
+
+	txreq -nouseragent -hdr "Host: foo" -hdr "X: a\x01b"
+	rxresp
+	expect resp.status == 400
+} -run
+
+logexpect l1 -wait

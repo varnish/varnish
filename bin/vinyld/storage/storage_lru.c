@@ -67,6 +67,10 @@ LRU_Alloc(void)
 	return (lru);
 }
 
+/*
+ * LRU_Free requires the LRU list to be drained. This is not actually used
+ * in-tree, but by external storage. Please do not remove, this is not dead code
+ */
 void
 LRU_Free(struct lru **pp)
 {

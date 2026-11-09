@@ -351,7 +351,7 @@ Pool_Task(struct pool *pp, struct pool_task *task, enum task_prio prio)
 	/* Vital work is always queued. Only priority classes that can
 	 * fit under the reserve capacity are eligible to queuing.
 	 */
-	if (prio >= TASK_QUEUE_RESERVE) {
+	if (prio >= TASK_QUEUE_RESERVE || pp->die) {
 		retval = -1;
 	} else if (!TASK_QUEUE_LIMITED(prio) ||
 	    pp->lqueue + pp->nthr < cache_param->wthread_max +

@@ -212,7 +212,7 @@ pool_poolherder(void *priv)
 {
 	VTAILQ_HEAD(,pool) deadpools = VTAILQ_HEAD_INITIALIZER(deadpools);
 	unsigned nwq, poolno;
-	struct pool *pp;
+	struct pool *pp, *next;
 	uint64_t u;
 
 	THR_SetName("pool_poolherder");
@@ -254,7 +254,7 @@ pool_poolherder(void *priv)
 			continue;
 		}
 
-		while ((pp = VTAILQ_FIRST(&deadpools)) != NULL) {
+		VTAILQ_FOREACH_SAFE(pp, &deadpools, list, next) {
 			CHECK_OBJ_NOTNULL(pp, POOL_MAGIC);
 			int active;
 
@@ -267,7 +267,7 @@ pool_poolherder(void *priv)
 			Lck_Unlock(&pp->mtx);
 
 			if (active)
-				 continue;
+				continue;
 
 			VTAILQ_REMOVE(&deadpools, pp, list);
 			pool_destroy(pp);
@@ -281,7 +281,8 @@ pool_poolherder(void *priv)
 			u += pp->lqueue;
 		}
 		VSC_C_main->thread_queue_len = u;
-		if (nwq > 0 || cache_param->wthread_pools > 0)
+		if (nwq > 0 || cache_param->wthread_pools > 0 ||
+		    VTAILQ_FIRST(&deadpools) != NULL)
 			(void)Lck_CondWaitTimeout(&cond, &pool_mtx, 1.0);
 		Lck_Unlock(&pool_mtx);
 	}

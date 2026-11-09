@@ -38,6 +38,8 @@
  *
  */
 
+/*lint -e801 goto */
+
 #include "config.h"
 
 #include <stdlib.h>
@@ -60,6 +62,7 @@ struct vgz {
 	struct vsl_log		*vsl;
 	const char		*id;
 	int			last_i;
+	int			latch;
 	enum vgz_flag		flag;
 
 	struct stv_buffer	*stvbuf;
@@ -111,12 +114,14 @@ VGZ_NewGunzip(struct vsl_log *vsl, const char *id)
 	return (vgz_gunzip(vsl, id));
 }
 
+#ifndef VDPIO_TEST_DRIVER
 static struct vgz *
 VGZ_NewTestGunzip(struct vsl_log *vsl, const char *id)
 {
 	VSC_C_main->n_test_gunzip++;
 	return (vgz_gunzip(vsl, id));
 }
+#endif
 
 struct vgz *
 VGZ_NewGzip(struct vsl_log *vsl, const char *id)
@@ -154,6 +159,7 @@ VGZ_NewGzip(struct vsl_log *vsl, const char *id)
 /*--------------------------------------------------------------------
  */
 
+#ifndef VDPIO_TEST_DRIVER
 static int
 vgz_getmbuf(struct worker *wrk, struct vgz *vg)
 {
@@ -178,6 +184,7 @@ vgz_getmbuf(struct worker *wrk, struct vgz *vg)
 	assert(vg->m_sz > 0);
 	return (0);
 }
+#endif
 
 /*--------------------------------------------------------------------*/
 
@@ -227,6 +234,7 @@ VGZ_ObufFull(const struct vgz *vg)
 
 /*--------------------------------------------------------------------*/
 
+#ifndef VDPIO_TEST_DRIVER
 static enum vgzret_e
 VGZ_Gunzip(struct vgz *vg, const void **pptr, ssize_t *plen)
 {
@@ -257,13 +265,14 @@ VGZ_Gunzip(struct vgz *vg, const void **pptr, ssize_t *plen)
 	VSLb(vg->vsl, SLT_Gzip, "Gunzip error: %d (%s)", i, vgz_msg(vg));
 	return (VGZ_ERROR);
 }
+#endif
 
 /* set vz pointers for in and out iovecs */
 static inline void
 vgz_iovec_update(struct vgz *vg, const struct iovec *in, const struct iovec *buf)
 {
-	/* in: either fully consumed or the same */
-	assert(vg->vz.avail_in == 0 || vg->vz.next_in == TRUST_ME(in->iov_base));
+
+	// can not assert on vz.next_in vs io_base because "junk" case
 	vg->vz.next_in = TRUST_ME(in->iov_base);
 	vg->vz.avail_in = in->iov_len;
 	vg->vz.next_out = TRUST_ME(buf->iov_base);
@@ -271,7 +280,7 @@ vgz_iovec_update(struct vgz *vg, const struct iovec *in, const struct iovec *buf
 }
 
 static enum vgzret_e
-vgz_gunzip_iovec(struct vgz *vg, struct iovec *in, struct iovec *buf, struct iovec *out)
+vgz_gunzip_iovec(struct vgz *vg, struct iovec *in, struct iovec *buf, struct iovec *out, int flush)
 {
 	int i;
 
@@ -279,19 +288,22 @@ vgz_gunzip_iovec(struct vgz *vg, struct iovec *in, struct iovec *buf, struct iov
 	AN(in && buf && out);
 	vgz_iovec_update(vg, in, buf);
 
-	i = inflate(&vg->vz, 0);
-	if (i == Z_OK || i == Z_STREAM_END) {
+	do {
+		i = inflate(&vg->vz, flush);
+	} while (i == Z_OK);
+
+	if (i == Z_STREAM_END || i == Z_BUF_ERROR) {
 		iovec_collect(buf, out, pdiff(buf->iov_base, vg->vz.next_out));
 		in->iov_base = TRUST_ME(vg->vz.next_in);
 		in->iov_len = vg->vz.avail_in;
 	}
 	vg->last_i = i;
-	if (i == Z_OK)
-		return (VGZ_OK);
+
 	if (i == Z_STREAM_END)
 		return (VGZ_END);
 	if (i == Z_BUF_ERROR)
 		return (VGZ_STUCK);
+
 	VSLb(vg->vsl, SLT_Gzip, "Gunzip error: %d (%s)", i, vgz_msg(vg));
 	return (VGZ_ERROR);
 }
@@ -342,8 +354,9 @@ VGZ_Gzip(struct vgz *vg, const void **pptr, ssize_t *plen, enum vgz_flag flags)
  */
 
 // common for traditional interface and vdpio
-static int vdp_gunzip_init_common(struct vdp_ctx *vdc);
+static int vdp_gunzip_init_common(const struct vdp_ctx *vdc);
 
+#ifndef VDPIO_TEST_DRIVER
 static int v_matchproto_(vdp_init_f)
 vdp_gunzip_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 {
@@ -367,9 +380,10 @@ vdp_gunzip_init(VRT_CTX, struct vdp_ctx *vdc, void **priv)
 	*priv = vg;
 	return (vdp_gunzip_init_common(vdc));
 }
+#endif
 
 static int
-vdp_gunzip_init_common(struct vdp_ctx *vdc)
+vdp_gunzip_init_common(const struct vdp_ctx *vdc)
 {
 	struct boc *boc;
 	enum boc_state_e bos;
@@ -401,6 +415,7 @@ vdp_gunzip_init_common(struct vdp_ctx *vdc)
 	return (0);
 }
 
+#ifndef VDPIO_TEST_DRIVER
 static int v_matchproto_(vdp_fini_f)
 vdp_gunzip_fini(struct vdp_ctx *vdc, void **priv)
 {
@@ -455,8 +470,10 @@ vdp_gunzip_bytes(struct vdp_ctx *vdc, enum vdp_action act, void **priv,
 	assert(vr == VGZ_STUCK || vr == VGZ_OK || vr == VGZ_END);
 	return (0);
 }
+#endif
 
-#ifdef LATER
+#ifdef VDPIO_TEST_DRIVER
+//lint -esym(754, vgz::*)
 /*
  * XXX does it make sense to work on more than one buffer?
  */
@@ -494,7 +511,7 @@ vdpio_gunzip_init(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
 	return (1);
 }
 #endif
-
+#ifndef VDPIO_TEST_DRIVER
 static int v_matchproto_(vdpio_init_f)
 vdpio_gunzip_upgrade(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
 {
@@ -526,6 +543,7 @@ vdpio_gunzip_upgrade(VRT_CTX, struct vdp_ctx *vdc, void **priv, int capacity)
 
 	return (1);
 }
+#endif
 
 static int v_matchproto_(vdpio_lease_f)
 vdpio_gunzip_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *out)
@@ -533,7 +551,7 @@ vdpio_gunzip_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 	struct vscarab *in;
 	enum vgzret_e vr;
 	struct vgz *vg;
-	struct viov *v, *b, *o;
+	struct viov *v, *b, *o, *end;
 	int r;
 
 	CHECK_OBJ_NOTNULL(vdc, VDP_CTX_MAGIC);
@@ -543,20 +561,19 @@ vdpio_gunzip_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 
 	this->calls++;
 
-	if (out->used == out->capacity)
-		return (0);
+	if (vg->latch != 0)
+		return (vg->latch);
+	// vdpio_pull*() guarantees
+	assert(out->used < out->capacity);
 
+	r = 0;
 	if (in->used < in->capacity && (in->flags & VSCARAB_F_END) == 0)
 		r = vdpio_pull(vdc, this, in);
-	else
-		r = 0;
 
-	if (in->used == 0) {
-		out->flags = in->flags & VSCARAB_F_END;
+	if (in->used == 0 && (in->flags & VSCARAB_F_END) == 0)
 		return (r);
-	}
 
-	// XXX more than one buffer?
+
 	VSCARAB_LOCAL(buf, 1);
 	b = VSCARAB_GET(buf);
 	AN(b);
@@ -569,37 +586,102 @@ vdpio_gunzip_lease(struct vdp_ctx *vdc, struct vdp_entry *this, struct vscarab *
 	AN(o);
 	r = 0;
 
+    again:
+	// no input or last empty scarab
+	if (in->used == 0 && (in->flags & VSCARAB_F_END)) {
+		vr = vgz_gunzip_iovec(vg, &(struct iovec){0}, &b->iov, &o->iov, Z_FINISH);
+		goto out;
+	}
+
+	// loop must be entered
+	vr = VGZ_WRONG;
+	end = in->flags & VSCARAB_F_END ? VSCARAB_LAST(in) : NULL;
 	VSCARAB_FOREACH(v, in) {
 		this->bytes_in += v->iov.iov_len;
-		vr = vgz_gunzip_iovec(vg, &v->iov, &b->iov, &o->iov);
-		if (vr == VGZ_END && v->iov.iov_len > 0) {
-			VSLb(vg->vsl, SLT_Gzip, "G(un)zip error: %d (%s)",
-			     vr, "junk after VGZ_END");
-			r = -EMSGSIZE;
+
+		if (vr == VGZ_END && v->iov.iov_len > 0)
+			goto junk;
+
+		vr = vgz_gunzip_iovec(vg, &v->iov, &b->iov, &o->iov,
+		    v == end ? Z_FINISH : Z_NO_FLUSH);
+
+		if (vr == VGZ_END && v->iov.iov_len > 0)
+			goto junk;
+
+		if (vr == VGZ_ERROR)
+			break;
+
+		this->bytes_in -= v->iov.iov_len;
+
+		if (vr == VGZ_STUCK && v->iov.iov_len > 0) {
+			// stuck because output full
+			AZ(b->iov.iov_len);
 			break;
 		}
-		if (vr < VGZ_OK)
-			break;
 
-		if (b->iov.iov_len == 0 || vr != VGZ_OK) {
-			r = 1;
-			break;
-		}
+		// handled after loop
+		assert(vr == VGZ_STUCK || vr == VGZ_OK || vr == VGZ_END);
 	}
 
-	if (r <= 0) {
-		o->iov = IOV_NIL;
-		vdpio_return_lease(vdc, b->lease);
-		return (r);
-	}
-
-	o->lease = b->lease;
-	b->lease = 0;
-
+    out:
 	vdpio_consolidate_vscarab(vdc, in);
-	if (in->used == 0)
-		out->flags = in->flags & VSCARAB_F_END;
 
+	switch (vr) {
+	case VGZ_END:
+		out->flags |= VSCARAB_F_END;
+		break;
+	case VGZ_OK:
+		break;
+	case VGZ_STUCK:
+		// compare above: stuck for full buffer
+		if (b->iov.iov_len == 0)
+			break;
+		AZ(in->used);
+		// for no input at all, we do not get a VGZ_END
+		if (in->flags & VSCARAB_F_END && this->bytes_in == 0) {
+			out->flags |= VSCARAB_F_END;
+			break;
+		}
+		// stuck for input empty, try to pull more
+		r = vdpio_pull(vdc, this, in);
+		if (r > 0)
+			goto again;
+		break;
+	case VGZ_ERROR:
+		r = -EBADMSG;
+		goto err;
+	default:
+		WRONG("vr after loop");
+	}
+
+	AN(out->used);
+
+	if (o->iov.iov_len == 0) {
+		AZ(o->iov.iov_base);
+		out->used--;
+		vdpio_return_vscarab(vdc, buf);
+		return (0);
+	}
+
+	// transfer ownership of buffer
+	o->lease = b->lease;
+	// not needed, for clarity
+	b->lease = VAI_LEASE_NORET;
+
+	return (1);
+
+    junk:
+	VSLb(vg->vsl, SLT_Gzip, "G(un)zip error: %d (%s)",
+		vr, "junk after VGZ_END");
+	r = -EMSGSIZE;
+    err:
+	vg->latch = r;
+	assert(r < 0);
+	memset(o, 0, sizeof *o);
+	AN(out->used);
+	out->used--;
+	vdpio_return_vscarab(vdc, buf);
+	vdpio_return_vscarab(vdc, in);
 	return (r);
 }
 
@@ -614,25 +696,96 @@ vdpio_gunzip_fini(struct vdp_ctx *vdc, void **priv)
 	CAST_OBJ_NOTNULL(in, (void *)vg->m_buf, VSCARAB_MAGIC);
 	vg->m_buf = NULL;
 
+	vdpio_return_vscarab(vdc, in);
+
 	(void)VGZ_Destroy(vdc->wrk, &vg);
 }
 
 const struct vdp VDP_gunzip = {
 	.name =		"gunzip",
+#ifndef VDPIO_TEST_DRIVER
 	.init =		vdp_gunzip_init,
 	.bytes =	vdp_gunzip_bytes,
 	.fini =		vdp_gunzip_fini,
+#endif
 
-#ifdef LATER
+#ifdef VDPIO_TEST_DRIVER
 	.io_init =	vdpio_gunzip_init,
 #endif
+#ifndef VDPIO_TEST_DRIVER
 	.io_upgrade =	vdpio_gunzip_upgrade,
+#endif
 	.io_lease =	vdpio_gunzip_lease,
 	.io_fini =	vdpio_gunzip_fini,
 };
 
+#ifdef VDPIO_TEST_DRIVER
+#include <stdio.h>
+#include "vdpio_test.h"
+#include "vfil.h"
+
+int
+main(int argc, char *const *argv)
+{
+	char *data, *expect;
+	char fn[64];
+	int fd;
+	char buf[1024];
+
+	VFLA_LOCAL(vdpio_test, t, VDPIO_TEST_MAGIC, tc, 2);
+	t->vdp = &VDP_gunzip;
+
+	// tests add up to 2752 bytes
+	cache_param->gzip_buffer = (size_t)1;
+
+	AN(argc);
+
+	// the test is to compress our own binary
+	// this is the simplest way I could come up with wrt loc
+	bprintf(fn, "/tmp/vdoip_gzip.%s", "XXXXXX");
+	fd = mkstemp(fn);
+	bprintf(buf, "gzip -c %s >&%d", argv[0], fd);
+	AZ(system(buf));
+	close(fd);
+	data = VFIL_readfile(NULL, fn, &t->datasz);
+	expect = VFIL_readfile(NULL, argv[0], &t->expectsz);
+	t->data = data;
+	t->expect = expect;
+	(void)unlink(fn);
+
+	struct vdpio_tc *tc;
+
+	tc = VFLA_GET(t, tc);
+	AN(tc);
+	tc->name = "junk at end";
+	tc->data = malloc(t->datasz + 1);
+	AN(tc->data);
+	tc->datasz = t->datasz + 1;
+	tc->ret = -EBADMSG;
+
+	tc = VFLA_GET(t, tc);
+	AN(tc);
+	tc->name = "garbage";
+	data = malloc(t->datasz);
+	AN(data);
+	memset(data + t->datasz / 2, 0, t->datasz / 4);
+	tc->data = data;
+	tc->datasz = t->datasz;
+	tc->ret = -EBADMSG;
+
+	AZ(vdpio_mock(t));
+
+	VFLA_FOREACH(tc, t, tc)
+		free(TRUST_ME(tc->data));
+
+	free(TRUST_ME(t->data));
+	free(TRUST_ME(t->expect));
+}
+#endif
+
 /*--------------------------------------------------------------------*/
 
+#ifndef VDPIO_TEST_DRIVER
 void
 VGZ_UpdateObj(const struct vfp_ctx *vc, struct vgz *vg, enum vgzret_e e)
 {
@@ -658,6 +811,7 @@ VGZ_UpdateObj(const struct vfp_ctx *vc, struct vgz *vg, enum vgzret_e e)
 	if (vg->dir == VGZ_UN)
 		vbe64enc(p + 24, vg->vz.total_out);
 }
+#endif
 
 /*--------------------------------------------------------------------
  */
@@ -685,10 +839,12 @@ VGZ_Destroy(struct worker *wrk, struct vgz **vgp)
 		i = inflateEnd(&vg->vz);
 	if (vg->last_i == Z_STREAM_END && i == Z_OK)
 		i = Z_STREAM_END;
+#ifndef VDPIO_TEST_DRIVER
 	if (vg->m_buf != NULL) {
 		AN(vg->stvbuf);
 		STV_FreeBuf(wrk, &vg->stvbuf);
 	}
+#endif
 	AZ(vg->stvbuf);
 	if (i == Z_OK)
 		vr = VGZ_OK;
@@ -706,6 +862,7 @@ VGZ_Destroy(struct worker *wrk, struct vgz **vgp)
 }
 
 /*--------------------------------------------------------------------*/
+#ifndef VDPIO_TEST_DRIVER
 
 static enum vfp_status v_matchproto_(vfp_init_f)
 vfp_gzip_init(VRT_CTX, struct vfp_ctx *vc, struct vfp_entry *vfe)
@@ -956,3 +1113,4 @@ const struct vfp VFP_testgunzip = {
 	.fini = vfp_gzip_fini,
 	.priv1 = "u F -",
 };
+#endif

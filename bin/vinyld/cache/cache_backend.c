@@ -35,6 +35,7 @@
 #include "config.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "cache_int.h"
 #include "cache_director.h"
@@ -884,6 +885,15 @@ VRT_new_backend_clustered(VRT_CTX, struct vsmw_cluster *vc,
 	vcl = ctx->vcl;
 	AN(vcl);
 	AN(vrt->vcl_name);
+
+	if (vrt->authority && vstrlen(vrt->authority) > BUFSIZ) {
+		VRT_fail(ctx, "%s: Excessive authority length", vrt->vcl_name);
+		return (NULL);
+	}
+	if (vrt->hosthdr && vstrlen(vrt->hosthdr) > BUFSIZ) {
+		VRT_fail(ctx, "%s: Excessive hosthdr length", vrt->vcl_name);
+		return (NULL);
+	}
 
 	/* Create new backend */
 	ALLOC_OBJ(be, BACKEND_MAGIC);

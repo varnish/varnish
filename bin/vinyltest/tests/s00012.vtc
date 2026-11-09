@@ -60,8 +60,8 @@ client c2 -connect "${tmpdir}/v1.sock" -rcvbuf 128 {
 client c1 -wait
 client c2 -wait
 
+varnish v1 -cliok "param.set send_timeout 20"
 varnish v1 -cliok "param.set idle_send_timeout 1"
-varnish v1 -cliok "param.reset send_timeout"
 
 logexpect l2 -v v1 -q "ReqURL ~ \"^/$\"" {
 	expect * * Debug "Hit idle send timeout"
@@ -70,8 +70,8 @@ logexpect l2 -v v1 -q "ReqURL ~ \"^/$\"" {
 client c3 -connect "${tmpdir}/v1.sock" -rcvbuf 128 {
 	txreq
 	rxresphdrs
-	# keep the session open for 2 seconds
-	delay 2
+	# keep the session open
+	delay 3
 } -start
 
 client c4 -connect "${tmpdir}/v1.sock" -rcvbuf 128 {

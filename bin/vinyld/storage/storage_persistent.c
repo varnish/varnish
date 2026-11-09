@@ -395,7 +395,7 @@ smp_open(struct stevedore *st)
  */
 
 static void v_matchproto_(storage_close_f)
-smp_close(const struct stevedore *st, int warn)
+smp_close(struct stevedore *st, int warn)
 {
 	struct smp_sc	*sc;
 	void *status;

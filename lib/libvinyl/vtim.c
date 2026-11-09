@@ -584,8 +584,8 @@ tstf(time_t t, const char *s)
 
 	VTIM_format(t, buf);
 	if (strcmp(s, buf)) {
-		printf("VTIM_format(%zd) error\nwant:\t%s\ngot:\t%s\n",
-		    t, s, buf);
+		printf("VTIM_format(%jd) error\nwant:\t%s\ngot:\t%s\n",
+		    (intmax_t)t, s, buf);
 		exit(4);
 	}
 }

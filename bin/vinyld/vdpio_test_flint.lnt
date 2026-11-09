@@ -1,0 +1,9 @@
+-e526 //   Symbol '___' (___) not defined
+-e714 //   Symbol '___' (___) not referenced
+-e755 //   global macro '___' (___) not referenced
+-e757 //   global declarator '___' (___) not referenced
+-e758 //   global ___ '___' (___) not referenced
+-e759 //   header declaration for symbol '___' defined at (___) could be moved from header to module
+-e765 //   external '___' (___) could be made static
+-e768 //   global struct member '___' (___) not referenced
+-e769 //   global enumeration constant '___' (___) not referenced

@@ -555,12 +555,13 @@ vmod_transcode(VRT_CTX, VCL_ENUM decs, VCL_ENUM encs, VCL_ENUM case_s,
 		errno = 0;
 		len = func[enc].encode(enc, kase, out, space, buf, len);
 
-		assert(len <= space);
 		if (len == -1) {
 			ERRNOMEM(ctx, "cannot encode");
 			WS_Release(ctx->ws, 0);
 			return (NULL);
 		}
+		assert(len >= 0);
+		assert((size_t)len <= space);
 
 		out += len;
 		space -= len;
