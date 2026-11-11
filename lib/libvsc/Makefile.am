@@ -7,6 +7,7 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/include
 
 VSC_SRC = \
+	VSC_disk.vsc \
 	VSC_lck.vsc \
 	VSC_main.vsc \
 	VSC_mempool.vsc \
