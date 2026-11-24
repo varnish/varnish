@@ -107,6 +107,9 @@ VBE_Connect_Error(struct VSC_vbe *vsc, int err)
 	default:
 		vsc->fail_other++;
 	}
+
+	if (err != 0)
+		vsc->fail++;
 }
 
 /*--------------------------------------------------------------------*/

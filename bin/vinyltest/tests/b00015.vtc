@@ -23,6 +23,7 @@ client c1 {
 } -run
 
 varnish v1 -expect VBE.vcl1.foo.fail_econnrefused > 0
+varnish v1 -expect VBE.vcl1.foo.fail > 0
 varnish v1 -expect VBE.vcl1.foo.helddown > 0
 
 # Then check that a cacheable error from the backend is

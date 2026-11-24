@@ -47,3 +47,6 @@ varnish v1 -expect MAIN.backend_conn == 0
 varnish v1 -expect MAIN.backend_busy == 1
 varnish v1 -expect MAIN.backend_wait_fail == 1
 varnish v1 -expect MAIN.backend_fail == 1
+varnish v1 -expect VBE.vcl1.default.busy == 1
+varnish v1 -expect VBE.vcl1.default.fail_etimedout == 1
+varnish v1 -expect VBE.vcl1.default.fail == 1
