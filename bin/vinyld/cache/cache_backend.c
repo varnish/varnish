@@ -107,6 +107,9 @@ VBE_Connect_Error(struct VSC_vbe *vsc, int err)
 	default:
 		vsc->fail_other++;
 	}
+
+	if (err != 0)
+		vsc->fail++;
 }
 
 /*--------------------------------------------------------------------*/
@@ -487,6 +490,8 @@ vbe_dir_gethdrs(VRT_CTX, VCL_BACKEND d)
 			if (VCP_Wait(wrk, pfd, VTIM_real() +
 			    bo->htc->first_byte_timeout) != 0) {
 				bo->htc->doclose = SC_RX_TIMEOUT;
+				VSC_C_main->backend_fail++;
+				VBE_Connect_Error(bp->vsc, ETIMEDOUT);
 				VSLb(bo->vsl, SLT_FetchError,
 				     "first byte timeout (reused connection)");
 				retry_connect = 0;

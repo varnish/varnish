@@ -1,0 +1,38 @@
+vtest "Timed out reusing backend connection"
+
+barrier b1 cond 2
+
+server s1 {
+	rxreq
+	txresp
+
+	barrier b1 sync
+} -start
+
+varnish v1 -cliok "param.set first_byte_timeout 1"
+varnish v1 -vcl+backend {
+	sub vcl_recv {
+		return (pass);
+	}
+} -start
+
+logexpect l1 -v v1 {
+	expect 1004 * FetchError "Timed out reusing backend connection"
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+
+	txreq
+	rxresp
+	expect resp.status == 503
+} -run
+
+logexpect l1 -wait
+barrier b1 sync
+
+varnish v1 -expect VBE.vcl1.s1.fail_etimedout == 1
+varnish v1 -expect VBE.vcl1.s1.fail == 1
+varnish v1 -expect MAIN.backend_fail == 1
