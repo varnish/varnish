@@ -239,6 +239,10 @@ include/vmod_math.generated.rst: $(top_builddir)/vmod/vmod_math.rst
 	cp $(top_builddir)/vmod/vmod_math.rst $@
 BUILT_SOURCES += include/vmod_math.generated.rst
 
+include/vmod_tls.generated.rst: $(top_builddir)/vmod/vmod_tls.rst
+	cp $(top_builddir)/vmod/vmod_tls.rst $@
+BUILT_SOURCES += include/vmod_tls.generated.rst
+
 EXTRA_DIST += $(BUILT_SOURCES)
 CLEANFILES = $(BUILT_SOURCES)
 
