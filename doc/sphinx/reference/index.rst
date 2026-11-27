@@ -41,6 +41,7 @@ Bundled VMODs
 	vmod_proxy.rst
 	vmod_purge.rst
 	vmod_std.rst
+	vmod_tls.rst
 	vmod_unix.rst
 
 The CLI interface
