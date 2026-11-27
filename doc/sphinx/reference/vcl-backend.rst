@@ -107,8 +107,13 @@ The ``.ssl*`` attributes control how Varnish connect to the backend using TLS::
     .ssl_verify_peer = 0;
     .ssl_verify_host = 1;
 
-For all of these, 0 means "activated" and 1 "deactivated". If ``.ssl`` is
+For the boolean attributes, 1 means "activated" and 0 "deactivated". If ``.ssl`` is
 deactivated, the others have no effect.
+
+If ``.ssl`` is not set, the ``.ssl_*`` attributes are accepted but
+ignored, except ``.ssl_ca_file`` which is a compilation error without
+``.ssl = 1``. With an explicit ``.ssl = 0``, setting any ``.ssl_*``
+attribute to a non-default value is also a compilation error.
 
 ``.ssl`` [default: 0]
     Set to 1 to activate HTTPS connection to the backend. By default the
@@ -117,7 +122,7 @@ deactivated, the others have no effect.
     This defaults to the ``.host`` attribute, unless if the ``.host_header``
     attribute is set in which case that will be used instead.
 
-    Activating HTTPS also changess the default ``.port`` value to 443.
+    Activating HTTPS also changes the default ``.port`` value to 443.
 
 ``.ssl_sni`` [default: 1]
     Set this to 0 to disable the use of the Server Name Indication (SNI)
